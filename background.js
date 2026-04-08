@@ -471,8 +471,14 @@ ${fx ? `
 .slds-tabs_default__item.slds-is-active,
 .slds-tabs--default__item.slds-active {
   color: ${c.tabActiveColor} !important;
-  border-bottom: 2px solid ${c.tabActiveBorder} !important;${fx ? `
+  border-bottom-color: ${c.tabActiveBorder} !important;${fx ? `
   text-shadow: 0 0 10px rgba(${hexToRgb(c.accent)}, 0.5) !important;` : ''}
+}
+
+/* Override SF's ::after pseudo-element tab indicator */
+.slds-tabs_default__item.slds-is-active::after,
+.slds-tabs--default__item.slds-active::after {
+  background-color: ${c.tabActiveBorder} !important;
 }
 
 .slds-tabs_default__content,
