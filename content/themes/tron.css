@@ -101,7 +101,6 @@ body,
 
 .slds-global-header,
 .slds-global-header_container,
-[class*="globalHeader"],
 .forceSearchDesktopHeader {
   background-color: #ffffff !important;
   color: #2d2d2d !important;

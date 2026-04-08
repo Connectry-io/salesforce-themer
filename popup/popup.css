@@ -221,6 +221,28 @@ body {
   margin-top: 2px;
 }
 
+/* Auto mode status line */
+.auto-mode-status {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-size: 11px;
+  color: var(--color-text-muted);
+  padding-top: 4px;
+}
+
+.auto-status-item {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  font-weight: 500;
+}
+
+.auto-status-dot {
+  color: var(--color-text-subtle);
+}
+
 /* ─── Theme Section (groups + grid) ─────────────────────────────────────── */
 
 .themes-section {

@@ -4,6 +4,15 @@
   const THEMES = ['connectry', 'connectry-dark', 'midnight', 'slate', 'tron', 'obsidian', 'arctic', 'none'];
   const LIGHT_THEMES = ['connectry', 'slate', 'arctic'];
   const DARK_THEMES = ['connectry-dark', 'midnight', 'tron', 'obsidian'];
+  const THEME_NAMES = {
+    'connectry': 'Connectry Light',
+    'connectry-dark': 'Connectry Dark',
+    'midnight': 'Midnight',
+    'slate': 'Slate',
+    'tron': 'Tron',
+    'obsidian': 'Obsidian',
+    'arctic': 'Arctic'
+  };
 
   let currentOrgHostname = null;
   let syncState = {};
@@ -21,7 +30,16 @@
   function setAutoModeUI(autoMode) {
     const toggle = document.getElementById('autoModeToggle');
     toggle.checked = autoMode;
-    // No dropdowns to manage — tooltip state is independent
+
+    const statusLine = document.getElementById('autoModeStatus');
+    statusLine.hidden = !autoMode;
+
+    if (autoMode) {
+      const lightName = THEME_NAMES[syncState.lastLightTheme || 'connectry'] || 'Connectry Light';
+      const darkName = THEME_NAMES[syncState.lastDarkTheme || 'connectry-dark'] || 'Connectry Dark';
+      document.getElementById('autoLightName').textContent = lightName;
+      document.getElementById('autoDarkName').textContent = darkName;
+    }
   }
 
   function updateOrgRow(orgThemes, activeTheme) {
@@ -90,6 +108,7 @@
 
     setActiveUI(theme);
     updateOrgRow(syncState.orgThemes, theme);
+    if (syncState.autoMode) setAutoModeUI(true);
     await applyThemeToTab(theme);
   }
 
