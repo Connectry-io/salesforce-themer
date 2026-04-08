@@ -682,18 +682,24 @@ body .slds-path__item.slds-is-current::after {
   background-image: none !important;
 }
 
-/* Active / selected */
+/* Active / selected — MUST come after incomplete to win specificity */
+/* Handles both .slds-is-active alone AND .slds-is-incomplete.slds-is-active */
 body .slds-path__item.slds-is-active,
 body .slds-path__item.slds-is-active .slds-path__link,
-body .slds-path__item[aria-selected="true"],
+body .slds-path__item.slds-is-active a.slds-path__link,
+body .slds-path__item.slds-is-incomplete.slds-is-active,
+body .slds-path__item.slds-is-incomplete.slds-is-active .slds-path__link,
+body .slds-path__item.slds-is-incomplete.slds-is-active a.slds-path__link,
 body .slds-path__item [aria-selected="true"] {
-  background-color: ${c.accent} !important;
+  background-color: ${c.accentHover} !important;
   color: ${c.buttonBrandText} !important;
 }
 
 body .slds-path__item.slds-is-active::before,
-body .slds-path__item.slds-is-active::after {
-  background: ${c.accent} !important;
+body .slds-path__item.slds-is-active::after,
+body .slds-path__item.slds-is-incomplete.slds-is-active::before,
+body .slds-path__item.slds-is-incomplete.slds-is-active::after {
+  background: ${c.accentHover} !important;
 }
 
 /* Hover — incomplete items */
@@ -728,7 +734,8 @@ body .slds-path__item.slds-is-active::after {
 }
 
 .slds-path__item.slds-is-complete .slds-path__title,
-.slds-path__item.slds-is-current .slds-path__title {
+.slds-path__item.slds-is-current .slds-path__title,
+.slds-path__item.slds-is-active .slds-path__title {
   color: ${c.buttonBrandText} !important;
 }
 

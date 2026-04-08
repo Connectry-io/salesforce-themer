@@ -1,0 +1,84 @@
+<!-- Component: Path / Stage Path -->
+<!-- Page: Lead record page -->
+<!-- Date: 2026-04-09 -->
+<!-- SLDS version: 1 (Aura runtime) -->
+<!-- Source: Noland's org — connectry.lightning.force.com -->
+
+<!-- Key findings:
+  - Path wraps in: .pathOriginal > article.slds-card > .slds-card__body_inner > .slds-path
+  - Each step is: li.slds-path__item with state classes
+  - States observed:
+    - .slds-is-current — the actual current stage (e.g., Contacted)
+    - .slds-is-incomplete — future stages not yet reached
+    - .slds-is-incomplete.slds-is-active — user CLICKED a future stage (selected, not confirmed)
+    - aria-selected="true" on the .slds-path__link of the active item
+  - Inner link: a.tabHeader.slds-path__link
+  - Inner spans: .slds-path__stage (icon area) + .slds-path__title (text)
+  - Chevron shape: ::before/::after with transform:skew() + background inheritance
+  - "Mark as Current Status" button: .slds-button_brand inside .slds-path__action
+  - CRITICAL: .slds-is-incomplete.slds-is-active is a combined state that must
+    override .slds-is-incomplete alone — this is the "selected before confirming" state
+-->
+
+<!-- Stripped to essential structure (removed data-aura-rendered-by, lwc attrs): -->
+
+<div class="pathOriginal runtime_sales_pathassistantPathAssistant">
+  <article class="slds-card">
+    <div class="slds-card__body slds-card__body_inner">
+      <div class="slds-path">
+        <div class="slds-grid slds-path__track">
+          <div class="slds-grid slds-path__scroller-container runtime_sales_pathassistantPathAssistantTabSet">
+            <div class="slds-path__scroller uiScroller">
+              <div class="slds-path__scroller_inner scroller">
+                <ul role="listbox" class="slds-path__nav">
+
+                  <!-- Current stage -->
+                  <li role="presentation" class="slds-is-current slds-path__item" data-name="Contacted">
+                    <a aria-selected="false" aria-current="true" class="tabHeader slds-path__link" href="javascript:void(0);">
+                      <span class="current slds-path__stage"></span>
+                      <span class="title slds-path__title">Contacted</span>
+                    </a>
+                  </li>
+
+                  <!-- Selected (clicked, not confirmed) — BOTH incomplete AND active -->
+                  <li role="presentation" class="slds-is-incomplete slds-is-active slds-path__item" data-name="Open">
+                    <a aria-selected="true" class="tabHeader slds-path__link" href="javascript:void(0);">
+                      <span class="ahead slds-path__stage"></span>
+                      <span class="title slds-path__title">Open</span>
+                    </a>
+                  </li>
+
+                  <!-- Incomplete (future) -->
+                  <li role="presentation" class="slds-is-incomplete slds-path__item" data-name="Unqualified">
+                    <a aria-selected="false" class="tabHeader slds-path__link" href="javascript:void(0);">
+                      <span class="ahead slds-path__stage"></span>
+                      <span class="title slds-path__title">Unqualified</span>
+                    </a>
+                  </li>
+
+                  <!-- Incomplete (future) -->
+                  <li role="presentation" class="slds-is-incomplete slds-path__item" data-name="converted">
+                    <a aria-selected="false" class="tabHeader slds-path__link" href="javascript:void(0);">
+                      <span class="ahead slds-path__stage"></span>
+                      <span class="title slds-path__title">Converted</span>
+                    </a>
+                  </li>
+
+                </ul>
+              </div>
+            </div>
+            <div class="slds-path__scroll-controls"></div>
+          </div>
+
+          <!-- Action button -->
+          <div class="slds-grid slds-path__action runtime_sales_pathassistantPathAssistantHeader">
+            <button class="slds-button slds-button_brand slds-path__mark-complete">
+              <span>Mark as Current Status</span>
+            </button>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </article>
+</div>
