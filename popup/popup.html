@@ -24,118 +24,164 @@
       </div>
     </header>
 
+    <!-- Auto mode bar -->
+    <div class="auto-mode-bar" id="autoModeBar">
+      <div class="auto-mode-toggle-row">
+        <div class="auto-mode-label">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <circle cx="12" cy="12" r="4" fill="currentColor"/>
+            <path d="M12 2v2M12 20v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M2 12h2M20 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+          <span>Follow system theme</span>
+        </div>
+        <label class="toggle-switch" title="Follow system light/dark preference">
+          <input type="checkbox" id="autoModeToggle" />
+          <span class="toggle-track"><span class="toggle-thumb"></span></span>
+        </label>
+      </div>
+      <div class="auto-mode-selectors" id="autoModeSelectors" hidden>
+        <div class="auto-mode-pair">
+          <span class="auto-mode-icon" title="Light mode theme">&#9728;</span>
+          <select id="lightThemeSelect" class="auto-select">
+            <option value="connectry">Connectry</option>
+            <option value="slate">Slate</option>
+            <option value="arctic">Arctic</option>
+          </select>
+        </div>
+        <div class="auto-mode-pair">
+          <span class="auto-mode-icon" title="Dark mode theme">&#9790;</span>
+          <select id="darkThemeSelect" class="auto-select">
+            <option value="midnight">Midnight</option>
+            <option value="tron">Tron</option>
+            <option value="obsidian">Obsidian</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
     <!-- Theme grid -->
-    <main class="themes-grid" role="radiogroup" aria-label="Select a theme">
+    <main class="themes-section" role="radiogroup" aria-label="Select a theme">
 
-      <button class="theme-card" data-theme="connectry" role="radio" aria-checked="false" title="Connectry — Clean, professional, Connectry brand identity">
-        <div class="theme-swatch">
-          <span style="background: #f7f7f5;"></span>
-          <span style="background: #ffffff;"></span>
-          <span style="background: #4a6fa5;"></span>
-          <span style="background: #2d2d2d;"></span>
-        </div>
-        <div class="theme-info">
-          <span class="theme-name">Connectry</span>
-          <span class="theme-tag">Default</span>
-        </div>
-        <div class="theme-check" aria-hidden="true">
-          <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-            <path d="M2.5 7L5.5 10L11.5 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-        </div>
-      </button>
+      <div class="theme-group-label">Light Themes</div>
+      <div class="themes-grid">
+        <button class="theme-card" data-theme="connectry" role="radio" aria-checked="false" title="Connectry — Clean, professional, Connectry brand identity">
+          <div class="theme-swatch">
+            <span style="background: #f7f7f5;"></span>
+            <span style="background: #ffffff;"></span>
+            <span style="background: #4a6fa5;"></span>
+            <span style="background: #2d2d2d;"></span>
+          </div>
+          <div class="theme-info">
+            <span class="theme-name">Connectry</span>
+            <span class="theme-tag">Default</span>
+          </div>
+          <div class="theme-check" aria-hidden="true">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+              <path d="M2.5 7L5.5 10L11.5 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+        </button>
 
-      <button class="theme-card" data-theme="midnight" role="radio" aria-checked="false" title="Midnight — Deep navy dark mode">
-        <div class="theme-swatch">
-          <span style="background: #0f1219;"></span>
-          <span style="background: #1a1f2e;"></span>
-          <span style="background: #60a5fa;"></span>
-          <span style="background: #e2e8f0;"></span>
-        </div>
-        <div class="theme-info">
-          <span class="theme-name">Midnight</span>
-          <span class="theme-desc">Dark mode</span>
-        </div>
-        <div class="theme-check" aria-hidden="true">
-          <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-            <path d="M2.5 7L5.5 10L11.5 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-        </div>
-      </button>
+        <button class="theme-card" data-theme="slate" role="radio" aria-checked="false" title="Slate — Professional muted greys">
+          <div class="theme-swatch">
+            <span style="background: #f8f9fa;"></span>
+            <span style="background: #ffffff;"></span>
+            <span style="background: #374151;"></span>
+            <span style="background: #111827;"></span>
+          </div>
+          <div class="theme-info">
+            <span class="theme-name">Slate</span>
+            <span class="theme-desc">Minimal</span>
+          </div>
+          <div class="theme-check" aria-hidden="true">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+              <path d="M2.5 7L5.5 10L11.5 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+        </button>
 
-      <button class="theme-card" data-theme="slate" role="radio" aria-checked="false" title="Slate — Professional muted greys">
-        <div class="theme-swatch">
-          <span style="background: #f8f9fa;"></span>
-          <span style="background: #ffffff;"></span>
-          <span style="background: #374151;"></span>
-          <span style="background: #111827;"></span>
-        </div>
-        <div class="theme-info">
-          <span class="theme-name">Slate</span>
-          <span class="theme-desc">Minimal</span>
-        </div>
-        <div class="theme-check" aria-hidden="true">
-          <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-            <path d="M2.5 7L5.5 10L11.5 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-        </div>
-      </button>
+        <button class="theme-card" data-theme="arctic" role="radio" aria-checked="false" title="Arctic — Crisp ice blue light mode">
+          <div class="theme-swatch">
+            <span style="background: #f0f4f8;"></span>
+            <span style="background: #ffffff;"></span>
+            <span style="background: #2b6cb0;"></span>
+            <span style="background: #1a202c;"></span>
+          </div>
+          <div class="theme-info">
+            <span class="theme-name">Arctic</span>
+            <span class="theme-desc">Ice blue</span>
+          </div>
+          <div class="theme-check" aria-hidden="true">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+              <path d="M2.5 7L5.5 10L11.5 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+        </button>
+      </div>
 
-      <button class="theme-card" data-theme="tron" role="radio" aria-checked="false" title="Tron — Electric cyan on near-black">
-        <div class="theme-swatch">
-          <span style="background: #0a0a0f;"></span>
-          <span style="background: #0d1117;"></span>
-          <span style="background: #00e5ff;"></span>
-          <span style="background: #e0f7fa;"></span>
-        </div>
-        <div class="theme-info">
-          <span class="theme-name">Tron</span>
-          <span class="theme-desc">Neon</span>
-        </div>
-        <div class="theme-check" aria-hidden="true">
-          <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-            <path d="M2.5 7L5.5 10L11.5 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-        </div>
-      </button>
+      <div class="theme-group-label">Dark Themes</div>
+      <div class="themes-grid">
+        <button class="theme-card" data-theme="midnight" role="radio" aria-checked="false" title="Midnight — Deep navy dark mode">
+          <div class="theme-swatch">
+            <span style="background: #0f1219;"></span>
+            <span style="background: #1a1f2e;"></span>
+            <span style="background: #60a5fa;"></span>
+            <span style="background: #e2e8f0;"></span>
+          </div>
+          <div class="theme-info">
+            <span class="theme-name">Midnight</span>
+            <span class="theme-desc">Dark mode</span>
+          </div>
+          <div class="theme-check" aria-hidden="true">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+              <path d="M2.5 7L5.5 10L11.5 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+        </button>
 
-      <button class="theme-card" data-theme="obsidian" role="radio" aria-checked="false" title="Obsidian — Matte black and gold">
-        <div class="theme-swatch">
-          <span style="background: #0c0c0c;"></span>
-          <span style="background: #161616;"></span>
-          <span style="background: #d4a853;"></span>
-          <span style="background: #e8e6e3;"></span>
-        </div>
-        <div class="theme-info">
-          <span class="theme-name">Obsidian</span>
-          <span class="theme-desc">Gold &amp; black</span>
-        </div>
-        <div class="theme-check" aria-hidden="true">
-          <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-            <path d="M2.5 7L5.5 10L11.5 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-        </div>
-      </button>
+        <button class="theme-card" data-theme="tron" role="radio" aria-checked="false" title="Tron — Electric cyan on near-black">
+          <div class="theme-swatch">
+            <span style="background: #0a0a0f;"></span>
+            <span style="background: #0d1117;"></span>
+            <span style="background: #00e5ff;"></span>
+            <span style="background: #e0f7fa;"></span>
+          </div>
+          <div class="theme-info">
+            <span class="theme-name">Tron</span>
+            <span class="theme-desc">Neon</span>
+          </div>
+          <div class="theme-check" aria-hidden="true">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+              <path d="M2.5 7L5.5 10L11.5 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+        </button>
 
-      <button class="theme-card" data-theme="arctic" role="radio" aria-checked="false" title="Arctic — Crisp ice blue light mode">
-        <div class="theme-swatch">
-          <span style="background: #f0f4f8;"></span>
-          <span style="background: #ffffff;"></span>
-          <span style="background: #2b6cb0;"></span>
-          <span style="background: #1a202c;"></span>
-        </div>
-        <div class="theme-info">
-          <span class="theme-name">Arctic</span>
-          <span class="theme-desc">Ice blue</span>
-        </div>
-        <div class="theme-check" aria-hidden="true">
-          <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-            <path d="M2.5 7L5.5 10L11.5 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-        </div>
-      </button>
+        <button class="theme-card" data-theme="obsidian" role="radio" aria-checked="false" title="Obsidian — Matte black and gold">
+          <div class="theme-swatch">
+            <span style="background: #0c0c0c;"></span>
+            <span style="background: #161616;"></span>
+            <span style="background: #d4a853;"></span>
+            <span style="background: #e8e6e3;"></span>
+          </div>
+          <div class="theme-info">
+            <span class="theme-name">Obsidian</span>
+            <span class="theme-desc">Gold &amp; black</span>
+          </div>
+          <div class="theme-check" aria-hidden="true">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+              <path d="M2.5 7L5.5 10L11.5 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+        </button>
+      </div>
 
     </main>
+
+    <!-- Per-org section -->
+    <div class="org-row" id="orgRow" hidden>
+      <div class="org-status" id="orgStatus"></div>
+    </div>
 
     <!-- Off button -->
     <div class="off-row">

@@ -7,8 +7,10 @@
 
   let currentTheme = null;
   let observer = null;
+  let mediaQuery = null;
 
-  // Inject transition styles once — lightweight, always present
+  // ─── Transition helpers ──────────────────────────────────────────────────
+
   function injectTransitionStyles() {
     if (document.getElementById('sf-themer-transitions')) return;
     const style = document.createElement('style');
@@ -29,54 +31,6 @@
     target.appendChild(style);
   }
 
-  // Fetch CSS from extension package
-  async function fetchThemeCSS(themeName) {
-    const url = chrome.runtime.getURL(`content/themes/${themeName}.css`);
-    const response = await fetch(url);
-    if (!response.ok) {
-      throw new Error(`Failed to fetch theme: ${themeName} (${response.status})`);
-    }
-    return response.text();
-  }
-
-  // Remove existing theme style tag
-  function removeThemeStyles() {
-    const existing = document.getElementById(STYLE_ID);
-    if (existing) existing.remove();
-  }
-
-  // Apply theme CSS by injecting a <style> tag
-  async function applyTheme(themeName, animate = true) {
-    if (themeName === 'none') {
-      if (animate) beginTransition();
-      removeThemeStyles();
-      currentTheme = 'none';
-      if (animate) endTransition();
-      return;
-    }
-
-    try {
-      const css = await fetchThemeCSS(themeName);
-
-      if (animate) beginTransition();
-
-      removeThemeStyles();
-
-      const style = document.createElement('style');
-      style.id = STYLE_ID;
-      style.textContent = css;
-
-      const target = document.head || document.documentElement;
-      target.appendChild(style);
-
-      currentTheme = themeName;
-
-      if (animate) endTransition();
-    } catch (err) {
-      console.warn('[Salesforce Themer] Could not apply theme:', err.message);
-    }
-  }
-
   function beginTransition() {
     const target = document.body || document.documentElement;
     target.classList.add(TRANSITION_CLASS);
@@ -89,7 +43,111 @@
     }, TRANSITION_DURATION + 50);
   }
 
-  // Re-inject theme if our style tag was removed (SF SPA navigation sometimes clears head)
+  // ─── CSS injection ───────────────────────────────────────────────────────
+
+  function removeThemeStyles() {
+    const existing = document.getElementById(STYLE_ID);
+    if (existing) existing.remove();
+  }
+
+  function injectCSSText(css) {
+    removeThemeStyles();
+    const style = document.createElement('style');
+    style.id = STYLE_ID;
+    style.textContent = css;
+    const target = document.head || document.documentElement;
+    target.appendChild(style);
+  }
+
+  async function fetchThemeCSS(themeName) {
+    const url = chrome.runtime.getURL(`content/themes/${themeName}.css`);
+    const response = await fetch(url);
+    if (!response.ok) throw new Error(`Failed to fetch theme: ${themeName} (${response.status})`);
+    return response.text();
+  }
+
+  // ─── Apply theme (with zero-flash fast path via local storage) ───────────
+
+  // Synchronous fast-path: reads from chrome.storage.local which was pre-cached
+  // by background.js. Called at document_start before any paint.
+  function applyThemeFast(themeName, css) {
+    if (!css || !themeName || themeName === 'none') return;
+    injectCSSText(css);
+    currentTheme = themeName;
+  }
+
+  async function applyTheme(themeName, animate = true) {
+    if (themeName === 'none') {
+      if (animate) beginTransition();
+      removeThemeStyles();
+      currentTheme = 'none';
+      if (animate) endTransition();
+      return;
+    }
+
+    try {
+      // Try local cache first (fast), fall back to fetch (first install edge case)
+      const cached = await chrome.storage.local.get(`themeCSS_${themeName}`);
+      const css = cached[`themeCSS_${themeName}`] || await fetchThemeCSS(themeName);
+
+      if (animate) beginTransition();
+      injectCSSText(css);
+      currentTheme = themeName;
+      if (animate) endTransition();
+    } catch (err) {
+      console.warn('[Salesforce Themer] Could not apply theme:', err.message);
+    }
+  }
+
+  // ─── Per-org theming ─────────────────────────────────────────────────────
+
+  function getOrgHostname() {
+    return window.location.hostname;
+  }
+
+  async function resolveTheme(syncData) {
+    const hostname = getOrgHostname();
+    const orgThemes = syncData.orgThemes || {};
+
+    if (orgThemes[hostname]) {
+      return orgThemes[hostname];
+    }
+
+    if (syncData.autoMode) {
+      const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      return isDark ? (syncData.darkTheme || 'midnight') : (syncData.lightTheme || 'connectry');
+    }
+
+    return syncData.theme || 'connectry';
+  }
+
+  // ─── System dark mode sync ───────────────────────────────────────────────
+
+  function setupMediaQueryListener() {
+    if (mediaQuery) return; // Only set up once
+    mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+    mediaQuery.addEventListener('change', async () => {
+      const result = await chrome.storage.sync.get({
+        autoMode: false,
+        lightTheme: 'connectry',
+        darkTheme: 'midnight',
+        orgThemes: {},
+      });
+
+      if (!result.autoMode) return;
+
+      // Check if this org has a per-org override — if so, don't auto-switch
+      const hostname = getOrgHostname();
+      if (result.orgThemes[hostname]) return;
+
+      const isDark = mediaQuery.matches;
+      const next = isDark ? result.darkTheme : result.lightTheme;
+      await applyTheme(next, true);
+    });
+  }
+
+  // ─── MutationObserver: re-inject if SF SPA navigation clears the head ────
+
   function ensureThemePresent() {
     if (!currentTheme || currentTheme === 'none') return;
     if (!document.getElementById(STYLE_ID)) {
@@ -97,15 +155,12 @@
     }
   }
 
-  // Watch for DOM mutations: SF navigation can clear or re-render the document head
   function startObserver() {
     if (observer) observer.disconnect();
 
     observer = new MutationObserver((mutations) => {
       let needsReinjection = false;
-
       for (const mutation of mutations) {
-        // Check if our style tag was removed
         for (const node of mutation.removedNodes) {
           if (node.id === STYLE_ID || node.id === 'sf-themer-transitions') {
             needsReinjection = true;
@@ -114,7 +169,6 @@
         }
         if (needsReinjection) break;
       }
-
       if (needsReinjection) {
         injectTransitionStyles();
         ensureThemePresent();
@@ -124,13 +178,13 @@
     const target = document.head || document.documentElement;
     observer.observe(target, { childList: true, subtree: false });
 
-    // Also observe body for SPA navigation signals
     if (document.body) {
       observer.observe(document.body, { childList: true, subtree: false, attributes: false });
     }
   }
 
-  // Listen for messages from popup
+  // ─── Message listener (from popup + background) ──────────────────────────
+
   chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
     if (message.action === 'setTheme') {
       applyTheme(message.theme, true).then(() => {
@@ -138,7 +192,7 @@
       }).catch((err) => {
         sendResponse({ success: false, error: err.message });
       });
-      return true; // Keep channel open for async response
+      return true;
     }
 
     if (message.action === 'getTheme') {
@@ -147,27 +201,82 @@
     }
   });
 
-  // Initialise: load saved theme and inject
+  // ─── Initialisation ──────────────────────────────────────────────────────
+
   async function init() {
     injectTransitionStyles();
     startObserver();
+    setupMediaQueryListener();
 
     try {
-      const result = await chrome.storage.sync.get({ theme: 'connectry' });
-      const savedTheme = result.theme || 'connectry';
-      await applyTheme(savedTheme, false);
+      const syncResult = await chrome.storage.sync.get({
+        theme: 'connectry',
+        autoMode: false,
+        lightTheme: 'connectry',
+        darkTheme: 'midnight',
+        orgThemes: {},
+      });
+
+      const themeName = await resolveTheme(syncResult);
+
+      // Try local cache for zero-flash experience when DOM is already ready
+      const cached = await chrome.storage.local.get(`themeCSS_${themeName}`);
+      const cachedCSS = cached[`themeCSS_${themeName}`];
+
+      if (cachedCSS) {
+        applyThemeFast(themeName, cachedCSS);
+      } else {
+        await applyTheme(themeName, false);
+      }
     } catch (err) {
       console.warn('[Salesforce Themer] Init error:', err.message);
-      // Fallback: try connectry theme silently
       try {
         await applyTheme('connectry', false);
-      } catch (_) {
-        // Silent fail — don't break the page
-      }
+      } catch (_) {}
     }
   }
 
-  // Run init when DOM is ready
+  // ─── Zero-flash pre-paint injection ─────────────────────────────────────
+  // At document_start, attempt to synchronously pull from local storage.
+  // chrome.storage.local.get is async but resolves very quickly at document_start
+  // before any paint occurs, eliminating the white flash.
+
+  function preInit() {
+    chrome.storage.sync.get(
+      { theme: 'connectry', autoMode: false, lightTheme: 'connectry', darkTheme: 'midnight', orgThemes: {} },
+      (syncData) => {
+        if (chrome.runtime.lastError) return;
+
+        const hostname = getOrgHostname();
+        const orgThemes = syncData.orgThemes || {};
+
+        let themeName;
+        if (orgThemes[hostname]) {
+          themeName = orgThemes[hostname];
+        } else if (syncData.autoMode) {
+          const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+          themeName = isDark ? (syncData.darkTheme || 'midnight') : (syncData.lightTheme || 'connectry');
+        } else {
+          themeName = syncData.theme || 'connectry';
+        }
+
+        if (!themeName || themeName === 'none') return;
+
+        chrome.storage.local.get(`themeCSS_${themeName}`, (localData) => {
+          if (chrome.runtime.lastError) return;
+          const css = localData[`themeCSS_${themeName}`];
+          if (css) {
+            applyThemeFast(themeName, css);
+          }
+        });
+      }
+    );
+  }
+
+  // Run pre-init immediately (document_start) for zero-flash
+  preInit();
+
+  // Full init when DOM is ready (sets up observer, media query, etc.)
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', init, { once: true });
   } else {

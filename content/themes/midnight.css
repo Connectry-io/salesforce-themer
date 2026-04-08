@@ -437,6 +437,43 @@ a:hover {
   color: #93c5fd !important;
 }
 
+/* ─── Setup Pages ────────────────────────────────────────────────────────── */
+
+.setupcontent,
+.slds-setup-assistant,
+.setup-page,
+[class*="setupLayout"],
+.onesetupSetupLayout,
+.setupTabContent,
+.slds-setup-summary,
+.forceSetupDesktop {
+  background-color: #0f1219 !important;
+  color: #e2e8f0 !important;
+}
+
+/* ─── Reports ────────────────────────────────────────────────────────────── */
+
+.report-container,
+.reportOutput,
+[class*="reportPage"],
+.slds-report,
+.forceReportOutput,
+.reportHeader {
+  background-color: #0f1219 !important;
+  color: #e2e8f0 !important;
+}
+
+/* ─── Console / Service Console ──────────────────────────────────────────── */
+
+.navexConsoleContent,
+.workspaceManager,
+.split-view,
+.slds-split-view,
+[class*="console"] {
+  background-color: #0f1219 !important;
+  color: #e2e8f0 !important;
+}
+
 /* ─── Invert Salesforce default light icons in dark context ──────────────── */
 
 .slds-icon-utility-close,

@@ -476,3 +476,40 @@ a:hover {
   color: #80ffff !important;
   text-shadow: 0 0 10px rgba(0, 229, 255, 0.5) !important;
 }
+
+/* ─── Setup Pages ────────────────────────────────────────────────────────── */
+
+.setupcontent,
+.slds-setup-assistant,
+.setup-page,
+[class*="setupLayout"],
+.onesetupSetupLayout,
+.setupTabContent,
+.slds-setup-summary,
+.forceSetupDesktop {
+  background-color: #0a0a0f !important;
+  color: #e0f7fa !important;
+}
+
+/* ─── Reports ────────────────────────────────────────────────────────────── */
+
+.report-container,
+.reportOutput,
+[class*="reportPage"],
+.slds-report,
+.forceReportOutput,
+.reportHeader {
+  background-color: #0a0a0f !important;
+  color: #e0f7fa !important;
+}
+
+/* ─── Console / Service Console ──────────────────────────────────────────── */
+
+.navexConsoleContent,
+.workspaceManager,
+.split-view,
+.slds-split-view,
+[class*="console"] {
+  background-color: #0a0a0f !important;
+  color: #e0f7fa !important;
+}
