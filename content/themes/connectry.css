@@ -109,6 +109,13 @@ one-app-nav-bar,
   border-bottom: 3px solid #ffffff !important;
 }
 
+/* Active tab link text — keep white, override SF default highlight */
+.slds-context-bar__item.slds-is-active .slds-context-bar__label-action,
+.slds-context-bar__item.slds-is-active a {
+  color: #ffffff !important;
+  background-color: transparent !important;
+}
+
 /* Nav text and icons */
 .slds-context-bar__label-action,
 .slds-context-bar__icon-action,
@@ -117,11 +124,26 @@ one-app-nav-bar,
   fill: #ffffff !important;
 }
 
-/* App launcher button */
+/* App launcher button and waffle icon */
 .slds-context-bar__app-name,
 .appLauncherButton {
   color: #ffffff !important;
   border-right: 1px solid rgba(255, 255, 255, 0.2) !important;
+}
+
+/* App launcher waffle dots — force white on nav background */
+.slds-icon-waffle,
+.appLauncher .slds-icon-waffle_container .slds-icon-waffle,
+.slds-icon-waffle .slds-r1,
+.slds-icon-waffle .slds-r2,
+.slds-icon-waffle .slds-r3,
+.slds-icon-waffle .slds-r4,
+.slds-icon-waffle .slds-r5,
+.slds-icon-waffle .slds-r6,
+.slds-icon-waffle .slds-r7,
+.slds-icon-waffle .slds-r8,
+.slds-icon-waffle .slds-r9 {
+  background-color: #ffffff !important;
 }
 
 /* ─── Main Content ───────────────────────────────────────────────────────── */
