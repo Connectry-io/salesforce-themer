@@ -563,16 +563,30 @@ a:hover {
   color: ${c.textPrimary} !important;
 }
 
-/* ─── Record Page Highlights / Containers ────────────────────────────────── */
+/* ─── Record Page Header / Highlights ────────────────────────────────────── */
 
 .highlights,
 .forceHighlightsStencilDesktop,
 .forceRecordLayout,
 .forceHighlightsPanel,
 .slds-page-header--record-home,
-.slds-page-header_record-home {
-  background-color: ${c.surface} !important;
+.slds-page-header_record-home,
+.flexipageHeader,
+.record-page-decorator,
+.recordHomeTemplate,
+.forceHighlightsLayout {
+  background-color: ${c.background} !important;
   color: ${c.textPrimary} !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+/* Record page full body background */
+.flexipagePage,
+.flexipage-template,
+.uiTabBar + .tabContent,
+.forceRecordFlexiPage {
+  background-color: ${c.background} !important;
 }
 
 /* ─── Path / Stage Path ─────────────────────────────────────────────────── */
@@ -580,21 +594,27 @@ a:hover {
 .slds-path,
 .slds-path__scroller,
 .slds-path__track,
+.slds-path__wrap,
+.slds-path__action,
 .pathAssistantContainer,
-.slds-path__scroller-container {
+.slds-path__scroller-container,
+.slds-path__coach,
+.slds-path__nav {
   background-color: transparent !important;
   border: none !important;
   box-shadow: none !important;
+  outline: none !important;
 }
 
-.slds-path__nav,
-.slds-path__coach {
-  background-color: transparent !important;
+/* The path container outer wrapper */
+.slds-grid.slds-path__track {
+  border: none !important;
+  box-shadow: none !important;
+  background: transparent !important;
 }
 
 .slds-path__item {
   background-color: ${c.surfaceAlt} !important;
-  border-color: ${c.border} !important;
 }
 
 .slds-path__item.slds-is-complete {
@@ -614,15 +634,44 @@ a:hover {
   color: ${c.buttonBrandText} !important;
 }
 
+/* ─── Related List Cards (right sidebar) ─────────────────────────────────── */
+
+.forceRelatedListContainer,
+.forceRelatedListSingleContainer,
+.slds-card.forceRelatedListCardDesktop {
+  background-color: ${c.surface} !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+/* Individual related list items can have subtle borders */
+.forceRelatedListCardDesktop .slds-card__body {
+  border: none !important;
+}
+
 /* ─── Profile Icon / Global Actions (top right) ─────────────────────────── */
 
 .slds-global-actions,
 .slds-global-actions__item,
+.slds-global-actions__item > *,
 .forceUserProfileMenu,
 .profileTrigger,
-.uiImage,
-.circular,
-.oneUserProfileCardTrigger {
+.oneUserProfileCardTrigger,
+.slds-global-header__item--button,
+.slds-global-actions__favorites,
+.slds-global-actions__setup,
+.slds-global-actions__help,
+.slds-global-actions__notifications {
+  background-color: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+/* Profile avatar container specifically */
+.slds-avatar,
+.forceSocialPhoto,
+.uiImage[class*="profilePhoto"],
+.photoContainer {
   background-color: transparent !important;
   border: none !important;
   box-shadow: none !important;

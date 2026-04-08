@@ -420,15 +420,15 @@ body {
   transform: scale(1);
 }
 
-/* Auto-mode: show sun/moon instead of checkmark */
+/* Auto-mode: sun/moon icon — shown on TOP LEFT, checkmark stays on top right */
 .theme-card .theme-auto-icon {
   position: absolute;
-  top: 7px;
-  right: 7px;
+  top: 6px;
+  left: 6px;
   width: 18px;
   height: 18px;
   border-radius: 50%;
-  display: flex;
+  display: none;
   align-items: center;
   justify-content: center;
   font-size: 10px;
@@ -436,6 +436,11 @@ body {
   opacity: 0;
   transform: scale(0.6);
   transition: opacity var(--transition), transform var(--transition);
+}
+
+/* Show auto icons only when auto-mode is active */
+.auto-mode-active .theme-card .theme-auto-icon {
+  display: flex;
 }
 
 .theme-card.is-auto-light .theme-auto-icon,
@@ -454,20 +459,15 @@ body {
   color: #ffffff;
 }
 
-/* When auto-mode is on, hide the blue checkmark, show auto icons instead */
-.auto-mode-active .theme-card .theme-check {
-  opacity: 0 !important;
-  transform: scale(0.6) !important;
+/* Auto-mode active cards get the highlight border too */
+.theme-card.is-auto-light,
+.theme-card.is-auto-dark {
+  border-color: var(--color-active-ring);
+  box-shadow: 0 0 0 3px rgba(74, 111, 165, 0.12), var(--shadow-sm);
+  background: #f5f8ff;
 }
 
-/* When auto-mode is off, hide auto icons */
-.theme-card .theme-auto-icon {
-  display: none;
-}
-
-.auto-mode-active .theme-card .theme-auto-icon {
-  display: flex;
-}
+/* Checkmark stays visible — do NOT hide it in auto-mode */
 
 /* ─── Per-Org Row ────────────────────────────────────────────────────────── */
 

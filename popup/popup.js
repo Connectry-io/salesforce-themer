@@ -131,6 +131,7 @@
     const section = document.getElementById('themesSection');
     section?.classList.toggle('auto-mode-active', autoMode);
 
+    // Clear auto-mode classes from all cards
     document.querySelectorAll('.theme-card').forEach(card => {
       card.classList.remove('is-auto-light', 'is-auto-dark');
     });
@@ -143,12 +144,14 @@
       const darkCard = document.querySelector(`[data-theme="${darkTheme}"]`);
 
       if (lightCard) {
-        lightCard.classList.add('is-auto-light');
+        lightCard.classList.add('is-auto-light', 'is-active');
+        lightCard.setAttribute('aria-checked', 'true');
         const icon = lightCard.querySelector('.theme-auto-icon');
         if (icon) icon.textContent = '\u2600\uFE0F';
       }
       if (darkCard) {
-        darkCard.classList.add('is-auto-dark');
+        darkCard.classList.add('is-auto-dark', 'is-active');
+        darkCard.setAttribute('aria-checked', 'true');
         const icon = darkCard.querySelector('.theme-auto-icon');
         if (icon) icon.textContent = '\uD83C\uDF19';
       }
