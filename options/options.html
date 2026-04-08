@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Salesforce Themer — Settings</title>
+  <link rel="stylesheet" href="options.css" />
+</head>
+<body>
+
+  <!-- Header -->
+  <header class="site-header">
+    <div class="header-inner">
+      <div class="header-brand">
+        <div class="brand-logo" aria-hidden="true">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="6" cy="12" r="3.5" fill="#2D2D2D"/>
+            <line x1="9.5" y1="12" x2="14.5" y2="12" stroke="#4A6FA5" stroke-width="1.5" stroke-linecap="round"/>
+            <circle cx="18" cy="12" r="3.5" fill="#4A6FA5"/>
+          </svg>
+        </div>
+        <div class="brand-text">
+          <span class="brand-name">Salesforce Themer</span>
+          <span class="brand-by">by Connectry</span>
+        </div>
+      </div>
+      <div class="header-meta" id="headerMeta">
+        <!-- populated by JS -->
+      </div>
+    </div>
+  </header>
+
+  <main class="main">
+
+    <!-- Themes section -->
+    <section class="section" aria-labelledby="themes-heading">
+      <div class="section-header">
+        <h2 class="section-title" id="themes-heading">Themes</h2>
+        <div class="filter-pills" role="group" aria-label="Filter themes by category">
+          <button class="filter-pill is-active" data-filter="all">All</button>
+          <button class="filter-pill" data-filter="light">Light</button>
+          <button class="filter-pill" data-filter="dark">Dark</button>
+        </div>
+      </div>
+
+      <div class="theme-grid" id="themeGrid" role="radiogroup" aria-label="Select a theme">
+        <!-- populated by JS -->
+      </div>
+    </section>
+
+    <!-- Settings section -->
+    <section class="section settings-section" aria-labelledby="settings-heading">
+      <h2 class="section-title" id="settings-heading">Settings</h2>
+
+      <div class="settings-group">
+
+        <!-- Auto mode -->
+        <div class="setting-row">
+          <div class="setting-info">
+            <div class="setting-label">Follow system theme</div>
+            <div class="setting-desc">Automatically switch between your preferred light and dark theme based on your system's appearance setting.</div>
+          </div>
+          <label class="toggle-switch" title="Follow system appearance">
+            <input type="checkbox" id="autoModeToggle" />
+            <span class="toggle-track"><span class="toggle-thumb"></span></span>
+          </label>
+        </div>
+
+        <!-- Per-org settings -->
+        <div class="setting-row setting-row--column" id="orgSettingsRow" hidden>
+          <div class="setting-info">
+            <div class="setting-label">Per-org themes</div>
+            <div class="setting-desc">Individual Salesforce orgs can have their own theme override, independent of the global setting.</div>
+          </div>
+          <div class="org-list" id="orgList">
+            <!-- populated by JS -->
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- Keyboard shortcuts -->
+    <section class="section" aria-labelledby="shortcuts-heading">
+      <h2 class="section-title" id="shortcuts-heading">Keyboard Shortcuts</h2>
+      <div class="shortcuts-grid">
+        <div class="shortcut-row">
+          <span class="shortcut-desc">Cycle to next theme</span>
+          <kbd class="shortcut-key">Alt + Shift + T</kbd>
+        </div>
+        <div class="shortcut-row">
+          <span class="shortcut-desc">Toggle dark / light mode</span>
+          <kbd class="shortcut-key">Alt + Shift + D</kbd>
+        </div>
+      </div>
+      <p class="shortcut-note">Shortcuts only work while viewing a Salesforce org tab. Custom key bindings can be set via <code>chrome://extensions/shortcuts</code>.</p>
+    </section>
+
+  </main>
+
+  <footer class="site-footer">
+    <span>Built by <a href="https://connectry.io" target="_blank" rel="noopener noreferrer">Connectry</a></span>
+    <span class="footer-sep">·</span>
+    <span id="versionLabel">v2.0.0</span>
+    <span class="footer-sep">·</span>
+    <a href="https://connectry.io" target="_blank" rel="noopener noreferrer">connectry.io</a>
+  </footer>
+
+  <script src="options.js"></script>
+</body>
+</html>

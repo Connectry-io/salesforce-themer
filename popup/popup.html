@@ -22,6 +22,11 @@
         <h1 class="header-title">Salesforce Themer</h1>
         <p class="header-subtitle">by Connectry</p>
       </div>
+      <button class="header-expand-btn" id="openOptionsBtn" title="Open theme gallery" aria-label="Open full theme gallery">
+        <svg width="15" height="15" viewBox="0 0 15 15" fill="none" aria-hidden="true">
+          <path d="M3 7.5h9M7.5 3l4.5 4.5L7.5 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
     </header>
 
     <!-- Auto mode bar -->
@@ -50,154 +55,15 @@
         Automatically switches between your last selected light and dark theme based on your system's appearance setting.
       </div>
       <div class="auto-mode-status" id="autoModeStatus" hidden>
-        <span class="auto-status-item">☀️ <span id="autoLightName">Connectry Light</span></span>
+        <span class="auto-status-item">&#9728; <span id="autoLightName">Connectry Light</span></span>
         <span class="auto-status-dot">·</span>
-        <span class="auto-status-item">🌙 <span id="autoDarkName">Connectry Dark</span></span>
+        <span class="auto-status-item">&#9790; <span id="autoDarkName">Connectry Dark</span></span>
       </div>
     </div>
 
-    <!-- Theme grid -->
-    <main class="themes-section" role="radiogroup" aria-label="Select a theme">
-
-      <div class="theme-group-label">Light Themes</div>
-      <div class="themes-grid">
-        <button class="theme-card" data-theme="connectry" role="radio" aria-checked="false" title="Connectry Light — Clean, professional, Connectry brand identity">
-          <div class="theme-swatch">
-            <span style="background: #f7f7f5;"></span>
-            <span style="background: #ffffff;"></span>
-            <span style="background: #4a6fa5;"></span>
-            <span style="background: #2d2d2d;"></span>
-          </div>
-          <div class="theme-info">
-            <span class="theme-name">Connectry Light</span>
-            <span class="theme-tag">Default</span>
-          </div>
-          <div class="theme-check" aria-hidden="true">
-            <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-              <path d="M2.5 7L5.5 10L11.5 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-          </div>
-          <div class="theme-auto-icon" aria-hidden="true"></div>
-        </button>
-
-        <button class="theme-card" data-theme="slate" role="radio" aria-checked="false" title="Slate — Professional muted greys">
-          <div class="theme-swatch">
-            <span style="background: #f8f9fa;"></span>
-            <span style="background: #ffffff;"></span>
-            <span style="background: #374151;"></span>
-            <span style="background: #111827;"></span>
-          </div>
-          <div class="theme-info">
-            <span class="theme-name">Slate</span>
-            <span class="theme-desc">Minimal</span>
-          </div>
-          <div class="theme-check" aria-hidden="true">
-            <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-              <path d="M2.5 7L5.5 10L11.5 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-          </div>
-          <div class="theme-auto-icon" aria-hidden="true"></div>
-        </button>
-
-        <button class="theme-card" data-theme="arctic" role="radio" aria-checked="false" title="Arctic — Crisp ice blue light mode">
-          <div class="theme-swatch">
-            <span style="background: #f0f4f8;"></span>
-            <span style="background: #ffffff;"></span>
-            <span style="background: #2b6cb0;"></span>
-            <span style="background: #1a202c;"></span>
-          </div>
-          <div class="theme-info">
-            <span class="theme-name">Arctic</span>
-            <span class="theme-desc">Ice blue</span>
-          </div>
-          <div class="theme-check" aria-hidden="true">
-            <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-              <path d="M2.5 7L5.5 10L11.5 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-          </div>
-          <div class="theme-auto-icon" aria-hidden="true"></div>
-        </button>
-      </div>
-
-      <div class="theme-group-label">Dark Themes</div>
-      <div class="themes-grid">
-        <button class="theme-card" data-theme="connectry-dark" role="radio" aria-checked="false" title="Connectry Dark — Professional dark mode with Connectry brand identity">
-          <div class="theme-swatch">
-            <span style="background: #1a1d23;"></span>
-            <span style="background: #22262e;"></span>
-            <span style="background: #6d9fd4;"></span>
-            <span style="background: #e8eaed;"></span>
-          </div>
-          <div class="theme-info">
-            <span class="theme-name">Connectry Dark</span>
-            <span class="theme-desc">Dark mode</span>
-          </div>
-          <div class="theme-check" aria-hidden="true">
-            <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-              <path d="M2.5 7L5.5 10L11.5 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-          </div>
-          <div class="theme-auto-icon" aria-hidden="true"></div>
-        </button>
-
-        <button class="theme-card" data-theme="midnight" role="radio" aria-checked="false" title="Midnight — Deep navy dark mode">
-          <div class="theme-swatch">
-            <span style="background: #0f1219;"></span>
-            <span style="background: #1a1f2e;"></span>
-            <span style="background: #60a5fa;"></span>
-            <span style="background: #e2e8f0;"></span>
-          </div>
-          <div class="theme-info">
-            <span class="theme-name">Midnight</span>
-            <span class="theme-desc">Deep navy</span>
-          </div>
-          <div class="theme-check" aria-hidden="true">
-            <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-              <path d="M2.5 7L5.5 10L11.5 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-          </div>
-          <div class="theme-auto-icon" aria-hidden="true"></div>
-        </button>
-
-        <button class="theme-card" data-theme="tron" role="radio" aria-checked="false" title="Tron — Electric cyan on near-black">
-          <div class="theme-swatch">
-            <span style="background: #0a0a0f;"></span>
-            <span style="background: #0d1117;"></span>
-            <span style="background: #00e5ff;"></span>
-            <span style="background: #e0f7fa;"></span>
-          </div>
-          <div class="theme-info">
-            <span class="theme-name">Tron</span>
-            <span class="theme-desc">Neon</span>
-          </div>
-          <div class="theme-check" aria-hidden="true">
-            <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-              <path d="M2.5 7L5.5 10L11.5 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-          </div>
-          <div class="theme-auto-icon" aria-hidden="true"></div>
-        </button>
-
-        <button class="theme-card" data-theme="obsidian" role="radio" aria-checked="false" title="Obsidian — Matte black and gold">
-          <div class="theme-swatch">
-            <span style="background: #0c0c0c;"></span>
-            <span style="background: #161616;"></span>
-            <span style="background: #d4a853;"></span>
-            <span style="background: #e8e6e3;"></span>
-          </div>
-          <div class="theme-info">
-            <span class="theme-name">Obsidian</span>
-            <span class="theme-desc">Gold &amp; black</span>
-          </div>
-          <div class="theme-check" aria-hidden="true">
-            <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-              <path d="M2.5 7L5.5 10L11.5 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-          </div>
-          <div class="theme-auto-icon" aria-hidden="true"></div>
-        </button>
-      </div>
-
+    <!-- Theme grid — dynamic, populated by popup.js from themes.json -->
+    <main class="themes-section" id="themesSection" role="radiogroup" aria-label="Select a theme">
+      <!-- populated by popup.js -->
     </main>
 
     <!-- Per-org section -->

@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
   "name": "Salesforce Themer by Connectry",
-  "version": "1.6.0",
-  "description": "Transform your Salesforce experience with stunning themes. 6 premium themes for Lightning Experience.",
+  "version": "2.0.0",
+  "description": "Transform your Salesforce experience with stunning themes. 15 premium themes for Lightning Experience.",
   "permissions": ["storage", "activeTab", "tabs"],
   "host_permissions": [
     "https://*.salesforce.com/*",
@@ -19,6 +19,7 @@
       "128": "icons/icon-128.svg"
     }
   },
+  "options_page": "options/options.html",
   "commands": {
     "toggle-theme": {
       "suggested_key": {
@@ -49,7 +50,10 @@
   },
   "web_accessible_resources": [
     {
-      "resources": ["content/themes/*.css"],
+      "resources": [
+        "themes/themes.json",
+        "content/themes/*.css"
+      ],
       "matches": [
         "https://*.salesforce.com/*",
         "https://*.lightning.force.com/*",

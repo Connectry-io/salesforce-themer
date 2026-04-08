@@ -1,26 +1,120 @@
 (() => {
   'use strict';
 
-  const THEMES = ['connectry', 'connectry-dark', 'midnight', 'slate', 'tron', 'obsidian', 'arctic', 'none'];
-  const LIGHT_THEMES = ['connectry', 'slate', 'arctic'];
-  const DARK_THEMES = ['connectry-dark', 'midnight', 'tron', 'obsidian'];
-  const THEME_NAMES = {
-    'connectry': 'Connectry Light',
-    'connectry-dark': 'Connectry Dark',
-    'midnight': 'Midnight',
-    'slate': 'Slate',
-    'tron': 'Tron',
-    'obsidian': 'Obsidian',
-    'arctic': 'Arctic'
-  };
-
+  let THEMES = [];
+  let LIGHT_THEME_IDS = new Set();
+  let DARK_THEME_IDS = new Set();
+  let THEME_NAMES = {};
   let currentOrgHostname = null;
   let syncState = {};
+
+  // ─── Theme registry loading ──────────────────────────────────────────────
+
+  async function loadThemes() {
+    const url = chrome.runtime.getURL('themes/themes.json');
+    const response = await fetch(url);
+    const data = await response.json();
+    THEMES = data.themes;
+
+    for (const t of THEMES) {
+      THEME_NAMES[t.id] = t.name;
+      if (t.category === 'light') LIGHT_THEME_IDS.add(t.id);
+      if (t.category === 'dark') DARK_THEME_IDS.add(t.id);
+    }
+  }
+
+  function getAllThemeIds() {
+    return THEMES.map(t => t.id);
+  }
+
+  // ─── Popup rendering ──────────────────────────────────────────────────────
+
+  function buildSwatchColors(theme) {
+    const c = theme.colors;
+    return [c.background, c.surface, c.accent, c.textPrimary];
+  }
+
+  function renderThemesSection() {
+    const section = document.getElementById('themesSection');
+    section.innerHTML = '';
+
+    const lightThemes = THEMES.filter(t => t.category === 'light');
+    const darkThemes = THEMES.filter(t => t.category === 'dark');
+
+    const groups = [
+      { label: 'Light Themes', themes: lightThemes },
+      { label: 'Dark Themes', themes: darkThemes },
+    ];
+
+    for (const group of groups) {
+      const label = document.createElement('div');
+      label.className = 'theme-group-label';
+      label.textContent = group.label;
+      section.appendChild(label);
+
+      const grid = document.createElement('div');
+      grid.className = 'themes-grid';
+
+      for (const theme of group.themes) {
+        const btn = document.createElement('button');
+        btn.className = 'theme-card';
+        btn.dataset.theme = theme.id;
+        btn.role = 'radio';
+        btn.setAttribute('aria-checked', 'false');
+        btn.title = `${theme.name} — ${theme.description}`;
+
+        const swatchColors = buildSwatchColors(theme);
+        const swatchHtml = swatchColors
+          .map(col => `<span style="background:${col};"></span>`)
+          .join('');
+
+        const isDefault = theme.isDefault;
+        const descOrTag = isDefault
+          ? `<span class="theme-tag">Default</span>`
+          : `<span class="theme-desc">${theme.tags[0] || ''}</span>`;
+
+        btn.innerHTML = `
+          <div class="theme-swatch">${swatchHtml}</div>
+          <div class="theme-info">
+            <span class="theme-name">${theme.name}</span>
+            ${descOrTag}
+          </div>
+          <div class="theme-check" aria-hidden="true">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+              <path d="M2.5 7L5.5 10L11.5 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+          <div class="theme-auto-icon" aria-hidden="true"></div>
+        `;
+
+        grid.appendChild(btn);
+      }
+
+      section.appendChild(grid);
+    }
+
+    // Bind off button
+    const offBtn = document.querySelector('.off-button');
+    if (offBtn) {
+      offBtn.addEventListener('click', () => selectTheme('none'));
+      offBtn.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); selectTheme('none'); }
+      });
+    }
+
+    // Bind theme cards
+    document.querySelectorAll('.theme-card[data-theme]').forEach(btn => {
+      btn.addEventListener('click', () => selectTheme(btn.dataset.theme));
+      btn.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); selectTheme(btn.dataset.theme); }
+      });
+    });
+  }
 
   // ─── UI state helpers ────────────────────────────────────────────────────
 
   function setActiveUI(activeTheme) {
-    document.querySelectorAll('[data-theme]').forEach((el) => {
+    document.querySelectorAll('[data-theme]').forEach(el => {
       const isActive = el.dataset.theme === activeTheme;
       el.classList.toggle('is-active', isActive);
       el.setAttribute('aria-checked', String(isActive));
@@ -34,11 +128,10 @@
     const statusLine = document.getElementById('autoModeStatus');
     statusLine.hidden = !autoMode;
 
-    const section = document.querySelector('.themes-section');
+    const section = document.getElementById('themesSection');
     section?.classList.toggle('auto-mode-active', autoMode);
 
-    // Clear all auto-mode card classes
-    document.querySelectorAll('.theme-card').forEach((card) => {
+    document.querySelectorAll('.theme-card').forEach(card => {
       card.classList.remove('is-auto-light', 'is-auto-dark');
     });
 
@@ -46,19 +139,20 @@
       const lightTheme = syncState.lastLightTheme || 'connectry';
       const darkTheme = syncState.lastDarkTheme || 'connectry-dark';
 
-      // Set sun/moon icons on the active auto-pair cards
       const lightCard = document.querySelector(`[data-theme="${lightTheme}"]`);
       const darkCard = document.querySelector(`[data-theme="${darkTheme}"]`);
+
       if (lightCard) {
         lightCard.classList.add('is-auto-light');
-        lightCard.querySelector('.theme-auto-icon').textContent = '☀️';
+        const icon = lightCard.querySelector('.theme-auto-icon');
+        if (icon) icon.textContent = '\u2600\uFE0F';
       }
       if (darkCard) {
         darkCard.classList.add('is-auto-dark');
-        darkCard.querySelector('.theme-auto-icon').textContent = '🌙';
+        const icon = darkCard.querySelector('.theme-auto-icon');
+        if (icon) icon.textContent = '\uD83C\uDF19';
       }
 
-      // Update status line text
       const lightName = THEME_NAMES[lightTheme] || 'Connectry Light';
       const darkName = THEME_NAMES[darkTheme] || 'Connectry Dark';
       document.getElementById('autoLightName').textContent = lightName;
@@ -75,7 +169,9 @@
     orgRow.hidden = false;
 
     if (hasOverride) {
-      const shortName = currentOrgHostname.replace('.lightning.force.com', '').replace('.my.salesforce.com', '');
+      const shortName = currentOrgHostname
+        .replace('.lightning.force.com', '')
+        .replace('.my.salesforce.com', '');
       orgStatus.innerHTML = `
         <span class="org-status-text" title="${currentOrgHostname}">Theme set for ${shortName}</span>
         <button class="org-reset-btn" id="orgResetBtn">Reset to global</button>
@@ -100,15 +196,13 @@
   }
 
   async function selectTheme(theme) {
-    if (!THEMES.includes(theme)) return;
+    const allIds = getAllThemeIds();
+    if (theme !== 'none' && !allIds.includes(theme)) return;
 
     const updates = { theme };
+    if (LIGHT_THEME_IDS.has(theme)) updates.lastLightTheme = theme;
+    if (DARK_THEME_IDS.has(theme)) updates.lastDarkTheme = theme;
 
-    // Always track last used light/dark — used by auto-mode and keyboard shortcuts
-    if (LIGHT_THEMES.includes(theme)) updates.lastLightTheme = theme;
-    if (DARK_THEMES.includes(theme)) updates.lastDarkTheme = theme;
-
-    // If per-org override is active, update org-specific storage instead of global
     const orgThemes = syncState.orgThemes || {};
     if (currentOrgHostname && orgThemes[currentOrgHostname]) {
       orgThemes[currentOrgHostname] = theme;
@@ -117,18 +211,6 @@
 
     await chrome.storage.sync.set(updates);
     syncState = { ...syncState, ...updates };
-
-    // Pre-cache the CSS for zero-flash
-    try {
-      if (theme !== 'none') {
-        const url = chrome.runtime.getURL(`content/themes/${theme}.css`);
-        const response = await fetch(url);
-        if (response.ok) {
-          const css = await response.text();
-          await chrome.storage.local.set({ [`themeCSS_${theme}`]: css });
-        }
-      }
-    } catch (_) {}
 
     setActiveUI(theme);
     updateOrgRow(syncState.orgThemes, theme);
@@ -148,7 +230,6 @@
     setAutoModeUI(autoMode);
 
     if (autoMode) {
-      // Apply the appropriate theme immediately based on current OS mode
       const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
       const theme = isDark
         ? (syncState.lastDarkTheme || 'connectry-dark')
@@ -176,33 +257,25 @@
     await chrome.storage.sync.set({ orgThemes });
     syncState.orgThemes = orgThemes;
     updateOrgRow(orgThemes, syncState.theme);
-    // Revert to global theme
     await applyThemeToTab(syncState.theme || 'connectry');
   }
 
-  // ─── Event binding ───────────────────────────────────────────────────────
+  // ─── Options page button ──────────────────────────────────────────────────
 
-  function bindButtons() {
-    document.querySelectorAll('[data-theme]').forEach((btn) => {
-      btn.addEventListener('click', () => selectTheme(btn.dataset.theme));
-      btn.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter' || e.key === ' ') {
-          e.preventDefault();
-          selectTheme(btn.dataset.theme);
-        }
-      });
+  function bindOptionsButton() {
+    document.getElementById('openOptionsBtn')?.addEventListener('click', () => {
+      chrome.runtime.openOptionsPage();
     });
+  }
 
-    document.getElementById('autoModeToggle')?.addEventListener('change', handleAutoModeToggle);
+  // ─── Help tooltip ─────────────────────────────────────────────────────────
 
-    // Help tooltip toggle
+  function bindHelpTooltip() {
     const helpBtn = document.getElementById('autoHelpBtn');
     const tooltip = document.getElementById('autoHelpTooltip');
     helpBtn?.addEventListener('click', () => {
       tooltip.hidden = !tooltip.hidden;
     });
-
-    // Close tooltip when clicking outside the auto-mode bar
     document.addEventListener('click', (e) => {
       if (!e.target.closest('#autoModeBar')) {
         if (tooltip) tooltip.hidden = true;
@@ -210,7 +283,7 @@
     });
   }
 
-  // ─── Detect current tab's org hostname ───────────────────────────────────
+  // ─── Detect current org ───────────────────────────────────────────────────
 
   async function detectCurrentOrg() {
     try {
@@ -218,7 +291,6 @@
       if (!tab?.url) return null;
       const url = new URL(tab.url);
       const host = url.hostname;
-      // Only consider Salesforce org URLs
       if (
         host.endsWith('.lightning.force.com') ||
         host.endsWith('.my.salesforce.com') ||
@@ -233,6 +305,11 @@
   // ─── Initialisation ──────────────────────────────────────────────────────
 
   async function init() {
+    await loadThemes();
+    renderThemesSection();
+    bindOptionsButton();
+    bindHelpTooltip();
+
     const [result, orgHostname] = await Promise.all([
       chrome.storage.sync.get({
         theme: 'connectry',
@@ -247,7 +324,6 @@
     syncState = result;
     currentOrgHostname = orgHostname;
 
-    // Determine the effective active theme (per-org overrides global)
     let effectiveTheme = result.theme;
     if (orgHostname && result.orgThemes[orgHostname]) {
       effectiveTheme = result.orgThemes[orgHostname];
@@ -265,7 +341,7 @@
       updateOrgRow(result.orgThemes, effectiveTheme);
     }
 
-    bindButtons();
+    document.getElementById('autoModeToggle')?.addEventListener('change', handleAutoModeToggle);
   }
 
   init();
