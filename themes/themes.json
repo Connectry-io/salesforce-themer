@@ -94,7 +94,7 @@
       "name": "Connectry Dark",
       "description": "Professional dark mode with Connectry brand identity",
       "category": "dark",
-      "isDefault": false,
+      "isDefault": true,
       "author": "Connectry",
       "tags": [
         "professional",

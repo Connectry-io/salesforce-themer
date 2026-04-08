@@ -248,13 +248,12 @@ one-app-nav-bar,
 /* ─── Cards ──────────────────────────────────────────────────────────────── */
 
 .slds-card,
-.slds-card__header,
 .slds-card__body,
 .slds-card__footer,
 .forceRecordCard {
   background-color: ${c.surface} !important;
-  border: 1px solid ${c.border} !important;
-  box-shadow: ${isDark ? '0 2px 8px rgba(0, 0, 0, 0.3)' : '0 1px 4px rgba(0, 0, 0, 0.06)'} !important;${isDark ? `
+  border: none !important;
+  box-shadow: ${isDark ? 'none' : '0 1px 4px rgba(0, 0, 0, 0.06)'} !important;${isDark ? `
   color: ${c.textPrimary} !important;` : ''}${fx ? `
   box-shadow: 0 0 20px rgba(${hexToRgb(c.accent)}, 0.06), inset 0 0 40px rgba(0, 0, 0, 0.2) !important;` : ''}
 }
@@ -265,7 +264,9 @@ ${fx ? `
 }` : ''}
 
 .slds-card__header {
-  border-bottom: 1px solid ${c.border} !important;
+  background-color: ${c.surface} !important;
+  border: none !important;
+  border-bottom: 1px solid ${isDark ? 'rgba(255,255,255,0.06)' : c.border} !important;
 }
 
 /* ─── Buttons ────────────────────────────────────────────────────────────── */

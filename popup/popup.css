@@ -281,14 +281,14 @@ body {
 }
 
 .theme-group-label {
-  font-size: 9px;
+  font-size: 10px;
   font-weight: 700;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
-  color: var(--color-text-subtle);
-  padding-bottom: 4px;
-  border-bottom: 1px solid var(--color-border);
-  margin-top: 2px;
+  color: var(--color-text);
+  padding-bottom: 5px;
+  border-bottom: 1.5px solid var(--color-border-hover);
+  margin-top: 6px;
 }
 
 /* ─── Theme Grid ─────────────────────────────────────────────────────────── */
@@ -307,6 +307,7 @@ body {
   flex-direction: column;
   gap: 6px;
   padding: 8px;
+  min-height: 82px;
   background: var(--color-surface);
   border: 1.5px solid var(--color-border);
   border-radius: var(--radius-md);
