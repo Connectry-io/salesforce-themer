@@ -655,6 +655,7 @@ records-lwc-highlights-panel,
   padding: 0 !important;
 }
 
+/* Path items — background colors */
 .slds-path__item {
   background-color: ${c.surfaceAlt} !important;
 }
@@ -667,12 +668,60 @@ records-lwc-highlights-panel,
   background-color: ${c.accent} !important;
 }
 
+.slds-path__item.slds-is-incomplete {
+  background-color: ${c.surfaceAlt} !important;
+}
+
+/* Path chevrons — the arrow shapes between steps */
+.slds-path__item::before,
+.slds-path__item::after {
+  border-color: transparent transparent transparent ${c.surfaceAlt} !important;
+}
+
+.slds-path__item.slds-is-complete::before,
+.slds-path__item.slds-is-complete::after {
+  border-color: transparent transparent transparent ${c.accent} !important;
+}
+
+.slds-path__item.slds-is-current::before,
+.slds-path__item.slds-is-current::after {
+  border-color: transparent transparent transparent ${c.accent} !important;
+}
+
+/* Path link hover state */
+.slds-path__item:hover {
+  background-color: ${c.surfaceHover} !important;
+}
+
+.slds-path__item:hover::before,
+.slds-path__item:hover::after {
+  border-color: transparent transparent transparent ${c.surfaceHover} !important;
+}
+
+.slds-path__item.slds-is-complete:hover,
+.slds-path__item.slds-is-current:hover {
+  background-color: ${c.accentHover} !important;
+}
+
+.slds-path__item.slds-is-complete:hover::before,
+.slds-path__item.slds-is-complete:hover::after,
+.slds-path__item.slds-is-current:hover::before,
+.slds-path__item.slds-is-current:hover::after {
+  border-color: transparent transparent transparent ${c.accentHover} !important;
+}
+
+/* Path text colors */
 .slds-path__title {
   color: ${c.textPrimary} !important;
 }
 
 .slds-path__item.slds-is-complete .slds-path__title,
 .slds-path__item.slds-is-current .slds-path__title {
+  color: ${c.buttonBrandText} !important;
+}
+
+/* Path stage icon (checkmark on completed) */
+.slds-path__stage {
   color: ${c.buttonBrandText} !important;
 }
 
