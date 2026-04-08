@@ -102,10 +102,10 @@
         "dark"
       ],
       "colors": {
-        "background": "#1e2128",
-        "surface": "#262b33",
-        "surfaceAlt": "#2a2f38",
-        "surfaceHover": "#282d37",
+        "background": "#252830",
+        "surface": "#2c3038",
+        "surfaceAlt": "#323640",
+        "surfaceHover": "#383d48",
         "surfaceHighlight": "rgba(109, 159, 212, 0.1)",
         "surfaceSelection": "rgba(109, 159, 212, 0.15)",
         "nav": "#4a6fa5",

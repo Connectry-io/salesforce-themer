@@ -127,6 +127,7 @@ body {
 /* ─── Auto Mode Bar ──────────────────────────────────────────────────────── */
 
 .auto-mode-bar {
+  position: relative;
   background: var(--color-surface);
   border: 1.5px solid var(--color-border);
   border-radius: var(--radius-md);
@@ -236,18 +237,22 @@ body {
   outline-offset: 1px;
 }
 
-/* Help tooltip */
+/* Help tooltip — floating overlay, does NOT expand the card */
 .auto-help-tooltip {
+  position: absolute;
+  top: 100%;
+  left: 12px;
+  right: 12px;
+  z-index: 100;
   font-size: 11px;
   line-height: 1.5;
   color: var(--color-text-muted);
-  background: var(--color-bg);
+  background: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-sm);
-  padding: 7px 9px;
-  max-width: 240px;
-  box-shadow: var(--shadow-md);
-  margin-top: 2px;
+  padding: 8px 10px;
+  box-shadow: var(--shadow-lg);
+  margin-top: 4px;
 }
 
 /* Auto mode status line */
