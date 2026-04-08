@@ -655,20 +655,24 @@ records-lwc-highlights-panel,
   padding: 0 !important;
 }
 
-/* Path items — background colors */
-.slds-path__item {
+/* Path items — background colors on BOTH the li and the inner link */
+.slds-path__item,
+.slds-path__item .slds-path__link {
   background-color: ${c.surfaceAlt} !important;
 }
 
-.slds-path__item.slds-is-complete {
+.slds-path__item.slds-is-complete,
+.slds-path__item.slds-is-complete .slds-path__link {
   background-color: ${c.accent} !important;
 }
 
-.slds-path__item.slds-is-current {
+.slds-path__item.slds-is-current,
+.slds-path__item.slds-is-current .slds-path__link {
   background-color: ${c.accent} !important;
 }
 
-.slds-path__item.slds-is-incomplete {
+.slds-path__item.slds-is-incomplete,
+.slds-path__item.slds-is-incomplete .slds-path__link {
   background-color: ${c.surfaceAlt} !important;
 }
 
@@ -689,7 +693,8 @@ records-lwc-highlights-panel,
 }
 
 /* Path link hover state */
-.slds-path__item:hover {
+.slds-path__item:hover,
+.slds-path__item:hover .slds-path__link {
   background-color: ${c.surfaceHover} !important;
 }
 
@@ -699,7 +704,9 @@ records-lwc-highlights-panel,
 }
 
 .slds-path__item.slds-is-complete:hover,
-.slds-path__item.slds-is-current:hover {
+.slds-path__item.slds-is-complete:hover .slds-path__link,
+.slds-path__item.slds-is-current:hover,
+.slds-path__item.slds-is-current:hover .slds-path__link {
   background-color: ${c.accentHover} !important;
 }
 
@@ -708,6 +715,20 @@ records-lwc-highlights-panel,
 .slds-path__item.slds-is-current:hover::before,
 .slds-path__item.slds-is-current:hover::after {
   border-color: transparent transparent transparent ${c.accentHover} !important;
+}
+
+/* Override SF's built-in path active/selected state */
+.slds-path__item.slds-is-active,
+.slds-path__item.slds-is-active .slds-path__link,
+.slds-path__item[aria-selected="true"],
+.slds-path__item [aria-selected="true"] {
+  background-color: ${c.accent} !important;
+  color: ${c.buttonBrandText} !important;
+}
+
+.slds-path__item.slds-is-active::before,
+.slds-path__item.slds-is-active::after {
+  border-color: transparent transparent transparent ${c.accent} !important;
 }
 
 /* Path text colors */
