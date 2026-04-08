@@ -248,15 +248,20 @@ one-app-nav-bar-item-root.slds-is-active a {
 
 /* ─── Cards ──────────────────────────────────────────────────────────────── */
 
+/* Cards — border only on .slds-card itself, not inner body/footer */
 .slds-card,
-.slds-card__body,
-.slds-card__footer,
 .forceRecordCard {
   background-color: ${c.surface} !important;
   border-color: ${c.border} !important;
   box-shadow: ${isDark ? '0 1px 4px rgba(0, 0, 0, 0.2)' : '0 1px 4px rgba(0, 0, 0, 0.06)'} !important;${isDark ? `
   color: ${c.textPrimary} !important;` : ''}${fx ? `
   box-shadow: 0 0 20px rgba(${hexToRgb(c.accent)}, 0.06), inset 0 0 40px rgba(0, 0, 0, 0.2) !important;` : ''}
+}
+
+.slds-card__body,
+.slds-card__footer {
+  background-color: ${c.surface} !important;${isDark ? `
+  color: ${c.textPrimary} !important;` : ''}
 }
 ${fx ? `
 .slds-card:hover {
@@ -755,6 +760,14 @@ body .slds-path__item.slds-is-incomplete.slds-is-active::after {
 .forceRelatedListContainer,
 .forceRelatedListSingleContainer {
   background-color: ${c.background} !important;
+}
+
+/* Related list inner headers — no extra borders */
+.slds-page-header_joined,
+.slds-page-header_bleed,
+.slds-page-header.slds-page-header_joined {
+  border-color: transparent !important;
+  box-shadow: none !important;
 }
 
 /* ─── Profile Icon / Global Actions (top right) ─────────────────────────── */
