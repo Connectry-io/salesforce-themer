@@ -391,7 +391,54 @@ body {
   transform: scale(1);
 }
 
-/* Theme cards remain fully interactive when auto-mode is on */
+/* Auto-mode: show sun/moon instead of checkmark */
+.theme-card .theme-auto-icon {
+  position: absolute;
+  top: 7px;
+  right: 7px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  line-height: 1;
+  opacity: 0;
+  transform: scale(0.6);
+  transition: opacity var(--transition), transform var(--transition);
+}
+
+.theme-card.is-auto-light .theme-auto-icon,
+.theme-card.is-auto-dark .theme-auto-icon {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.theme-card.is-auto-light .theme-auto-icon {
+  background: #f59e0b;
+  color: #ffffff;
+}
+
+.theme-card.is-auto-dark .theme-auto-icon {
+  background: #6366f1;
+  color: #ffffff;
+}
+
+/* When auto-mode is on, hide the blue checkmark, show auto icons instead */
+.auto-mode-active .theme-card .theme-check {
+  opacity: 0 !important;
+  transform: scale(0.6) !important;
+}
+
+/* When auto-mode is off, hide auto icons */
+.theme-card .theme-auto-icon {
+  display: none;
+}
+
+.auto-mode-active .theme-card .theme-auto-icon {
+  display: flex;
+}
 
 /* ─── Per-Org Row ────────────────────────────────────────────────────────── */
 

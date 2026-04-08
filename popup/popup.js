@@ -34,9 +34,33 @@
     const statusLine = document.getElementById('autoModeStatus');
     statusLine.hidden = !autoMode;
 
+    const section = document.querySelector('.themes-section');
+    section?.classList.toggle('auto-mode-active', autoMode);
+
+    // Clear all auto-mode card classes
+    document.querySelectorAll('.theme-card').forEach((card) => {
+      card.classList.remove('is-auto-light', 'is-auto-dark');
+    });
+
     if (autoMode) {
-      const lightName = THEME_NAMES[syncState.lastLightTheme || 'connectry'] || 'Connectry Light';
-      const darkName = THEME_NAMES[syncState.lastDarkTheme || 'connectry-dark'] || 'Connectry Dark';
+      const lightTheme = syncState.lastLightTheme || 'connectry';
+      const darkTheme = syncState.lastDarkTheme || 'connectry-dark';
+
+      // Set sun/moon icons on the active auto-pair cards
+      const lightCard = document.querySelector(`[data-theme="${lightTheme}"]`);
+      const darkCard = document.querySelector(`[data-theme="${darkTheme}"]`);
+      if (lightCard) {
+        lightCard.classList.add('is-auto-light');
+        lightCard.querySelector('.theme-auto-icon').textContent = '☀️';
+      }
+      if (darkCard) {
+        darkCard.classList.add('is-auto-dark');
+        darkCard.querySelector('.theme-auto-icon').textContent = '🌙';
+      }
+
+      // Update status line text
+      const lightName = THEME_NAMES[lightTheme] || 'Connectry Light';
+      const darkName = THEME_NAMES[darkTheme] || 'Connectry Dark';
       document.getElementById('autoLightName').textContent = lightName;
       document.getElementById('autoDarkName').textContent = darkName;
     }
