@@ -645,17 +645,17 @@ records-lwc-highlights-panel,
   border: none !important;
 }
 
-/* The slds-card wrapping the path — this is the white box */
-.pathOriginal .slds-card,
-.pathOriginal .slds-card__body,
-.pathOriginal .slds-card__body_inner,
-.runtime_sales_pathassistantPathAssistant .slds-card,
-.runtime_sales_pathassistantPathAssistant .slds-card__body,
-.runtime_sales_pathassistantPathAssistant .slds-card__body_inner,
-.runtime_sales_pathassistantPathAssistant > article,
-.forcePathAssistant .slds-card,
-.forcePathAssistant .slds-card__body,
-.forcePathAssistant .slds-card__body_inner {
+/* The slds-card wrapping the path — boosted specificity to beat SF */
+body .pathOriginal .slds-card,
+body .pathOriginal .slds-card__body,
+body .pathOriginal .slds-card__body_inner,
+body .runtime_sales_pathassistantPathAssistant .slds-card,
+body .runtime_sales_pathassistantPathAssistant .slds-card__body,
+body .runtime_sales_pathassistantPathAssistant .slds-card__body_inner,
+body .runtime_sales_pathassistantPathAssistant > article,
+body .forcePathAssistant .slds-card,
+body .forcePathAssistant .slds-card__body,
+body .forcePathAssistant .slds-card__body_inner {
   border: none !important;
   box-shadow: none !important;
   background: transparent !important;
@@ -664,25 +664,33 @@ records-lwc-highlights-panel,
   padding: 0 !important;
 }
 
-/* Path items — background colors on BOTH the li and the inner link */
-.slds-path__item,
-.slds-path__item .slds-path__link {
+/* Path items — boosted specificity with body prefix */
+body .slds-path__item,
+body .slds-path__item .slds-path__link,
+body .slds-path__item a.slds-path__link {
   background-color: ${c.surfaceAlt} !important;
+  background: ${c.surfaceAlt} !important;
 }
 
-.slds-path__item.slds-is-complete,
-.slds-path__item.slds-is-complete .slds-path__link {
+body .slds-path__item.slds-is-complete,
+body .slds-path__item.slds-is-complete .slds-path__link,
+body .slds-path__item.slds-is-complete a.slds-path__link {
   background-color: ${c.accent} !important;
+  background: ${c.accent} !important;
 }
 
-.slds-path__item.slds-is-current,
-.slds-path__item.slds-is-current .slds-path__link {
+body .slds-path__item.slds-is-current,
+body .slds-path__item.slds-is-current .slds-path__link,
+body .slds-path__item.slds-is-current a.slds-path__link {
   background-color: ${c.accent} !important;
+  background: ${c.accent} !important;
 }
 
-.slds-path__item.slds-is-incomplete,
-.slds-path__item.slds-is-incomplete .slds-path__link {
+body .slds-path__item.slds-is-incomplete,
+body .slds-path__item.slds-is-incomplete .slds-path__link,
+body .slds-path__item.slds-is-incomplete a.slds-path__link {
   background-color: ${c.surfaceAlt} !important;
+  background: ${c.surfaceAlt} !important;
 }
 
 /* Path chevrons — the arrow shapes between steps */

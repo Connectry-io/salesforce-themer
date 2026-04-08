@@ -6,10 +6,6 @@
 
 'use strict';
 
-/**
- * @param {Object} theme — full theme object from themes.json
- * @returns {string} — complete CSS string ready to inject
- */
 function generateThemeCSS(theme) {
   const c = theme.colors;
   const isDark = c.colorScheme === 'dark';
@@ -636,17 +632,17 @@ records-lwc-highlights-panel,
   border: none !important;
 }
 
-/* The slds-card wrapping the path — this is the white box */
-.pathOriginal .slds-card,
-.pathOriginal .slds-card__body,
-.pathOriginal .slds-card__body_inner,
-.runtime_sales_pathassistantPathAssistant .slds-card,
-.runtime_sales_pathassistantPathAssistant .slds-card__body,
-.runtime_sales_pathassistantPathAssistant .slds-card__body_inner,
-.runtime_sales_pathassistantPathAssistant > article,
-.forcePathAssistant .slds-card,
-.forcePathAssistant .slds-card__body,
-.forcePathAssistant .slds-card__body_inner {
+/* The slds-card wrapping the path — boosted specificity to beat SF */
+body .pathOriginal .slds-card,
+body .pathOriginal .slds-card__body,
+body .pathOriginal .slds-card__body_inner,
+body .runtime_sales_pathassistantPathAssistant .slds-card,
+body .runtime_sales_pathassistantPathAssistant .slds-card__body,
+body .runtime_sales_pathassistantPathAssistant .slds-card__body_inner,
+body .runtime_sales_pathassistantPathAssistant > article,
+body .forcePathAssistant .slds-card,
+body .forcePathAssistant .slds-card__body,
+body .forcePathAssistant .slds-card__body_inner {
   border: none !important;
   box-shadow: none !important;
   background: transparent !important;
@@ -655,25 +651,33 @@ records-lwc-highlights-panel,
   padding: 0 !important;
 }
 
-/* Path items — background colors on BOTH the li and the inner link */
-.slds-path__item,
-.slds-path__item .slds-path__link {
+/* Path items — boosted specificity with body prefix */
+body .slds-path__item,
+body .slds-path__item .slds-path__link,
+body .slds-path__item a.slds-path__link {
   background-color: ${c.surfaceAlt} !important;
+  background: ${c.surfaceAlt} !important;
 }
 
-.slds-path__item.slds-is-complete,
-.slds-path__item.slds-is-complete .slds-path__link {
+body .slds-path__item.slds-is-complete,
+body .slds-path__item.slds-is-complete .slds-path__link,
+body .slds-path__item.slds-is-complete a.slds-path__link {
   background-color: ${c.accent} !important;
+  background: ${c.accent} !important;
 }
 
-.slds-path__item.slds-is-current,
-.slds-path__item.slds-is-current .slds-path__link {
+body .slds-path__item.slds-is-current,
+body .slds-path__item.slds-is-current .slds-path__link,
+body .slds-path__item.slds-is-current a.slds-path__link {
   background-color: ${c.accent} !important;
+  background: ${c.accent} !important;
 }
 
-.slds-path__item.slds-is-incomplete,
-.slds-path__item.slds-is-incomplete .slds-path__link {
+body .slds-path__item.slds-is-incomplete,
+body .slds-path__item.slds-is-incomplete .slds-path__link,
+body .slds-path__item.slds-is-incomplete a.slds-path__link {
   background-color: ${c.surfaceAlt} !important;
+  background: ${c.surfaceAlt} !important;
 }
 
 /* Path chevrons — the arrow shapes between steps */
@@ -797,6 +801,31 @@ records-lwc-highlights-panel,
  * @param {string} hex
  * @returns {string}
  */
+function hexToRgb(hex) {
+  if (!hex || typeof hex !== 'string') return '74, 111, 165';
+  // Strip leading # and handle short hex
+  const clean = hex.replace('#', '');
+  if (clean.length === 3) {
+    const r = parseInt(clean[0] + clean[0], 16);
+    const g = parseInt(clean[1] + clean[1], 16);
+    const b = parseInt(clean[2] + clean[2], 16);
+    return `${r}, ${g}, ${b}`;
+  }
+  if (clean.length === 6) {
+    const r = parseInt(clean.slice(0, 2), 16);
+    const g = parseInt(clean.slice(2, 4), 16);
+    const b = parseInt(clean.slice(4, 6), 16);
+    return `${r}, ${g}, ${b}`;
+  }
+  return '74, 111, 165';
+}
+
+// Export for use in background.js (service worker context — no ES modules)
+if (typeof module !== 'undefined') {
+  module.exports = { generateThemeCSS, hexToRgb };
+}
+
+
 function hexToRgb(hex) {
   if (!hex || typeof hex !== 'string') return '74, 111, 165';
   // Strip leading # and handle short hex
