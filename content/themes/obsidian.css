@@ -19,7 +19,6 @@
   --lwc-colorBackgroundButtonBrandActive: #b07e2e !important;
   --lwc-colorBackgroundButtonDefault: #1e1e1e !important;
   --lwc-colorBackgroundButtonDefaultHover: #262626 !important;
-  --lwc-headerColorBackground: #1a1a1a !important;
   --lwc-pageColorBackground: #0c0c0c !important;
   --lwc-colorTextDefault: #e8e6e3 !important;
   --lwc-colorTextWeak: #a39e93 !important;
@@ -81,7 +80,17 @@ body,
   color: #e8e6e3 !important;
 }
 
-/* ─── Navigation ─────────────────────────────────────────────────────────── */
+/* ─── Global Header (top bar) — keep light so logo/icons stay visible ───── */
+
+.slds-global-header,
+.slds-global-header_container,
+[class*="globalHeader"],
+.forceSearchDesktopHeader {
+  background-color: #ffffff !important;
+  color: #2d2d2d !important;
+}
+
+/* ─── Navigation (app bar below header) ──────────────────────────────────── */
 
 .oneGlobalNav,
 one-app-nav-bar,
