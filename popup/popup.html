@@ -33,29 +33,21 @@
             <path d="M12 2v2M12 20v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M2 12h2M20 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
           </svg>
           <span>Follow system theme</span>
+          <button class="auto-help-btn" id="autoHelpBtn" aria-label="Learn more about auto mode" title="How does this work?">
+            <svg width="13" height="13" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+              <circle cx="7" cy="7" r="6" stroke="currentColor" stroke-width="1.3"/>
+              <path d="M7 6.5v3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
+              <circle cx="7" cy="4.5" r="0.65" fill="currentColor"/>
+            </svg>
+          </button>
         </div>
         <label class="toggle-switch" title="Follow system light/dark preference">
           <input type="checkbox" id="autoModeToggle" />
           <span class="toggle-track"><span class="toggle-thumb"></span></span>
         </label>
       </div>
-      <div class="auto-mode-selectors" id="autoModeSelectors" hidden>
-        <div class="auto-mode-pair">
-          <span class="auto-mode-icon" title="Light mode theme">&#9728;</span>
-          <select id="lightThemeSelect" class="auto-select">
-            <option value="connectry">Connectry</option>
-            <option value="slate">Slate</option>
-            <option value="arctic">Arctic</option>
-          </select>
-        </div>
-        <div class="auto-mode-pair">
-          <span class="auto-mode-icon" title="Dark mode theme">&#9790;</span>
-          <select id="darkThemeSelect" class="auto-select">
-            <option value="midnight">Midnight</option>
-            <option value="tron">Tron</option>
-            <option value="obsidian">Obsidian</option>
-          </select>
-        </div>
+      <div class="auto-help-tooltip" id="autoHelpTooltip" hidden>
+        Automatically switches between your last selected light and dark theme based on your system's appearance setting.
       </div>
     </div>
 
@@ -64,7 +56,7 @@
 
       <div class="theme-group-label">Light Themes</div>
       <div class="themes-grid">
-        <button class="theme-card" data-theme="connectry" role="radio" aria-checked="false" title="Connectry — Clean, professional, Connectry brand identity">
+        <button class="theme-card" data-theme="connectry" role="radio" aria-checked="false" title="Connectry Light — Clean, professional, Connectry brand identity">
           <div class="theme-swatch">
             <span style="background: #f7f7f5;"></span>
             <span style="background: #ffffff;"></span>
@@ -72,7 +64,7 @@
             <span style="background: #2d2d2d;"></span>
           </div>
           <div class="theme-info">
-            <span class="theme-name">Connectry</span>
+            <span class="theme-name">Connectry Light</span>
             <span class="theme-tag">Default</span>
           </div>
           <div class="theme-check" aria-hidden="true">
@@ -121,6 +113,24 @@
 
       <div class="theme-group-label">Dark Themes</div>
       <div class="themes-grid">
+        <button class="theme-card" data-theme="connectry-dark" role="radio" aria-checked="false" title="Connectry Dark — Professional dark mode with Connectry brand identity">
+          <div class="theme-swatch">
+            <span style="background: #1a1d23;"></span>
+            <span style="background: #22262e;"></span>
+            <span style="background: #6d9fd4;"></span>
+            <span style="background: #e8eaed;"></span>
+          </div>
+          <div class="theme-info">
+            <span class="theme-name">Connectry Dark</span>
+            <span class="theme-desc">Dark mode</span>
+          </div>
+          <div class="theme-check" aria-hidden="true">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+              <path d="M2.5 7L5.5 10L11.5 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+        </button>
+
         <button class="theme-card" data-theme="midnight" role="radio" aria-checked="false" title="Midnight — Deep navy dark mode">
           <div class="theme-swatch">
             <span style="background: #0f1219;"></span>
@@ -130,7 +140,7 @@
           </div>
           <div class="theme-info">
             <span class="theme-name">Midnight</span>
-            <span class="theme-desc">Dark mode</span>
+            <span class="theme-desc">Deep navy</span>
           </div>
           <div class="theme-check" aria-hidden="true">
             <svg width="14" height="14" viewBox="0 0 14 14" fill="none">

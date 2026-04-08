@@ -179,44 +179,46 @@ body {
   outline-offset: 2px;
 }
 
-/* Light/dark selectors */
-.auto-mode-selectors {
-  display: flex;
-  gap: 8px;
-}
-
-.auto-mode-pair {
-  display: flex;
+/* Help icon button */
+.auto-help-btn {
+  display: inline-flex;
   align-items: center;
-  gap: 5px;
-  flex: 1;
-}
-
-.auto-mode-icon {
-  font-size: 12px;
-  line-height: 1;
-  flex-shrink: 0;
-  color: var(--color-text-muted);
-}
-
-.auto-select {
-  flex: 1;
-  font-family: var(--font);
-  font-size: 11px;
-  font-weight: 500;
-  color: var(--color-text);
-  background: var(--color-bg);
-  border: 1.5px solid var(--color-border);
-  border-radius: var(--radius-sm);
-  padding: 4px 6px;
-  outline: none;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  background: none;
+  border: none;
+  padding: 0;
   cursor: pointer;
-  transition: border-color var(--transition);
-  -webkit-appearance: auto;
+  color: var(--color-text-subtle);
+  border-radius: 50%;
+  transition: color var(--transition), background-color var(--transition);
+  flex-shrink: 0;
+  outline: none;
 }
 
-.auto-select:focus {
-  border-color: var(--color-accent);
+.auto-help-btn:hover {
+  color: var(--color-accent);
+  background-color: rgba(74, 111, 165, 0.08);
+}
+
+.auto-help-btn:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 1px;
+}
+
+/* Help tooltip */
+.auto-help-tooltip {
+  font-size: 11px;
+  line-height: 1.5;
+  color: var(--color-text-muted);
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: 7px 9px;
+  max-width: 240px;
+  box-shadow: var(--shadow-md);
+  margin-top: 2px;
 }
 
 /* ─── Theme Section (groups + grid) ─────────────────────────────────────── */
@@ -242,7 +244,7 @@ body {
 
 .themes-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
+  grid-template-columns: 1fr 1fr;
   gap: 7px;
 }
 
@@ -367,12 +369,7 @@ body {
   transform: scale(1);
 }
 
-/* Auto mode active: dim theme cards */
-.themes-section.auto-active .theme-card {
-  opacity: 0.45;
-  pointer-events: none;
-  cursor: default;
-}
+/* Theme cards remain fully interactive when auto-mode is on */
 
 /* ─── Per-Org Row ────────────────────────────────────────────────────────── */
 

@@ -115,7 +115,7 @@
 
     if (syncData.autoMode) {
       const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-      return isDark ? (syncData.darkTheme || 'midnight') : (syncData.lightTheme || 'connectry');
+      return isDark ? (syncData.lastDarkTheme || 'connectry-dark') : (syncData.lastLightTheme || 'connectry');
     }
 
     return syncData.theme || 'connectry';
@@ -129,8 +129,8 @@
     mediaQuery.addEventListener('change', async () => {
       const result = await chrome.storage.sync.get({
         autoMode: false,
-        lightTheme: 'connectry',
-        darkTheme: 'midnight',
+        lastLightTheme: 'connectry',
+        lastDarkTheme: 'connectry-dark',
         orgThemes: {},
       });
 
@@ -141,7 +141,7 @@
       if (result.orgThemes[hostname]) return;
 
       const isDark = mediaQuery.matches;
-      const next = isDark ? result.darkTheme : result.lightTheme;
+      const next = isDark ? result.lastDarkTheme : result.lastLightTheme;
       await applyTheme(next, true);
     });
   }
@@ -212,8 +212,8 @@
       const syncResult = await chrome.storage.sync.get({
         theme: 'connectry',
         autoMode: false,
-        lightTheme: 'connectry',
-        darkTheme: 'midnight',
+        lastLightTheme: 'connectry',
+        lastDarkTheme: 'connectry-dark',
         orgThemes: {},
       });
 
@@ -243,7 +243,7 @@
 
   function preInit() {
     chrome.storage.sync.get(
-      { theme: 'connectry', autoMode: false, lightTheme: 'connectry', darkTheme: 'midnight', orgThemes: {} },
+      { theme: 'connectry', autoMode: false, lastLightTheme: 'connectry', lastDarkTheme: 'connectry-dark', orgThemes: {} },
       (syncData) => {
         if (chrome.runtime.lastError) return;
 
@@ -255,7 +255,7 @@
           themeName = orgThemes[hostname];
         } else if (syncData.autoMode) {
           const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-          themeName = isDark ? (syncData.darkTheme || 'midnight') : (syncData.lightTheme || 'connectry');
+          themeName = isDark ? (syncData.lastDarkTheme || 'connectry-dark') : (syncData.lastLightTheme || 'connectry');
         } else {
           themeName = syncData.theme || 'connectry';
         }

@@ -1,7 +1,7 @@
-const THEME_ORDER = ['connectry', 'midnight', 'slate', 'tron', 'obsidian', 'arctic'];
+const THEME_ORDER = ['connectry', 'connectry-dark', 'midnight', 'slate', 'tron', 'obsidian', 'arctic'];
 
 const LIGHT_THEMES = new Set(['connectry', 'slate', 'arctic']);
-const DARK_THEMES = new Set(['midnight', 'tron', 'obsidian']);
+const DARK_THEMES = new Set(['connectry-dark', 'midnight', 'tron', 'obsidian']);
 
 // Fetch and cache a theme's CSS text into chrome.storage.local
 async function cacheThemeCSS(themeName) {
@@ -23,10 +23,8 @@ chrome.runtime.onInstalled.addListener(async (details) => {
     await chrome.storage.sync.set({
       theme: 'connectry',
       autoMode: false,
-      lightTheme: 'connectry',
-      darkTheme: 'midnight',
       lastLightTheme: 'connectry',
-      lastDarkTheme: 'midnight',
+      lastDarkTheme: 'connectry-dark',
       orgThemes: {},
     });
   }
@@ -59,7 +57,7 @@ chrome.commands.onCommand.addListener(async (command) => {
     const result = await chrome.storage.sync.get({
       theme: 'connectry',
       lastLightTheme: 'connectry',
-      lastDarkTheme: 'midnight',
+      lastDarkTheme: 'connectry-dark',
       autoMode: false,
     });
     if (result.autoMode) return;
@@ -76,17 +74,9 @@ chrome.commands.onCommand.addListener(async (command) => {
 });
 
 async function applyAndSaveTheme(themeName) {
-  const result = await chrome.storage.sync.get({
-    lastLightTheme: 'connectry',
-    lastDarkTheme: 'midnight',
-  });
-
   const updates = { theme: themeName };
-  if (LIGHT_THEMES.has(themeName)) {
-    updates.lastLightTheme = themeName;
-  } else if (DARK_THEMES.has(themeName)) {
-    updates.lastDarkTheme = themeName;
-  }
+  if (LIGHT_THEMES.has(themeName)) updates.lastLightTheme = themeName;
+  else if (DARK_THEMES.has(themeName)) updates.lastDarkTheme = themeName;
   await chrome.storage.sync.set(updates);
   await cacheThemeCSS(themeName);
   await broadcastThemeToActiveTabs(themeName);

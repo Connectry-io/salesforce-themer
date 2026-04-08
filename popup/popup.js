@@ -1,9 +1,9 @@
 (() => {
   'use strict';
 
-  const THEMES = ['connectry', 'midnight', 'slate', 'tron', 'obsidian', 'arctic', 'none'];
+  const THEMES = ['connectry', 'connectry-dark', 'midnight', 'slate', 'tron', 'obsidian', 'arctic', 'none'];
   const LIGHT_THEMES = ['connectry', 'slate', 'arctic'];
-  const DARK_THEMES = ['midnight', 'tron', 'obsidian'];
+  const DARK_THEMES = ['connectry-dark', 'midnight', 'tron', 'obsidian'];
 
   let currentOrgHostname = null;
   let syncState = {};
@@ -18,19 +18,10 @@
     });
   }
 
-  function setAutoModeUI(autoMode, lightTheme, darkTheme) {
+  function setAutoModeUI(autoMode) {
     const toggle = document.getElementById('autoModeToggle');
-    const selectors = document.getElementById('autoModeSelectors');
-    const section = document.querySelector('.themes-section');
-    const lightSelect = document.getElementById('lightThemeSelect');
-    const darkSelect = document.getElementById('darkThemeSelect');
-
     toggle.checked = autoMode;
-    selectors.hidden = !autoMode;
-    section?.classList.toggle('auto-active', autoMode);
-
-    lightSelect.value = lightTheme || 'connectry';
-    darkSelect.value = darkTheme || 'midnight';
+    // No dropdowns to manage — tooltip state is independent
   }
 
   function updateOrgRow(orgThemes, activeTheme) {
@@ -71,7 +62,7 @@
 
     const updates = { theme };
 
-    // Track last used light/dark for keyboard shortcut toggle
+    // Always track last used light/dark — used by auto-mode and keyboard shortcuts
     if (LIGHT_THEMES.includes(theme)) updates.lastLightTheme = theme;
     if (DARK_THEMES.includes(theme)) updates.lastDarkTheme = theme;
 
@@ -108,50 +99,19 @@
     const toggle = document.getElementById('autoModeToggle');
     const autoMode = toggle.checked;
 
-    const updates = { autoMode };
-    await chrome.storage.sync.set(updates);
-    syncState = { ...syncState, ...updates };
+    await chrome.storage.sync.set({ autoMode });
+    syncState = { ...syncState, autoMode };
 
-    setAutoModeUI(
-      autoMode,
-      syncState.lightTheme || 'connectry',
-      syncState.darkTheme || 'midnight'
-    );
+    setAutoModeUI(autoMode);
 
     if (autoMode) {
       // Apply the appropriate theme immediately based on current OS mode
       const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
       const theme = isDark
-        ? (syncState.darkTheme || 'midnight')
-        : (syncState.lightTheme || 'connectry');
+        ? (syncState.lastDarkTheme || 'connectry-dark')
+        : (syncState.lastLightTheme || 'connectry');
       setActiveUI(theme);
       await applyThemeToTab(theme);
-    }
-  }
-
-  async function handleLightThemeChange() {
-    const select = document.getElementById('lightThemeSelect');
-    const lightTheme = select.value;
-    await chrome.storage.sync.set({ lightTheme });
-    syncState.lightTheme = lightTheme;
-
-    const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    if (!isDark) {
-      setActiveUI(lightTheme);
-      await applyThemeToTab(lightTheme);
-    }
-  }
-
-  async function handleDarkThemeChange() {
-    const select = document.getElementById('darkThemeSelect');
-    const darkTheme = select.value;
-    await chrome.storage.sync.set({ darkTheme });
-    syncState.darkTheme = darkTheme;
-
-    const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    if (isDark) {
-      setActiveUI(darkTheme);
-      await applyThemeToTab(darkTheme);
     }
   }
 
@@ -191,8 +151,20 @@
     });
 
     document.getElementById('autoModeToggle')?.addEventListener('change', handleAutoModeToggle);
-    document.getElementById('lightThemeSelect')?.addEventListener('change', handleLightThemeChange);
-    document.getElementById('darkThemeSelect')?.addEventListener('change', handleDarkThemeChange);
+
+    // Help tooltip toggle
+    const helpBtn = document.getElementById('autoHelpBtn');
+    const tooltip = document.getElementById('autoHelpTooltip');
+    helpBtn?.addEventListener('click', () => {
+      tooltip.hidden = !tooltip.hidden;
+    });
+
+    // Close tooltip when clicking outside the auto-mode bar
+    document.addEventListener('click', (e) => {
+      if (!e.target.closest('#autoModeBar')) {
+        if (tooltip) tooltip.hidden = true;
+      }
+    });
   }
 
   // ─── Detect current tab's org hostname ───────────────────────────────────
@@ -222,10 +194,8 @@
       chrome.storage.sync.get({
         theme: 'connectry',
         autoMode: false,
-        lightTheme: 'connectry',
-        darkTheme: 'midnight',
         lastLightTheme: 'connectry',
-        lastDarkTheme: 'midnight',
+        lastDarkTheme: 'connectry-dark',
         orgThemes: {},
       }),
       detectCurrentOrg(),
@@ -240,11 +210,13 @@
       effectiveTheme = result.orgThemes[orgHostname];
     } else if (result.autoMode) {
       const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-      effectiveTheme = isDark ? result.darkTheme : result.lightTheme;
+      effectiveTheme = isDark
+        ? (result.lastDarkTheme || 'connectry-dark')
+        : (result.lastLightTheme || 'connectry');
     }
 
     setActiveUI(effectiveTheme);
-    setAutoModeUI(result.autoMode, result.lightTheme, result.darkTheme);
+    setAutoModeUI(result.autoMode);
 
     if (orgHostname) {
       updateOrgRow(result.orgThemes, effectiveTheme);
