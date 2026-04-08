@@ -107,6 +107,29 @@ body,
   color: #2d2d2d !important;
 }
 
+/* Search box — keep themed */
+.slds-global-header .slds-input,
+.slds-global-header input[type="search"],
+.forceSearchDesktopHeader input,
+.slds-global-header .slds-form-element__control input {
+  background-color: #0d1117 !important;
+  color: #e0f7fa !important;
+  border-color: rgba(0, 229, 255, 0.25) !important;
+  border-radius: 6px !important;
+  box-shadow: 0 0 6px rgba(0, 229, 255, 0.08) !important;
+}
+
+.slds-global-header .slds-input::placeholder,
+.slds-global-header input::placeholder {
+  color: #4dd0e1 !important;
+}
+
+.slds-global-header .slds-input:focus,
+.slds-global-header input:focus {
+  border-color: #00e5ff !important;
+  box-shadow: 0 0 0 2px rgba(0, 229, 255, 0.3), 0 0 12px rgba(0, 229, 255, 0.15) !important;
+}
+
 /* ─── Navigation (app bar below header) ──────────────────────────────────── */
 
 .oneGlobalNav,
