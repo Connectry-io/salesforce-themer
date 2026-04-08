@@ -542,64 +542,154 @@ the engine's calculations. This is critical.
 
 ## V3 AI Integration Points
 
-### GenAI prompt → 23 values
+### Key design decision: AI generates ALL 81 values, not just 23
+
+Manual editing uses 23 core values + derivation engine for the rest.
+But AI/URL/brand inputs have enough context to make artistic choices
+for ALL values — things like neon active borders, custom glow effects,
+accent-specific hover states that generic `darken(accent, 15%)` can't match.
+
+```
+Manual pickers  →  23 core values  →  derivation fills remaining ~58
+                                      (generic math, good starting point)
+
+AI / URL / Brand  →  all 81 values directly from Claude
+                     (artistic choices, theme personality)
+                                ↓
+                     Derivation fills any gaps (if AI returns < 81)
+                                ↓
+                     Same editor UI — user can override anything
+```
+
+The derivation engine is the **fallback**, not the primary generator for
+AI themes. If Claude returns 60 values, derivation fills the other 21.
+If it returns all 81, derivation does nothing.
+
+### GenAI prompt → up to 81 values
 ```
 POST /api/theme/generate
 {
   "method": "prompt",
   "input": "make it feel like Notion — clean, minimal, warm"
 }
-→ { "colorScheme": "light", "background": "#ffffff", "accent": "#2F3437", ... }
+→ { "colorScheme": "light", "background": "#ffffff", "accent": "#2F3437",
+     "navActiveBorder": "#EB5757", "accentHover": "#37352F", ... (all 81) }
 ```
 
-### URL extraction → 23 values
+### URL extraction → up to 81 values
 ```
 POST /api/theme/generate
 {
   "method": "url",
   "input": "https://stripe.com"
 }
-→ server fetches page, extracts dominant colors, maps to 23 values
-→ { "colorScheme": "dark", "accent": "#635BFF", "nav": "#0A2540", ... }
+→ server fetches page, extracts dominant colors
+→ Claude maps extracted palette to all 81 values with brand-aware choices
+→ { "colorScheme": "dark", "accent": "#635BFF", "nav": "#0A2540",
+     "navActiveBorder": "#635BFF", "buttonBrandText": "#ffffff", ... }
 ```
 
-### Brand guide upload → 23 values
+### Brand guide upload → up to 81 values
 ```
 POST /api/theme/generate
 {
   "method": "brand-guide",
   "input": "<base64 PDF or image>"
 }
-→ Claude Vision extracts brand colors → maps to 23 values
-→ { "accent": "#FF5A1F", "nav": "#1B1B1B", ... }
+→ Claude Vision extracts brand colors, typography mood, design principles
+→ Maps to all 81 values with brand-faithful choices
+→ { "accent": "#FF5A1F", "nav": "#1B1B1B", "navActiveBorder": "#FF5A1F", ... }
 ```
 
-### Brand API lookup → 23 values
+### Brand API lookup → up to 81 values
 ```
 POST /api/theme/generate
 {
   "method": "brand-lookup",
   "input": "Stripe"
 }
-→ Brandfetch API → brand colors → map to 23 values
+→ Brandfetch API → brand colors → Claude enriches to full 81 values
 ```
 
-All four return the same shape. The editor pre-fills and the user refines.
+### Resolution for AI-generated themes
+
+```
+1. AI returns N values (target: all 81, minimum: 23 core)
+2. Split into core (23) + advanced (rest)
+3. Derivation engine fills any gaps (81 - N remaining keys)
+4. All values load into the editor UI
+5. User refines any value they want
+6. Stored as coreOverrides + advancedOverrides (same as manual themes)
+```
+
+### AI prompt template (for Claude)
+
+The API proxy sends this structured prompt:
+
+```
+You are generating a Salesforce Lightning theme. Return a JSON object with
+color values for a complete theme.
+
+The theme should: {user_prompt}
+
+Return ALL of these keys with valid CSS color values:
+
+CORE (23 keys — these define the identity):
+  colorScheme, background, surface, surfaceAlt, accent, link,
+  nav, navText, textPrimary, textSecondary, textPlaceholder,
+  border, borderInput, buttonBrandText, buttonNeutralBg,
+  tableHeaderBg, modalBg, dropdownBg, success, warning, error,
+  focusRing, scrollThumb
+
+ADVANCED (58 keys — these add personality):
+  surfaceHover, surfaceHighlight, surfaceSelection,
+  accentHover, accentActive, accentLight,
+  textMuted,
+  navHover, navActive, navActiveBorder, navBorder, navIcon,
+  navActiveText, navAppName, navAppBorder, navWaffleDot,
+  linkHover, borderSeparator,
+  buttonBrandBg, buttonBrandBorder, buttonBrandHover,
+  buttonNeutralBorder, buttonNeutralHover, buttonNeutralText,
+  tableHeaderText, tableAltRow, tableHoverRow, tableBorderRow, tableColBorder,
+  modalHeaderBg, modalFooterBg, modalBackdrop, modalShadow,
+  dropdownItemHoverBg, dropdownItemHoverText,
+  tabNavBorder, tabActiveColor, tabActiveBorder, tabInactiveColor, tabContentBg,
+  scrollTrack, scrollThumbHover,
+  badgeBg, badgeText, badgeBorder, pillBg, pillBorder, pillText,
+  panelBg, panelBorder,
+  searchBg, searchText, searchBorder, searchPlaceholder,
+  searchFocusBorder, searchFocusShadow,
+  globalHeaderWhite
+
+Requirements:
+- All hex values must be valid 6-digit hex (#RRGGBB)
+- Text colors must have WCAG AA contrast against their backgrounds
+- Dark themes: colorScheme "dark", light text on dark backgrounds
+- Light themes: colorScheme "light", dark text on light backgrounds
+- Make artistic choices — don't just darken/lighten mechanically
+- navActiveBorder and navActiveText can use accent for personality
+- Maintain visual hierarchy: primary > secondary > muted > placeholder
+```
+
+This prompt gives Claude the full schema and freedom to make artistic
+choices, while the derivation engine catches anything it misses.
 
 ---
 
 ## Implementation Phases
 
-### Phase 1: Derivation engine (current sprint)
-- [ ] Color utility functions (lighten, darken, alpha, contrast, mix)
-- [ ] `deriveFullTheme(coreValues)` function
-- [ ] Validate: derive Connectry Light from its 23 core values → compare to hand-tuned
-- [ ] Validate: derive all 15 OOTB themes → measure delta
+### Phase 1: Derivation engine — DONE
+- [x] Color utility functions (themes/color-utils.js)
+- [x] `deriveFullTheme()` — 23 core → 81 keys (themes/derive.js)
+- [x] `resolveCustomTheme()` — base → core overrides → derive → advanced overrides
+- [x] `extractCoreValues()` — pull 23 core from any full theme
+- [x] Validated against all 15 OOTB themes (80-86% for standard, lower for stylized)
+- [x] Integrated into background.js (cacheCustomThemeCSS pipeline)
 
 ### Phase 2: Custom theme storage
 - [ ] `customThemes` in chrome.storage.sync schema
-- [ ] Runtime resolution: base → core overrides → derive → advanced overrides
 - [ ] Custom themes appear in popup + options gallery
+- [ ] Delete / duplicate custom theme
 
 ### Phase 3: Editor UI
 - [ ] 23 color pickers with grouped layout
@@ -608,11 +698,12 @@ All four return the same shape. The editor pre-fills and the user refines.
 - [ ] Save / Reset / Rename / Delete
 - [ ] Export JSON / Import JSON
 
-### Phase 4: AI generation (V3)
+### Phase 4: AI generation (V3 — premium)
 - [ ] Connectry API proxy endpoint
-- [ ] GenAI prompt → 23 values
-- [ ] URL extraction → 23 values
-- [ ] Brand guide upload → 23 values
+- [ ] GenAI prompt → all 81 values (derivation fills gaps)
+- [ ] URL brand extraction → all 81 values
+- [ ] Brand guide upload (PDF/image) → Claude Vision → all 81 values
+- [ ] Brand API lookup (Brandfetch) → all 81 values
 - [ ] "Generate" button in editor UI
 - [ ] Usage cap: 5-10 generations/month free, unlimited premium
 
