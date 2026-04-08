@@ -261,8 +261,8 @@ one-app-nav-bar,
 .slds-card__footer,
 .forceRecordCard {
   background-color: ${c.surface} !important;
-  border: none !important;
-  box-shadow: ${isDark ? 'none' : '0 1px 4px rgba(0, 0, 0, 0.06)'} !important;${isDark ? `
+  border-color: ${c.border} !important;
+  box-shadow: ${isDark ? '0 1px 4px rgba(0, 0, 0, 0.2)' : '0 1px 4px rgba(0, 0, 0, 0.06)'} !important;${isDark ? `
   color: ${c.textPrimary} !important;` : ''}${fx ? `
   box-shadow: 0 0 20px rgba(${hexToRgb(c.accent)}, 0.06), inset 0 0 40px rgba(0, 0, 0, 0.2) !important;` : ''}
 }
@@ -274,7 +274,7 @@ ${fx ? `
 
 .slds-card__header {
   background-color: ${c.surface} !important;
-  border: none !important;
+  border-color: ${c.border} !important;
   border-bottom: 1px solid ${isDark ? 'rgba(255,255,255,0.06)' : c.border} !important;
 }
 
@@ -587,8 +587,8 @@ a:hover {
 .forceHighlightsLayout {
   background-color: ${c.background} !important;
   color: ${c.textPrimary} !important;
-  border: none !important;
-  box-shadow: none !important;
+  border-color: ${c.border} !important;
+  box-shadow: ${isDark ? '0 1px 3px rgba(0, 0, 0, 0.15)' : '0 1px 3px rgba(0, 0, 0, 0.06)'} !important;
 }
 
 /* Record page full body background */
@@ -601,6 +601,7 @@ a:hover {
 
 /* ─── Path / Stage Path ─────────────────────────────────────────────────── */
 
+/* Path structural containers — recolor, keep structure */
 .slds-path,
 .slds-path__scroller,
 .slds-path__track,
@@ -624,28 +625,17 @@ records-lwc-highlights-panel,
 [class*="PathAssistant"],
 [class*="salesPath"],
 [class*="SalesPath"] {
-  background-color: transparent !important;
-  background: transparent !important;
-  border: none !important;
-  box-shadow: none !important;
-  outline: none !important;
-  border-radius: 0 !important;
+  background-color: ${c.surface} !important;
+  color: ${c.textPrimary} !important;
 }
 
-/* Path links and items — remove inner backgrounds */
-.slds-path__link,
-.tabHeader.slds-path__link {
-  background: transparent !important;
-}
-
-/* The path scroller inner wrapper */
+/* Path scroller inner wrapper */
 .slds-path__scroller .scroller,
 .slds-path__scroller .slds-path__scroller_inner {
-  background: transparent !important;
-  border: none !important;
+  background-color: ${c.surface} !important;
 }
 
-/* The slds-card wrapping the path — boosted specificity to beat SF */
+/* The slds-card wrapping the path — recolor, keep structure */
 body .pathOriginal .slds-card,
 body .pathOriginal .slds-card__body,
 body .pathOriginal .slds-card__body_inner,
@@ -656,12 +646,9 @@ body .runtime_sales_pathassistantPathAssistant > article,
 body .forcePathAssistant .slds-card,
 body .forcePathAssistant .slds-card__body,
 body .forcePathAssistant .slds-card__body_inner {
-  border: none !important;
-  box-shadow: none !important;
-  background: transparent !important;
-  background-color: transparent !important;
-  border-radius: 0 !important;
-  padding: 0 !important;
+  background-color: ${c.surface} !important;
+  border-color: ${c.border} !important;
+  box-shadow: ${isDark ? '0 1px 4px rgba(0, 0, 0, 0.2)' : '0 1px 4px rgba(0, 0, 0, 0.06)'} !important;
 }
 
 /* Path items — boosted specificity with body prefix */
@@ -669,28 +656,24 @@ body .slds-path__item,
 body .slds-path__item .slds-path__link,
 body .slds-path__item a.slds-path__link {
   background-color: ${c.surfaceAlt} !important;
-  background: ${c.surfaceAlt} !important;
 }
 
 body .slds-path__item.slds-is-complete,
 body .slds-path__item.slds-is-complete .slds-path__link,
 body .slds-path__item.slds-is-complete a.slds-path__link {
   background-color: ${c.accent} !important;
-  background: ${c.accent} !important;
 }
 
 body .slds-path__item.slds-is-current,
 body .slds-path__item.slds-is-current .slds-path__link,
 body .slds-path__item.slds-is-current a.slds-path__link {
   background-color: ${c.accent} !important;
-  background: ${c.accent} !important;
 }
 
 body .slds-path__item.slds-is-incomplete,
 body .slds-path__item.slds-is-incomplete .slds-path__link,
 body .slds-path__item.slds-is-incomplete a.slds-path__link {
   background-color: ${c.surfaceAlt} !important;
-  background: ${c.surfaceAlt} !important;
 }
 
 /* Path chevrons — the arrow shapes between steps */
@@ -769,13 +752,13 @@ body .slds-path__item.slds-is-incomplete a.slds-path__link {
 .forceRelatedListSingleContainer,
 .slds-card.forceRelatedListCardDesktop {
   background-color: ${c.surface} !important;
-  border: none !important;
-  box-shadow: none !important;
+  border-color: ${c.border} !important;
+  box-shadow: ${isDark ? '0 1px 4px rgba(0, 0, 0, 0.2)' : '0 1px 4px rgba(0, 0, 0, 0.06)'} !important;
 }
 
-/* Individual related list items can have subtle borders */
+/* Individual related list items */
 .forceRelatedListCardDesktop .slds-card__body {
-  border: none !important;
+  border-color: ${c.border} !important;
 }
 
 /* ─── Profile Icon / Global Actions (top right) ─────────────────────────── */
@@ -835,7 +818,7 @@ function hexToRgb(hex) {
 
 // Export for use in background.js (service worker context — no ES modules)
 if (typeof module !== 'undefined') {
-  module.exports = { generateThemeCSS, hexToRgb };
+
 }
 
 

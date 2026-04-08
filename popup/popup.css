@@ -238,6 +238,10 @@ body {
 }
 
 /* Help tooltip — floating overlay, does NOT expand the card */
+.auto-help-tooltip[hidden] {
+  display: none !important;
+}
+
 .auto-help-tooltip {
   position: absolute;
   top: 100%;
@@ -264,6 +268,10 @@ body {
   font-size: 11px;
   color: var(--color-text-muted);
   padding-top: 4px;
+}
+
+.auto-mode-status[hidden] {
+  display: none !important;
 }
 
 .auto-status-item {
