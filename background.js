@@ -503,12 +503,6 @@ ${fx ? `
 
 /* ─── Record Detail ──────────────────────────────────────────────────────── */
 
-.forcePageBlockSectionRow,
-.slds-form-element,
-.slds-form__row {
-  border-bottom: 1px solid ${isDark ? c.tableBorderRow : c.surfaceHover} !important;
-}
-
 .forceOutputField,
 .slds-form-element__static {
   color: ${c.textPrimary} !important;
@@ -606,14 +600,12 @@ a:hover {
 .slds-path__scroller,
 .slds-path__track,
 .slds-path__wrap,
-.slds-path__action,
 .slds-path__coach,
 .slds-path__nav,
 .slds-path__scroller-container,
 .slds-path__scroller_inner,
 .slds-path__scroll-controls,
 .slds-grid.slds-path__track,
-.slds-grid.slds-path__action,
 .pathAssistantContainer,
 .forcePathAssistant,
 lightning-sales-path,
@@ -676,18 +668,19 @@ body .slds-path__item.slds-is-incomplete a.slds-path__link {
   background-color: ${c.surfaceAlt} !important;
 }
 
-/* Path chevrons — the arrow shapes between steps */
-.slds-path__item::before,
+/* Path chevrons — ::before = notch (background color), ::after = arrow (item color) */
+.slds-path__item::before {
+  border-color: transparent transparent transparent ${c.surface} !important;
+}
+
 .slds-path__item::after {
   border-color: transparent transparent transparent ${c.surfaceAlt} !important;
 }
 
-.slds-path__item.slds-is-complete::before,
 .slds-path__item.slds-is-complete::after {
   border-color: transparent transparent transparent ${c.accent} !important;
 }
 
-.slds-path__item.slds-is-current::before,
 .slds-path__item.slds-is-current::after {
   border-color: transparent transparent transparent ${c.accent} !important;
 }
@@ -698,7 +691,7 @@ body .slds-path__item.slds-is-incomplete a.slds-path__link {
   background-color: ${c.surfaceHover} !important;
 }
 
-.slds-path__item:hover::before,
+/* Hover: only ::after arrow changes color, ::before notch stays background */
 .slds-path__item:hover::after {
   border-color: transparent transparent transparent ${c.surfaceHover} !important;
 }
@@ -710,9 +703,7 @@ body .slds-path__item.slds-is-incomplete a.slds-path__link {
   background-color: ${c.accentHover} !important;
 }
 
-.slds-path__item.slds-is-complete:hover::before,
 .slds-path__item.slds-is-complete:hover::after,
-.slds-path__item.slds-is-current:hover::before,
 .slds-path__item.slds-is-current:hover::after {
   border-color: transparent transparent transparent ${c.accentHover} !important;
 }
@@ -726,7 +717,7 @@ body .slds-path__item.slds-is-incomplete a.slds-path__link {
   color: ${c.buttonBrandText} !important;
 }
 
-.slds-path__item.slds-is-active::before,
+/* Active: only ::after arrow is accent, ::before notch stays background */
 .slds-path__item.slds-is-active::after {
   border-color: transparent transparent transparent ${c.accent} !important;
 }
@@ -748,17 +739,10 @@ body .slds-path__item.slds-is-incomplete a.slds-path__link {
 
 /* ─── Related List Cards (right sidebar) ─────────────────────────────────── */
 
+/* Related list containers — background only, cards handle their own borders */
 .forceRelatedListContainer,
-.forceRelatedListSingleContainer,
-.slds-card.forceRelatedListCardDesktop {
-  background-color: ${c.surface} !important;
-  border-color: ${c.border} !important;
-  box-shadow: ${isDark ? '0 1px 4px rgba(0, 0, 0, 0.2)' : '0 1px 4px rgba(0, 0, 0, 0.06)'} !important;
-}
-
-/* Individual related list items */
-.forceRelatedListCardDesktop .slds-card__body {
-  border-color: ${c.border} !important;
+.forceRelatedListSingleContainer {
+  background-color: ${c.background} !important;
 }
 
 /* ─── Profile Icon / Global Actions (top right) ─────────────────────────── */
@@ -818,9 +802,6 @@ function hexToRgb(hex) {
 
 // Export for use in background.js (service worker context — no ES modules)
 if (typeof module !== 'undefined') {
-
-}
-
 
 // ─── Theme registry ──────────────────────────────────────────────────────────
 
