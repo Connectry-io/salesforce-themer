@@ -1,0 +1,414 @@
+/*
+ * Salesforce Themer by Connectry — Midnight Theme
+ * Deep navy/charcoal dark mode. Not pure black — rich, layered depth.
+ * Think Linear, Vercel, modern dark UI done right.
+ */
+
+/* ─── CSS Custom Properties ─────────────────────────────────────────────── */
+
+:root {
+  /* Legacy LWC tokens */
+  --lwc-colorBackground: #0f1219 !important;
+  --lwc-colorBackgroundAlt: #1a1f2e !important;
+  --lwc-colorBackgroundRow: #1a1f2e !important;
+  --lwc-colorBackgroundRowHover: #222836 !important;
+  --lwc-colorBackgroundHighlight: #1e2d45 !important;
+  --lwc-colorBackgroundSelection: #1e2d45 !important;
+  --lwc-colorBackgroundButtonBrand: #60a5fa !important;
+  --lwc-colorBackgroundButtonBrandHover: #3b82f6 !important;
+  --lwc-colorBackgroundButtonBrandActive: #2563eb !important;
+  --lwc-colorBackgroundButtonDefault: #222836 !important;
+  --lwc-colorBackgroundButtonDefaultHover: #2d3548 !important;
+  --lwc-headerColorBackground: #151b2b !important;
+  --lwc-pageColorBackground: #0f1219 !important;
+  --lwc-colorTextDefault: #e2e8f0 !important;
+  --lwc-colorTextWeak: #94a3b8 !important;
+  --lwc-colorTextLabel: #94a3b8 !important;
+  --lwc-colorTextPlaceholder: #4a5568 !important;
+  --lwc-colorTextButtonBrand: #0f1219 !important;
+  --lwc-colorTextLink: #60a5fa !important;
+  --lwc-colorTextLinkHover: #93c5fd !important;
+  --lwc-colorBorder: #2d3548 !important;
+  --lwc-colorBorderSeparator: #232b3e !important;
+  --lwc-colorBorderInput: #3a4558 !important;
+  --lwc-colorBorderInputActive: #60a5fa !important;
+  --lwc-brandPrimary: #60a5fa !important;
+  --lwc-brandPrimaryActive: #3b82f6 !important;
+  --lwc-brandPrimaryTransparent: rgba(96, 165, 250, 0.15) !important;
+  --lwc-brandAccessible: #60a5fa !important;
+  --lwc-brandAccessibleActive: #3b82f6 !important;
+  --lwc-colorBackgroundSpin: #60a5fa !important;
+  --lwc-shadowOutlineFocus: 0 0 0 3px rgba(96, 165, 250, 0.3) !important;
+
+  /* SLDS 2 global tokens */
+  --slds-g-color-surface-1: #0f1219 !important;
+  --slds-g-color-surface-2: #1a1f2e !important;
+  --slds-g-color-surface-3: #222836 !important;
+  --slds-g-color-surface-4: #2d3548 !important;
+  --slds-g-color-on-surface-1: #e2e8f0 !important;
+  --slds-g-color-on-surface-2: #94a3b8 !important;
+  --slds-g-color-on-surface-3: #64748b !important;
+  --slds-g-color-border-1: #2d3548 !important;
+  --slds-g-color-border-2: #3a4558 !important;
+  --slds-g-color-brand-1: #60a5fa !important;
+  --slds-g-color-brand-2: #3b82f6 !important;
+  --slds-g-color-brand-3: #2563eb !important;
+  --slds-g-color-neutral-1: #0f1219 !important;
+  --slds-g-color-neutral-2: #1a1f2e !important;
+  --slds-g-color-neutral-3: #2d3548 !important;
+
+  /* Component hooks */
+  --slds-c-card-color-background: #1a1f2e !important;
+  --slds-c-card-color-border: #2d3548 !important;
+  --slds-c-input-color-background: #0f1219 !important;
+  --slds-c-input-color-border: #3a4558 !important;
+  --slds-c-input-color-border-focus: #60a5fa !important;
+  --slds-c-button-brand-color-background: #60a5fa !important;
+  --slds-c-button-brand-color-border: #60a5fa !important;
+  --slds-c-button-brand-color-background-hover: #3b82f6 !important;
+  --slds-c-button-neutral-color-background: #222836 !important;
+  --slds-c-button-neutral-color-border: #3a4558 !important;
+
+  color-scheme: dark;
+}
+
+/* ─── Base ───────────────────────────────────────────────────────────────── */
+
+html,
+body,
+.desktop {
+  background-color: #0f1219 !important;
+  color: #e2e8f0 !important;
+}
+
+/* ─── Navigation ─────────────────────────────────────────────────────────── */
+
+.oneGlobalNav,
+one-app-nav-bar,
+.navexConsoleTabBar,
+[class*="globalNavigation"],
+.slds-context-bar {
+  background-color: #151b2b !important;
+  border-bottom: 1px solid #2d3548 !important;
+}
+
+.slds-context-bar__item,
+.navexConsoleTabItem,
+.oneConsoleTabItem {
+  color: #e2e8f0 !important;
+}
+
+.slds-context-bar__item:hover,
+.navexConsoleTabItem:hover {
+  background-color: rgba(255, 255, 255, 0.06) !important;
+}
+
+.slds-context-bar__item.slds-is-active,
+.navexConsoleTabItem.active {
+  background-color: rgba(96, 165, 250, 0.12) !important;
+  border-bottom: 3px solid #60a5fa !important;
+}
+
+.slds-context-bar__label-action,
+.slds-context-bar__icon-action,
+.slds-context-bar .slds-icon {
+  color: #e2e8f0 !important;
+  fill: #e2e8f0 !important;
+}
+
+.slds-context-bar__app-name,
+.appLauncherButton {
+  color: #e2e8f0 !important;
+  border-right: 1px solid #2d3548 !important;
+}
+
+/* ─── Main Content ───────────────────────────────────────────────────────── */
+
+.oneContent,
+.oneWorkspace,
+.flexipageBody,
+.onesetupSetupLayout,
+.setupcontent {
+  background-color: #0f1219 !important;
+}
+
+/* ─── Page Headers ───────────────────────────────────────────────────────── */
+
+.slds-page-header,
+.forceListViewManager .listViewManager,
+[class*="pageHeader"] {
+  background-color: #1a1f2e !important;
+  border-bottom: 1px solid #2d3548 !important;
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.04) !important;
+}
+
+.slds-page-header__title,
+.slds-page-header__name-title {
+  color: #e2e8f0 !important;
+}
+
+.slds-page-header__meta-text {
+  color: #94a3b8 !important;
+}
+
+/* ─── Cards ──────────────────────────────────────────────────────────────── */
+
+.slds-card,
+.slds-card__header,
+.slds-card__body,
+.slds-card__footer,
+.forceRecordCard,
+[class*="Card"] {
+  background-color: #1a1f2e !important;
+  border: 1px solid #2d3548 !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4) !important;
+  color: #e2e8f0 !important;
+}
+
+.slds-card__header {
+  border-bottom: 1px solid #2d3548 !important;
+}
+
+/* ─── Buttons ────────────────────────────────────────────────────────────── */
+
+.slds-button_brand,
+.slds-button--brand {
+  background-color: #60a5fa !important;
+  border-color: #60a5fa !important;
+  color: #0f1219 !important;
+}
+
+.slds-button_brand:hover,
+.slds-button--brand:hover {
+  background-color: #3b82f6 !important;
+  border-color: #3b82f6 !important;
+}
+
+.slds-button_neutral,
+.slds-button--neutral {
+  background-color: #222836 !important;
+  border-color: #3a4558 !important;
+  color: #e2e8f0 !important;
+}
+
+.slds-button_neutral:hover,
+.slds-button--neutral:hover {
+  background-color: #2d3548 !important;
+}
+
+/* ─── Form Elements ──────────────────────────────────────────────────────── */
+
+.slds-input,
+.slds-textarea,
+.slds-select,
+.slds-combobox__form-element {
+  background-color: #0f1219 !important;
+  border-color: #3a4558 !important;
+  color: #e2e8f0 !important;
+}
+
+.slds-input:focus,
+.slds-textarea:focus,
+.slds-select:focus {
+  border-color: #60a5fa !important;
+  box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.2) !important;
+  outline: none !important;
+}
+
+.slds-input::placeholder,
+.slds-textarea::placeholder {
+  color: #4a5568 !important;
+}
+
+.slds-form-element__label {
+  color: #94a3b8 !important;
+  font-weight: 500 !important;
+}
+
+/* ─── Tables ─────────────────────────────────────────────────────────────── */
+
+.slds-table {
+  background-color: #1a1f2e !important;
+  border: 1px solid #2d3548 !important;
+}
+
+.slds-table thead th,
+.slds-table thead td {
+  background-color: #151b2b !important;
+  color: #94a3b8 !important;
+  border-bottom: 2px solid #2d3548 !important;
+  font-weight: 600 !important;
+}
+
+.slds-table tbody tr {
+  background-color: #1a1f2e !important;
+  border-bottom: 1px solid #232b3e !important;
+  color: #e2e8f0 !important;
+}
+
+.slds-table tbody tr:nth-child(even) {
+  background-color: #1e2333 !important;
+}
+
+.slds-table tbody tr:hover {
+  background-color: #222836 !important;
+}
+
+.slds-table td,
+.slds-table th {
+  color: #e2e8f0 !important;
+  border-right: 1px solid #232b3e !important;
+}
+
+/* ─── Modals ─────────────────────────────────────────────────────────────── */
+
+.slds-modal__container {
+  background-color: #1a1f2e !important;
+  border: 1px solid #2d3548 !important;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.7) !important;
+}
+
+.slds-modal__header {
+  background-color: #151b2b !important;
+  border-bottom: 1px solid #2d3548 !important;
+  color: #e2e8f0 !important;
+}
+
+.slds-modal__content {
+  background-color: #1a1f2e !important;
+  color: #e2e8f0 !important;
+}
+
+.slds-modal__footer {
+  background-color: #151b2b !important;
+  border-top: 1px solid #2d3548 !important;
+}
+
+.slds-backdrop {
+  background-color: rgba(0, 0, 0, 0.7) !important;
+}
+
+/* ─── Dropdowns & Popovers ───────────────────────────────────────────────── */
+
+.slds-dropdown,
+.slds-dropdown__list {
+  background-color: #1a1f2e !important;
+  border: 1px solid #2d3548 !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5) !important;
+}
+
+.slds-dropdown__item > a,
+.slds-dropdown__item > span {
+  color: #e2e8f0 !important;
+}
+
+.slds-dropdown__item:hover > a,
+.slds-dropdown__item:hover > span,
+.slds-dropdown__item:focus > a {
+  background-color: #222836 !important;
+  color: #e2e8f0 !important;
+}
+
+.slds-popover {
+  background-color: #1a1f2e !important;
+  border: 1px solid #2d3548 !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5) !important;
+  color: #e2e8f0 !important;
+}
+
+/* ─── Tabs ───────────────────────────────────────────────────────────────── */
+
+.slds-tabs_default__nav,
+.slds-tabs--default__nav {
+  border-bottom: 2px solid #2d3548 !important;
+  background-color: transparent !important;
+}
+
+.slds-tabs_default__item,
+.slds-tabs--default__item {
+  color: #94a3b8 !important;
+}
+
+.slds-tabs_default__item.slds-is-active,
+.slds-tabs--default__item.slds-active {
+  color: #60a5fa !important;
+  border-bottom: 2px solid #60a5fa !important;
+}
+
+.slds-tabs_default__content,
+.slds-tabs--default__content {
+  background-color: #1a1f2e !important;
+}
+
+/* ─── Pills & Badges ─────────────────────────────────────────────────────── */
+
+.slds-pill {
+  background-color: #222836 !important;
+  border: 1px solid #3a4558 !important;
+  color: #e2e8f0 !important;
+}
+
+.slds-badge {
+  background-color: #1e2d45 !important;
+  color: #60a5fa !important;
+}
+
+/* ─── Scrollbars ─────────────────────────────────────────────────────────── */
+
+::-webkit-scrollbar {
+  width: 8px !important;
+  height: 8px !important;
+}
+
+::-webkit-scrollbar-track {
+  background: #0f1219 !important;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #2d3548 !important;
+  border-radius: 4px !important;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #3a4558 !important;
+}
+
+/* ─── Record Detail ──────────────────────────────────────────────────────── */
+
+.forcePageBlockSectionRow,
+.slds-form-element,
+.slds-form__row {
+  border-bottom: 1px solid #232b3e !important;
+}
+
+.forceOutputField,
+.slds-form-element__static {
+  color: #e2e8f0 !important;
+}
+
+/* ─── Sidebar / Panel ────────────────────────────────────────────────────── */
+
+.slds-panel,
+.slds-split-view_container {
+  background-color: #1a1f2e !important;
+  border-right: 1px solid #2d3548 !important;
+}
+
+/* ─── Links ──────────────────────────────────────────────────────────────── */
+
+a,
+.slds-truncate a,
+.forceOutputLookup a {
+  color: #60a5fa !important;
+}
+
+a:hover {
+  color: #93c5fd !important;
+}
+
+/* ─── Invert Salesforce default light icons in dark context ──────────────── */
+
+.slds-icon-utility-close,
+.slds-icon-utility-search {
+  filter: invert(1) !important;
+}
