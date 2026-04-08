@@ -636,13 +636,23 @@ records-lwc-highlights-panel,
   border: none !important;
 }
 
-/* Any card wrapping the path */
+/* The slds-card wrapping the path — this is the white box */
+.pathOriginal .slds-card,
+.pathOriginal .slds-card__body,
+.pathOriginal .slds-card__body_inner,
+.runtime_sales_pathassistantPathAssistant .slds-card,
+.runtime_sales_pathassistantPathAssistant .slds-card__body,
+.runtime_sales_pathassistantPathAssistant .slds-card__body_inner,
+.runtime_sales_pathassistantPathAssistant > article,
 .forcePathAssistant .slds-card,
-.forcePathAssistant .slds-card__body {
+.forcePathAssistant .slds-card__body,
+.forcePathAssistant .slds-card__body_inner {
   border: none !important;
   box-shadow: none !important;
   background: transparent !important;
+  background-color: transparent !important;
   border-radius: 0 !important;
+  padding: 0 !important;
 }
 
 .slds-path__item {
