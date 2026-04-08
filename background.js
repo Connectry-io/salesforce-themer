@@ -668,34 +668,59 @@ body .slds-path__item.slds-is-incomplete a.slds-path__link {
   background-color: ${c.surfaceAlt} !important;
 }
 
-/* Path chevrons — ::before = notch (background color), ::after = arrow (item color) */
-.slds-path__item::before {
-  border-color: transparent transparent transparent ${c.surface} !important;
+/* Path chevrons — SLDS uses skewed ::before/::after with background, NOT border triangles */
+/* Each state must set background on BOTH the item AND its pseudo-elements */
+
+/* Incomplete (default) — item + pseudo-elements */
+body .slds-path__item::before,
+body .slds-path__item::after {
+  background: ${c.surfaceAlt} !important;
 }
 
-.slds-path__item::after {
-  border-color: transparent transparent transparent ${c.surfaceAlt} !important;
+body .slds-path__item.slds-is-incomplete::before,
+body .slds-path__item.slds-is-incomplete::after {
+  background: ${c.surfaceAlt} !important;
 }
 
-.slds-path__item.slds-is-complete::after {
-  border-color: transparent transparent transparent ${c.accent} !important;
+/* Complete */
+body .slds-path__item.slds-is-complete::before,
+body .slds-path__item.slds-is-complete::after {
+  background: ${c.accent} !important;
 }
 
-.slds-path__item.slds-is-current::after {
-  border-color: transparent transparent transparent ${c.accent} !important;
+/* Current */
+body .slds-path__item.slds-is-current::before,
+body .slds-path__item.slds-is-current::after {
+  background-color: ${c.accent} !important;
+  background-image: none !important;
 }
 
-/* Path link hover state */
+/* Active / selected */
+body .slds-path__item.slds-is-active,
+body .slds-path__item.slds-is-active .slds-path__link,
+body .slds-path__item[aria-selected="true"],
+body .slds-path__item [aria-selected="true"] {
+  background-color: ${c.accent} !important;
+  color: ${c.buttonBrandText} !important;
+}
+
+body .slds-path__item.slds-is-active::before,
+body .slds-path__item.slds-is-active::after {
+  background: ${c.accent} !important;
+}
+
+/* Hover — incomplete items */
 .slds-path__item:hover,
 .slds-path__item:hover .slds-path__link {
   background-color: ${c.surfaceHover} !important;
 }
 
-/* Hover: only ::after arrow changes color, ::before notch stays background */
+.slds-path__item:hover::before,
 .slds-path__item:hover::after {
-  border-color: transparent transparent transparent ${c.surfaceHover} !important;
+  background: ${c.surfaceHover} !important;
 }
 
+/* Hover — complete/current items */
 .slds-path__item.slds-is-complete:hover,
 .slds-path__item.slds-is-complete:hover .slds-path__link,
 .slds-path__item.slds-is-current:hover,
@@ -703,23 +728,11 @@ body .slds-path__item.slds-is-incomplete a.slds-path__link {
   background-color: ${c.accentHover} !important;
 }
 
+.slds-path__item.slds-is-complete:hover::before,
 .slds-path__item.slds-is-complete:hover::after,
+.slds-path__item.slds-is-current:hover::before,
 .slds-path__item.slds-is-current:hover::after {
-  border-color: transparent transparent transparent ${c.accentHover} !important;
-}
-
-/* Override SF's built-in path active/selected state */
-.slds-path__item.slds-is-active,
-.slds-path__item.slds-is-active .slds-path__link,
-.slds-path__item[aria-selected="true"],
-.slds-path__item [aria-selected="true"] {
-  background-color: ${c.accent} !important;
-  color: ${c.buttonBrandText} !important;
-}
-
-/* Active: only ::after arrow is accent, ::before notch stays background */
-.slds-path__item.slds-is-active::after {
-  border-color: transparent transparent transparent ${c.accent} !important;
+  background: ${c.accentHover} !important;
 }
 
 /* Path text colors */
