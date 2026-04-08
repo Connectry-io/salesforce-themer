@@ -32,14 +32,25 @@
 
   <main class="main">
 
+    <!-- ═══ Gallery View ═══ -->
+    <div id="galleryView">
+
     <!-- Themes section -->
     <section class="section" aria-labelledby="themes-heading">
       <div class="section-header">
         <h2 class="section-title" id="themes-heading">Themes</h2>
-        <div class="filter-pills" role="group" aria-label="Filter themes by category">
-          <button class="filter-pill is-active" data-filter="all">All</button>
-          <button class="filter-pill" data-filter="light">Light</button>
-          <button class="filter-pill" data-filter="dark">Dark</button>
+        <div class="section-header-actions">
+          <button class="create-theme-btn" id="createThemeBtn">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+              <path d="M7 2v10M2 7h10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+            </svg>
+            Create Theme
+          </button>
+          <div class="filter-pills" role="group" aria-label="Filter themes by category">
+            <button class="filter-pill is-active" data-filter="all">All</button>
+            <button class="filter-pill" data-filter="light">Light</button>
+            <button class="filter-pill" data-filter="dark">Dark</button>
+          </div>
         </div>
       </div>
 
@@ -95,6 +106,327 @@
       </div>
       <p class="shortcut-note">Shortcuts only work while viewing a Salesforce org tab. Custom key bindings can be set via <code>chrome://extensions/shortcuts</code>.</p>
     </section>
+
+    </div><!-- /galleryView -->
+
+    <!-- ═══ Editor View ═══ -->
+    <div id="editorView" class="editor-view" hidden>
+      <div class="editor-toolbar">
+        <button class="editor-back-btn" id="editorBackBtn">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+            <path d="M9 2L4 7l5 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          Back to Gallery
+        </button>
+        <div class="editor-toolbar-right">
+          <input type="text" class="editor-name-input" id="editorName" value="My Custom Theme" spellcheck="false" />
+          <button class="editor-save-btn" id="editorSaveBtn">Save Theme</button>
+        </div>
+      </div>
+
+      <div class="editor-layout">
+
+        <!-- Left: Color Pickers -->
+        <div class="editor-panel editor-colors">
+
+          <div class="editor-group">
+            <h3 class="editor-group-title">Base</h3>
+            <div class="editor-field" data-key="colorScheme">
+              <label>Mode</label>
+              <select class="editor-select" id="editorColorScheme">
+                <option value="light">Light</option>
+                <option value="dark">Dark</option>
+              </select>
+            </div>
+            <div class="editor-field" data-key="background">
+              <label>Page Background</label>
+              <div class="color-input-wrap">
+                <input type="color" class="color-swatch-input" />
+                <input type="text" class="color-hex-input" spellcheck="false" />
+              </div>
+            </div>
+            <div class="editor-field" data-key="surface">
+              <label>Card Background</label>
+              <div class="color-input-wrap">
+                <input type="color" class="color-swatch-input" />
+                <input type="text" class="color-hex-input" spellcheck="false" />
+              </div>
+            </div>
+            <div class="editor-field" data-key="surfaceAlt">
+              <label>Alternate Surface</label>
+              <div class="color-input-wrap">
+                <input type="color" class="color-swatch-input" />
+                <input type="text" class="color-hex-input" spellcheck="false" />
+              </div>
+            </div>
+          </div>
+
+          <div class="editor-group">
+            <h3 class="editor-group-title">Brand</h3>
+            <div class="editor-field" data-key="accent">
+              <label>Accent Color</label>
+              <div class="color-input-wrap">
+                <input type="color" class="color-swatch-input" />
+                <input type="text" class="color-hex-input" spellcheck="false" />
+              </div>
+            </div>
+            <div class="editor-field" data-key="link">
+              <label>Link Color</label>
+              <div class="color-input-wrap">
+                <input type="color" class="color-swatch-input" />
+                <input type="text" class="color-hex-input" spellcheck="false" />
+              </div>
+            </div>
+          </div>
+
+          <div class="editor-group">
+            <h3 class="editor-group-title">Navigation</h3>
+            <div class="editor-field" data-key="nav">
+              <label>Nav Background</label>
+              <div class="color-input-wrap">
+                <input type="color" class="color-swatch-input" />
+                <input type="text" class="color-hex-input" spellcheck="false" />
+              </div>
+            </div>
+            <div class="editor-field" data-key="navText">
+              <label>Nav Text</label>
+              <div class="color-input-wrap">
+                <input type="color" class="color-swatch-input" />
+                <input type="text" class="color-hex-input" spellcheck="false" />
+              </div>
+            </div>
+          </div>
+
+          <div class="editor-group">
+            <h3 class="editor-group-title">Text</h3>
+            <div class="editor-field" data-key="textPrimary">
+              <label>Primary Text</label>
+              <div class="color-input-wrap">
+                <input type="color" class="color-swatch-input" />
+                <input type="text" class="color-hex-input" spellcheck="false" />
+              </div>
+            </div>
+            <div class="editor-field" data-key="textSecondary">
+              <label>Secondary Text</label>
+              <div class="color-input-wrap">
+                <input type="color" class="color-swatch-input" />
+                <input type="text" class="color-hex-input" spellcheck="false" />
+              </div>
+            </div>
+            <div class="editor-field" data-key="textPlaceholder">
+              <label>Placeholder</label>
+              <div class="color-input-wrap">
+                <input type="color" class="color-swatch-input" />
+                <input type="text" class="color-hex-input" spellcheck="false" />
+              </div>
+            </div>
+          </div>
+
+          <div class="editor-group">
+            <h3 class="editor-group-title">Borders</h3>
+            <div class="editor-field" data-key="border">
+              <label>Border Color</label>
+              <div class="color-input-wrap">
+                <input type="color" class="color-swatch-input" />
+                <input type="text" class="color-hex-input" spellcheck="false" />
+              </div>
+            </div>
+            <div class="editor-field" data-key="borderInput">
+              <label>Input Borders</label>
+              <div class="color-input-wrap">
+                <input type="color" class="color-swatch-input" />
+                <input type="text" class="color-hex-input" spellcheck="false" />
+              </div>
+            </div>
+          </div>
+
+          <div class="editor-group">
+            <h3 class="editor-group-title">Buttons</h3>
+            <div class="editor-field" data-key="buttonBrandText">
+              <label>Brand Button Text</label>
+              <div class="color-input-wrap">
+                <input type="color" class="color-swatch-input" />
+                <input type="text" class="color-hex-input" spellcheck="false" />
+              </div>
+            </div>
+            <div class="editor-field" data-key="buttonNeutralBg">
+              <label>Neutral Button</label>
+              <div class="color-input-wrap">
+                <input type="color" class="color-swatch-input" />
+                <input type="text" class="color-hex-input" spellcheck="false" />
+              </div>
+            </div>
+          </div>
+
+          <div class="editor-group">
+            <h3 class="editor-group-title">Tables</h3>
+            <div class="editor-field" data-key="tableHeaderBg">
+              <label>Table Header</label>
+              <div class="color-input-wrap">
+                <input type="color" class="color-swatch-input" />
+                <input type="text" class="color-hex-input" spellcheck="false" />
+              </div>
+            </div>
+          </div>
+
+          <div class="editor-group">
+            <h3 class="editor-group-title">Overlays</h3>
+            <div class="editor-field" data-key="modalBg">
+              <label>Modal Background</label>
+              <div class="color-input-wrap">
+                <input type="color" class="color-swatch-input" />
+                <input type="text" class="color-hex-input" spellcheck="false" />
+              </div>
+            </div>
+            <div class="editor-field" data-key="dropdownBg">
+              <label>Dropdown Background</label>
+              <div class="color-input-wrap">
+                <input type="color" class="color-swatch-input" />
+                <input type="text" class="color-hex-input" spellcheck="false" />
+              </div>
+            </div>
+          </div>
+
+          <div class="editor-group">
+            <h3 class="editor-group-title">Feedback</h3>
+            <div class="editor-field" data-key="success">
+              <label>Success</label>
+              <div class="color-input-wrap">
+                <input type="color" class="color-swatch-input" />
+                <input type="text" class="color-hex-input" spellcheck="false" />
+              </div>
+            </div>
+            <div class="editor-field" data-key="warning">
+              <label>Warning</label>
+              <div class="color-input-wrap">
+                <input type="color" class="color-swatch-input" />
+                <input type="text" class="color-hex-input" spellcheck="false" />
+              </div>
+            </div>
+            <div class="editor-field" data-key="error">
+              <label>Error</label>
+              <div class="color-input-wrap">
+                <input type="color" class="color-swatch-input" />
+                <input type="text" class="color-hex-input" spellcheck="false" />
+              </div>
+            </div>
+          </div>
+
+          <div class="editor-group">
+            <h3 class="editor-group-title">Utility</h3>
+            <div class="editor-field" data-key="scrollThumb">
+              <label>Scrollbar</label>
+              <div class="color-input-wrap">
+                <input type="color" class="color-swatch-input" />
+                <input type="text" class="color-hex-input" spellcheck="false" />
+              </div>
+            </div>
+          </div>
+
+          <!-- Advanced panel -->
+          <details class="editor-advanced" id="editorAdvanced">
+            <summary class="editor-advanced-toggle">Advanced <span class="editor-advanced-count" id="advancedCount">58 derived values</span></summary>
+            <div class="editor-advanced-body" id="advancedBody">
+              <!-- populated by JS -->
+            </div>
+          </details>
+
+          <!-- Actions -->
+          <div class="editor-actions">
+            <button class="editor-action-btn editor-reset-btn" id="editorResetBtn">Reset to Base</button>
+            <button class="editor-action-btn editor-export-btn" id="editorExportBtn">Export JSON</button>
+            <button class="editor-action-btn editor-import-btn" id="editorImportBtn">Import JSON</button>
+            <input type="file" id="editorImportFile" accept=".json" hidden />
+          </div>
+
+        </div>
+
+        <!-- Right: Live Preview -->
+        <div class="editor-panel editor-preview">
+          <div class="editor-preview-frame" id="editorPreview">
+
+            <!-- Mock Nav -->
+            <div class="preview-nav" data-bind="nav">
+              <span class="preview-nav-app" data-bind-color="navText">Connectry Hub</span>
+              <span class="preview-nav-item" data-bind-color="navText">Home</span>
+              <span class="preview-nav-item preview-nav-active" data-bind-color="navActiveText" data-bind-border="accent">Leads</span>
+              <span class="preview-nav-item" data-bind-color="navText">Contacts</span>
+            </div>
+
+            <!-- Mock Page Header -->
+            <div class="preview-header" data-bind="background">
+              <div class="preview-header-title" data-bind-color="textPrimary">Lead: John Smith</div>
+              <div class="preview-header-meta" data-bind-color="textSecondary">Senior Account Executive</div>
+            </div>
+
+            <!-- Mock Path -->
+            <div class="preview-path-wrap" data-bind="surface">
+              <div class="preview-path">
+                <span class="preview-path-item preview-path-complete" data-bind="accent" data-bind-color="buttonBrandText">New</span>
+                <span class="preview-path-item preview-path-current" data-bind="accent" data-bind-color="buttonBrandText">Working</span>
+                <span class="preview-path-item" data-bind="surfaceAlt" data-bind-color="textPrimary">Converted</span>
+              </div>
+            </div>
+
+            <!-- Mock Card -->
+            <div class="preview-card" data-bind="surface" data-bind-border-color="border">
+              <div class="preview-card-tabs">
+                <span class="preview-tab-active" data-bind-color="accent">Details</span>
+                <span class="preview-tab" data-bind-color="textSecondary">Activity</span>
+                <span class="preview-tab" data-bind-color="textSecondary">Chatter</span>
+              </div>
+              <div class="preview-card-body">
+                <div class="preview-field">
+                  <span class="preview-field-label" data-bind-color="textSecondary">Name</span>
+                  <span class="preview-field-value" data-bind-color="textPrimary">John Smith</span>
+                </div>
+                <div class="preview-field">
+                  <span class="preview-field-label" data-bind-color="textSecondary">Email</span>
+                  <span class="preview-field-value preview-link" data-bind-color="link">john@example.com</span>
+                </div>
+                <div class="preview-field">
+                  <span class="preview-field-label" data-bind-color="textSecondary">Company</span>
+                  <span class="preview-field-value" data-bind-color="textPrimary">Acme Corp</span>
+                </div>
+              </div>
+              <div class="preview-card-actions">
+                <button class="preview-btn-brand" data-bind="accent" data-bind-color="buttonBrandText">Convert</button>
+                <button class="preview-btn-neutral" data-bind="buttonNeutralBg" data-bind-color="textPrimary" data-bind-border-color="borderInput">Edit</button>
+              </div>
+            </div>
+
+            <!-- Mock Table -->
+            <div class="preview-table-wrap" data-bind="surface" data-bind-border-color="border">
+              <div class="preview-table-header" data-bind="tableHeaderBg">
+                <span data-bind-color="textSecondary">Name</span>
+                <span data-bind-color="textSecondary">Email</span>
+                <span data-bind-color="textSecondary">Status</span>
+              </div>
+              <div class="preview-table-row" data-bind="surface">
+                <span data-bind-color="link">Jane Doe</span>
+                <span data-bind-color="textPrimary">jane@acme.com</span>
+                <span class="preview-badge" data-bind-color="success">Active</span>
+              </div>
+              <div class="preview-table-row preview-table-alt" data-bind="surface">
+                <span data-bind-color="link">Bob Lee</span>
+                <span data-bind-color="textPrimary">bob@acme.com</span>
+                <span class="preview-badge" data-bind-color="warning">Pending</span>
+              </div>
+            </div>
+
+            <!-- Mock Input -->
+            <div class="preview-input-wrap" data-bind="surface">
+              <span class="preview-input-label" data-bind-color="textSecondary">Search</span>
+              <div class="preview-input" data-bind="background" data-bind-border-color="borderInput">
+                <span data-bind-color="textPlaceholder">Search leads...</span>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+      </div><!-- /editor-layout -->
+    </div><!-- /editorView -->
 
   </main>
 
