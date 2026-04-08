@@ -600,18 +600,30 @@ a:hover {
 .pathAssistantContainer,
 .slds-path__scroller-container,
 .slds-path__coach,
-.slds-path__nav {
+.slds-path__nav,
+.forcePathAssistant,
+lightning-sales-path,
+records-lwc-highlights-panel,
+[class*="pathAssistant"],
+[class*="salesPath"],
+[class*="SalesPath"] {
   background-color: transparent !important;
+  background: transparent !important;
   border: none !important;
   box-shadow: none !important;
   outline: none !important;
+  border-radius: 0 !important;
 }
 
-/* The path container outer wrapper */
-.slds-grid.slds-path__track {
+/* The path container outer wrapper and any parent card */
+.slds-grid.slds-path__track,
+.slds-path__scroller-container > *,
+.forcePathAssistant .slds-card,
+.forcePathAssistant .slds-card__body {
   border: none !important;
   box-shadow: none !important;
   background: transparent !important;
+  border-radius: 0 !important;
 }
 
 .slds-path__item {
