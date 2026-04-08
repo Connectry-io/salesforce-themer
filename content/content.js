@@ -1,6 +1,17 @@
 (() => {
   'use strict';
 
+  // Skip login, verification, and other pre-auth pages — don't theme them
+  const skipPatterns = [
+    '/login',
+    '/_ui/identity/',
+    '/setup/secur/',
+    '/secur/login',
+    '/one/one.app?login',
+  ];
+  const path = window.location.pathname + window.location.search;
+  if (skipPatterns.some(p => path.includes(p))) return;
+
   const STYLE_ID = 'sf-themer-styles';
   const TRANSITION_CLASS = 'sf-themer-transitioning';
   const TRANSITION_DURATION = 300;

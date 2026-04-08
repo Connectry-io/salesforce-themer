@@ -102,9 +102,9 @@
         "dark"
       ],
       "colors": {
-        "background": "#1a1d23",
-        "surface": "#22262e",
-        "surfaceAlt": "#1e222a",
+        "background": "#1e2128",
+        "surface": "#262b33",
+        "surfaceAlt": "#2a2f38",
         "surfaceHover": "#282d37",
         "surfaceHighlight": "rgba(109, 159, 212, 0.1)",
         "surfaceSelection": "rgba(109, 159, 212, 0.15)",
@@ -197,9 +197,9 @@
         "modern"
       ],
       "colors": {
-        "background": "#0f1219",
-        "surface": "#1a1f2e",
-        "surfaceAlt": "#151b2b",
+        "background": "#141822",
+        "surface": "#1e2333",
+        "surfaceAlt": "#242a3a",
         "surfaceHover": "#222836",
         "surfaceHighlight": "#1e2d45",
         "surfaceSelection": "#1e2d45",
@@ -487,9 +487,9 @@
         "premium"
       ],
       "colors": {
-        "background": "#0c0c0c",
-        "surface": "#161616",
-        "surfaceAlt": "#111111",
+        "background": "#111111",
+        "surface": "#1a1a1a",
+        "surfaceAlt": "#202020",
         "surfaceHover": "#1e1e1e",
         "surfaceHighlight": "rgba(212, 168, 83, 0.08)",
         "surfaceSelection": "rgba(212, 168, 83, 0.12)",
