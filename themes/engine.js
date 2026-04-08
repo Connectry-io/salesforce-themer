@@ -597,14 +597,22 @@ a:hover {
 .slds-path__track,
 .slds-path__wrap,
 .slds-path__action,
-.pathAssistantContainer,
-.slds-path__scroller-container,
 .slds-path__coach,
 .slds-path__nav,
+.slds-path__scroller-container,
+.slds-path__scroller_inner,
+.slds-path__scroll-controls,
+.slds-grid.slds-path__track,
+.slds-grid.slds-path__action,
+.pathAssistantContainer,
 .forcePathAssistant,
 lightning-sales-path,
 records-lwc-highlights-panel,
+.runtime_sales_pathassistantPathAssistantTabSet,
+.runtime_sales_pathassistantPathAssistantHeader,
+.uiScroller.slds-path__scroller,
 [class*="pathAssistant"],
+[class*="PathAssistant"],
 [class*="salesPath"],
 [class*="SalesPath"] {
   background-color: transparent !important;
@@ -615,9 +623,20 @@ records-lwc-highlights-panel,
   border-radius: 0 !important;
 }
 
-/* The path container outer wrapper and any parent card */
-.slds-grid.slds-path__track,
-.slds-path__scroller-container > *,
+/* Path links and items — remove inner backgrounds */
+.slds-path__link,
+.tabHeader.slds-path__link {
+  background: transparent !important;
+}
+
+/* The path scroller inner wrapper */
+.slds-path__scroller .scroller,
+.slds-path__scroller .slds-path__scroller_inner {
+  background: transparent !important;
+  border: none !important;
+}
+
+/* Any card wrapping the path */
 .forcePathAssistant .slds-card,
 .forcePathAssistant .slds-card__body {
   border: none !important;
