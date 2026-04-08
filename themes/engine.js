@@ -251,8 +251,7 @@ one-app-nav-bar,
 .slds-card__header,
 .slds-card__body,
 .slds-card__footer,
-.forceRecordCard,
-[class*="Card"] {
+.forceRecordCard {
   background-color: ${c.surface} !important;
   border: 1px solid ${c.border} !important;
   box-shadow: ${isDark ? '0 2px 8px rgba(0, 0, 0, 0.3)' : '0 1px 4px rgba(0, 0, 0, 0.06)'} !important;${isDark ? `
@@ -562,6 +561,71 @@ a:hover {
 [class*="console"] {
   background-color: ${c.background} !important;
   color: ${c.textPrimary} !important;
+}
+
+/* ─── Record Page Highlights / Containers ────────────────────────────────── */
+
+.highlights,
+.forceHighlightsStencilDesktop,
+.forceRecordLayout,
+.forceHighlightsPanel,
+.slds-page-header--record-home,
+.slds-page-header_record-home {
+  background-color: ${c.surface} !important;
+  color: ${c.textPrimary} !important;
+}
+
+/* ─── Path / Stage Path ─────────────────────────────────────────────────── */
+
+.slds-path,
+.slds-path__scroller,
+.slds-path__track,
+.pathAssistantContainer,
+.slds-path__scroller-container {
+  background-color: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+.slds-path__nav,
+.slds-path__coach {
+  background-color: transparent !important;
+}
+
+.slds-path__item {
+  background-color: ${c.surfaceAlt} !important;
+  border-color: ${c.border} !important;
+}
+
+.slds-path__item.slds-is-complete {
+  background-color: ${c.accent} !important;
+}
+
+.slds-path__item.slds-is-current {
+  background-color: ${c.accent} !important;
+}
+
+.slds-path__title {
+  color: ${c.textPrimary} !important;
+}
+
+.slds-path__item.slds-is-complete .slds-path__title,
+.slds-path__item.slds-is-current .slds-path__title {
+  color: ${c.buttonBrandText} !important;
+}
+
+/* ─── Profile Icon / Global Actions (top right) ─────────────────────────── */
+
+.slds-global-actions,
+.slds-global-actions__item,
+.forceUserProfileMenu,
+.profileTrigger,
+.uiImage,
+.circular,
+.oneUserProfileCardTrigger {
+  background-color: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
 }
 `;
 }
