@@ -804,11 +804,19 @@ chrome.runtime.onInstalled.addListener(async (details) => {
   await cacheAllThemes();
 });
 
-// Re-generate CSS when extension starts (service worker restart after browser relaunch)
+// Re-generate CSS when browser starts
 chrome.runtime.onStartup.addListener(async () => {
   await loadThemeRegistry();
   await cacheAllThemes();
 });
+
+// Also regenerate on any service worker activation (covers extension refresh during dev)
+(async () => {
+  try {
+    await loadThemeRegistry();
+    await cacheAllThemes();
+  } catch (_) {}
+})();
 
 // ─── Storage change handler ───────────────────────────────────────────────────
 
