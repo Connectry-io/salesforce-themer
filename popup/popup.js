@@ -286,6 +286,27 @@
     });
   }
 
+  // ─── Scope selector ──────────────────────────────────────────────────────
+
+  function bindScopeSelector() {
+    const pills = document.querySelectorAll('.scope-pill');
+    pills.forEach(pill => {
+      pill.addEventListener('click', async () => {
+        const scope = pill.dataset.scope;
+        pills.forEach(p => p.classList.remove('is-active'));
+        pill.classList.add('is-active');
+        await chrome.storage.sync.set({ themeScope: scope });
+      });
+    });
+  }
+
+  function setScopeUI(scope) {
+    const pills = document.querySelectorAll('.scope-pill');
+    pills.forEach(p => {
+      p.classList.toggle('is-active', p.dataset.scope === scope);
+    });
+  }
+
   // ─── Detect current org ───────────────────────────────────────────────────
 
   async function detectCurrentOrg() {
@@ -312,6 +333,7 @@
     renderThemesSection();
     bindOptionsButton();
     bindHelpTooltip();
+    bindScopeSelector();
 
     const [result, orgHostname] = await Promise.all([
       chrome.storage.sync.get({
@@ -320,12 +342,14 @@
         lastLightTheme: 'connectry',
         lastDarkTheme: 'connectry-dark',
         orgThemes: {},
+        themeScope: 'both',
       }),
       detectCurrentOrg(),
     ]);
 
     syncState = result;
     currentOrgHostname = orgHostname;
+    setScopeUI(result.themeScope || 'both');
 
     let effectiveTheme = result.theme;
     if (orgHostname && result.orgThemes[orgHostname]) {

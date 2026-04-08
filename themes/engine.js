@@ -166,24 +166,30 @@ one-app-nav-bar,
   color: ${c.navActiveText} !important;` : ''}
 }
 
+/* Active nav tab — target all SF variations */
 .slds-context-bar__item.slds-is-active,
+one-app-nav-bar-item-root.slds-is-active,
 .navexConsoleTabItem.active {
   background-color: ${c.navActive} !important;
-  border-bottom: 3px solid ${c.navActiveBorder} !important;${fx && fx.navActiveBoxShadow ? `
+  background: ${c.navActive} !important;
+  border-bottom: 3px solid ${c.navActiveBorder} !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;${fx && fx.navActiveBoxShadow ? `
   box-shadow: ${fx.navActiveBoxShadow} !important;` : ''}
   color: ${c.navActiveText} !important;
 }
 
-/* Active tab link text — must beat SF's aria-current="page" styling */
+/* Active tab inner link — must beat SF's aria-current="page" + pill styling */
 .slds-context-bar__item.slds-is-active .slds-context-bar__label-action,
 .slds-context-bar__item.slds-is-active a,
-.slds-context-bar__item.slds-is-active a.slds-context-bar__label-action,
-.slds-context-bar a[aria-current="page"],
-one-app-nav-bar-item-root.slds-is-active a {
+one-app-nav-bar-item-root.slds-is-active a,
+one-app-nav-bar-item-root.slds-is-active .slds-context-bar__label-action,
+.slds-context-bar a[aria-current="page"] {
   color: ${c.navActiveText} !important;
   background-color: transparent !important;
   background: transparent !important;
-  border-bottom-color: transparent !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
 }
 
 /* Nav text and icons */
@@ -771,29 +777,28 @@ body .slds-path__item.slds-is-incomplete.slds-is-active::after {
 }
 
 /* ─── Profile Icon / Global Actions (top right) ─────────────────────────── */
+/* Keep white header's action icons visible — don't override their colors */
 
-.slds-global-actions,
-.slds-global-actions__item,
-.slds-global-actions__item > *,
-.forceUserProfileMenu,
-.profileTrigger,
-.oneUserProfileCardTrigger,
-.slds-global-header__item--button,
-.slds-global-actions__favorites,
-.slds-global-actions__setup,
-.slds-global-actions__help,
-.slds-global-actions__notifications {
+.slds-global-actions__item > button,
+.slds-global-actions__item > span,
+.slds-global-actions__item > div > button {
   background-color: transparent !important;
-  border: none !important;
-  box-shadow: none !important;
 }
 
-/* Profile avatar container specifically */
+${c.globalHeaderWhite ? `
+/* Header stays white — ensure icons are dark/visible, not washed out */
+.slds-global-header .slds-global-header__icon,
+.slds-global-header .slds-button__icon,
+.slds-global-header .forceIcon .slds-icon,
+.slds-global-actions .slds-icon {
+  fill: #54698d !important;
+  color: #54698d !important;
+}` : ''}
+
+/* Profile avatar container */
 .slds-avatar,
 .forceSocialPhoto,
-.uiImage[class*="profilePhoto"],
 .photoContainer {
-  background-color: transparent !important;
   border: none !important;
   box-shadow: none !important;
 }

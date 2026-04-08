@@ -240,6 +240,7 @@
       lastLightTheme: 'connectry',
       lastDarkTheme: 'connectry-dark',
       orgThemes: {},
+      themeScope: 'both',
     });
 
     let activeTheme = syncState.theme;
@@ -260,6 +261,14 @@
     const autoToggle = document.getElementById('autoModeToggle');
     autoToggle.checked = syncState.autoMode;
     autoToggle.addEventListener('change', handleAutoModeToggle);
+
+    // Theme scope select
+    const scopeSelect = document.getElementById('themeScopeSelect');
+    scopeSelect.value = syncState.themeScope || 'both';
+    scopeSelect.addEventListener('change', async () => {
+      await chrome.storage.sync.set({ themeScope: scopeSelect.value });
+      syncState.themeScope = scopeSelect.value;
+    });
 
     // Listen for storage changes from other windows/tabs
     chrome.storage.onChanged.addListener((changes, area) => {

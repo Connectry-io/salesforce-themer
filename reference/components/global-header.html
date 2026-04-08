@@ -1,0 +1,34 @@
+<!-- Component: Global Header (top bar with logo, search, actions) -->
+<!-- Page: Any Lightning page -->
+<!-- Date: 2026-04-09 -->
+<!-- SLDS version: 1 (Aura runtime) -->
+<!-- Source: Noland's org — connectry.lightning.force.com -->
+
+<!-- Key findings:
+  - Outer: header#oneHeader.slds-global-header_container
+  - Top bar: .slds-global-header.slds-grid
+    - Left: .slds-global-header__item with .slds-global-header__logo
+    - Center: .slds-global-header__item_search with search button
+    - Right: ul.slds-global-actions with action buttons as li items
+
+  - Action icons (right side):
+    - Each in li.slds-global-actions__item
+    - Icons use lightning-icon with variant="inverse" (designed for dark bg)
+    - When globalHeaderWhite=true, SF natively renders these as dark icons
+    - We must NOT make these icons transparent/invisible
+
+  - Action items:
+    - Favorites: .branding-favorites-star-button (star + dropdown)
+    - Global Create: .oneGlobalCreate (+ icon)
+    - Guidance Center: .trailheadTrigger (trailhead icon)
+    - Help: .slds-global-actions__help (? icon)
+    - Setup: .setupGear (gear icon)
+    - Notifications: .slds-global-actions__notifications (bell icon)
+    - Profile: .branding-userProfile-button (avatar)
+
+  - CRITICAL: Icons use .slds-global-header__icon class
+    - On white header, these must stay dark/visible
+    - Our CSS should NOT set these to transparent or override their fill
+
+  - Profile avatar: .profileTrigger.branding-user-profile with inline bg color
+-->

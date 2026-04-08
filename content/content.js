@@ -16,6 +16,9 @@
   const TRANSITION_CLASS = 'sf-themer-transitioning';
   const TRANSITION_DURATION = 300;
 
+  // Detect page type for scope filtering
+  const isSetupPage = path.includes('/lightning/setup/');
+
   let currentTheme = null;
   let observer = null;
   let mediaQuery = null;
@@ -226,7 +229,10 @@
         lastLightTheme: 'connectry',
         lastDarkTheme: 'connectry-dark',
         orgThemes: {},
+        themeScope: 'both',
       });
+
+      if (!shouldApplyToPage(syncResult.themeScope)) return;
 
       const themeName = await resolveTheme(syncResult);
 
@@ -252,10 +258,18 @@
   // chrome.storage.local.get is async but resolves very quickly at document_start
   // before any paint occurs, eliminating the white flash.
 
+  function shouldApplyToPage(scope) {
+    if (!scope || scope === 'both') return true;
+    if (scope === 'lightning' && isSetupPage) return false;
+    if (scope === 'setup' && !isSetupPage) return false;
+    return true;
+  }
+
   function preInit() {
     chrome.storage.sync.get(
-      { theme: 'connectry', autoMode: false, lastLightTheme: 'connectry', lastDarkTheme: 'connectry-dark', orgThemes: {} },
+      { theme: 'connectry', autoMode: false, lastLightTheme: 'connectry', lastDarkTheme: 'connectry-dark', orgThemes: {}, themeScope: 'both' },
       (syncData) => {
+        if (!shouldApplyToPage(syncData.themeScope)) return;
         if (chrome.runtime.lastError) return;
 
         const hostname = getOrgHostname();
