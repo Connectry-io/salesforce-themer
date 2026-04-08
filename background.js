@@ -187,11 +187,16 @@ one-app-nav-bar,
   color: ${c.navActiveText} !important;
 }
 
-/* Active tab link text */
+/* Active tab link text — must beat SF's aria-current="page" styling */
 .slds-context-bar__item.slds-is-active .slds-context-bar__label-action,
-.slds-context-bar__item.slds-is-active a {
+.slds-context-bar__item.slds-is-active a,
+.slds-context-bar__item.slds-is-active a.slds-context-bar__label-action,
+.slds-context-bar a[aria-current="page"],
+one-app-nav-bar-item-root.slds-is-active a {
   color: ${c.navActiveText} !important;
   background-color: transparent !important;
+  background: transparent !important;
+  border-bottom-color: transparent !important;
 }
 
 /* Nav text and icons */
