@@ -123,9 +123,8 @@
         const cloneBtn = e.target.closest('[data-clone]');
         if (cloneBtn) {
           e.stopPropagation();
-          // Builder is open to all in Commit B; for now, still gated.
-          // (Remove _guardPremium call in Commit B.)
-          if (!_guardPremium()) return;
+          // V3: Theme Builder is open to ALL users — free users can preview
+          // and tweak everything but can't save until they upgrade.
           openCreationDialog(cloneBtn.dataset.clone);
           return;
         }
@@ -832,32 +831,31 @@
     // Mark <body> with the current premium state so CSS can hide gating
     syncPremiumBodyClass();
 
-    // Empty-state buttons in custom themes section
+    // Empty-state buttons in custom themes section.
+    // V3: builder is open to all — no premium gate at entry, only on Save.
     document.getElementById('createThemeBtnEmpty')?.addEventListener('click', () => {
-      if (!_guardPremium()) return;
       _pendingCreateEffects = getSuggestedEffectsFor('connectry');
       openEditor('connectry', null);
     });
     document.getElementById('cloneFirstBtn')?.addEventListener('click', () => {
-      if (!_guardPremium()) return;
       openCreationDialog('connectry');
     });
 
-    // Builder tab: create-method cards (all premium)
+    // Builder tab: create-method cards.
+    // V3: Manual is open to all (Save is gated). AI/brand-guide/url stay
+    // coming-soon and still show the upgrade dialog as a fallback.
     document.querySelectorAll('.create-method-card[data-method]').forEach(card => {
       card.addEventListener('click', () => {
         const method = card.dataset.method;
-        // All create methods are premium. Manual is the only one that currently
-        // works — AI, brand-guide, url are coming soon (will show upgrade prompt
-        // even when premium is unlocked, until they ship).
-        if (!isPremium()) {
-          openUpgradeDialog();
-          return;
-        }
         if (method === 'manual') {
           openCreationDialog('connectry');
+          return;
         }
-        // Other methods are coming-soon even for premium users — no-op for now
+        // AI, brand-guide, url are still coming-soon — show upgrade dialog
+        // for free users; no-op for premium until they ship.
+        if (!isPremium()) {
+          openUpgradeDialog();
+        }
       });
     });
   }
@@ -1047,17 +1045,33 @@
       editorState.customId = customTheme.id;
       editorState.coreOverrides = { ...(customTheme.coreOverrides || {}) };
       editorState.advancedOverrides = { ...(customTheme.advancedOverrides || {}) };
+      // Existing custom theme: load its effects snapshot
+      editorState.effects = customTheme.effects
+        ? { ...customTheme.effects }
+        : getSuggestedEffectsFor(customTheme.basedOn || baseThemeId);
       document.getElementById('editorName').value = customTheme.name;
     } else {
       editorState.customId = null;
       editorState.coreOverrides = {};
       editorState.advancedOverrides = {};
+      // New theme: seed effects from base theme's shipped effects, OR from
+      // _pendingCreateEffects if the creation dialog staged something
+      editorState.effects = _pendingCreateEffects
+        ? { ..._pendingCreateEffects }
+        : getSuggestedEffectsFor(baseThemeId);
       const base = getThemeById(baseThemeId);
       document.getElementById('editorName').value = base ? `My ${base.name}` : 'My Custom Theme';
     }
 
     document.getElementById('galleryView').hidden = true;
     document.getElementById('editorView').hidden = false;
+
+    // Show the free preview banner only when not premium
+    const freeBanner = document.getElementById('editorFreeBanner');
+    if (freeBanner) freeBanner.hidden = isPremium();
+
+    // Always start on the Colors sub-tab
+    switchEditorSubtab('colors');
 
     populateEditorFields();
     renderAdvancedPanel();
@@ -1253,6 +1267,142 @@
     document.getElementById('createThemeBtn').addEventListener('click', () => {
       openEditor('connectry', null);
     });
+
+    // Editor sub-tabs (Colors / Effects)
+    document.querySelectorAll('.editor-subtab[data-editor-subtab]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const target = btn.dataset.editorSubtab;
+        switchEditorSubtab(target);
+      });
+    });
+
+    // Free preview banner upgrade CTA
+    document.getElementById('editorFreeBannerUpgrade')?.addEventListener('click', () => {
+      closeEditor();
+      if (_tabsInstance) _tabsInstance.activate('upgrade');
+    });
+  }
+
+  /**
+   * Switch the editor's left panel between Colors and Effects. The right
+   * preview pane stays put — both sub-tabs preview against the same theme.
+   */
+  function switchEditorSubtab(target) {
+    const colorsPanel = document.querySelector('.editor-colors');
+    const effectsPanel = document.getElementById('editorEffectsPanel');
+    if (!colorsPanel || !effectsPanel) return;
+
+    const isEffects = target === 'effects';
+    colorsPanel.hidden = isEffects;
+    effectsPanel.hidden = !isEffects;
+
+    document.querySelectorAll('.editor-subtab[data-editor-subtab]').forEach(b => {
+      const active = b.dataset.editorSubtab === target;
+      b.classList.toggle('is-active', active);
+      b.setAttribute('aria-selected', String(active));
+    });
+
+    if (isEffects) {
+      renderEditorEffectsGrid();
+    }
+  }
+
+  /**
+   * Render the per-effect grid inside the Theme Builder. Reads from
+   * editorState.effects (the cloned theme's effects being edited) and
+   * writes back to it. Free users can interact freely; the gate fires
+   * on Save, not on individual edits.
+   */
+  function renderEditorEffectsGrid() {
+    const grid = document.getElementById('editorEffectsGrid');
+    if (!grid) return;
+    grid.innerHTML = '';
+
+    const config = editorState.effects || { ...NONE_EFFECTS };
+
+    for (const effect of EFFECT_CATALOG) {
+      const isOn = !!config[effect.id];
+      const intensity = config[effect.id + 'Intensity'] || 'medium';
+
+      const card = document.createElement('div');
+      card.className = `effect-card${isOn ? ' is-enabled' : ''}`;
+      card.dataset.effect = effect.id;
+
+      const particleType = typeof config.particles === 'string' ? config.particles : 'snow';
+      const particleSelectRow = effect.id === 'particles' ? `
+        <div class="effect-slider-row">
+          <span class="effect-select-label">Style</span>
+          <select class="effect-select" data-effect-select="particles">
+            <option value="snow" ${particleType === 'snow' ? 'selected' : ''}>Snow</option>
+            <option value="dots" ${particleType === 'dots' ? 'selected' : ''}>Floating Dots</option>
+            <option value="matrix" ${particleType === 'matrix' ? 'selected' : ''}>Matrix Rain</option>
+            <option value="embers" ${particleType === 'embers' ? 'selected' : ''}>Embers</option>
+            <option value="rain" ${particleType === 'rain' ? 'selected' : ''}>Rain</option>
+          </select>
+        </div>
+      ` : '';
+
+      const intensityButtons = ['subtle', 'medium', 'strong'].map(level => `
+        <button type="button"
+                class="intensity-btn${intensity === level ? ' is-active' : ''}"
+                data-effect-intensity="${effect.id}"
+                data-level="${level}">${_capitalize(level)}</button>
+      `).join('');
+
+      card.innerHTML = `
+        <div class="effect-card-header">
+          <div class="effect-info">
+            <div class="effect-name">
+              ${effect.name}
+              <span class="effect-card-status">${isOn ? 'On' : 'Off'}</span>
+            </div>
+            <div class="effect-short">${effect.short}</div>
+          </div>
+          <label class="cx-toggle">
+            <input type="checkbox" data-effect-toggle="${effect.id}" ${isOn ? 'checked' : ''} />
+            <span class="cx-toggle-track"><span class="cx-toggle-thumb"></span></span>
+          </label>
+        </div>
+        <div class="effect-controls">
+          <div class="effect-slider-row">
+            <span class="effect-slider-label">Intensity</span>
+            <div class="intensity-segmented" role="group" aria-label="Effect intensity for ${effect.name}">
+              ${intensityButtons}
+            </div>
+          </div>
+          ${particleSelectRow}
+        </div>
+      `;
+
+      // Toggle wiring
+      const toggle = card.querySelector(`[data-effect-toggle="${effect.id}"]`);
+      toggle?.addEventListener('change', () => {
+        if (effect.id === 'particles') {
+          editorState.effects.particles = toggle.checked ? (particleType || 'snow') : false;
+        } else {
+          editorState.effects[effect.id] = toggle.checked;
+        }
+        renderEditorEffectsGrid();
+      });
+
+      // Intensity buttons
+      card.querySelectorAll(`[data-effect-intensity="${effect.id}"]`).forEach(btn => {
+        btn.addEventListener('click', () => {
+          editorState.effects[effect.id + 'Intensity'] = btn.dataset.level;
+          renderEditorEffectsGrid();
+        });
+      });
+
+      // Particle style select
+      const pSelect = card.querySelector('[data-effect-select="particles"]');
+      pSelect?.addEventListener('change', () => {
+        if (editorState.effects.particles) {
+          editorState.effects.particles = pSelect.value;
+        }
+      });
+
+      grid.appendChild(card);
+    }
   }
 
   function bindAdvancedEvents() {
@@ -1310,6 +1460,13 @@
   // ─── Save / Export / Import ───────────────────────────────────────────────
 
   async function saveCustomTheme() {
+    // V3: builder is open to all but Save is the Premium gate.
+    // Show the upgrade dialog and bail without losing any in-progress edits.
+    if (!isPremium()) {
+      _showSaveUpgradePrompt();
+      return;
+    }
+
     const name = document.getElementById('editorName').value.trim() || 'My Custom Theme';
     const id = editorState.customId || `custom-${Date.now()}`;
     const base = getThemeById(editorState.basedOn);
@@ -1548,6 +1705,47 @@
       // Switch to the Builder tab — user will pick a starting point there
       if (_tabsInstance) _tabsInstance.activate('builder');
     });
+  }
+
+  /**
+   * Save-time upgrade prompt for free users in the Theme Builder. The
+   * builder is open to everyone so users can preview the full editor; the
+   * Save button is the Premium gate. Shows a focused dialog that explains
+   * what they're about to unlock and lets them either upgrade or stay in
+   * preview mode (their work is preserved).
+   */
+  function _showSaveUpgradePrompt() {
+    const body = document.createElement('div');
+    body.innerHTML = `
+      <p style="margin-bottom:12px;">Saving custom themes is a <strong>Premium</strong> feature.</p>
+      <p style="margin-bottom:16px; font-size:13px; color: var(--cx-text-muted); line-height:1.6;">
+        Your changes are still here in the editor — feel free to keep tweaking. When you're ready,
+        upgrade to save this theme to your library, switch to it from any popup, and unlock all
+        the per-effect personalization options.
+      </p>
+      <p style="font-size:12px; color: var(--cx-text-subtle); margin-bottom:0;">
+        Premium starts at <strong>$5/month</strong>. Yearly is $45 (save 25%) and Lifetime is
+        $200 while the Early Supporter window is open.
+      </p>
+    `;
+
+    const dialog = new Connectry.Settings.Dialog({
+      title: 'Upgrade to save your themes',
+      body,
+      actions: [
+        { label: 'Keep editing', variant: 'secondary' },
+        {
+          label: 'See plans',
+          variant: 'primary',
+          onClick: () => {
+            // Close the editor and jump to the Upgrade tab
+            closeEditor();
+            if (_tabsInstance) _tabsInstance.activate('upgrade');
+          },
+        },
+      ],
+    });
+    dialog.open();
   }
 
   /**
@@ -2113,7 +2311,7 @@
   setTimeout(() => {
     bindEditorEvents();
     document.getElementById('createThemeBtn')?.addEventListener('click', () => {
-      if (!_guardPremium()) return;
+      // V3: builder open to all — Save is the gate
       openCreationDialog('connectry');
     });
   }, 100);

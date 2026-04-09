@@ -1393,6 +1393,120 @@
 
 .editor-view[hidden] { display: none !important; }
 
+/* Free preview banner — only visible to non-premium users in the editor */
+.editor-free-banner[hidden] { display: none !important; }
+
+.editor-free-banner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 16px;
+  margin-bottom: var(--cx-space-4);
+  background: linear-gradient(135deg, #fef9e7 0%, #fdf3ca 100%);
+  border: 1.5px solid #d4a22a;
+  border-radius: var(--cx-radius-md);
+  font-size: 13px;
+  color: #8f6413;
+}
+
+.editor-free-banner svg {
+  flex-shrink: 0;
+  color: #b07d1a;
+}
+
+.editor-free-banner span {
+  flex: 1;
+}
+
+.editor-free-banner strong {
+  font-weight: 700;
+}
+
+.editor-free-banner-cta {
+  background: linear-gradient(135deg, #d4a22a 0%, #b07d1a 100%);
+  color: #ffffff;
+  border: none;
+  padding: 6px 14px;
+  border-radius: var(--cx-radius-full);
+  font-family: var(--cx-font);
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: filter var(--cx-transition);
+}
+
+.editor-free-banner-cta:hover {
+  filter: brightness(1.1);
+}
+
+/* Editor sub-tabs (Colors / Effects) — sit in the toolbar between back btn
+   and the right-side actions */
+.editor-subtabs {
+  display: inline-flex;
+  gap: 2px;
+  background: var(--cx-surface-alt);
+  border: 1px solid var(--cx-border);
+  border-radius: var(--cx-radius-full);
+  padding: 2px;
+  margin-left: var(--cx-space-4);
+}
+
+.editor-subtab {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  background: transparent;
+  border: none;
+  border-radius: var(--cx-radius-full);
+  font-family: var(--cx-font);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--cx-text-subtle);
+  cursor: pointer;
+  transition: background-color var(--cx-transition), color var(--cx-transition);
+  outline: none;
+}
+
+.editor-subtab:hover {
+  color: var(--cx-text-muted);
+}
+
+.editor-subtab.is-active {
+  background: var(--cx-accent);
+  color: #ffffff;
+}
+
+.editor-subtab:focus-visible {
+  outline: 2px solid var(--cx-accent);
+  outline-offset: 2px;
+}
+
+/* Effects panel inside the editor (alternate to the colors panel) */
+.editor-effects[hidden] { display: none !important; }
+
+.editor-effects {
+  /* Reuses .editor-panel base styles for layout/scroll */
+}
+
+.editor-effects-intro {
+  margin-bottom: var(--cx-space-5);
+}
+
+.editor-effects-help {
+  font-size: 12px;
+  color: var(--cx-text-muted);
+  line-height: 1.55;
+  margin-top: var(--cx-space-2);
+}
+
+.editor-effects-grid {
+  display: flex;
+  flex-direction: column;
+  gap: var(--cx-space-3);
+}
+
 .editor-toolbar {
   display: flex;
   align-items: center;
