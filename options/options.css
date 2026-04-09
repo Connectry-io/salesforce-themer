@@ -2586,58 +2586,131 @@ td.upgrade-compare-col-premium,
   max-width: 720px;
 }
 
-/* "coming soon" inline badge */
+/* "coming soon" inline badge — gold to distinguish from premium-blue */
 .guide-coming-soon {
   display: inline-block;
   font-size: 9px;
-  font-weight: 700;
-  letter-spacing: 0.06em;
+  font-weight: 800;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
   padding: 2px 8px;
-  background: var(--cx-accent-light);
-  color: var(--cx-accent);
+  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+  color: #8f6413 !important;
+  border: 1px solid #d4a22a;
   border-radius: var(--cx-radius-full);
   vertical-align: middle;
   margin-left: 6px;
+  white-space: nowrap;
+  line-height: 1.4;
 }
 
-/* Anatomy section: diagram on left, callouts on right */
+/* Inside callouts, the "soon" badge is smaller */
+.guide-anatomy-callouts .guide-coming-soon {
+  font-size: 8px;
+  padding: 1px 6px;
+  margin-left: 4px;
+}
+
+/* Anatomy section: diagram with numbered badges overlaid on the card,
+   callouts in a clean 2-column grid below */
 .guide-anatomy {
-  display: grid;
-  grid-template-columns: minmax(280px, 360px) 1fr;
-  gap: var(--cx-space-8);
-  align-items: start;
-}
-
-@media (max-width: 900px) {
-  .guide-anatomy { grid-template-columns: 1fr; }
+  display: flex;
+  flex-direction: column;
+  gap: var(--cx-space-6);
 }
 
 .guide-anatomy-diagram {
+  position: relative;
   background: var(--cx-surface-alt);
-  border: 1.5px dashed var(--cx-border-hover);
+  border: 1px solid var(--cx-border);
   border-radius: var(--cx-radius-lg);
-  padding: var(--cx-space-6);
+  padding: var(--cx-space-8);
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: 280px;
+  min-height: 320px;
 }
 
+/* Wrapper that holds the sample card + numbered markers in a relative
+   coordinate space so the markers can be absolutely positioned */
+.guide-anatomy-card-wrap {
+  position: relative;
+  display: inline-block;
+}
+
+/* Numbered marker badges that overlay the sample card */
+.guide-anatomy-marker {
+  position: absolute;
+  width: 26px;
+  height: 26px;
+  background: var(--cx-accent);
+  color: #ffffff;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 800;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.18), 0 0 0 3px var(--cx-surface-alt);
+  z-index: 2;
+  pointer-events: none;
+}
+
+/* Placeholder rows in the anatomy card showing what Typography + Favicon
+   will look like when V1.1 / V1 land. Subtle, dashed border to communicate
+   "this isn't real yet". */
+.guide-anatomy-placeholder-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 6px;
+  padding: 4px 8px;
+  background: var(--cx-surface-alt);
+  border: 1px dashed var(--cx-border-hover);
+  border-radius: var(--cx-radius-sm);
+  font-size: 11px;
+  color: var(--cx-text-subtle);
+}
+
+.guide-anatomy-placeholder-label {
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--cx-text);
+  width: 18px;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.guide-anatomy-placeholder-favicon {
+  display: flex;
+  align-items: center;
+  width: 18px;
+  flex-shrink: 0;
+}
+
+.guide-anatomy-placeholder-text {
+  flex: 1;
+}
+
+/* Callout grid below the diagram — 2 or 3 columns based on width */
 .guide-anatomy-callouts {
   list-style: none;
   counter-reset: anatomy-counter;
   padding: 0;
   margin: 0;
-  display: flex;
-  flex-direction: column;
-  gap: var(--cx-space-3);
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: var(--cx-space-4);
 }
 
 .guide-anatomy-callouts li {
   counter-increment: anatomy-counter;
   position: relative;
-  padding-left: 32px;
+  padding: var(--cx-space-3) var(--cx-space-3) var(--cx-space-3) 40px;
+  background: var(--cx-surface);
+  border: 1px solid var(--cx-border);
+  border-radius: var(--cx-radius-md);
   font-size: 13px;
   line-height: 1.55;
   color: var(--cx-text-muted);
@@ -2646,8 +2719,8 @@ td.upgrade-compare-col-premium,
 .guide-anatomy-callouts li::before {
   content: counter(anatomy-counter);
   position: absolute;
-  left: 0;
-  top: 0;
+  left: var(--cx-space-3);
+  top: var(--cx-space-3);
   width: 22px;
   height: 22px;
   background: var(--cx-accent);
@@ -2664,7 +2737,7 @@ td.upgrade-compare-col-premium,
   display: block;
   color: var(--cx-text);
   font-weight: 700;
-  margin-bottom: 2px;
+  margin-bottom: 4px;
 }
 
 .guide-anatomy-callouts span {

@@ -87,9 +87,13 @@
   /**
    * Build the effect text pills for a theme card. Each pill is clickable —
    * clicking jumps to the Effects/Guide tab so the user can read about it.
+   * Accepts either an OOTB theme ID (looks up shipped effects) or a raw
+   * effects config object (used by custom themes which carry their own snapshot).
    */
-  function buildEffectIndicators(themeId) {
-    const cfg = getSuggestedEffectsFor(themeId);
+  function buildEffectIndicators(themeIdOrConfig) {
+    const cfg = (typeof themeIdOrConfig === 'string')
+      ? getSuggestedEffectsFor(themeIdOrConfig)
+      : (themeIdOrConfig || {});
     const enabled = [];
     for (const eff of ['hoverLift', 'ambientGlow', 'borderShimmer', 'gradientBorders', 'aurora', 'neonFlicker', 'particles', 'cursorTrail']) {
       if (cfg[eff]) enabled.push(eff);
@@ -303,7 +307,8 @@
             <span class="theme-name">${Connectry.Settings.escape(ct.name)}</span>
             <span class="theme-category-badge ${category}">${category === 'light' ? 'Light' : 'Dark'}</span>
           </div>
-          <div class="theme-description">Based on ${base ? base.name : ct.basedOn} · Effects: ${_capitalize(presetName)}</div>
+          <div class="theme-description">Based on ${base ? base.name : ct.basedOn}</div>
+          ${buildEffectIndicators(ct.effects || {})}
         </div>
         <div class="theme-card-actions">
           <div class="theme-card-status">
@@ -2064,8 +2069,9 @@
   }
 
   /**
-   * Render the sample theme card in the anatomy section. Uses the user's
-   * currently active theme as the example so they recognize it.
+   * Render the sample theme card in the anatomy section, with numbered
+   * marker badges overlaid on each part. Uses the user's currently active
+   * theme as the example so they recognize it.
    */
   function renderGuideAnatomyDiagram() {
     const target = document.getElementById('guideAnatomyDiagram');
@@ -2075,31 +2081,62 @@
     if (!theme) return;
 
     target.innerHTML = `
-      <div class="theme-card is-active" style="max-width: 280px; cursor: default;">
-        <div class="theme-swatch">${buildSwatch(theme)}</div>
-        <div class="theme-card-body">
-          <div class="theme-card-header">
-            <span class="theme-name">${Connectry.Settings.escape(theme.name)}</span>
-            <span class="theme-category-badge ${theme.category}">${theme.category === 'light' ? 'Light' : 'Dark'}</span>
+      <div class="guide-anatomy-card-wrap">
+        <div class="theme-card is-active" style="width: 320px; cursor: default; pointer-events: none;">
+          <div class="theme-swatch">${buildSwatch(theme)}</div>
+          <div class="theme-card-body">
+            <div class="theme-card-header">
+              <span class="theme-name">${Connectry.Settings.escape(theme.name)}</span>
+              <span class="theme-category-badge ${theme.category}">${theme.category === 'light' ? 'Light' : 'Dark'}</span>
+            </div>
+            <div class="theme-description">${Connectry.Settings.escape(theme.description)}</div>
+            ${buildEffectIndicators(theme.id)}
+            <!-- Placeholder rows for V1.1 typography + V1 favicon -->
+            <div class="guide-anatomy-placeholder-row">
+              <span class="guide-anatomy-placeholder-label">Aa</span>
+              <span class="guide-anatomy-placeholder-text">Inter · 13px · 1.5</span>
+            </div>
+            <div class="guide-anatomy-placeholder-row">
+              <span class="guide-anatomy-placeholder-favicon">${_faviconPlaceholderSvg(theme.colors.accent)}</span>
+              <span class="guide-anatomy-placeholder-text">Tab favicon</span>
+            </div>
           </div>
-          <div class="theme-description">${Connectry.Settings.escape(theme.description)}</div>
-          ${buildEffectIndicators(theme.id)}
-        </div>
-        <div class="theme-card-actions">
-          <div class="theme-card-status">
-            <span class="theme-card-status-dot"></span>
-            <span>Apply</span>
+          <div class="theme-card-actions">
+            <div class="theme-card-status">
+              <span class="theme-card-status-dot"></span>
+              <span>Apply</span>
+            </div>
+            <button class="theme-card-clone-btn" type="button" title="Clone preview" disabled>
+              <svg width="10" height="10" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+                <rect x="2.5" y="5.5" width="7" height="5" rx="1" stroke="currentColor" stroke-width="1.3"/>
+                <path d="M4 5.5V4a2 2 0 0 1 4 0v1.5" stroke="currentColor" stroke-width="1.3"/>
+              </svg>
+              Clone
+            </button>
           </div>
-          <button class="theme-card-clone-btn" type="button" title="Clone preview" disabled>
-            <svg width="10" height="10" viewBox="0 0 12 12" fill="none" aria-hidden="true">
-              <rect x="2.5" y="5.5" width="7" height="5" rx="1" stroke="currentColor" stroke-width="1.3"/>
-              <path d="M4 5.5V4a2 2 0 0 1 4 0v1.5" stroke="currentColor" stroke-width="1.3"/>
-            </svg>
-            Clone
-          </button>
         </div>
+        <!-- Numbered marker badges, positioned absolutely over the card -->
+        <div class="guide-anatomy-marker" data-marker="1" style="top: 8px; left: -14px;">1</div>
+        <div class="guide-anatomy-marker" data-marker="2" style="top: 60px; right: -14px;">2</div>
+        <div class="guide-anatomy-marker" data-marker="3" style="top: 92px; right: -14px;">3</div>
+        <div class="guide-anatomy-marker" data-marker="4" style="top: 124px; left: -14px;">4</div>
+        <div class="guide-anatomy-marker" data-marker="5" style="top: 168px; left: -14px;">5</div>
+        <div class="guide-anatomy-marker" data-marker="6" style="top: 196px; left: -14px;">6</div>
+        <div class="guide-anatomy-marker" data-marker="7" style="bottom: 14px; right: -14px;">7</div>
       </div>
     `;
+  }
+
+  /**
+   * Tiny inline SVG placeholder for the favicon row in the anatomy diagram.
+   * Mimics what a future curated favicon might look like (small accent dot
+   * inside a circle).
+   */
+  function _faviconPlaceholderSvg(accent) {
+    return `<svg width="14" height="14" viewBox="0 0 16 16" aria-hidden="true">
+      <circle cx="8" cy="8" r="7" fill="#ffffff" stroke="#d8d8d6" stroke-width="0.5"/>
+      <circle cx="8" cy="8" r="3.5" fill="${accent || '#4a6fa5'}"/>
+    </svg>`;
   }
 
   /**

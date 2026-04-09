@@ -34,6 +34,50 @@
     return [c.background, c.surface, c.accent, c.textPrimary];
   }
 
+  // Local copy of theme → shipped effects map for the popup. Mirrors the
+  // canonical map in effects/presets.js (popup runs in a different script
+  // context so it can't import from there).
+  const POPUP_THEME_EFFECTS = {
+    'connectry':       ['hoverLift'],
+    'connectry-dark':  ['hoverLift', 'ambientGlow'],
+    'midnight':        ['hoverLift', 'aurora', 'particles'],
+    'slate':           ['hoverLift'],
+    'tron':            ['hoverLift', 'ambientGlow', 'borderShimmer', 'gradientBorders', 'cursorTrail', 'neonFlicker'],
+    'obsidian':        ['hoverLift', 'ambientGlow'],
+    'arctic':          ['hoverLift', 'ambientGlow', 'borderShimmer', 'aurora', 'particles'],
+    'sakura':          ['hoverLift', 'borderShimmer'],
+    'ember':           ['hoverLift', 'ambientGlow', 'particles'],
+    'nord':            ['hoverLift', 'aurora'],
+    'terminal':        ['hoverLift', 'ambientGlow', 'borderShimmer', 'neonFlicker', 'particles'],
+    'high-contrast':   [],
+    'dracula':         ['hoverLift', 'ambientGlow', 'borderShimmer'],
+    'solarized-light': ['hoverLift'],
+    'solarized-dark':  ['hoverLift', 'ambientGlow'],
+  };
+
+  const POPUP_EFFECT_LABELS = {
+    hoverLift: 'Hover lift',
+    ambientGlow: 'Glow',
+    borderShimmer: 'Shimmer',
+    gradientBorders: 'Gradient',
+    aurora: 'Aurora',
+    neonFlicker: 'Neon',
+    particles: 'Particles',
+    cursorTrail: 'Cursor trail',
+  };
+
+  function buildPopupEffectPills(themeId) {
+    const effects = POPUP_THEME_EFFECTS[themeId] || [];
+    if (!effects.length) {
+      return '<div class="theme-effects-pills is-empty">No effects</div>';
+    }
+    const pills = effects.slice(0, 3).map(e =>
+      `<span class="theme-effect-pill" title="${POPUP_EFFECT_LABELS[e] || e}">${POPUP_EFFECT_LABELS[e] || e}</span>`
+    ).join('');
+    const more = effects.length > 3 ? `<span class="theme-effect-pill-more">+${effects.length - 3}</span>` : '';
+    return `<div class="theme-effects-pills">${pills}${more}</div>`;
+  }
+
   function renderThemesSection() {
     const section = document.getElementById('themesSection');
     section.innerHTML = '';
@@ -76,8 +120,21 @@
         btn.innerHTML = `
           <div class="theme-swatch">${swatchHtml}</div>
           <div class="theme-info">
-            <span class="theme-name">${theme.name}</span>
-            ${descOrTag}
+            <div class="theme-name-row">
+              <span class="theme-name">${theme.name}</span>
+              ${descOrTag}
+            </div>
+            <div class="theme-desc-popup">${theme.description || ''}</div>
+            ${buildPopupEffectPills(theme.id)}
+          </div>
+          <div class="theme-clone-row">
+            <span class="theme-clone-btn" data-clone="${theme.id}" title="Clone & customize this theme">
+              <svg width="10" height="10" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+                <rect x="3.5" y="3.5" width="7" height="7" rx="1" stroke="currentColor" stroke-width="1.2"/>
+                <path d="M8.5 3.5v-1a1 1 0 0 0-1-1h-5a1 1 0 0 0-1 1v5a1 1 0 0 0 1 1h1" stroke="currentColor" stroke-width="1.2"/>
+              </svg>
+              Clone
+            </span>
           </div>
           <div class="theme-check" aria-hidden="true">
             <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
@@ -104,7 +161,22 @@
 
     // Bind theme cards
     document.querySelectorAll('.theme-card[data-theme]').forEach(btn => {
-      btn.addEventListener('click', () => selectTheme(btn.dataset.theme));
+      btn.addEventListener('click', (e) => {
+        // Clone button → open Builder on the options page with this theme pre-selected
+        const cloneBtn = e.target.closest('[data-clone]');
+        if (cloneBtn) {
+          e.stopPropagation();
+          chrome.storage.local.set({
+            openOptionsTab: 'builder',
+            openBuilderClone: cloneBtn.dataset.clone,
+          }).then(() => {
+            chrome.runtime.openOptionsPage();
+            window.close();
+          });
+          return;
+        }
+        selectTheme(btn.dataset.theme);
+      });
       btn.addEventListener('keydown', (e) => {
         if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); selectTheme(btn.dataset.theme); }
       });
