@@ -32,6 +32,28 @@
   let currentTheme = null;
   let observer = null;
   let mediaQuery = null;
+  let contextDead = false;
+
+  /**
+   * Returns true if the error is the harmless "Extension context invalidated"
+   * that fires when the extension is reloaded while a content script is still
+   * running on an open tab. The old script's chrome.* handles are now stale.
+   * Once we detect this, we set contextDead and tear down the observer so we
+   * stop hammering a dead context. The user just needs to refresh the SF tab.
+   */
+  function isExtensionContextDead(err) {
+    const msg = err && (err.message || String(err));
+    return !!(msg && msg.includes('Extension context invalidated'));
+  }
+
+  function handleDeadContext() {
+    if (contextDead) return;
+    contextDead = true;
+    if (observer) {
+      try { observer.disconnect(); } catch (_) {}
+      observer = null;
+    }
+  }
 
   // ─── Transition helpers ──────────────────────────────────────────────────
 
@@ -175,6 +197,7 @@
    *   - OOTB theme active  → use global effectsConfig
    */
   async function loadAndApplyEffects(themeName) {
+    if (contextDead) return;
     try {
       const [syncData, themeData] = await Promise.all([
         chrome.storage.sync.get({ effectsConfig: null, customThemes: [] }),
@@ -207,6 +230,10 @@
         applyEffects(config, theme.colors);
       }
     } catch (err) {
+      if (isExtensionContextDead(err)) {
+        handleDeadContext();
+        return;
+      }
       console.warn('[Salesforce Themer] Effects load error:', err.message);
     }
   }
@@ -222,6 +249,7 @@
   }
 
   async function applyTheme(themeName, animate = true) {
+    if (contextDead) return;
     if (themeName === 'none') {
       if (animate) beginTransition();
       removeThemeStyles();
@@ -240,6 +268,10 @@
       currentTheme = themeName;
       if (animate) endTransition();
     } catch (err) {
+      if (isExtensionContextDead(err)) {
+        handleDeadContext();
+        return;
+      }
       console.warn('[Salesforce Themer] Could not apply theme:', err.message);
     }
   }
@@ -272,22 +304,31 @@
     if (mediaQuery) return; // Only set up once
     mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
     mediaQuery.addEventListener('change', async () => {
-      const result = await chrome.storage.sync.get({
-        autoMode: false,
-        lastLightTheme: 'connectry',
-        lastDarkTheme: 'connectry-dark',
-        orgThemes: {},
-      });
+      if (contextDead) return;
+      try {
+        const result = await chrome.storage.sync.get({
+          autoMode: false,
+          lastLightTheme: 'connectry',
+          lastDarkTheme: 'connectry-dark',
+          orgThemes: {},
+        });
 
-      if (!result.autoMode) return;
+        if (!result.autoMode) return;
 
-      // Check if this org has a per-org override — if so, don't auto-switch
-      const hostname = getOrgHostname();
-      if (result.orgThemes[hostname]) return;
+        // Check if this org has a per-org override — if so, don't auto-switch
+        const hostname = getOrgHostname();
+        if (result.orgThemes[hostname]) return;
 
-      const isDark = mediaQuery.matches;
-      const next = isDark ? result.lastDarkTheme : result.lastLightTheme;
-      await applyTheme(next, true);
+        const isDark = mediaQuery.matches;
+        const next = isDark ? result.lastDarkTheme : result.lastLightTheme;
+        await applyTheme(next, true);
+      } catch (err) {
+        if (isExtensionContextDead(err)) {
+          handleDeadContext();
+          return;
+        }
+        console.warn('[Salesforce Themer] Auto-mode listener error:', err.message);
+      }
     });
   }
 
@@ -402,6 +443,10 @@
       // Load effects layer after theme is applied
       loadAndApplyEffects(themeName);
     } catch (err) {
+      if (isExtensionContextDead(err)) {
+        handleDeadContext();
+        return;
+      }
       console.warn('[Salesforce Themer] Init error:', err.message);
       try {
         await applyTheme('connectry', false);
