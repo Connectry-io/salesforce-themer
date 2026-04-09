@@ -619,6 +619,45 @@
   box-shadow: 0 0 0 1px var(--cx-accent-light);
 }
 
+.effect-card.is-locked {
+  cursor: pointer;
+  position: relative;
+}
+
+.effect-card.is-locked:hover {
+  border-color: var(--cx-warning);
+  box-shadow: 0 0 0 1px rgba(217, 119, 6, 0.2);
+}
+
+.effect-card.is-locked .effect-controls {
+  opacity: 0.55;
+  pointer-events: none;
+}
+
+.effect-card.is-locked .effect-slider {
+  cursor: not-allowed;
+}
+
+.effect-card.is-locked .effect-select {
+  cursor: not-allowed;
+}
+
+.effect-lock-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  background: rgba(217, 119, 6, 0.1);
+  border: 1px solid rgba(217, 119, 6, 0.25);
+  border-radius: var(--cx-radius-full);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--cx-warning);
+  flex-shrink: 0;
+}
+
 .effect-card-header {
   display: flex;
   align-items: flex-start;

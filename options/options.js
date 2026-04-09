@@ -1,6 +1,28 @@
 (() => {
   'use strict';
 
+  // ─── Premium gate ─────────────────────────────────────────────────────────
+  //
+  // Free tier gets: all themes, all presets (None/Subtle/Alive/Immersive),
+  //   theme scope, auto mode, per-org themes, keyboard shortcuts, theme hints.
+  //
+  // Premium tier unlocks: individual effect toggles & intensity sliders,
+  //   particle style selection, per-theme effects, the Builder (custom themes,
+  //   AI generation, brand guide upload, URL matching), and Marketplace sharing.
+  //
+  // TODO: when auth ships, read from chrome.storage.local.premiumStatus set by
+  // the backend session. For now this is a hardcoded flag that can be toggled
+  // in dev via: chrome.storage.local.set({ premiumOverride: true })
+  const IS_PREMIUM = false;
+
+  function isPremium() {
+    // Local override for dev/testing — set via:
+    // chrome.storage.local.set({ premiumOverride: true })
+    return IS_PREMIUM || _localPremiumOverride;
+  }
+
+  let _localPremiumOverride = false;
+
   let THEMES = [];
   let syncState = {};
   let activeFilter = 'all';
@@ -115,6 +137,7 @@
         const hintBtn = e.target.closest('[data-suggested-for]');
         if (cloneBtn) {
           e.stopPropagation();
+          if (!_guardPremium()) return;
           openCreationDialog(cloneBtn.dataset.clone);
           return;
         }
@@ -554,6 +577,12 @@
   async function init() {
     await loadThemes();
 
+    // Load dev premium override from local storage (hidden dev toggle)
+    try {
+      const local = await chrome.storage.local.get({ premiumOverride: false });
+      _localPremiumOverride = !!local.premiumOverride;
+    } catch (_) {}
+
     syncState = await chrome.storage.sync.get({
       theme: 'connectry',
       autoMode: false,
@@ -646,23 +675,42 @@
 
     // Empty-state buttons in custom themes section
     document.getElementById('createThemeBtnEmpty')?.addEventListener('click', () => {
+      if (!_guardPremium()) return;
       _pendingCreateEffects = getSuggestedEffectsFor('connectry');
       openEditor('connectry', null);
     });
     document.getElementById('cloneFirstBtn')?.addEventListener('click', () => {
+      if (!_guardPremium()) return;
       openCreationDialog('connectry');
     });
 
-    // Builder tab: create-method cards
+    // Builder tab: create-method cards (all premium)
     document.querySelectorAll('.create-method-card[data-method]').forEach(card => {
       card.addEventListener('click', () => {
         const method = card.dataset.method;
+        // All create methods are premium. Manual is the only one that currently
+        // works — AI, brand-guide, url are coming soon (will show upgrade prompt
+        // even when premium is unlocked, until they ship).
+        if (!isPremium()) {
+          openUpgradeDialog();
+          return;
+        }
         if (method === 'manual') {
           openCreationDialog('connectry');
         }
-        // ai / brand-guide / url are coming-soon — disabled, no handler needed
+        // Other methods are coming-soon even for premium users — no-op for now
       });
     });
+  }
+
+  /**
+   * Check if the user is premium; open the upgrade dialog if not.
+   * @returns {boolean} true if user is premium and the caller can proceed
+   */
+  function _guardPremium() {
+    if (isPremium()) return true;
+    openUpgradeDialog();
+    return false;
   }
 
   // ═══════════════════════════════════════════════════════════════════════════
@@ -1289,6 +1337,20 @@
     if (!banner || !text) return;
 
     const { mode, theme } = resolveEffectsEditingTarget();
+
+    if (!isPremium()) {
+      // Free tier: show a friendly "presets only" notice instead of editing-mode banner
+      banner.className = 'cx-banner cx-banner-info';
+      text.innerHTML = `
+        <strong>Free tier:</strong> Pick any of the four presets below to style every built-in theme.
+        Upgrade to <strong>Premium</strong> to customize individual effects, set a different intensity per effect,
+        or give each custom theme its own effect config.
+      `;
+      actions.innerHTML = `<button class="cx-btn cx-btn-sm cx-btn-primary" id="upgradeFromBannerBtn">Upgrade</button>`;
+      document.getElementById('upgradeFromBannerBtn')?.addEventListener('click', openUpgradeDialog);
+      return;
+    }
+
     if (mode === 'custom' && theme) {
       banner.className = 'cx-banner cx-banner-info';
       text.innerHTML = `Editing effects for <strong>${Connectry.Settings.escape(theme.name)}</strong>. These effects are saved with this theme only — global changes won't affect it.`;
@@ -1299,6 +1361,39 @@
       text.innerHTML = `Editing <strong>global effects</strong> — these apply to all built-in themes.`;
       actions.innerHTML = '';
     }
+  }
+
+  function openUpgradeDialog() {
+    const body = document.createElement('div');
+    body.innerHTML = `
+      <p style="margin-bottom:16px;">Upgrade to Connectry Themer Premium to unlock the advanced features:</p>
+      <ul style="margin: 0 0 16px 18px; padding: 0; font-size: 13px; line-height: 1.7; color: var(--cx-text-muted);">
+        <li><strong>Individual effect control</strong> — turn any effect on or off, not just presets</li>
+        <li><strong>Per-effect intensity sliders</strong> — subtle, medium, or strong for each effect</li>
+        <li><strong>Particle style picker</strong> — snow, rain, matrix, dots, or embers on any theme</li>
+        <li><strong>Per-theme effects</strong> — custom themes carry their own effect configs</li>
+        <li><strong>Custom theme builder</strong> — clone, tweak, import/export JSON</li>
+        <li><strong>AI theme generation</strong> — describe a vibe or paste a URL (coming soon)</li>
+        <li><strong>Marketplace access</strong> — share themes and install community packs (coming soon)</li>
+      </ul>
+      <p style="font-size: 12px; color: var(--cx-text-subtle); margin-bottom: 0;">Free tier keeps everything you have now: all 15 themes, 4 effect presets, auto dark mode, per-org themes, and keyboard shortcuts.</p>
+    `;
+
+    const dialog = new Connectry.Settings.Dialog({
+      title: 'Upgrade to Premium',
+      body,
+      actions: [
+        { label: 'Maybe later', variant: 'secondary' },
+        {
+          label: 'Learn more',
+          variant: 'primary',
+          onClick: () => {
+            window.open('https://connectry.io', '_blank', 'noopener');
+          },
+        },
+      ],
+    });
+    dialog.open();
   }
 
   function openEffectsResetMenu() {
@@ -1414,26 +1509,38 @@
     grid.innerHTML = '';
     stopEffectPreviews();
 
+    const locked = !isPremium();
+
     for (const effect of EFFECT_CATALOG) {
       const isOn = !!config[effect.id];
       const intensity = config[effect.id + 'Intensity'] || 'medium';
       const intensityVal = INTENSITY_TO_VAL[intensity] || 2;
 
       const card = document.createElement('div');
-      card.className = `effect-card${isOn ? ' is-enabled' : ''}`;
+      card.className = `effect-card${isOn ? ' is-enabled' : ''}${locked ? ' is-locked' : ''}`;
       card.dataset.effect = effect.id;
 
       const particleType = typeof config.particles === 'string' ? config.particles : 'snow';
       const particleSelectRow = effect.id === 'particles' ? `
         <div class="effect-slider-row">
           <span class="effect-select-label">Style</span>
-          <select class="effect-select" data-effect-select="particles">
+          <select class="effect-select" data-effect-select="particles" ${locked ? 'disabled' : ''}>
             <option value="snow" ${particleType === 'snow' ? 'selected' : ''}>Snow</option>
             <option value="dots" ${particleType === 'dots' ? 'selected' : ''}>Floating Dots</option>
             <option value="matrix" ${particleType === 'matrix' ? 'selected' : ''}>Matrix Rain</option>
             <option value="embers" ${particleType === 'embers' ? 'selected' : ''}>Embers</option>
             <option value="rain" ${particleType === 'rain' ? 'selected' : ''}>Rain</option>
           </select>
+        </div>
+      ` : '';
+
+      const lockBadge = locked ? `
+        <div class="effect-lock-badge" title="Upgrade to Premium to control this effect individually">
+          <svg width="11" height="11" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+            <rect x="2.5" y="5.5" width="7" height="5" rx="1" stroke="currentColor" stroke-width="1.3"/>
+            <path d="M4 5.5V4a2 2 0 0 1 4 0v1.5" stroke="currentColor" stroke-width="1.3"/>
+          </svg>
+          Premium
         </div>
       ` : '';
 
@@ -1447,50 +1554,59 @@
             <div class="effect-short">${effect.short}</div>
             <div class="effect-long">${effect.long}</div>
           </div>
-          <label class="cx-toggle">
-            <input type="checkbox" data-effect-toggle="${effect.id}" ${isOn ? 'checked' : ''} />
-            <span class="cx-toggle-track"><span class="cx-toggle-thumb"></span></span>
-          </label>
+          ${locked ? lockBadge : `
+            <label class="cx-toggle">
+              <input type="checkbox" data-effect-toggle="${effect.id}" ${isOn ? 'checked' : ''} />
+              <span class="cx-toggle-track"><span class="cx-toggle-thumb"></span></span>
+            </label>
+          `}
         </div>
         <div class="effect-controls">
           <div class="effect-slider-row">
             <span class="effect-slider-label">Intensity</span>
-            <input type="range" class="effect-slider" data-effect-slider="${effect.id}" min="1" max="3" step="1" value="${intensityVal}" />
+            <input type="range" class="effect-slider" data-effect-slider="${effect.id}" min="1" max="3" step="1" value="${intensityVal}" ${locked ? 'disabled' : ''} />
             <span class="effect-slider-value">${_capitalize(intensity)}</span>
           </div>
           ${particleSelectRow}
         </div>
       `;
 
-      // Toggle
-      const toggle = card.querySelector(`[data-effect-toggle="${effect.id}"]`);
-      toggle.addEventListener('change', async () => {
-        const { config: current } = resolveEffectsEditingTarget();
-        const next = { ...current, preset: 'custom' };
-        if (effect.id === 'particles') {
-          next.particles = toggle.checked ? (particleType || 'snow') : false;
-        } else {
-          next[effect.id] = toggle.checked;
-        }
-        await saveEffectsConfig(next);
-      });
+      if (locked) {
+        // Clicking anywhere on a locked card opens the upgrade dialog
+        card.addEventListener('click', (e) => {
+          // Don't hijack the hover preview interaction
+          if (e.target.closest('.effect-preview')) return;
+          openUpgradeDialog();
+        });
+      } else {
+        // Toggle
+        const toggle = card.querySelector(`[data-effect-toggle="${effect.id}"]`);
+        toggle?.addEventListener('change', async () => {
+          const { config: current } = resolveEffectsEditingTarget();
+          const next = { ...current, preset: 'custom' };
+          if (effect.id === 'particles') {
+            next.particles = toggle.checked ? (particleType || 'snow') : false;
+          } else {
+            next[effect.id] = toggle.checked;
+          }
+          await saveEffectsConfig(next);
+        });
 
-      // Slider
-      const slider = card.querySelector(`[data-effect-slider="${effect.id}"]`);
-      slider.addEventListener('input', async () => {
-        const intensityName = VAL_TO_INTENSITY[parseInt(slider.value)] || 'medium';
-        const { config: current } = resolveEffectsEditingTarget();
-        const next = { ...current, preset: 'custom' };
-        next[effect.id + 'Intensity'] = intensityName;
-        const label = card.querySelector('.effect-slider-value');
-        if (label) label.textContent = _capitalize(intensityName);
-        await saveEffectsConfig(next);
-      });
+        // Slider
+        const slider = card.querySelector(`[data-effect-slider="${effect.id}"]`);
+        slider?.addEventListener('input', async () => {
+          const intensityName = VAL_TO_INTENSITY[parseInt(slider.value)] || 'medium';
+          const { config: current } = resolveEffectsEditingTarget();
+          const next = { ...current, preset: 'custom' };
+          next[effect.id + 'Intensity'] = intensityName;
+          const label = card.querySelector('.effect-slider-value');
+          if (label) label.textContent = _capitalize(intensityName);
+          await saveEffectsConfig(next);
+        });
 
-      // Particle select
-      const pSelect = card.querySelector('[data-effect-select="particles"]');
-      if (pSelect) {
-        pSelect.addEventListener('change', async () => {
+        // Particle select
+        const pSelect = card.querySelector('[data-effect-select="particles"]');
+        pSelect?.addEventListener('change', async () => {
           const { config: current } = resolveEffectsEditingTarget();
           const next = { ...current, preset: 'custom' };
           if (next.particles) next.particles = pSelect.value;
@@ -1672,6 +1788,7 @@
   setTimeout(() => {
     bindEditorEvents();
     document.getElementById('createThemeBtn')?.addEventListener('click', () => {
+      if (!_guardPremium()) return;
       openCreationDialog('connectry');
     });
   }, 100);

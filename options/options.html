@@ -36,12 +36,19 @@
           </svg>
           Themes
         </button>
+        <button class="cx-tab" role="tab" data-tab="effects" aria-selected="false">
+          <svg class="cx-tab-icon" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+            <path d="M8 1l1.8 4.2L14 6l-3.2 2.8L12 13 8 10.6 4 13l1.2-4.2L2 6l4.2-0.8L8 1z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
+          </svg>
+          Effects
+        </button>
         <button class="cx-tab" role="tab" data-tab="builder" aria-selected="false">
           <svg class="cx-tab-icon" viewBox="0 0 16 16" fill="none" aria-hidden="true">
             <path d="M11 2l3 3-8 8H3v-3l8-8z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
             <path d="M9 4l3 3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
           </svg>
           Builder
+          <span class="cx-tab-badge">Premium</span>
         </button>
         <button class="cx-tab" role="tab" data-tab="marketplace" aria-selected="false">
           <svg class="cx-tab-icon" viewBox="0 0 16 16" fill="none" aria-hidden="true">
@@ -50,13 +57,6 @@
           </svg>
           Marketplace
           <span class="cx-tab-badge">Soon</span>
-        </button>
-        <button class="cx-tab" role="tab" data-tab="effects" aria-selected="false">
-          <svg class="cx-tab-icon" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-            <path d="M8 1l1.8 4.2L14 6l-3.2 2.8L12 13 8 10.6 4 13l1.2-4.2L2 6l4.2-0.8L8 1z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
-          </svg>
-          Effects
-          <span class="cx-tab-badge">Premium</span>
         </button>
         <button class="cx-tab" role="tab" data-tab="shortcuts" aria-selected="false">
           <svg class="cx-tab-icon" viewBox="0 0 16 16" fill="none" aria-hidden="true">
@@ -169,7 +169,8 @@
 
         <div class="create-method-grid">
 
-          <button class="create-method-card" data-method="manual">
+          <button class="create-method-card" data-method="manual" id="createMethodManual">
+            <div class="create-method-badge">Premium</div>
             <div class="create-method-icon">
               <svg width="22" height="22" viewBox="0 0 22 22" fill="none" aria-hidden="true">
                 <path d="M14 2l6 6-12 12H2v-6L14 2z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
@@ -178,7 +179,7 @@
             </div>
             <div class="create-method-name">From scratch or clone</div>
             <div class="create-method-desc">Pick a built-in theme as your starting point and tweak any of the 23 core colors. Live preview, advanced overrides, JSON import/export.</div>
-            <div class="create-method-cta">Available now →</div>
+            <div class="create-method-cta">Available with Premium</div>
           </button>
 
           <button class="create-method-card is-coming-soon" data-method="ai" disabled>
