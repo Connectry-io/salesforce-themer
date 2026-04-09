@@ -1292,15 +1292,111 @@ chrome.runtime.onInstalled.addListener(async (details) => {
       lastDarkTheme: 'connectry-dark',
       orgThemes: {},
       themeScope: 'both',
+      effectsConfig: {
+        preset: 'subtle',
+        hoverLift: true, hoverLiftIntensity: 'subtle',
+        ambientGlow: false, ambientGlowIntensity: 'subtle',
+        borderShimmer: false, borderShimmerIntensity: 'subtle',
+        gradientBorders: false, gradientBordersIntensity: 'subtle',
+        aurora: false, auroraIntensity: 'subtle',
+        neonFlicker: false, neonFlickerIntensity: 'subtle',
+        particles: false, particlesIntensity: 'subtle',
+        cursorTrail: false, cursorTrailIntensity: 'subtle',
+      },
     });
   }
 
+  await migrateCustomThemeEffects();
   await cacheAllThemes();
 });
+
+/**
+ * Backfill the `effects` snapshot on existing custom themes that were created
+ * before the per-theme effects feature. Each gets its base theme's suggested
+ * effects as a starting point. One-way migration — only runs on themes missing
+ * the key.
+ */
+async function migrateCustomThemeEffects() {
+  try {
+    const { customThemes = [] } = await chrome.storage.sync.get('customThemes');
+    if (!customThemes.length) return;
+
+    let migrated = false;
+    for (const t of customThemes) {
+      if (!t.effects) {
+        // Inline seed logic (mirrors initialCustomThemeEffects('basic', basedOn, null))
+        t.effects = suggestedEffectsFor(t.basedOn);
+        migrated = true;
+      }
+    }
+
+    if (migrated) {
+      await chrome.storage.sync.set({ customThemes });
+      console.log('[Salesforce Themer] Migrated custom themes with effects snapshots');
+    }
+  } catch (err) {
+    console.warn('[Salesforce Themer] Migration error:', err.message);
+  }
+}
+
+/**
+ * Return a suggested effects config for a theme ID, inlined here so the
+ * service worker doesn't need to import presets.js. Mirrors
+ * effects/presets.js THEME_EFFECTS_MAP + EFFECTS_PRESETS.
+ */
+function suggestedEffectsFor(themeId) {
+  const NONE = {
+    preset: 'none',
+    hoverLift: false, hoverLiftIntensity: 'medium',
+    ambientGlow: false, ambientGlowIntensity: 'medium',
+    borderShimmer: false, borderShimmerIntensity: 'medium',
+    gradientBorders: false, gradientBordersIntensity: 'medium',
+    aurora: false, auroraIntensity: 'medium',
+    neonFlicker: false, neonFlickerIntensity: 'medium',
+    particles: false, particlesIntensity: 'medium',
+    cursorTrail: false, cursorTrailIntensity: 'medium',
+  };
+  const SUBTLE = { ...NONE, preset: 'subtle', hoverLift: true, hoverLiftIntensity: 'subtle' };
+  const ALIVE = {
+    ...NONE, preset: 'alive',
+    hoverLift: true, hoverLiftIntensity: 'medium',
+    ambientGlow: true, ambientGlowIntensity: 'medium',
+    borderShimmer: true, borderShimmerIntensity: 'medium',
+  };
+  const IMMERSIVE = {
+    ...NONE, preset: 'immersive',
+    hoverLift: true, hoverLiftIntensity: 'strong',
+    ambientGlow: true, ambientGlowIntensity: 'strong',
+    borderShimmer: true, borderShimmerIntensity: 'medium',
+    gradientBorders: true, gradientBordersIntensity: 'strong',
+    cursorTrail: true, cursorTrailIntensity: 'medium',
+  };
+
+  const MAP = {
+    'connectry': SUBTLE,
+    'connectry-dark': { ...SUBTLE, ambientGlow: true, ambientGlowIntensity: 'subtle' },
+    'midnight': { ...SUBTLE, aurora: true, auroraIntensity: 'subtle', particles: 'dots', particlesIntensity: 'subtle' },
+    'slate': SUBTLE,
+    'tron': { ...IMMERSIVE, neonFlicker: true, neonFlickerIntensity: 'strong', ambientGlow: true, ambientGlowIntensity: 'strong' },
+    'obsidian': { ...SUBTLE, ambientGlow: true, ambientGlowIntensity: 'subtle' },
+    'arctic': { ...ALIVE, aurora: true, auroraIntensity: 'medium', particles: 'snow', particlesIntensity: 'medium' },
+    'sakura': { ...SUBTLE, borderShimmer: true, borderShimmerIntensity: 'subtle' },
+    'ember': { ...SUBTLE, ambientGlow: true, ambientGlowIntensity: 'medium', particles: 'embers', particlesIntensity: 'subtle' },
+    'nord': { ...SUBTLE, aurora: true, auroraIntensity: 'subtle' },
+    'terminal': { ...ALIVE, neonFlicker: true, neonFlickerIntensity: 'medium', particles: 'matrix', particlesIntensity: 'medium' },
+    'high-contrast': NONE,
+    'dracula': { ...SUBTLE, ambientGlow: true, ambientGlowIntensity: 'medium', borderShimmer: true, borderShimmerIntensity: 'medium' },
+    'solarized-light': SUBTLE,
+    'solarized-dark': { ...SUBTLE, ambientGlow: true, ambientGlowIntensity: 'subtle' },
+  };
+
+  return MAP[themeId] || NONE;
+}
 
 // Re-generate CSS when browser starts
 chrome.runtime.onStartup.addListener(async () => {
   await loadThemeRegistry();
+  await migrateCustomThemeEffects();
   await cacheAllThemes();
 });
 
@@ -1308,6 +1404,7 @@ chrome.runtime.onStartup.addListener(async () => {
 (async () => {
   try {
     await loadThemeRegistry();
+    await migrateCustomThemeEffects();
     await cacheAllThemes();
   } catch (_) {}
 })();
@@ -1321,8 +1418,9 @@ chrome.storage.onChanged.addListener(async (changes, area) => {
     if (!THEME_REGISTRY.themes.length) await loadThemeRegistry();
     await cacheThemeCSS(changes.theme.newValue);
   }
-  if (changes.effectsConfig) {
+  if (changes.effectsConfig || changes.customThemes) {
     // Broadcast effects update to active SF tabs
+    // (customThemes changes matter too since custom themes carry their own snapshot)
     broadcastEffectsToActiveTabs();
   }
 });

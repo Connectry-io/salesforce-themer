@@ -263,14 +263,62 @@
     await applyThemeToTab(syncState.theme || 'connectry');
   }
 
-  // ─── Effects preset selector ──────���────────────────────────────────────────
+  // ─── Effects preset selector ────────────────────────────────────────────────
+
+  const POPUP_EFFECTS_PRESETS = {
+    none: {
+      preset: 'none',
+      hoverLift: false, hoverLiftIntensity: 'medium',
+      ambientGlow: false, ambientGlowIntensity: 'medium',
+      borderShimmer: false, borderShimmerIntensity: 'medium',
+      gradientBorders: false, gradientBordersIntensity: 'medium',
+      aurora: false, auroraIntensity: 'medium',
+      neonFlicker: false, neonFlickerIntensity: 'medium',
+      particles: false, particlesIntensity: 'medium',
+      cursorTrail: false, cursorTrailIntensity: 'medium',
+    },
+    subtle: {
+      preset: 'subtle',
+      hoverLift: true, hoverLiftIntensity: 'subtle',
+      ambientGlow: false, ambientGlowIntensity: 'subtle',
+      borderShimmer: false, borderShimmerIntensity: 'subtle',
+      gradientBorders: false, gradientBordersIntensity: 'subtle',
+      aurora: false, auroraIntensity: 'subtle',
+      neonFlicker: false, neonFlickerIntensity: 'subtle',
+      particles: false, particlesIntensity: 'subtle',
+      cursorTrail: false, cursorTrailIntensity: 'subtle',
+    },
+    alive: {
+      preset: 'alive',
+      hoverLift: true, hoverLiftIntensity: 'medium',
+      ambientGlow: true, ambientGlowIntensity: 'medium',
+      borderShimmer: true, borderShimmerIntensity: 'medium',
+      gradientBorders: false, gradientBordersIntensity: 'medium',
+      aurora: false, auroraIntensity: 'medium',
+      neonFlicker: false, neonFlickerIntensity: 'medium',
+      particles: false, particlesIntensity: 'medium',
+      cursorTrail: false, cursorTrailIntensity: 'medium',
+    },
+    immersive: {
+      preset: 'immersive',
+      hoverLift: true, hoverLiftIntensity: 'strong',
+      ambientGlow: true, ambientGlowIntensity: 'strong',
+      borderShimmer: true, borderShimmerIntensity: 'medium',
+      gradientBorders: true, gradientBordersIntensity: 'strong',
+      aurora: false, auroraIntensity: 'medium',
+      neonFlicker: false, neonFlickerIntensity: 'medium',
+      particles: false, particlesIntensity: 'medium',
+      cursorTrail: true, cursorTrailIntensity: 'medium',
+    },
+  };
 
   function bindEffectsSelector() {
     const pills = document.querySelectorAll('.effects-pill');
     pills.forEach(pill => {
       pill.addEventListener('click', async () => {
         const preset = pill.dataset.preset;
-        await chrome.storage.sync.set({ effectsConfig: { preset } });
+        const config = POPUP_EFFECTS_PRESETS[preset] || POPUP_EFFECTS_PRESETS.none;
+        await chrome.storage.sync.set({ effectsConfig: { ...config } });
         setEffectsUI(preset);
       });
     });

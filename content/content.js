@@ -152,42 +152,55 @@
 
     if (config && config.particles && config.particles !== false) {
       const pType = typeof config.particles === 'string' ? config.particles : 'dots';
-      particleSystem = new SFThemerParticles(pType, {
-        color: config.particleColor || themeColors?.accent || '#ffffff',
-        density: config.particleDensity || 40,
-        speed: config.particleSpeed || 1,
-        opacity: config.particleOpacity || 0.5,
-      });
+      const runtime = typeof buildParticleRuntimeConfig === 'function'
+        ? buildParticleRuntimeConfig(config, themeColors)
+        : { color: themeColors?.accent || '#ffffff', density: 50, speed: 1, opacity: 0.5 };
+      particleSystem = new SFThemerParticles(pType, runtime);
       particleSystem.init();
     }
 
     if (config && config.cursorTrail) {
-      cursorTrailSystem = new SFThemerCursorTrail({
-        color: config.cursorTrailColor || themeColors?.accent || '#ffffff',
-        length: config.cursorTrailLength || 20,
-        size: config.cursorTrailSize || 4,
-        opacity: 0.5,
-      });
+      const runtime = typeof buildCursorTrailRuntimeConfig === 'function'
+        ? buildCursorTrailRuntimeConfig(config, themeColors)
+        : { color: themeColors?.accent || '#ffffff', length: 20, size: 4, opacity: 0.5 };
+      cursorTrailSystem = new SFThemerCursorTrail(runtime);
       cursorTrailSystem.init();
     }
   }
 
   /**
    * Load and apply effects for the current theme.
-   * Reads effectsConfig from storage, resolves against theme defaults.
+   * Resolution rules (implemented in resolveActiveEffects):
+   *   - Custom theme active → use customTheme.effects snapshot
+   *   - OOTB theme active  → use global effectsConfig
    */
   async function loadAndApplyEffects(themeName) {
     try {
       const [syncData, themeData] = await Promise.all([
-        chrome.storage.sync.get({ effectsConfig: null }),
+        chrome.storage.sync.get({ effectsConfig: null, customThemes: [] }),
         fetch(chrome.runtime.getURL('themes/themes.json')).then(r => r.json()),
       ]);
 
-      const theme = themeData.themes.find(t => t.id === themeName);
+      // Find the theme (OOTB or custom)
+      let theme = themeData.themes.find(t => t.id === themeName);
+      let customTheme = null;
+
+      if (!theme && Array.isArray(syncData.customThemes)) {
+        customTheme = syncData.customThemes.find(t => t.id === themeName);
+        if (customTheme) {
+          // Use the custom theme's resolved colors (base + overrides)
+          const base = themeData.themes.find(t => t.id === customTheme.basedOn);
+          theme = {
+            id: customTheme.id,
+            colors: { ...(base?.colors || {}), ...(customTheme.coreOverrides || {}), ...(customTheme.advancedOverrides || {}) },
+          };
+        }
+      }
+
       if (!theme) return;
 
-      const config = typeof resolveEffectsConfig === 'function'
-        ? resolveEffectsConfig(themeName, syncData.effectsConfig)
+      const config = typeof resolveActiveEffects === 'function'
+        ? resolveActiveEffects(themeName, syncData.effectsConfig, customTheme)
         : null;
 
       if (config) {

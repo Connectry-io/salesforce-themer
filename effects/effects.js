@@ -6,34 +6,159 @@
  * This is a SEPARATE layer from the color theme engine. Effects are toggled independently
  * via body classes (body.sf-themer-fx-*) and a dedicated <style id="sf-themer-effects">.
  *
- * Architecture:
- *   - CSS effects: generated once per config change, injected as static CSS
- *   - Canvas effects: particles + cursor trail, managed by SFThemerParticles
- *   - All effects respect prefers-reduced-motion
- *   - Canvas auto-pauses when tab is hidden or on battery power
+ * Design principles:
+ *   - Per-effect intensity (hoverLiftIntensity, ambientGlowIntensity, ...)
+ *   - Effect colors derived from current theme accent at render time (auto-adapt on theme switch)
+ *   - All CSS respects prefers-reduced-motion
+ *   - Canvas systems auto-pause when tab is hidden, reduce density on battery
+ *   - Never touches .slds-modal, .slds-dropdown, .slds-combobox, .slds-popover (breaks SF positioning)
  */
 
 'use strict';
+
+// ─── Intensity helper ────────────────────────────────────────────────────────
+
+const INTENSITY_MULT = { subtle: 0.5, medium: 1.0, strong: 1.5 };
+
+function _intensityMult(config, effect, fallback = 'medium') {
+  const lvl = (config && config[effect + 'Intensity']) || fallback;
+  return INTENSITY_MULT[lvl] || 1.0;
+}
+
+// Particle density/speed/opacity derived from intensity level
+const PARTICLE_INTENSITY = {
+  subtle: { density: 25, speed: 0.6, opacity: 0.35 },
+  medium: { density: 50, speed: 1.0, opacity: 0.5 },
+  strong: { density: 100, speed: 1.3, opacity: 0.7 },
+};
+
+
+// ─── Color utilities ────────────────────────────────────────────────────────
+
+function _hexToRgb(hex) {
+  if (!hex || typeof hex !== 'string') return '128, 128, 128';
+  const clean = hex.replace('#', '');
+  if (clean.length === 3) {
+    const r = parseInt(clean[0] + clean[0], 16);
+    const g = parseInt(clean[1] + clean[1], 16);
+    const b = parseInt(clean[2] + clean[2], 16);
+    return `${r}, ${g}, ${b}`;
+  }
+  if (clean.length === 6) {
+    const r = parseInt(clean.slice(0, 2), 16);
+    const g = parseInt(clean.slice(2, 4), 16);
+    const b = parseInt(clean.slice(4, 6), 16);
+    return `${r}, ${g}, ${b}`;
+  }
+  return '128, 128, 128';
+}
+
+function _parseHex(hex) {
+  if (!hex || typeof hex !== 'string') return null;
+  const clean = hex.replace('#', '');
+  if (clean.length === 3) {
+    return {
+      r: parseInt(clean[0] + clean[0], 16),
+      g: parseInt(clean[1] + clean[1], 16),
+      b: parseInt(clean[2] + clean[2], 16),
+    };
+  }
+  if (clean.length === 6) {
+    return {
+      r: parseInt(clean.slice(0, 2), 16),
+      g: parseInt(clean.slice(2, 4), 16),
+      b: parseInt(clean.slice(4, 6), 16),
+    };
+  }
+  return null;
+}
+
+function _rgbToHsl(r, g, b) {
+  r /= 255; g /= 255; b /= 255;
+  const max = Math.max(r, g, b), min = Math.min(r, g, b);
+  const l = (max + min) / 2;
+  let h = 0, s = 0;
+  if (max !== min) {
+    const d = max - min;
+    s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+    if (max === r) h = ((g - b) / d + (g < b ? 6 : 0)) / 6;
+    else if (max === g) h = ((b - r) / d + 2) / 6;
+    else h = ((r - g) / d + 4) / 6;
+  }
+  return { h: h * 360, s: s * 100, l: l * 100 };
+}
+
+function _hslToHex(h, s, l) {
+  h /= 360; s /= 100; l /= 100;
+  let r, g, b;
+  if (s === 0) {
+    r = g = b = l;
+  } else {
+    const hue2rgb = (p, q, t) => {
+      if (t < 0) t += 1;
+      if (t > 1) t -= 1;
+      if (t < 1/6) return p + (q - p) * 6 * t;
+      if (t < 1/2) return q;
+      if (t < 2/3) return p + (q - p) * (2/3 - t) * 6;
+      return p;
+    };
+    const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+    const p = 2 * l - q;
+    r = hue2rgb(p, q, h + 1/3);
+    g = hue2rgb(p, q, h);
+    b = hue2rgb(p, q, h - 1/3);
+  }
+  const toHex = v => Math.round(v * 255).toString(16).padStart(2, '0');
+  return '#' + toHex(r) + toHex(g) + toHex(b);
+}
+
+/**
+ * Derive a 3-stop aurora color palette from theme accent.
+ * Uses HSL rotations to create related colors that feel intentional.
+ */
+function _deriveAuroraColors(accent, isDark) {
+  const rgb = _parseHex(accent);
+  if (!rgb) {
+    return isDark
+      ? ['#1a1a2e', '#16213e', '#0f3460']
+      : ['#e8f4fd', '#f0e6ff', '#e6fff0'];
+  }
+  const hsl = _rgbToHsl(rgb.r, rgb.g, rgb.b);
+  const s = isDark ? Math.max(40, hsl.s) : Math.max(25, Math.min(50, hsl.s));
+  const baseL = isDark ? 18 : 88;
+
+  return [
+    _hslToHex(hsl.h, s, baseL),
+    _hslToHex((hsl.h + 60) % 360, s, baseL + (isDark ? 4 : -2)),
+    _hslToHex((hsl.h + 180) % 360, s, baseL + (isDark ? 2 : -1)),
+  ];
+}
+
 
 // ─── Effect CSS Generator ─────────────────────────────────────────────────────
 
 /**
  * Generate all effects CSS based on the active effects config.
- * @param {Object} config - Effects configuration
- * @param {Object} themeColors - Current theme's color values (for accent-aware effects)
+ * @param {Object} config - Effects configuration (flat keys with per-effect intensity)
+ * @param {Object} themeColors - Current theme's color values
  * @returns {string} CSS string
  */
 function generateEffectsCSS(config, themeColors) {
-  if (!config || config.preset === 'none') return '';
+  if (!config) return '';
+
+  // Bail only if truly nothing is enabled. Individual toggles can be active
+  // even when preset is 'none' or 'custom' — don't gate on preset value alone.
+  const anyOn = !!(
+    config.hoverLift || config.ambientGlow || config.borderShimmer ||
+    config.gradientBorders || config.aurora || config.neonFlicker ||
+    config.particles || config.cursorTrail
+  );
+  if (!anyOn) return '';
 
   const c = themeColors || {};
   const accent = c.accent || '#4a6fa5';
   const accentRgb = _hexToRgb(accent);
   const isDark = c.colorScheme === 'dark';
-
-  // Intensity multipliers
-  const intensity = config.intensity || 'medium';
-  const mult = { subtle: 0.5, medium: 1.0, strong: 1.5 }[intensity] || 1.0;
 
   let css = `/* Salesforce Themer — Effects Layer */\n`;
 
@@ -51,13 +176,14 @@ function generateEffectsCSS(config, themeColors) {
 
   // ─── Hover Lift ────────────────────────────────────────────────────────────
   if (config.hoverLift) {
-    const liftPx = Math.round(2 * mult);
-    const shadowSpread = Math.round(25 * mult);
-    const shadowAlpha = isDark ? 0.25 * mult : 0.12 * mult;
-    const btnLift = Math.max(1, Math.round(1 * mult));
+    const m = _intensityMult(config, 'hoverLift');
+    const liftPx = Math.max(1, Math.round(2 * m));
+    const shadowSpread = Math.round(25 * m);
+    const shadowAlpha = (isDark ? 0.25 : 0.12) * m;
+    const btnLift = Math.max(1, Math.round(1 * m));
 
     css += `
-/* ─── Hover Lift ─── */
+/* ─── Hover Lift (intensity ${(config.hoverLiftIntensity || 'medium')}) ─── */
 
 body.sf-themer-fx-hover .slds-card,
 body.sf-themer-fx-hover .forceRelatedListSingleContainer,
@@ -72,8 +198,8 @@ body.sf-themer-fx-hover .forceRelatedListSingleContainer:hover,
 body.sf-themer-fx-hover .forceRecordCard:hover {
   transform: translateY(-${liftPx}px) !important;
   box-shadow:
-    0 ${Math.round(8 * mult)}px ${shadowSpread}px rgba(0, 0, 0, ${shadowAlpha.toFixed(2)}),
-    0 2px 8px rgba(0, 0, 0, ${(shadowAlpha * 0.6).toFixed(2)}) !important;
+    0 ${Math.round(8 * m)}px ${shadowSpread}px rgba(0, 0, 0, ${shadowAlpha.toFixed(3)}),
+    0 2px 8px rgba(0, 0, 0, ${(shadowAlpha * 0.6).toFixed(3)}) !important;
 }
 
 body.sf-themer-fx-hover .slds-button:not(.slds-button_icon):hover {
@@ -86,10 +212,10 @@ body.sf-themer-fx-hover .slds-table tbody tr {
 }
 
 body.sf-themer-fx-hover .slds-table tbody tr:hover {
-  transform: translateX(${Math.max(1, Math.round(2 * mult))}px) !important;
+  transform: translateX(${Math.max(1, Math.round(2 * m))}px) !important;
 }
 
-/* NEVER lift modals, dropdowns, comboboxes — breaks SF positioning */
+/* NEVER lift modals, dropdowns, comboboxes, popovers — breaks SF positioning */
 body.sf-themer-fx-hover .slds-modal,
 body.sf-themer-fx-hover .slds-modal__container,
 body.sf-themer-fx-hover .slds-dropdown,
@@ -103,16 +229,17 @@ body.sf-themer-fx-hover .slds-popover {
 
   // ─── Ambient Glow ──────────────────────────────────────────────────────────
   if (config.ambientGlow) {
-    const glowMin = (0.06 * mult).toFixed(2);
-    const glowMax = (0.15 * mult).toFixed(2);
-    const glowSpeed = Math.round(3000 / mult);
+    const m = _intensityMult(config, 'ambientGlow');
+    const glowMin = (0.06 * m).toFixed(3);
+    const glowMax = (0.15 * m).toFixed(3);
+    const glowSpeed = Math.round(3000 / m);
 
     css += `
-/* ─── Ambient Glow ─── */
+/* ─── Ambient Glow (intensity ${(config.ambientGlowIntensity || 'medium')}) ─── */
 
 @keyframes sf-themer-glow-pulse {
-  0%, 100% { box-shadow: 0 0 ${Math.round(10 * mult)}px rgba(${accentRgb}, ${glowMin}); }
-  50%      { box-shadow: 0 0 ${Math.round(20 * mult)}px rgba(${accentRgb}, ${glowMax}); }
+  0%, 100% { box-shadow: 0 0 ${Math.round(10 * m)}px rgba(${accentRgb}, ${glowMin}); }
+  50%      { box-shadow: 0 0 ${Math.round(20 * m)}px rgba(${accentRgb}, ${glowMax}); }
 }
 
 body.sf-themer-fx-glow .slds-button_brand,
@@ -127,23 +254,25 @@ body.sf-themer-fx-glow .slds-context-bar__item.slds-is-active {
 @keyframes sf-themer-focus-glow {
   0%, 100% { box-shadow: 0 0 0 2px rgba(${accentRgb}, 0.2); }
   50%      { box-shadow: 0 0 0 4px rgba(${accentRgb}, 0.12),
-                          0 0 ${Math.round(15 * mult)}px rgba(${accentRgb}, ${(0.08 * mult).toFixed(2)}); }
+                          0 0 ${Math.round(15 * m)}px rgba(${accentRgb}, ${(0.08 * m).toFixed(3)}); }
 }
 
 body.sf-themer-fx-glow .slds-input:focus,
 body.sf-themer-fx-glow .slds-textarea:focus,
 body.sf-themer-fx-glow .slds-select:focus {
-  animation: sf-themer-focus-glow ${Math.round(2500 / mult)}ms ease-in-out infinite !important;
+  animation: sf-themer-focus-glow ${Math.round(2500 / m)}ms ease-in-out infinite !important;
 }
 `;
   }
 
   // ─── Border Shimmer ────────────────────────────────────────────────────────
   if (config.borderShimmer) {
-    const shimmerSpeed = Math.round(3000 / mult);
+    const m = _intensityMult(config, 'borderShimmer');
+    const shimmerSpeed = Math.round(3000 / m);
+    const shimmerAlpha = (0.6 * m).toFixed(3);
 
     css += `
-/* ─── Border Shimmer ─── */
+/* ─── Border Shimmer (intensity ${(config.borderShimmerIntensity || 'medium')}) ─── */
 
 @keyframes sf-themer-shimmer {
   0%   { background-position: -200% center; }
@@ -166,7 +295,7 @@ body.sf-themer-fx-shimmer .slds-card::before {
     90deg,
     transparent 0%,
     transparent 40%,
-    rgba(${accentRgb}, ${(0.6 * mult).toFixed(2)}) 50%,
+    rgba(${accentRgb}, ${shimmerAlpha}) 50%,
     transparent 60%,
     transparent 100%
   ) !important;
@@ -180,11 +309,12 @@ body.sf-themer-fx-shimmer .slds-card::before {
 
   // ─── Gradient Borders (Animated conic-gradient via @property) ──────────────
   if (config.gradientBorders) {
-    const rotateSpeed = Math.round(4000 / mult);
-    const gradientAlpha = (0.8 * mult).toFixed(2);
+    const m = _intensityMult(config, 'gradientBorders');
+    const rotateSpeed = Math.round(4000 / m);
+    const gradientAlpha = Math.min(1, (0.8 * m)).toFixed(3);
 
     css += `
-/* ─── Gradient Borders ─── */
+/* ─── Gradient Borders (intensity ${(config.gradientBordersIntensity || 'medium')}) ─── */
 
 @property --sf-border-angle {
   syntax: '<angle>';
@@ -225,23 +355,15 @@ body.sf-themer-fx-gradient-border .slds-card::after {
 `;
   }
 
-  // ─── Aurora Background ─────────────────────────────────────────────────────
+  // ─── Aurora Background (theme-accent-derived colors) ──────────────────────
   if (config.aurora) {
-    const auroraOpacity = (0.06 * mult).toFixed(3);
-    const auroraSpeed = Math.round(25000 / mult);
-
-    // Theme-aware aurora colors
-    let auroraColors;
-    if (config.auroraColors) {
-      auroraColors = config.auroraColors;
-    } else if (isDark) {
-      auroraColors = '#1a1a2e, #16213e, #0f3460, #1a5c3a, #1a1a4e, #2d1b69';
-    } else {
-      auroraColors = '#e8f4fd, #f0e6ff, #e6fff0, #fff0e6, #e6f0ff, #f0ffe6';
-    }
+    const m = _intensityMult(config, 'aurora');
+    const auroraOpacity = (0.06 * m).toFixed(3);
+    const auroraSpeed = Math.round(25000 / m);
+    const [aurora1, aurora2, aurora3] = _deriveAuroraColors(accent, isDark);
 
     css += `
-/* ─── Aurora Background ─── */
+/* ─── Aurora Background (intensity ${(config.auroraIntensity || 'medium')}) ─── */
 
 @keyframes sf-themer-aurora {
   0%   { background-position: 0% 50%; filter: hue-rotate(0deg); }
@@ -257,9 +379,9 @@ body.sf-themer-fx-aurora::before {
   z-index: 0 !important;
   opacity: ${auroraOpacity} !important;
   background:
-    radial-gradient(ellipse at 20% 50%, ${auroraColors.split(',')[0]?.trim() || '#1a5c3a'} 0%, transparent 50%),
-    radial-gradient(ellipse at 80% 20%, ${auroraColors.split(',')[4]?.trim() || '#2d1b69'} 0%, transparent 50%),
-    radial-gradient(ellipse at 50% 80%, ${auroraColors.split(',')[2]?.trim() || '#0f3460'} 0%, transparent 50%) !important;
+    radial-gradient(ellipse at 20% 50%, ${aurora1} 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 20%, ${aurora2} 0%, transparent 50%),
+    radial-gradient(ellipse at 50% 80%, ${aurora3} 0%, transparent 50%) !important;
   background-size: 200% 200% !important;
   animation: sf-themer-aurora ${auroraSpeed}ms ease-in-out infinite !important;
   filter: blur(60px) !important;
@@ -275,22 +397,21 @@ body.sf-themer-fx-aurora .slds-modal__container {
 `;
   }
 
-  // ─── Neon Flicker ──────────────────────────────────────────────────────────
+  // ─── Neon Flicker (uses theme accent) ─────────────────────────────────────
   if (config.neonFlicker) {
-    const neonColor = config.neonColor || accent;
-    const neonRgb = _hexToRgb(neonColor);
-    const flickerIntensity = (0.8 * mult).toFixed(2);
+    const m = _intensityMult(config, 'neonFlicker');
+    const flickerIntensity = Math.min(1, (0.8 * m)).toFixed(3);
 
     css += `
-/* ─── Neon Flicker ─── */
+/* ─── Neon Flicker (intensity ${(config.neonFlickerIntensity || 'medium')}) ─── */
 
 @keyframes sf-themer-neon-flicker {
   0%, 19%, 21%, 23%, 25%, 54%, 56%, 100% {
     text-shadow:
-      0 0 4px rgba(${neonRgb}, ${flickerIntensity}),
-      0 0 11px rgba(${neonRgb}, ${(0.5 * mult).toFixed(2)}),
-      0 0 19px rgba(${neonRgb}, ${(0.3 * mult).toFixed(2)}),
-      0 0 40px rgba(${neonRgb}, ${(0.15 * mult).toFixed(2)});
+      0 0 4px rgba(${accentRgb}, ${flickerIntensity}),
+      0 0 11px rgba(${accentRgb}, ${(0.5 * m).toFixed(3)}),
+      0 0 19px rgba(${accentRgb}, ${(0.3 * m).toFixed(3)}),
+      0 0 40px rgba(${accentRgb}, ${(0.15 * m).toFixed(3)});
   }
   20%, 24%, 55% {
     text-shadow: none;
@@ -300,37 +421,35 @@ body.sf-themer-fx-aurora .slds-modal__container {
 @keyframes sf-themer-neon-breathe {
   0%, 100% {
     text-shadow:
-      0 0 4px rgba(${neonRgb}, ${(0.4 * mult).toFixed(2)}),
-      0 0 10px rgba(${neonRgb}, ${(0.2 * mult).toFixed(2)});
+      0 0 4px rgba(${accentRgb}, ${(0.4 * m).toFixed(3)}),
+      0 0 10px rgba(${accentRgb}, ${(0.2 * m).toFixed(3)});
   }
   50% {
     text-shadow:
-      0 0 8px rgba(${neonRgb}, ${(0.6 * mult).toFixed(2)}),
-      0 0 20px rgba(${neonRgb}, ${(0.35 * mult).toFixed(2)}),
-      0 0 35px rgba(${neonRgb}, ${(0.15 * mult).toFixed(2)});
+      0 0 8px rgba(${accentRgb}, ${(0.6 * m).toFixed(3)}),
+      0 0 20px rgba(${accentRgb}, ${(0.35 * m).toFixed(3)}),
+      0 0 35px rgba(${accentRgb}, ${(0.15 * m).toFixed(3)});
   }
 }
 
 body.sf-themer-fx-neon .slds-page-header__title,
 body.sf-themer-fx-neon .slds-page-header__name-title {
-  animation: sf-themer-neon-flicker ${Math.round(4000 / mult)}ms ease-in-out infinite !important;
-  color: rgb(${neonRgb}) !important;
+  animation: sf-themer-neon-flicker ${Math.round(4000 / m)}ms ease-in-out infinite !important;
 }
 
 body.sf-themer-fx-neon .slds-context-bar__label-action,
 body.sf-themer-fx-neon .slds-tabs_default__item.slds-is-active a,
 body.sf-themer-fx-neon .slds-tabs--default__item.slds-active a {
-  animation: sf-themer-neon-breathe ${Math.round(3000 / mult)}ms ease-in-out infinite !important;
+  animation: sf-themer-neon-breathe ${Math.round(3000 / m)}ms ease-in-out infinite !important;
 }
 
 body.sf-themer-fx-neon .slds-card__header-title {
-  animation: sf-themer-neon-breathe ${Math.round(5000 / mult)}ms ease-in-out infinite !important;
+  animation: sf-themer-neon-breathe ${Math.round(5000 / m)}ms ease-in-out infinite !important;
 }
 `;
   }
 
-  // ─── Cursor Trail ──────────────────────────────────────────────────────────
-  // (Canvas-based — CSS only provides the container z-index rules)
+  // ─── Cursor Trail (canvas container rules) ────────────────────────────────
   if (config.cursorTrail) {
     css += `
 /* ─── Cursor Trail (canvas container rules) ─── */
@@ -347,8 +466,7 @@ body.sf-themer-fx-neon .slds-card__header-title {
 `;
   }
 
-  // ─── Particles ─────────────────────────────────────────────────────────────
-  // (Canvas-based — CSS only provides the container z-index rules)
+  // ─── Particles (canvas container rules) ───────────────────────────────────
   if (config.particles) {
     css += `
 /* ─── Particles (canvas container rules) ─── */
@@ -373,7 +491,7 @@ body.sf-themer-fx-neon .slds-card__header-title {
 
 class SFThemerParticles {
   constructor(type, config) {
-    this.type = type;            // 'snow' | 'rain' | 'matrix' | 'dots' | 'embers'
+    this.type = type;
     this.config = {
       color: '#ffffff',
       density: 50,
@@ -392,7 +510,6 @@ class SFThemerParticles {
   }
 
   init() {
-    // Remove existing canvas if present
     document.getElementById('sf-themer-particles')?.remove();
 
     this.canvas = document.createElement('canvas');
@@ -416,14 +533,12 @@ class SFThemerParticles {
     this._spawn();
     this._loop();
 
-    // Pause when tab not visible
     this._boundVisibility = () => {
       this.paused = document.hidden;
       if (!this.paused && !this.raf) this._loop();
     };
     document.addEventListener('visibilitychange', this._boundVisibility);
 
-    // Resize handling (debounced)
     window.addEventListener('resize', () => {
       clearTimeout(this._resizeTimer);
       this._resizeTimer = setTimeout(() => {
@@ -440,7 +555,6 @@ class SFThemerParticles {
         this.onBattery = !battery.charging;
         battery.addEventListener('chargingchange', () => {
           this.onBattery = !battery.charging;
-          // Reduce density on battery
           if (this.onBattery && this.particles.length > this.config.density * 0.5) {
             this.particles.length = Math.floor(this.config.density * 0.5);
           }
@@ -458,7 +572,6 @@ class SFThemerParticles {
     const count = this._getDensity();
     const w = this.canvas.width;
     const h = this.canvas.height;
-
     this.particles = [];
     for (let i = 0; i < count; i++) {
       this.particles.push(this._createParticle(w, h, true));
@@ -572,7 +685,7 @@ class SFThemerParticles {
           }
           break;
 
-        case 'dots':
+        case 'dots': {
           p.pulsePhase += 0.005;
           p.x += p.vx;
           p.y += p.vy;
@@ -585,8 +698,9 @@ class SFThemerParticles {
           if (p.x < 0 || p.x > w) p.vx *= -1;
           if (p.y < 0 || p.y > h) p.vy *= -1;
           break;
+        }
 
-        case 'embers':
+        case 'embers': {
           p.x += p.vx + Math.sin(p.life * 10) * 0.3;
           p.y += p.vy;
           p.life -= p.decay;
@@ -600,13 +714,13 @@ class SFThemerParticles {
           ctx.fillStyle = color;
           ctx.globalAlpha = p.opacity * p.life;
           ctx.fill();
-          // Orange/red glow
           ctx.beginPath();
           ctx.arc(p.x, p.y, emberR * 2, 0, Math.PI * 2);
           ctx.fillStyle = color;
           ctx.globalAlpha = p.opacity * p.life * 0.2;
           ctx.fill();
           break;
+        }
       }
     }
     ctx.globalAlpha = 1;
@@ -679,9 +793,7 @@ class SFThemerCursorTrail {
     document.addEventListener('mousemove', this._boundMove, { passive: true });
 
     this._boundVisibility = () => {
-      if (document.hidden) {
-        this.points = [];
-      }
+      if (document.hidden) this.points = [];
     };
     document.addEventListener('visibilitychange', this._boundVisibility);
 
@@ -714,7 +826,6 @@ class SFThemerCursorTrail {
       p.life -= 0.02;
     }
 
-    // Remove dead points
     this.points = this.points.filter(p => p.life > 0);
     ctx.globalAlpha = 1;
     this.raf = requestAnimationFrame(() => this._draw());
@@ -731,27 +842,6 @@ class SFThemerCursorTrail {
     this.ctx = null;
     this.points = [];
   }
-}
-
-
-// ─── Utility ──────────────────────────────────────────────────────────────────
-
-function _hexToRgb(hex) {
-  if (!hex || typeof hex !== 'string') return '74, 111, 165';
-  const clean = hex.replace('#', '');
-  if (clean.length === 3) {
-    const r = parseInt(clean[0] + clean[0], 16);
-    const g = parseInt(clean[1] + clean[1], 16);
-    const b = parseInt(clean[2] + clean[2], 16);
-    return `${r}, ${g}, ${b}`;
-  }
-  if (clean.length === 6) {
-    const r = parseInt(clean.slice(0, 2), 16);
-    const g = parseInt(clean.slice(2, 4), 16);
-    const b = parseInt(clean.slice(4, 6), 16);
-    return `${r}, ${g}, ${b}`;
-  }
-  return '74, 111, 165';
 }
 
 
@@ -782,12 +872,46 @@ function applyEffectsClasses(config) {
 }
 
 
-// Export for content.js
+/**
+ * Build particle runtime config from effects config + theme.
+ * Pulls density/speed/opacity from intensity level; color from theme accent.
+ */
+function buildParticleRuntimeConfig(effectsConfig, themeColors) {
+  const level = effectsConfig.particlesIntensity || 'medium';
+  const defaults = PARTICLE_INTENSITY[level] || PARTICLE_INTENSITY.medium;
+  return {
+    color: effectsConfig.particleColor || themeColors?.accent || '#ffffff',
+    density: effectsConfig.particleDensity || defaults.density,
+    speed: effectsConfig.particleSpeed || defaults.speed,
+    opacity: effectsConfig.particleOpacity || defaults.opacity,
+  };
+}
+
+/**
+ * Build cursor trail runtime config from effects config + theme.
+ */
+function buildCursorTrailRuntimeConfig(effectsConfig, themeColors) {
+  const level = effectsConfig.cursorTrailIntensity || 'medium';
+  const m = INTENSITY_MULT[level] || 1.0;
+  return {
+    color: effectsConfig.cursorTrailColor || themeColors?.accent || '#ffffff',
+    length: Math.round(20 * m),
+    size: Math.round(4 * m),
+    opacity: 0.4 + (m - 1) * 0.2,
+  };
+}
+
+
+// Export for content.js + Node tests
 if (typeof module !== 'undefined') {
   module.exports = {
     generateEffectsCSS,
     SFThemerParticles,
     SFThemerCursorTrail,
     applyEffectsClasses,
+    buildParticleRuntimeConfig,
+    buildCursorTrailRuntimeConfig,
+    PARTICLE_INTENSITY,
+    INTENSITY_MULT,
   };
 }

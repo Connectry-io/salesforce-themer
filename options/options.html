@@ -4,324 +4,345 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Salesforce Themer — Settings</title>
+  <link rel="stylesheet" href="../lib/connectry-settings.css" />
   <link rel="stylesheet" href="options.css" />
 </head>
-<body>
+<body class="cx-settings">
 
-  <!-- Header -->
-  <header class="site-header">
-    <div class="header-inner">
-      <div class="header-brand">
-        <div class="brand-logo" aria-hidden="true">
+  <!-- ═══ Header with tabs ═══ -->
+  <header class="cx-header">
+    <div class="cx-header-inner">
+      <div class="cx-brand">
+        <div class="cx-brand-logo" aria-hidden="true">
           <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
             <circle cx="6" cy="12" r="3.5" fill="#2D2D2D"/>
             <line x1="9.5" y1="12" x2="14.5" y2="12" stroke="#4A6FA5" stroke-width="1.5" stroke-linecap="round"/>
             <circle cx="18" cy="12" r="3.5" fill="#4A6FA5"/>
           </svg>
         </div>
-        <div class="brand-text">
-          <span class="brand-name">Salesforce Themer</span>
-          <span class="brand-by">by Connectry</span>
+        <div class="cx-brand-text">
+          <span class="cx-brand-name">Salesforce Themer</span>
+          <span class="cx-brand-by">by Connectry</span>
         </div>
       </div>
-      <div class="header-meta" id="headerMeta">
-        <!-- populated by JS -->
-      </div>
+
+      <nav class="cx-tabs" role="tablist" aria-label="Settings sections">
+        <button class="cx-tab is-active" role="tab" data-tab="themes" aria-selected="true">
+          <svg class="cx-tab-icon" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+            <rect x="2" y="2" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.5"/>
+            <rect x="9" y="2" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.5"/>
+            <rect x="2" y="9" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.5"/>
+            <rect x="9" y="9" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.5"/>
+          </svg>
+          Themes
+        </button>
+        <button class="cx-tab" role="tab" data-tab="effects" aria-selected="false">
+          <svg class="cx-tab-icon" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+            <path d="M8 1l1.8 4.2L14 6l-3.2 2.8L12 13 8 10.6 4 13l1.2-4.2L2 6l4.2-0.8L8 1z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
+          </svg>
+          Effects
+          <span class="cx-tab-badge">Premium</span>
+        </button>
+        <button class="cx-tab" role="tab" data-tab="shortcuts" aria-selected="false">
+          <svg class="cx-tab-icon" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+            <rect x="2" y="5" width="12" height="7" rx="1.5" stroke="currentColor" stroke-width="1.5"/>
+            <circle cx="5" cy="8.5" r="0.7" fill="currentColor"/>
+            <circle cx="8" cy="8.5" r="0.7" fill="currentColor"/>
+            <circle cx="11" cy="8.5" r="0.7" fill="currentColor"/>
+          </svg>
+          Shortcuts
+        </button>
+        <button class="cx-tab" role="tab" data-tab="about" aria-selected="false">
+          <svg class="cx-tab-icon" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+            <circle cx="8" cy="8" r="6.5" stroke="currentColor" stroke-width="1.5"/>
+            <path d="M8 7v4M8 5h.01" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+          About
+        </button>
+      </nav>
+
+      <div class="cx-header-meta" id="headerMeta"></div>
     </div>
   </header>
 
-  <main class="main">
+  <main class="cx-main">
 
-    <!-- ═══ Gallery View ═══ -->
-    <div id="galleryView">
+    <!-- ═══ Themes Tab ═══ -->
+    <div class="cx-tabpanel" role="tabpanel" data-tabpanel="themes" id="galleryView">
 
-    <!-- Themes section -->
-    <section class="section" aria-labelledby="themes-heading">
-      <div class="section-header">
-        <h2 class="section-title" id="themes-heading">Themes</h2>
-        <div class="section-header-actions">
-          <button class="create-theme-btn" id="createThemeBtn">
-            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
-              <path d="M7 2v10M2 7h10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-            </svg>
-            Create Theme
-          </button>
-          <div class="filter-pills" role="group" aria-label="Filter themes by category">
-            <button class="filter-pill is-active" data-filter="all">All</button>
-            <button class="filter-pill" data-filter="light">Light</button>
-            <button class="filter-pill" data-filter="dark">Dark</button>
+      <!-- Built-in Themes -->
+      <section class="cx-section" aria-labelledby="ootb-heading">
+        <div class="cx-section-header">
+          <div>
+            <h2 class="cx-section-title" id="ootb-heading">Built-in Themes</h2>
+            <p class="cx-section-subtitle">15 polished themes designed for Salesforce Lightning</p>
           </div>
-        </div>
-      </div>
-
-      <div class="theme-grid" id="themeGrid" role="radiogroup" aria-label="Select a theme">
-        <!-- populated by JS -->
-      </div>
-    </section>
-
-    <!-- Settings section -->
-    <section class="section settings-section" aria-labelledby="settings-heading">
-      <h2 class="section-title" id="settings-heading">Settings</h2>
-
-      <div class="settings-group">
-
-        <!-- Auto mode -->
-        <div class="setting-row">
-          <div class="setting-info">
-            <div class="setting-label">Follow system theme</div>
-            <div class="setting-desc">Automatically switch between your preferred light and dark theme based on your system's appearance setting.</div>
-          </div>
-          <label class="toggle-switch" title="Follow system appearance">
-            <input type="checkbox" id="autoModeToggle" />
-            <span class="toggle-track"><span class="toggle-thumb"></span></span>
-          </label>
-        </div>
-
-        <!-- Theme scope -->
-        <div class="setting-row">
-          <div class="setting-info">
-            <div class="setting-label">Apply theme to</div>
-            <div class="setting-desc">Choose whether to theme Lightning pages, Setup pages, or both.</div>
-          </div>
-          <select class="setting-select" id="themeScopeSelect">
-            <option value="both">Both (default)</option>
-            <option value="lightning">Lightning only</option>
-            <option value="setup">Setup only</option>
-          </select>
-        </div>
-
-        <!-- Per-org settings -->
-        <div class="setting-row setting-row--column" id="orgSettingsRow" hidden>
-          <div class="setting-info">
-            <div class="setting-label">Per-org themes</div>
-            <div class="setting-desc">Individual Salesforce orgs can have their own theme override, independent of the global setting.</div>
-          </div>
-          <div class="org-list" id="orgList">
-            <!-- populated by JS -->
-          </div>
-        </div>
-
-      </div>
-    </section>
-
-    <!-- ═══ Effects Section ═══ -->
-    <section class="section effects-section" aria-labelledby="effects-heading">
-      <div class="section-header">
-        <h2 class="section-title" id="effects-heading">Visual Effects</h2>
-        <span class="effects-premium-badge">Premium</span>
-      </div>
-
-      <!-- Preset row -->
-      <div class="effects-preset-row">
-        <span class="effects-preset-label">Preset</span>
-        <div class="effects-preset-pills" id="effectsPresetPills" role="radiogroup" aria-label="Effects intensity preset">
-          <button class="effects-preset-pill is-active" data-preset="none" role="radio" aria-checked="true">
-            <span class="effects-preset-icon">&#9675;</span> None
-          </button>
-          <button class="effects-preset-pill" data-preset="subtle" role="radio" aria-checked="false">
-            <span class="effects-preset-icon">&#9680;</span> Subtle
-          </button>
-          <button class="effects-preset-pill" data-preset="alive" role="radio" aria-checked="false">
-            <span class="effects-preset-icon">&#9673;</span> Alive
-          </button>
-          <button class="effects-preset-pill" data-preset="immersive" role="radio" aria-checked="false">
-            <span class="effects-preset-icon">&#10022;</span> Immersive
-          </button>
-        </div>
-      </div>
-
-      <!-- Individual effect toggles -->
-      <div class="effects-grid" id="effectsGrid">
-
-        <div class="effect-card" data-effect="hoverLift">
-          <div class="effect-header">
-            <div class="effect-info">
-              <span class="effect-name">Hover Lift</span>
-              <span class="effect-desc">Cards and buttons float up on hover</span>
+          <div class="cx-section-actions">
+            <div class="cx-pills" role="group" aria-label="Filter themes by category">
+              <button class="cx-pill is-active" data-filter="all">All</button>
+              <button class="cx-pill" data-filter="light">Light</button>
+              <button class="cx-pill" data-filter="dark">Dark</button>
             </div>
-            <label class="toggle-switch">
-              <input type="checkbox" class="effect-toggle" data-effect="hoverLift" />
-              <span class="toggle-track"><span class="toggle-thumb"></span></span>
+          </div>
+        </div>
+
+        <div class="theme-grid" id="themeGrid" role="radiogroup" aria-label="Select a built-in theme">
+          <!-- populated by JS -->
+        </div>
+      </section>
+
+      <!-- My Custom Themes -->
+      <section class="cx-section" aria-labelledby="custom-heading">
+        <div class="cx-section-header">
+          <div>
+            <h2 class="cx-section-title" id="custom-heading">My Custom Themes</h2>
+            <p class="cx-section-subtitle">Your personal themes — clone a built-in or create from scratch</p>
+          </div>
+          <div class="cx-section-actions">
+            <button class="cx-btn cx-btn-primary" id="createThemeBtn">
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+                <path d="M7 2v10M2 7h10" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+              </svg>
+              Create Theme
+            </button>
+          </div>
+        </div>
+
+        <div class="theme-grid theme-grid-custom" id="customThemeGrid" role="radiogroup" aria-label="Select a custom theme">
+          <!-- populated by JS -->
+        </div>
+
+        <div class="cx-empty" id="customThemeEmpty" hidden>
+          <div class="cx-empty-icon">✨</div>
+          <div class="cx-empty-title">No custom themes yet</div>
+          <div class="cx-empty-body">Clone one of the built-in themes and tweak its colors, or start from scratch to make something entirely your own. Your custom themes keep their own effects independently from the global settings.</div>
+          <div class="cx-empty-actions">
+            <button class="cx-btn cx-btn-primary" id="createThemeBtnEmpty">Create from scratch</button>
+            <button class="cx-btn cx-btn-secondary" id="cloneFirstBtn">Clone a built-in theme</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Marketplace (coming soon) -->
+      <section class="cx-section" aria-labelledby="marketplace-heading">
+        <div class="cx-section-header">
+          <div>
+            <h2 class="cx-section-title" id="marketplace-heading">
+              Marketplace
+              <span class="cx-tab-badge">Coming Soon</span>
+            </h2>
+            <p class="cx-section-subtitle">Browse and install themes created by the community</p>
+          </div>
+        </div>
+
+        <div class="marketplace-preview">
+          <div class="marketplace-preview-inner">
+            <div class="marketplace-preview-icon" aria-hidden="true">🌐</div>
+            <h3 class="marketplace-preview-title">A growing theme library</h3>
+            <p class="marketplace-preview-body">Soon you'll be able to share your custom themes with the world, discover themes matched to real company brands, and install curated collections from the Connectry team.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Theme application settings -->
+      <section class="cx-section" aria-labelledby="apply-heading">
+        <div class="cx-section-header">
+          <div>
+            <h2 class="cx-section-title" id="apply-heading">Theme Application</h2>
+            <p class="cx-section-subtitle">Control when and where your theme is applied</p>
+          </div>
+        </div>
+
+        <div class="cx-card cx-card-pad settings-stack">
+
+          <div class="setting-row">
+            <div class="setting-info">
+              <div class="setting-label">Follow system theme</div>
+              <div class="setting-desc">Automatically switch between your preferred light and dark theme based on your system's appearance setting.</div>
+            </div>
+            <label class="cx-toggle">
+              <input type="checkbox" id="autoModeToggle" />
+              <span class="cx-toggle-track"><span class="cx-toggle-thumb"></span></span>
             </label>
           </div>
-          <div class="effect-slider-row">
-            <span class="effect-slider-label">Intensity</span>
-            <input type="range" class="effect-slider" data-effect="hoverLift" min="1" max="3" step="1" value="2" />
-            <span class="effect-slider-value" data-effect="hoverLift">Medium</span>
-          </div>
-        </div>
 
-        <div class="effect-card" data-effect="ambientGlow">
-          <div class="effect-header">
-            <div class="effect-info">
-              <span class="effect-name">Ambient Glow</span>
-              <span class="effect-desc">Subtle pulsing glow on accent elements</span>
+          <div class="setting-row">
+            <div class="setting-info">
+              <div class="setting-label">Apply theme to</div>
+              <div class="setting-desc">Choose whether to theme Lightning pages, Setup pages, or both.</div>
             </div>
-            <label class="toggle-switch">
-              <input type="checkbox" class="effect-toggle" data-effect="ambientGlow" />
-              <span class="toggle-track"><span class="toggle-thumb"></span></span>
-            </label>
-          </div>
-          <div class="effect-slider-row">
-            <span class="effect-slider-label">Intensity</span>
-            <input type="range" class="effect-slider" data-effect="ambientGlow" min="1" max="3" step="1" value="2" />
-            <span class="effect-slider-value" data-effect="ambientGlow">Medium</span>
-          </div>
-        </div>
-
-        <div class="effect-card" data-effect="borderShimmer">
-          <div class="effect-header">
-            <div class="effect-info">
-              <span class="effect-name">Border Shimmer</span>
-              <span class="effect-desc">Animated light sweep along card borders</span>
-            </div>
-            <label class="toggle-switch">
-              <input type="checkbox" class="effect-toggle" data-effect="borderShimmer" />
-              <span class="toggle-track"><span class="toggle-thumb"></span></span>
-            </label>
-          </div>
-          <div class="effect-slider-row">
-            <span class="effect-slider-label">Intensity</span>
-            <input type="range" class="effect-slider" data-effect="borderShimmer" min="1" max="3" step="1" value="2" />
-            <span class="effect-slider-value" data-effect="borderShimmer">Medium</span>
-          </div>
-        </div>
-
-        <div class="effect-card" data-effect="gradientBorders">
-          <div class="effect-header">
-            <div class="effect-info">
-              <span class="effect-name">Gradient Borders</span>
-              <span class="effect-desc">Animated rotating gradient on card edges</span>
-            </div>
-            <label class="toggle-switch">
-              <input type="checkbox" class="effect-toggle" data-effect="gradientBorders" />
-              <span class="toggle-track"><span class="toggle-thumb"></span></span>
-            </label>
-          </div>
-          <div class="effect-slider-row">
-            <span class="effect-slider-label">Intensity</span>
-            <input type="range" class="effect-slider" data-effect="gradientBorders" min="1" max="3" step="1" value="2" />
-            <span class="effect-slider-value" data-effect="gradientBorders">Medium</span>
-          </div>
-        </div>
-
-        <div class="effect-card" data-effect="aurora">
-          <div class="effect-header">
-            <div class="effect-info">
-              <span class="effect-name">Aurora Background</span>
-              <span class="effect-desc">Slow-moving gradient background glow</span>
-            </div>
-            <label class="toggle-switch">
-              <input type="checkbox" class="effect-toggle" data-effect="aurora" />
-              <span class="toggle-track"><span class="toggle-thumb"></span></span>
-            </label>
-          </div>
-          <div class="effect-slider-row">
-            <span class="effect-slider-label">Intensity</span>
-            <input type="range" class="effect-slider" data-effect="aurora" min="1" max="3" step="1" value="2" />
-            <span class="effect-slider-value" data-effect="aurora">Medium</span>
-          </div>
-        </div>
-
-        <div class="effect-card" data-effect="neonFlicker">
-          <div class="effect-header">
-            <div class="effect-info">
-              <span class="effect-name">Neon Flicker</span>
-              <span class="effect-desc">Glowing text-shadow flicker effect</span>
-            </div>
-            <label class="toggle-switch">
-              <input type="checkbox" class="effect-toggle" data-effect="neonFlicker" />
-              <span class="toggle-track"><span class="toggle-thumb"></span></span>
-            </label>
-          </div>
-          <div class="effect-slider-row">
-            <span class="effect-slider-label">Intensity</span>
-            <input type="range" class="effect-slider" data-effect="neonFlicker" min="1" max="3" step="1" value="2" />
-            <span class="effect-slider-value" data-effect="neonFlicker">Medium</span>
-          </div>
-        </div>
-
-        <div class="effect-card" data-effect="particles">
-          <div class="effect-header">
-            <div class="effect-info">
-              <span class="effect-name">Particles</span>
-              <span class="effect-desc">Snow, matrix rain, floating dots, embers</span>
-            </div>
-            <label class="toggle-switch">
-              <input type="checkbox" class="effect-toggle" data-effect="particles" />
-              <span class="toggle-track"><span class="toggle-thumb"></span></span>
-            </label>
-          </div>
-          <div class="effect-slider-row">
-            <span class="effect-slider-label">Density</span>
-            <input type="range" class="effect-slider" data-effect="particles" min="1" max="3" step="1" value="2" />
-            <span class="effect-slider-value" data-effect="particles">Medium</span>
-          </div>
-          <div class="effect-select-row">
-            <span class="effect-select-label">Style</span>
-            <select class="effect-select" data-effect="particleType">
-              <option value="snow">Snow</option>
-              <option value="dots">Floating Dots</option>
-              <option value="matrix">Matrix Rain</option>
-              <option value="embers">Embers</option>
-              <option value="rain">Rain</option>
+            <select class="setting-select" id="themeScopeSelect">
+              <option value="both">Both (default)</option>
+              <option value="lightning">Lightning only</option>
+              <option value="setup">Setup only</option>
             </select>
           </div>
-        </div>
 
-        <div class="effect-card" data-effect="cursorTrail">
-          <div class="effect-header">
-            <div class="effect-info">
-              <span class="effect-name">Cursor Trail</span>
-              <span class="effect-desc">Subtle light trail following your mouse</span>
+          <div class="setting-row setting-row--column" id="orgSettingsRow" hidden>
+            <div class="setting-info">
+              <div class="setting-label">Per-org themes</div>
+              <div class="setting-desc">Individual Salesforce orgs can have their own theme override, independent of the global setting.</div>
             </div>
-            <label class="toggle-switch">
-              <input type="checkbox" class="effect-toggle" data-effect="cursorTrail" />
-              <span class="toggle-track"><span class="toggle-thumb"></span></span>
-            </label>
+            <div class="org-list" id="orgList">
+              <!-- populated by JS -->
+            </div>
           </div>
-          <div class="effect-slider-row">
-            <span class="effect-slider-label">Intensity</span>
-            <input type="range" class="effect-slider" data-effect="cursorTrail" min="1" max="3" step="1" value="2" />
-            <span class="effect-slider-value" data-effect="cursorTrail">Medium</span>
-          </div>
-        </div>
 
+        </div>
+      </section>
+
+    </div>
+
+    <!-- ═══ Effects Tab ═══ -->
+    <div class="cx-tabpanel" role="tabpanel" data-tabpanel="effects" hidden>
+
+      <!-- Context banner (which theme's effects are being edited) -->
+      <div class="cx-banner cx-banner-info" id="effectsContextBanner">
+        <svg class="cx-banner-icon" viewBox="0 0 18 18" fill="none" aria-hidden="true">
+          <circle cx="9" cy="9" r="7.5" stroke="currentColor" stroke-width="1.5"/>
+          <path d="M9 8v4M9 6h.01" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+        <div class="cx-banner-text" id="effectsContextText">
+          Editing global effects — applies to all built-in themes.
+        </div>
+        <div class="cx-banner-actions" id="effectsContextActions"></div>
       </div>
 
-      <p class="effects-note">Effects respect <code>prefers-reduced-motion</code> and auto-pause when the tab is hidden. Particles reduce density on battery power.</p>
-    </section>
-
-    <!-- Keyboard shortcuts -->
-    <section class="section" aria-labelledby="shortcuts-heading">
-      <h2 class="section-title" id="shortcuts-heading">Keyboard Shortcuts</h2>
-      <div class="shortcuts-grid">
-        <div class="shortcut-row">
-          <span class="shortcut-desc">Cycle to next theme</span>
-          <kbd class="shortcut-key">Alt + Shift + T</kbd>
+      <!-- Preset selector -->
+      <section class="cx-section">
+        <div class="cx-section-header">
+          <div>
+            <h2 class="cx-section-title">Effects Preset</h2>
+            <p class="cx-section-subtitle">Start with a preset, then fine-tune individual effects below</p>
+          </div>
         </div>
-        <div class="shortcut-row">
-          <span class="shortcut-desc">Toggle dark / light mode</span>
-          <kbd class="shortcut-key">Alt + Shift + D</kbd>
+
+        <div class="preset-grid" role="radiogroup" aria-label="Effects intensity preset" id="presetGrid">
+          <!-- populated by JS -->
         </div>
-      </div>
-      <p class="shortcut-note">Shortcuts only work while viewing a Salesforce org tab. Custom key bindings can be set via <code>chrome://extensions/shortcuts</code>.</p>
-    </section>
+      </section>
 
-    </div><!-- /galleryView -->
+      <!-- Individual effects -->
+      <section class="cx-section">
+        <div class="cx-section-header">
+          <div>
+            <h2 class="cx-section-title">Individual Effects</h2>
+            <p class="cx-section-subtitle">Toggle and fine-tune each effect. Previews update live.</p>
+          </div>
+        </div>
 
-    <!-- ═══ Editor View ═══ -->
+        <div class="effects-grid" id="effectsGrid">
+          <!-- populated by JS -->
+        </div>
+      </section>
+
+      <p class="effects-footnote">
+        Effects respect <code>prefers-reduced-motion</code> and auto-pause when the tab is hidden. Particles reduce density on battery power. Modals, dropdowns, and comboboxes are never transformed.
+      </p>
+
+    </div>
+
+    <!-- ═══ Shortcuts Tab ═══ -->
+    <div class="cx-tabpanel" role="tabpanel" data-tabpanel="shortcuts" hidden>
+
+      <section class="cx-section">
+        <div class="cx-section-header">
+          <div>
+            <h2 class="cx-section-title">Keyboard Shortcuts</h2>
+            <p class="cx-section-subtitle">Quick actions that work on any Salesforce tab</p>
+          </div>
+        </div>
+
+        <div class="cx-card cx-card-pad">
+          <div class="shortcuts-list">
+            <div class="shortcut-row">
+              <div class="shortcut-info">
+                <div class="shortcut-desc-label">Cycle to next theme</div>
+                <div class="shortcut-desc-sub">Walks through all themes in order. Resumes where you left off.</div>
+              </div>
+              <kbd class="shortcut-key">Alt + Shift + T</kbd>
+            </div>
+            <div class="shortcut-row">
+              <div class="shortcut-info">
+                <div class="shortcut-desc-label">Toggle dark / light mode</div>
+                <div class="shortcut-desc-sub">Switches between your last-used light and dark themes.</div>
+              </div>
+              <kbd class="shortcut-key">Alt + Shift + D</kbd>
+            </div>
+          </div>
+          <p class="shortcut-note">
+            Shortcuts only work while viewing a Salesforce org tab. Custom key bindings can be set via <code>chrome://extensions/shortcuts</code>.
+          </p>
+        </div>
+      </section>
+
+    </div>
+
+    <!-- ═══ About Tab ═══ -->
+    <div class="cx-tabpanel" role="tabpanel" data-tabpanel="about" hidden>
+
+      <section class="cx-section">
+        <div class="cx-section-header">
+          <div>
+            <h2 class="cx-section-title">About Salesforce Themer</h2>
+            <p class="cx-section-subtitle">A Connectry product</p>
+          </div>
+        </div>
+
+        <div class="cx-card cx-card-pad-lg about-card">
+          <div class="about-hero">
+            <div class="about-logo" aria-hidden="true">
+              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="6" cy="12" r="3.5" fill="#2D2D2D"/>
+                <line x1="9.5" y1="12" x2="14.5" y2="12" stroke="#4A6FA5" stroke-width="1.5" stroke-linecap="round"/>
+                <circle cx="18" cy="12" r="3.5" fill="#4A6FA5"/>
+              </svg>
+            </div>
+            <div>
+              <h3 class="about-title">Salesforce Themer</h3>
+              <p class="about-version">Version <span id="aboutVersion">2.0.0</span></p>
+            </div>
+          </div>
+          <p class="about-body">
+            15 polished themes for Salesforce Lightning Experience. Auto-follows system dark mode, per-org theming, keyboard shortcuts, and full coverage of Setup, Reports, and Console views. Built with care by Connectry.
+          </p>
+        </div>
+
+        <div class="about-grid">
+          <a class="about-link-card" href="https://connectry.io" target="_blank" rel="noopener noreferrer">
+            <div class="about-link-title">Connectry</div>
+            <div class="about-link-desc">Salesforce architects building better tools</div>
+          </a>
+          <a class="about-link-card" href="https://github.com/Connectry-io/salesforce-themer" target="_blank" rel="noopener noreferrer">
+            <div class="about-link-title">GitHub</div>
+            <div class="about-link-desc">Source code, issues, and releases</div>
+          </a>
+          <a class="about-link-card" href="https://chromewebstore.google.com/" target="_blank" rel="noopener noreferrer">
+            <div class="about-link-title">Chrome Web Store</div>
+            <div class="about-link-desc">Install, review, and update</div>
+          </a>
+          <a class="about-link-card" href="https://connectry.io" target="_blank" rel="noopener noreferrer">
+            <div class="about-link-title">Other Connectry Apps</div>
+            <div class="about-link-desc">VAT Checker, LEI Lookup, and more</div>
+          </a>
+        </div>
+
+      </section>
+
+    </div>
+
+    <!-- ═══ Editor View (modal-style overlay) ═══ -->
     <div id="editorView" class="editor-view" hidden>
       <div class="editor-toolbar">
         <button class="editor-back-btn" id="editorBackBtn">
           <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
             <path d="M9 2L4 7l5 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
           </svg>
-          Back to Gallery
+          Back to Themes
         </button>
         <div class="editor-toolbar-right">
           <input type="text" class="editor-name-input" id="editorName" value="My Custom Theme" spellcheck="false" />
-          <button class="editor-save-btn" id="editorSaveBtn">Save Theme</button>
+          <button class="cx-btn cx-btn-primary" id="editorSaveBtn">Save Theme</button>
         </div>
       </div>
 
@@ -524,19 +545,15 @@
             </div>
           </div>
 
-          <!-- Advanced panel -->
           <details class="editor-advanced" id="editorAdvanced">
             <summary class="editor-advanced-toggle">Advanced <span class="editor-advanced-count" id="advancedCount">58 derived values</span></summary>
-            <div class="editor-advanced-body" id="advancedBody">
-              <!-- populated by JS -->
-            </div>
+            <div class="editor-advanced-body" id="advancedBody"></div>
           </details>
 
-          <!-- Actions -->
           <div class="editor-actions">
-            <button class="editor-action-btn editor-reset-btn" id="editorResetBtn">Reset to Base</button>
-            <button class="editor-action-btn editor-export-btn" id="editorExportBtn">Export JSON</button>
-            <button class="editor-action-btn editor-import-btn" id="editorImportBtn">Import JSON</button>
+            <button class="cx-btn cx-btn-secondary" id="editorResetBtn">Reset to Base</button>
+            <button class="cx-btn cx-btn-secondary" id="editorExportBtn">Export JSON</button>
+            <button class="cx-btn cx-btn-secondary" id="editorImportBtn">Import JSON</button>
             <input type="file" id="editorImportFile" accept=".json" hidden />
           </div>
 
@@ -546,7 +563,6 @@
         <div class="editor-panel editor-preview">
           <div class="editor-preview-frame" id="editorPreview">
 
-            <!-- Mock Nav -->
             <div class="preview-nav" data-bind="nav">
               <span class="preview-nav-app" data-bind-color="navText">Connectry Hub</span>
               <span class="preview-nav-item" data-bind-color="navText">Home</span>
@@ -554,13 +570,11 @@
               <span class="preview-nav-item" data-bind-color="navText">Contacts</span>
             </div>
 
-            <!-- Mock Page Header -->
             <div class="preview-header" data-bind="background">
               <div class="preview-header-title" data-bind-color="textPrimary">Lead: John Smith</div>
               <div class="preview-header-meta" data-bind-color="textSecondary">Senior Account Executive</div>
             </div>
 
-            <!-- Mock Path -->
             <div class="preview-path-wrap" data-bind="surface">
               <div class="preview-path">
                 <span class="preview-path-item preview-path-complete" data-bind="accent" data-bind-color="buttonBrandText">New</span>
@@ -569,7 +583,6 @@
               </div>
             </div>
 
-            <!-- Mock Card -->
             <div class="preview-card" data-bind="surface" data-bind-border-color="border">
               <div class="preview-card-tabs">
                 <span class="preview-tab-active" data-bind-color="accent">Details</span>
@@ -596,7 +609,6 @@
               </div>
             </div>
 
-            <!-- Mock Table -->
             <div class="preview-table-wrap" data-bind="surface" data-bind-border-color="border">
               <div class="preview-table-header" data-bind="tableHeaderBg">
                 <span data-bind-color="textSecondary">Name</span>
@@ -615,7 +627,6 @@
               </div>
             </div>
 
-            <!-- Mock Input -->
             <div class="preview-input-wrap" data-bind="surface">
               <span class="preview-input-label" data-bind-color="textSecondary">Search</span>
               <div class="preview-input" data-bind="background" data-bind-border-color="borderInput">
@@ -626,19 +637,20 @@
           </div>
         </div>
 
-      </div><!-- /editor-layout -->
-    </div><!-- /editorView -->
+      </div>
+    </div>
 
   </main>
 
-  <footer class="site-footer">
-    <span>Built by <a href="https://connectry.io" target="_blank" rel="noopener noreferrer">Connectry</a></span>
-    <span class="footer-sep">·</span>
+  <footer class="cx-footer">
+    <span>Built with care by <a href="https://connectry.io" target="_blank" rel="noopener noreferrer">Connectry</a></span>
+    <span class="cx-footer-sep">·</span>
     <span id="versionLabel">v2.0.0</span>
-    <span class="footer-sep">·</span>
+    <span class="cx-footer-sep">·</span>
     <a href="https://connectry.io" target="_blank" rel="noopener noreferrer">connectry.io</a>
   </footer>
 
+  <script src="../lib/connectry-settings.js"></script>
   <script src="options.js"></script>
 </body>
 </html>

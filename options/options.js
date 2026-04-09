@@ -49,18 +49,41 @@
 
   // ─── Theme grid rendering ─────────────────────────────────────────────────
 
+  // Suggested preset name for each OOTB theme (for hint badges on cards)
+  const THEME_SUGGESTED_PRESET = {
+    'connectry': 'subtle', 'connectry-dark': 'subtle',
+    'midnight': 'subtle', 'slate': 'subtle',
+    'tron': 'immersive', 'obsidian': 'subtle',
+    'arctic': 'alive', 'sakura': 'subtle',
+    'ember': 'subtle', 'nord': 'subtle',
+    'terminal': 'alive', 'high-contrast': 'none',
+    'dracula': 'subtle', 'solarized-light': 'subtle',
+    'solarized-dark': 'subtle',
+  };
+
   function renderThemeGrid(activeThemeId) {
     const grid = document.getElementById('themeGrid');
     grid.innerHTML = '';
 
     for (const theme of THEMES) {
       const isActive = theme.id === activeThemeId;
-      const card = document.createElement('button');
+      const suggestedPreset = THEME_SUGGESTED_PRESET[theme.id] || 'none';
+      const showHint = suggestedPreset !== 'none';
+
+      const card = document.createElement('div');
       card.className = `theme-card${isActive ? ' is-active' : ''}${activeFilter !== 'all' && theme.category !== activeFilter ? ' is-hidden' : ''}`;
       card.dataset.theme = theme.id;
-      card.role = 'radio';
+      card.setAttribute('role', 'radio');
       card.setAttribute('aria-checked', String(isActive));
+      card.setAttribute('tabindex', '0');
       card.setAttribute('title', theme.name);
+
+      const hintBadge = showHint
+        ? `<button class="theme-fx-hint" data-suggested-for="${theme.id}" title="Apply suggested effects to your global config">
+             <span class="theme-fx-hint-icon">✨</span>
+             Suggests ${_capitalize(suggestedPreset)}
+           </button>`
+        : '';
 
       card.innerHTML = `
         <div class="theme-swatch">${buildSwatch(theme)}</div>
@@ -70,22 +93,42 @@
             <span class="theme-category-badge ${theme.category}">${theme.category === 'light' ? 'Light' : 'Dark'}</span>
           </div>
           <div class="theme-description">${theme.description}</div>
+          ${hintBadge}
         </div>
-        <button class="theme-apply-btn" data-apply="${theme.id}" tabindex="-1">
-          ${isActive ? 'Active' : 'Apply'}
-        </button>
-        <div class="theme-check" aria-hidden="true">
-          <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-            <path d="M2.5 7L5.5 10L11.5 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
+        <div class="theme-card-actions">
+          <div class="theme-card-status">
+            <span class="theme-card-status-dot"></span>
+            <span>${isActive ? 'Active' : 'Apply'}</span>
+          </div>
+          <button class="theme-card-clone-btn" data-clone="${theme.id}" title="Clone & customize this theme">
+            <svg width="11" height="11" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+              <rect x="3.5" y="3.5" width="7" height="7" rx="1" stroke="currentColor" stroke-width="1.2"/>
+              <path d="M8.5 3.5v-1a1 1 0 0 0-1-1h-5a1 1 0 0 0-1 1v5a1 1 0 0 0 1 1h1" stroke="currentColor" stroke-width="1.2"/>
+            </svg>
+            Clone
+          </button>
         </div>
       `;
 
       card.addEventListener('click', (e) => {
-        // Don't double-fire when clicking the inner apply button
-        if (e.target.dataset.apply) {
-          selectTheme(e.target.dataset.apply);
-        } else {
+        const cloneBtn = e.target.closest('[data-clone]');
+        const hintBtn = e.target.closest('[data-suggested-for]');
+        if (cloneBtn) {
+          e.stopPropagation();
+          openCreationDialog(cloneBtn.dataset.clone);
+          return;
+        }
+        if (hintBtn) {
+          e.stopPropagation();
+          applySuggestedEffectsToGlobal(hintBtn.dataset.suggestedFor);
+          return;
+        }
+        selectTheme(theme.id);
+      });
+
+      card.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
           selectTheme(theme.id);
         }
       });
@@ -95,26 +138,146 @@
   }
 
   function updateGridActiveState(activeThemeId) {
-    document.querySelectorAll('.theme-card').forEach(card => {
+    document.querySelectorAll('#themeGrid .theme-card, #customThemeGrid .theme-card').forEach(card => {
       const id = card.dataset.theme;
       const isActive = id === activeThemeId;
       card.classList.toggle('is-active', isActive);
       card.setAttribute('aria-checked', String(isActive));
-      const btn = card.querySelector('.theme-apply-btn');
-      if (btn) btn.textContent = isActive ? 'Active' : 'Apply';
+      const statusText = card.querySelector('.theme-card-status span:last-child');
+      if (statusText) statusText.textContent = isActive ? 'Active' : 'Apply';
     });
+  }
+
+  function _capitalize(s) {
+    return s.charAt(0).toUpperCase() + s.slice(1);
+  }
+
+  // ─── Custom theme grid ───────────────────────────────────────────────────
+
+  function renderCustomThemeGrid(activeThemeId) {
+    const grid = document.getElementById('customThemeGrid');
+    const empty = document.getElementById('customThemeEmpty');
+    if (!grid || !empty) return;
+
+    const customs = syncState.customThemes || [];
+
+    if (!customs.length) {
+      grid.innerHTML = '';
+      grid.hidden = true;
+      empty.hidden = false;
+      return;
+    }
+
+    grid.hidden = false;
+    empty.hidden = true;
+    grid.innerHTML = '';
+
+    for (const ct of customs) {
+      const isActive = ct.id === activeThemeId;
+      const base = getThemeById(ct.basedOn);
+      const resolvedColors = { ...(base?.colors || {}), ...(ct.coreOverrides || {}), ...(ct.advancedOverrides || {}) };
+      const swatchColors = [resolvedColors.background, resolvedColors.surface, resolvedColors.accent, resolvedColors.textPrimary];
+      const swatchHtml = swatchColors.map(col => `<span style="background:${col};"></span>`).join('');
+
+      const card = document.createElement('div');
+      card.className = `theme-card${isActive ? ' is-active' : ''}`;
+      card.dataset.theme = ct.id;
+      card.setAttribute('role', 'radio');
+      card.setAttribute('aria-checked', String(isActive));
+      card.setAttribute('tabindex', '0');
+      card.setAttribute('title', ct.name);
+
+      const category = ct.category || (resolvedColors.colorScheme === 'dark' ? 'dark' : 'light');
+      const presetName = (ct.effects && ct.effects.preset) || 'none';
+
+      card.innerHTML = `
+        <div class="theme-swatch">${swatchHtml}</div>
+        <div class="theme-card-body">
+          <div class="theme-card-header">
+            <span class="theme-name">${Connectry.Settings.escape(ct.name)}</span>
+            <span class="theme-category-badge ${category}">${category === 'light' ? 'Light' : 'Dark'}</span>
+          </div>
+          <div class="theme-description">Based on ${base ? base.name : ct.basedOn} · Effects: ${_capitalize(presetName)}</div>
+        </div>
+        <div class="theme-card-actions">
+          <div class="theme-card-status">
+            <span class="theme-card-status-dot"></span>
+            <span>${isActive ? 'Active' : 'Apply'}</span>
+          </div>
+          <div style="display:flex; gap:6px;">
+            <button class="theme-card-edit-btn" data-edit="${ct.id}" title="Edit this theme">
+              <svg width="11" height="11" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+                <path d="M8 1.5l2 2-7 7H1v-2l7-7z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/>
+              </svg>
+              Edit
+            </button>
+            <button class="theme-card-delete-btn" data-delete="${ct.id}" title="Delete this theme">
+              <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+                <path d="M2 3h8M4.5 3V2a1 1 0 0 1 1-1h1a1 1 0 0 1 1 1v1M3 3l.5 7a1 1 0 0 0 1 1h3a1 1 0 0 0 1-1L9 3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+      `;
+
+      card.addEventListener('click', (e) => {
+        const editBtn = e.target.closest('[data-edit]');
+        const deleteBtn = e.target.closest('[data-delete]');
+        if (editBtn) {
+          e.stopPropagation();
+          openEditor(ct.basedOn, ct);
+          return;
+        }
+        if (deleteBtn) {
+          e.stopPropagation();
+          deleteCustomTheme(ct.id);
+          return;
+        }
+        selectTheme(ct.id);
+      });
+
+      card.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          selectTheme(ct.id);
+        }
+      });
+
+      grid.appendChild(card);
+    }
+  }
+
+  async function deleteCustomTheme(customId) {
+    const customs = syncState.customThemes || [];
+    const ct = customs.find(t => t.id === customId);
+    if (!ct) return;
+    if (!confirm(`Delete "${ct.name}"? This can't be undone.`)) return;
+
+    const filtered = customs.filter(t => t.id !== customId);
+    await chrome.storage.sync.set({ customThemes: filtered });
+    syncState.customThemes = filtered;
+
+    // If the deleted theme was active, fall back to connectry
+    if (syncState.theme === customId) {
+      await selectTheme('connectry');
+    } else {
+      renderCustomThemeGrid(syncState.theme);
+    }
   }
 
   // ─── Filter pills ─────────────────────────────────────────────────────────
 
   function bindFilterPills() {
-    document.querySelectorAll('.filter-pill').forEach(pill => {
+    document.querySelectorAll('#themes-heading').forEach(() => {});
+    // Target the filter pills specifically (inside the Built-in Themes section)
+    const filterPills = document.querySelectorAll('.cx-pill[data-filter]');
+    filterPills.forEach(pill => {
       pill.addEventListener('click', () => {
         activeFilter = pill.dataset.filter;
-        document.querySelectorAll('.filter-pill').forEach(p => p.classList.remove('is-active'));
+        filterPills.forEach(p => p.classList.remove('is-active'));
         pill.classList.add('is-active');
 
-        document.querySelectorAll('.theme-card').forEach(card => {
+        document.querySelectorAll('#themeGrid .theme-card').forEach(card => {
           const theme = getThemeById(card.dataset.theme);
           if (!theme) return;
           const hidden = activeFilter !== 'all' && theme.category !== activeFilter;
@@ -128,14 +291,19 @@
 
   async function selectTheme(themeId) {
     const updates = { theme: themeId };
-    if (isLightTheme(themeId)) updates.lastLightTheme = themeId;
-    if (isDarkTheme(themeId)) updates.lastDarkTheme = themeId;
+    const ootbTheme = getThemeById(themeId);
+    if (ootbTheme) {
+      if (ootbTheme.category === 'light') updates.lastLightTheme = themeId;
+      if (ootbTheme.category === 'dark') updates.lastDarkTheme = themeId;
+    }
 
     await chrome.storage.sync.set(updates);
     syncState = { ...syncState, ...updates };
 
     updateGridActiveState(themeId);
     updateHeaderMeta(themeId);
+    updateEffectsContextBanner();
+    renderEffectsTabForActiveTheme();
 
     // Apply to any active SF tab
     try {
@@ -145,6 +313,162 @@
       }
     } catch (_) {}
   }
+
+  // ─── Suggested effects hint (click-to-apply) ────────────────────────────
+
+  async function applySuggestedEffectsToGlobal(themeId) {
+    const suggested = getSuggestedEffectsFor(themeId);
+    const theme = getThemeById(themeId);
+    const themeName = theme ? theme.name : themeId;
+
+    const dialog = new Connectry.Settings.Dialog({
+      title: `Apply suggested effects from ${themeName}?`,
+      body: `
+        <p>This will update your global effects config to the <strong>${_capitalize(THEME_SUGGESTED_PRESET[themeId] || 'subtle')}</strong> preset as designed for ${themeName}.</p>
+        <p>Your current global effects will be replaced. This affects all built-in themes, but custom themes keep their own effects.</p>
+      `,
+      actions: [
+        { label: 'Cancel', variant: 'secondary' },
+        {
+          label: `Apply effects`,
+          variant: 'primary',
+          onClick: async () => {
+            await chrome.storage.sync.set({ effectsConfig: suggested });
+            syncState.effectsConfig = suggested;
+            renderEffectsTabForActiveTheme();
+            // Flash a brief confirmation
+            _flashToast(`Applied ${_capitalize(THEME_SUGGESTED_PRESET[themeId] || 'subtle')} preset globally`);
+          },
+        },
+      ],
+    });
+    dialog.open();
+  }
+
+  /**
+   * Inline suggested-effects generator — mirrors effects/presets.js
+   * THEME_EFFECTS_MAP. Options page doesn't load presets.js directly because
+   * that's a content-script resource, so we duplicate the mapping here.
+   */
+  function getSuggestedEffectsFor(themeId) {
+    const NONE = {
+      preset: 'none',
+      hoverLift: false, hoverLiftIntensity: 'medium',
+      ambientGlow: false, ambientGlowIntensity: 'medium',
+      borderShimmer: false, borderShimmerIntensity: 'medium',
+      gradientBorders: false, gradientBordersIntensity: 'medium',
+      aurora: false, auroraIntensity: 'medium',
+      neonFlicker: false, neonFlickerIntensity: 'medium',
+      particles: false, particlesIntensity: 'medium',
+      cursorTrail: false, cursorTrailIntensity: 'medium',
+    };
+    const SUBTLE = { ...NONE, preset: 'subtle', hoverLift: true, hoverLiftIntensity: 'subtle' };
+    const ALIVE = {
+      ...NONE, preset: 'alive',
+      hoverLift: true, hoverLiftIntensity: 'medium',
+      ambientGlow: true, ambientGlowIntensity: 'medium',
+      borderShimmer: true, borderShimmerIntensity: 'medium',
+    };
+    const IMMERSIVE = {
+      ...NONE, preset: 'immersive',
+      hoverLift: true, hoverLiftIntensity: 'strong',
+      ambientGlow: true, ambientGlowIntensity: 'strong',
+      borderShimmer: true, borderShimmerIntensity: 'medium',
+      gradientBorders: true, gradientBordersIntensity: 'strong',
+      cursorTrail: true, cursorTrailIntensity: 'medium',
+    };
+    const MAP = {
+      'connectry': SUBTLE,
+      'connectry-dark': { ...SUBTLE, ambientGlow: true, ambientGlowIntensity: 'subtle' },
+      'midnight': { ...SUBTLE, aurora: true, auroraIntensity: 'subtle', particles: 'dots', particlesIntensity: 'subtle' },
+      'slate': SUBTLE,
+      'tron': { ...IMMERSIVE, neonFlicker: true, neonFlickerIntensity: 'strong', ambientGlow: true, ambientGlowIntensity: 'strong' },
+      'obsidian': { ...SUBTLE, ambientGlow: true, ambientGlowIntensity: 'subtle' },
+      'arctic': { ...ALIVE, aurora: true, auroraIntensity: 'medium', particles: 'snow', particlesIntensity: 'medium' },
+      'sakura': { ...SUBTLE, borderShimmer: true, borderShimmerIntensity: 'subtle' },
+      'ember': { ...SUBTLE, ambientGlow: true, ambientGlowIntensity: 'medium', particles: 'embers', particlesIntensity: 'subtle' },
+      'nord': { ...SUBTLE, aurora: true, auroraIntensity: 'subtle' },
+      'terminal': { ...ALIVE, neonFlicker: true, neonFlickerIntensity: 'medium', particles: 'matrix', particlesIntensity: 'medium' },
+      'high-contrast': NONE,
+      'dracula': { ...SUBTLE, ambientGlow: true, ambientGlowIntensity: 'medium', borderShimmer: true, borderShimmerIntensity: 'medium' },
+      'solarized-light': SUBTLE,
+      'solarized-dark': { ...SUBTLE, ambientGlow: true, ambientGlowIntensity: 'subtle' },
+    };
+    return { ...(MAP[themeId] || NONE) };
+  }
+
+  function _flashToast(msg) {
+    const el = document.createElement('div');
+    el.className = 'cx-toast';
+    el.textContent = msg;
+    Object.assign(el.style, {
+      position: 'fixed',
+      top: '84px',
+      left: '50%',
+      transform: 'translateX(-50%)',
+      background: 'var(--cx-text)',
+      color: 'var(--cx-white)',
+      padding: '10px 20px',
+      borderRadius: 'var(--cx-radius-md)',
+      fontSize: '13px',
+      fontWeight: '600',
+      boxShadow: 'var(--cx-shadow-lg)',
+      zIndex: '2000',
+      animation: 'cx-fade-in 220ms ease',
+    });
+    document.body.appendChild(el);
+    setTimeout(() => el.remove(), 2400);
+  }
+
+  // ─── Custom theme creation dialog ───────────────────────────────────────
+
+  function openCreationDialog(baseThemeId) {
+    const base = getThemeById(baseThemeId);
+    const baseName = base ? base.name : baseThemeId;
+    const suggestedPreset = _capitalize(THEME_SUGGESTED_PRESET[baseThemeId] || 'none');
+    const globalPreset = _capitalize((syncState.effectsConfig?.preset) || 'none');
+
+    const body = document.createElement('div');
+    body.innerHTML = `
+      <p style="margin-bottom: 16px;">Your custom theme will keep its own effects, independent from the global settings. Pick a starting point:</p>
+
+      <label class="cx-option-card">
+        <input type="radio" name="start-mode" value="basic" checked />
+        <div class="cx-option-card-title">Start with ${baseName}'s suggested effects</div>
+        <div class="cx-option-card-desc">Uses the <strong>${suggestedPreset}</strong> preset — the effects this theme was designed with.</div>
+      </label>
+
+      <label class="cx-option-card">
+        <input type="radio" name="start-mode" value="global" />
+        <div class="cx-option-card-title">Copy my current global effects</div>
+        <div class="cx-option-card-desc">Starts with your current global config (<strong>${globalPreset}</strong>). Changes after this won't affect the global config.</div>
+      </label>
+    `;
+
+    const dialog = new Connectry.Settings.Dialog({
+      title: `Clone & Customize: ${baseName}`,
+      body,
+      actions: [
+        { label: 'Cancel', variant: 'secondary' },
+        {
+          label: 'Create',
+          variant: 'primary',
+          onClick: () => {
+            const mode = body.querySelector('input[name="start-mode"]:checked')?.value || 'basic';
+            const initialEffects = mode === 'global'
+              ? { ...(syncState.effectsConfig || getSuggestedEffectsFor(baseThemeId)) }
+              : getSuggestedEffectsFor(baseThemeId);
+            _pendingCreateEffects = initialEffects;
+            openEditor(baseThemeId, null);
+          },
+        },
+      ],
+    });
+    dialog.open();
+  }
+
+  // Holds effects snapshot staged by the creation dialog — picked up by saveCustomTheme
+  let _pendingCreateEffects = null;
 
   // ─── Auto mode toggle ─────────────────────────────────────────────────────
 
@@ -211,14 +535,10 @@
 
   function updateHeaderMeta(activeThemeId) {
     const meta = document.getElementById('headerMeta');
-    const theme = getThemeById(activeThemeId);
+    if (!meta) return;
+    const theme = getThemeById(activeThemeId) || (syncState.customThemes || []).find(t => t.id === activeThemeId);
     const name = theme ? theme.name : activeThemeId;
-    meta.innerHTML = `
-      <div class="header-theme-dot"></div>
-      <span>Active: ${name}</span>
-      <span style="color: var(--color-border)">·</span>
-      <span>${THEMES.length} themes</span>
-    `;
+    meta.innerHTML = `<span>Active: <strong>${Connectry.Settings.escape(name)}</strong></span>`;
   }
 
   // ─── Version ──────────────────────────────────────────────────────────────
@@ -241,6 +561,8 @@
       lastDarkTheme: 'connectry-dark',
       orgThemes: {},
       themeScope: 'both',
+      effectsConfig: null,
+      customThemes: [],
     });
 
     let activeTheme = syncState.theme;
@@ -251,7 +573,9 @@
         : (syncState.lastLightTheme || 'connectry');
     }
 
+    // Themes tab
     renderThemeGrid(activeTheme);
+    renderCustomThemeGrid(activeTheme);
     bindFilterPills();
     updateHeaderMeta(activeTheme);
     renderOrgList(syncState.orgThemes);
@@ -270,6 +594,9 @@
       syncState.themeScope = scopeSelect.value;
     });
 
+    // Effects tab
+    renderEffectsTabForActiveTheme();
+
     // Listen for storage changes from other windows/tabs
     chrome.storage.onChanged.addListener((changes, area) => {
       if (area !== 'sync') return;
@@ -277,6 +604,8 @@
         syncState.theme = changes.theme.newValue;
         updateGridActiveState(syncState.theme);
         updateHeaderMeta(syncState.theme);
+        updateEffectsContextBanner();
+        renderEffectsTabForActiveTheme();
       }
       if (changes.autoMode) {
         syncState.autoMode = changes.autoMode.newValue;
@@ -286,6 +615,42 @@
         syncState.orgThemes = changes.orgThemes.newValue;
         renderOrgList(syncState.orgThemes);
       }
+      if (changes.customThemes) {
+        syncState.customThemes = changes.customThemes.newValue || [];
+        renderCustomThemeGrid(syncState.theme);
+        renderEffectsTabForActiveTheme();
+      }
+      if (changes.effectsConfig) {
+        syncState.effectsConfig = changes.effectsConfig.newValue;
+        renderEffectsTabForActiveTheme();
+      }
+    });
+
+    // Initialize tabs (must happen after all content is rendered)
+    if (window.Connectry && Connectry.Settings && Connectry.Settings.Tabs) {
+      const tabContainer = document.querySelector('.cx-tabs');
+      if (tabContainer) {
+        new Connectry.Settings.Tabs(tabContainer, {
+          storageKey: 'cx-themer-active-tab',
+          onChange: (tabName) => {
+            // Start/stop preview canvases when leaving/entering Effects tab
+            if (tabName === 'effects') {
+              startEffectPreviews();
+            } else {
+              stopEffectPreviews();
+            }
+          },
+        });
+      }
+    }
+
+    // Empty-state buttons in custom themes section
+    document.getElementById('createThemeBtnEmpty')?.addEventListener('click', () => {
+      _pendingCreateEffects = getSuggestedEffectsFor('connectry');
+      openEditor('connectry', null);
+    });
+    document.getElementById('cloneFirstBtn')?.addEventListener('click', () => {
+      openCreationDialog('connectry');
     });
   }
 
@@ -721,6 +1086,24 @@
     const id = editorState.customId || `custom-${Date.now()}`;
     const base = getThemeById(editorState.basedOn);
 
+    // Load existing custom themes first so we can preserve existing effects on update
+    const { customThemes = [] } = await chrome.storage.sync.get('customThemes');
+    const existing = customThemes.find(t => t.id === id);
+
+    // Determine the effects snapshot for this custom theme
+    //   - Update: preserve existing effects (edit flow shouldn't wipe them)
+    //   - New from creation dialog: use the staged _pendingCreateEffects
+    //   - New without dialog (edge case): use base theme's suggested effects
+    let effects;
+    if (existing && existing.effects) {
+      effects = existing.effects;
+    } else if (_pendingCreateEffects) {
+      effects = _pendingCreateEffects;
+      _pendingCreateEffects = null;
+    } else {
+      effects = getSuggestedEffectsFor(editorState.basedOn);
+    }
+
     const custom = {
       id,
       name,
@@ -730,20 +1113,15 @@
       createdVia: 'manual',
       coreOverrides: { ...editorState.coreOverrides },
       advancedOverrides: { ...editorState.advancedOverrides },
+      effects,
     };
 
-    // Load existing custom themes
-    const { customThemes = [] } = await chrome.storage.sync.get('customThemes');
-
-    // Replace or append
     const idx = customThemes.findIndex(t => t.id === id);
-    if (idx >= 0) {
-      customThemes[idx] = custom;
-    } else {
-      customThemes.push(custom);
-    }
+    if (idx >= 0) customThemes[idx] = custom;
+    else customThemes.push(custom);
 
     await chrome.storage.sync.set({ customThemes });
+    syncState.customThemes = customThemes;
     editorState.customId = id;
 
     // Apply the theme
@@ -751,8 +1129,10 @@
 
     // Visual feedback
     const btn = document.getElementById('editorSaveBtn');
-    btn.textContent = 'Saved!';
-    setTimeout(() => { btn.textContent = 'Save Theme'; }, 1500);
+    if (btn) {
+      btn.textContent = 'Saved!';
+      setTimeout(() => { btn.textContent = 'Save Theme'; }, 1500);
+    }
   }
 
   function exportThemeJSON() {
@@ -813,153 +1193,475 @@
     e.target.value = '';
   }
 
-  // ─── Customize button on theme cards ──────────────────────────────────────
-
-  function addCustomizeButtons() {
-    document.querySelectorAll('.theme-card').forEach(card => {
-      const themeId = card.dataset.theme;
-      if (!themeId) return;
-
-      const btn = document.createElement('button');
-      btn.className = 'theme-customize-btn';
-      btn.title = 'Customize this theme';
-      btn.innerHTML = `<svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M8.5 1.5l2 2-7 7H1.5V8.5l7-7z" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
-      btn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        openEditor(themeId, null);
-      });
-
-      card.appendChild(btn);
-    });
-  }
+  // Theme customize buttons are built directly into the theme card markup
+  // now (Clone for OOTB, Edit for custom themes) — no post-render pass needed.
 
   // ═══════════════════════════════════════════════════════════════════════════
-  // Effects Control Panel
+  // Effects Tab
   // ═══════════════════════════════════════════════════════════════════════════
 
-  const INTENSITY_LABELS = { 1: 'Subtle', 2: 'Medium', 3: 'Strong' };
-  const INTENSITY_MAP = { 1: 'subtle', 2: 'medium', 3: 'strong' };
+  const INTENSITY_TO_VAL = { subtle: 1, medium: 2, strong: 3 };
+  const VAL_TO_INTENSITY = { 1: 'subtle', 2: 'medium', 3: 'strong' };
 
-  // Preset definitions (mirrors effects/presets.js — inlined for options page)
-  const FX_PRESETS = {
-    none: { hoverLift: false, ambientGlow: false, borderShimmer: false, gradientBorders: false, aurora: false, neonFlicker: false, particles: false, cursorTrail: false },
-    subtle: { hoverLift: true, ambientGlow: false, borderShimmer: false, gradientBorders: false, aurora: false, neonFlicker: false, particles: false, cursorTrail: false },
-    alive: { hoverLift: true, ambientGlow: true, borderShimmer: true, gradientBorders: false, aurora: false, neonFlicker: false, particles: false, cursorTrail: false },
-    immersive: { hoverLift: true, ambientGlow: true, borderShimmer: true, gradientBorders: true, aurora: false, neonFlicker: false, particles: false, cursorTrail: true },
+  const PRESET_CATALOG = [
+    { id: 'none', name: 'None', tagline: 'No animations', body: 'Clean and focused. Recommended for accessibility needs, low-power devices, or distraction-free work.', icon: '○' },
+    { id: 'subtle', name: 'Subtle', tagline: 'Gentle hover lift on cards', body: 'Cards and buttons lift slightly on hover. Nothing else. Perfect for everyday use — adds polish without distraction.', icon: '◐' },
+    { id: 'alive', name: 'Alive', tagline: 'Hover lift, ambient glow, border shimmer', body: 'Adds pulsing glow on active elements and a shimmer line across card tops. Best for dashboards and visual interest.', icon: '◉' },
+    { id: 'immersive', name: 'Immersive', tagline: 'Full effects pack + cursor trail', body: 'The works: hover lift, glow, shimmer, rotating gradient borders, and a light cursor trail. Best for demos, dark themes, and dramatic moments.', icon: '✦' },
+  ];
+
+  const EFFECT_CATALOG = [
+    { id: 'hoverLift',       name: 'Hover Lift',        short: 'Cards lift on hover',             long: 'Cards, buttons, and list items gently float up when you hover. Modals and dropdowns are never affected.' },
+    { id: 'ambientGlow',     name: 'Ambient Glow',      short: 'Pulsing glow on accent elements', long: 'Brand buttons, active nav items, and focused inputs gain a slow pulsing glow in your theme accent color.' },
+    { id: 'borderShimmer',   name: 'Border Shimmer',    short: 'Animated light sweep on cards',   long: 'A thin line of light sweeps across the top of each card, giving a subtle animated edge.' },
+    { id: 'gradientBorders', name: 'Gradient Borders',  short: 'Rotating gradient card edges',    long: 'Card borders become animated conic gradients that slowly rotate around the edge.' },
+    { id: 'aurora',          name: 'Aurora Background', short: 'Slow-moving ambient background',  long: 'A soft, slow-moving gradient glow sits behind all content. Colors derive from your theme accent.' },
+    { id: 'neonFlicker',     name: 'Neon Flicker',      short: 'Glowing text with flicker',       long: 'Page titles and active navigation gain a neon text glow with occasional flicker, like a sign.' },
+    { id: 'particles',       name: 'Particles',         short: 'Snow, rain, matrix, dots, embers', long: 'Animated background particles. Pick from snow, rain, matrix rain, floating dots, or rising embers.' },
+    { id: 'cursorTrail',     name: 'Cursor Trail',      short: 'Light trail follows your mouse',  long: 'A short glowing trail follows your mouse pointer, fading as it goes.' },
+  ];
+
+  const NONE_EFFECTS = {
+    preset: 'none',
+    hoverLift: false, hoverLiftIntensity: 'medium',
+    ambientGlow: false, ambientGlowIntensity: 'medium',
+    borderShimmer: false, borderShimmerIntensity: 'medium',
+    gradientBorders: false, gradientBordersIntensity: 'medium',
+    aurora: false, auroraIntensity: 'medium',
+    neonFlicker: false, neonFlickerIntensity: 'medium',
+    particles: false, particlesIntensity: 'medium',
+    cursorTrail: false, cursorTrailIntensity: 'medium',
   };
 
-  let effectsConfig = { preset: 'none', intensity: 'medium' };
+  const PRESET_CONFIGS = {
+    none: { ...NONE_EFFECTS, preset: 'none' },
+    subtle: { ...NONE_EFFECTS, preset: 'subtle', hoverLift: true, hoverLiftIntensity: 'subtle' },
+    alive: {
+      ...NONE_EFFECTS, preset: 'alive',
+      hoverLift: true, hoverLiftIntensity: 'medium',
+      ambientGlow: true, ambientGlowIntensity: 'medium',
+      borderShimmer: true, borderShimmerIntensity: 'medium',
+    },
+    immersive: {
+      ...NONE_EFFECTS, preset: 'immersive',
+      hoverLift: true, hoverLiftIntensity: 'strong',
+      ambientGlow: true, ambientGlowIntensity: 'strong',
+      borderShimmer: true, borderShimmerIntensity: 'medium',
+      gradientBorders: true, gradientBordersIntensity: 'strong',
+      cursorTrail: true, cursorTrailIntensity: 'medium',
+    },
+  };
 
-  function loadEffectsUI() {
-    chrome.storage.sync.get({ effectsConfig: null }, (result) => {
-      if (result.effectsConfig) {
-        effectsConfig = { preset: 'none', intensity: 'medium', ...result.effectsConfig };
+  // Effects tab state
+  let effectsEditingMode = 'global';    // 'global' | 'custom'
+  let effectsEditingCustomId = null;
+  let previewCanvases = new Map();      // effectId -> { canvas, raf, cleanup? }
+
+  function resolveEffectsEditingTarget() {
+    const activeId = syncState.theme;
+    const customs = syncState.customThemes || [];
+    const custom = customs.find(t => t.id === activeId);
+    if (custom) {
+      effectsEditingMode = 'custom';
+      effectsEditingCustomId = custom.id;
+      return { config: custom.effects || { ...NONE_EFFECTS }, mode: 'custom', theme: custom };
+    }
+    effectsEditingMode = 'global';
+    effectsEditingCustomId = null;
+    return { config: syncState.effectsConfig || { ...NONE_EFFECTS }, mode: 'global', theme: null };
+  }
+
+  function updateEffectsContextBanner() {
+    const banner = document.getElementById('effectsContextBanner');
+    const text = document.getElementById('effectsContextText');
+    const actions = document.getElementById('effectsContextActions');
+    if (!banner || !text) return;
+
+    const { mode, theme } = resolveEffectsEditingTarget();
+    if (mode === 'custom' && theme) {
+      banner.className = 'cx-banner cx-banner-info';
+      text.innerHTML = `Editing effects for <strong>${Connectry.Settings.escape(theme.name)}</strong>. These effects are saved with this theme only — global changes won't affect it.`;
+      actions.innerHTML = `<button class="cx-btn cx-btn-sm cx-btn-ghost" id="effectsResetBtn">Reset ▾</button>`;
+      document.getElementById('effectsResetBtn')?.addEventListener('click', openEffectsResetMenu);
+    } else {
+      banner.className = 'cx-banner cx-banner-warning';
+      text.innerHTML = `Editing <strong>global effects</strong> — these apply to all built-in themes.`;
+      actions.innerHTML = '';
+    }
+  }
+
+  function openEffectsResetMenu() {
+    if (effectsEditingMode !== 'custom') return;
+    const custom = (syncState.customThemes || []).find(t => t.id === effectsEditingCustomId);
+    if (!custom) return;
+
+    const body = document.createElement('div');
+    body.innerHTML = `
+      <p style="margin-bottom:16px;">Reset the effects for this custom theme to:</p>
+      <label class="cx-option-card">
+        <input type="radio" name="reset-mode" value="suggested" checked />
+        <div class="cx-option-card-title">Suggested effects for ${Connectry.Settings.escape(getThemeById(custom.basedOn)?.name || custom.basedOn)}</div>
+        <div class="cx-option-card-desc">Restore the base theme's suggested effect preset.</div>
+      </label>
+      <label class="cx-option-card">
+        <input type="radio" name="reset-mode" value="global" />
+        <div class="cx-option-card-title">Copy current global effects</div>
+        <div class="cx-option-card-desc">Replace with your current global config snapshot.</div>
+      </label>
+      <label class="cx-option-card">
+        <input type="radio" name="reset-mode" value="none" />
+        <div class="cx-option-card-title">Clear all effects</div>
+        <div class="cx-option-card-desc">Turn every effect off for this theme.</div>
+      </label>
+    `;
+
+    const dialog = new Connectry.Settings.Dialog({
+      title: 'Reset effects',
+      body,
+      actions: [
+        { label: 'Cancel', variant: 'secondary' },
+        {
+          label: 'Reset',
+          variant: 'primary',
+          onClick: async () => {
+            const mode = body.querySelector('input[name="reset-mode"]:checked')?.value || 'suggested';
+            let newEffects;
+            if (mode === 'global') newEffects = { ...(syncState.effectsConfig || NONE_EFFECTS) };
+            else if (mode === 'none') newEffects = { ...NONE_EFFECTS };
+            else newEffects = getSuggestedEffectsFor(custom.basedOn);
+
+            const customs = [...(syncState.customThemes || [])];
+            const idx = customs.findIndex(t => t.id === custom.id);
+            if (idx >= 0) {
+              customs[idx] = { ...customs[idx], effects: newEffects };
+              await chrome.storage.sync.set({ customThemes: customs });
+              syncState.customThemes = customs;
+              renderEffectsTabForActiveTheme();
+              renderCustomThemeGrid(syncState.theme);
+            }
+          },
+        },
+      ],
+    });
+    dialog.open();
+  }
+
+  function renderEffectsTabForActiveTheme() {
+    const { config } = resolveEffectsEditingTarget();
+    updateEffectsContextBanner();
+    renderPresetGrid(config);
+    renderEffectsGrid(config);
+  }
+
+  function renderPresetGrid(config) {
+    const grid = document.getElementById('presetGrid');
+    if (!grid) return;
+    grid.innerHTML = '';
+
+    const activePreset = config.preset || 'none';
+    for (const p of PRESET_CATALOG) {
+      const card = document.createElement('button');
+      card.className = `preset-card${activePreset === p.id ? ' is-active' : ''}`;
+      card.dataset.preset = p.id;
+      card.setAttribute('role', 'radio');
+      card.setAttribute('aria-checked', String(activePreset === p.id));
+      card.innerHTML = `
+        <div class="preset-card-icon">${p.icon}</div>
+        <div class="preset-card-name">${p.name}</div>
+        <div class="preset-card-tagline">${p.tagline}</div>
+        <div class="preset-card-body">${p.body}</div>
+      `;
+      card.addEventListener('click', () => selectPreset(p.id));
+      grid.appendChild(card);
+    }
+  }
+
+  async function selectPreset(presetId) {
+    const base = PRESET_CONFIGS[presetId] || PRESET_CONFIGS.none;
+    await saveEffectsConfig({ ...base });
+  }
+
+  async function saveEffectsConfig(newConfig) {
+    if (effectsEditingMode === 'custom' && effectsEditingCustomId) {
+      const customs = [...(syncState.customThemes || [])];
+      const idx = customs.findIndex(t => t.id === effectsEditingCustomId);
+      if (idx >= 0) {
+        customs[idx] = { ...customs[idx], effects: newConfig };
+        await chrome.storage.sync.set({ customThemes: customs });
+        syncState.customThemes = customs;
       }
-      renderEffectsState();
-    });
-  }
-
-  function renderEffectsState() {
-    // Set preset pills
-    document.querySelectorAll('.effects-preset-pill').forEach(pill => {
-      const isActive = pill.dataset.preset === effectsConfig.preset;
-      pill.classList.toggle('is-active', isActive);
-      pill.setAttribute('aria-checked', String(isActive));
-    });
-
-    // Set individual toggles
-    document.querySelectorAll('.effect-toggle').forEach(toggle => {
-      const effect = toggle.dataset.effect;
-      toggle.checked = !!effectsConfig[effect];
-    });
-
-    // Set sliders
-    document.querySelectorAll('.effect-slider').forEach(slider => {
-      const intensity = effectsConfig.intensity || 'medium';
-      const val = { subtle: 1, medium: 2, strong: 3 }[intensity] || 2;
-      slider.value = val;
-      const label = slider.closest('.effect-card')?.querySelector('.effect-slider-value');
-      if (label) label.textContent = INTENSITY_LABELS[val];
-    });
-
-    // Set particle type select
-    const particleSelect = document.querySelector('.effect-select[data-effect="particleType"]');
-    if (particleSelect) {
-      const pType = typeof effectsConfig.particles === 'string' ? effectsConfig.particles : 'snow';
-      particleSelect.value = pType;
+    } else {
+      await chrome.storage.sync.set({ effectsConfig: newConfig });
+      syncState.effectsConfig = newConfig;
     }
+    renderEffectsTabForActiveTheme();
   }
 
-  async function saveEffectsConfig() {
-    await chrome.storage.sync.set({ effectsConfig });
-  }
+  function renderEffectsGrid(config) {
+    const grid = document.getElementById('effectsGrid');
+    if (!grid) return;
+    grid.innerHTML = '';
+    stopEffectPreviews();
 
-  function bindEffectsEvents() {
-    // Preset pills
-    document.querySelectorAll('.effects-preset-pill').forEach(pill => {
-      pill.addEventListener('click', async () => {
-        const preset = pill.dataset.preset;
-        const base = FX_PRESETS[preset] || FX_PRESETS.none;
-        effectsConfig = {
-          preset,
-          intensity: preset === 'none' ? 'medium' : (preset === 'subtle' ? 'subtle' : preset === 'immersive' ? 'strong' : 'medium'),
-          ...base,
-        };
-        renderEffectsState();
-        await saveEffectsConfig();
-      });
-    });
+    for (const effect of EFFECT_CATALOG) {
+      const isOn = !!config[effect.id];
+      const intensity = config[effect.id + 'Intensity'] || 'medium';
+      const intensityVal = INTENSITY_TO_VAL[intensity] || 2;
 
-    // Individual effect toggles
-    document.querySelectorAll('.effect-toggle').forEach(toggle => {
+      const card = document.createElement('div');
+      card.className = `effect-card${isOn ? ' is-enabled' : ''}`;
+      card.dataset.effect = effect.id;
+
+      const particleType = typeof config.particles === 'string' ? config.particles : 'snow';
+      const particleSelectRow = effect.id === 'particles' ? `
+        <div class="effect-slider-row">
+          <span class="effect-select-label">Style</span>
+          <select class="effect-select" data-effect-select="particles">
+            <option value="snow" ${particleType === 'snow' ? 'selected' : ''}>Snow</option>
+            <option value="dots" ${particleType === 'dots' ? 'selected' : ''}>Floating Dots</option>
+            <option value="matrix" ${particleType === 'matrix' ? 'selected' : ''}>Matrix Rain</option>
+            <option value="embers" ${particleType === 'embers' ? 'selected' : ''}>Embers</option>
+            <option value="rain" ${particleType === 'rain' ? 'selected' : ''}>Rain</option>
+          </select>
+        </div>
+      ` : '';
+
+      card.innerHTML = `
+        <div class="effect-preview" data-effect="${effect.id}">
+          <div class="effect-preview-card">${_previewLabel(effect.id)}</div>
+        </div>
+        <div class="effect-card-header">
+          <div class="effect-info">
+            <div class="effect-name">${effect.name}</div>
+            <div class="effect-short">${effect.short}</div>
+            <div class="effect-long">${effect.long}</div>
+          </div>
+          <label class="cx-toggle">
+            <input type="checkbox" data-effect-toggle="${effect.id}" ${isOn ? 'checked' : ''} />
+            <span class="cx-toggle-track"><span class="cx-toggle-thumb"></span></span>
+          </label>
+        </div>
+        <div class="effect-controls">
+          <div class="effect-slider-row">
+            <span class="effect-slider-label">Intensity</span>
+            <input type="range" class="effect-slider" data-effect-slider="${effect.id}" min="1" max="3" step="1" value="${intensityVal}" />
+            <span class="effect-slider-value">${_capitalize(intensity)}</span>
+          </div>
+          ${particleSelectRow}
+        </div>
+      `;
+
+      // Toggle
+      const toggle = card.querySelector(`[data-effect-toggle="${effect.id}"]`);
       toggle.addEventListener('change', async () => {
-        const effect = toggle.dataset.effect;
-        effectsConfig[effect] = toggle.checked;
-        effectsConfig.preset = 'custom';
-        renderEffectsState();
-        await saveEffectsConfig();
-      });
-    });
-
-    // Intensity sliders (global intensity)
-    document.querySelectorAll('.effect-slider').forEach(slider => {
-      slider.addEventListener('input', async () => {
-        const val = parseInt(slider.value);
-        effectsConfig.intensity = INTENSITY_MAP[val] || 'medium';
-        effectsConfig.preset = 'custom';
-        // Update all slider labels
-        document.querySelectorAll('.effect-slider').forEach(s => {
-          s.value = val;
-          const label = s.closest('.effect-card')?.querySelector('.effect-slider-value');
-          if (label) label.textContent = INTENSITY_LABELS[val];
-        });
-        renderEffectsState();
-        await saveEffectsConfig();
-      });
-    });
-
-    // Particle type select
-    const particleSelect = document.querySelector('.effect-select[data-effect="particleType"]');
-    if (particleSelect) {
-      particleSelect.addEventListener('change', async () => {
-        if (effectsConfig.particles) {
-          effectsConfig.particles = particleSelect.value;
+        const { config: current } = resolveEffectsEditingTarget();
+        const next = { ...current, preset: 'custom' };
+        if (effect.id === 'particles') {
+          next.particles = toggle.checked ? (particleType || 'snow') : false;
+        } else {
+          next[effect.id] = toggle.checked;
         }
-        effectsConfig.preset = 'custom';
-        await saveEffectsConfig();
+        await saveEffectsConfig(next);
       });
+
+      // Slider
+      const slider = card.querySelector(`[data-effect-slider="${effect.id}"]`);
+      slider.addEventListener('input', async () => {
+        const intensityName = VAL_TO_INTENSITY[parseInt(slider.value)] || 'medium';
+        const { config: current } = resolveEffectsEditingTarget();
+        const next = { ...current, preset: 'custom' };
+        next[effect.id + 'Intensity'] = intensityName;
+        const label = card.querySelector('.effect-slider-value');
+        if (label) label.textContent = _capitalize(intensityName);
+        await saveEffectsConfig(next);
+      });
+
+      // Particle select
+      const pSelect = card.querySelector('[data-effect-select="particles"]');
+      if (pSelect) {
+        pSelect.addEventListener('change', async () => {
+          const { config: current } = resolveEffectsEditingTarget();
+          const next = { ...current, preset: 'custom' };
+          if (next.particles) next.particles = pSelect.value;
+          await saveEffectsConfig(next);
+        });
+      }
+
+      grid.appendChild(card);
+    }
+
+    startEffectPreviews();
+  }
+
+  function _previewLabel(effectId) {
+    const labels = {
+      hoverLift: 'Hover me',
+      ambientGlow: 'Glow',
+      borderShimmer: 'Shimmer',
+      gradientBorders: 'Border',
+      aurora: '',
+      neonFlicker: 'NEON',
+      particles: 'Particles',
+      cursorTrail: 'Hover me',
+    };
+    return labels[effectId] || '';
+  }
+
+  // ─── Mini preview canvas runtime (particles + cursor trail) ──────────────
+
+  function startEffectPreviews() {
+    stopEffectPreviews();
+
+    const particlesPreview = document.querySelector('.effect-preview[data-effect="particles"]');
+    if (particlesPreview) {
+      const canvas = document.createElement('canvas');
+      canvas.className = 'fx-preview-canvas';
+      canvas.width = particlesPreview.clientWidth || 240;
+      canvas.height = particlesPreview.clientHeight || 96;
+      particlesPreview.insertBefore(canvas, particlesPreview.firstChild);
+
+      const { config } = resolveEffectsEditingTarget();
+      const pType = typeof config.particles === 'string' ? config.particles : 'snow';
+      const theme = getThemeById(syncState.theme) || (syncState.customThemes || []).find(t => t.id === syncState.theme);
+      const accent = theme?.colors?.accent || '#4a6fa5';
+
+      previewCanvases.set('particles', _spawnMiniParticles(canvas, pType, accent));
+    }
+
+    const trailPreview = document.querySelector('.effect-preview[data-effect="cursorTrail"]');
+    if (trailPreview) {
+      const canvas = document.createElement('canvas');
+      canvas.className = 'fx-preview-canvas';
+      canvas.width = trailPreview.clientWidth || 240;
+      canvas.height = trailPreview.clientHeight || 96;
+      trailPreview.insertBefore(canvas, trailPreview.firstChild);
+      previewCanvases.set('cursorTrail', _spawnMiniCursorTrail(trailPreview, canvas));
     }
   }
 
-  // ─── Init (extended) ──────────────────────────────────────────────────────
+  function stopEffectPreviews() {
+    for (const runtime of previewCanvases.values()) {
+      if (runtime.raf) cancelAnimationFrame(runtime.raf);
+      if (runtime.canvas) runtime.canvas.remove();
+      if (runtime.cleanup) runtime.cleanup();
+    }
+    previewCanvases.clear();
+  }
+
+  function _spawnMiniParticles(canvas, type, color) {
+    const ctx = canvas.getContext('2d');
+    const w = canvas.width, h = canvas.height;
+    const count = type === 'matrix' ? 10 : 16;
+    const particles = [];
+
+    for (let i = 0; i < count; i++) {
+      if (type === 'snow') particles.push({ x: Math.random() * w, y: Math.random() * h, r: Math.random() * 1.2 + 0.6, vx: (Math.random() * 0.4 - 0.2), vy: (Math.random() * 0.4 + 0.25) });
+      else if (type === 'rain') particles.push({ x: Math.random() * w, y: Math.random() * h, len: Math.random() * 6 + 3, vy: Math.random() * 3 + 1.5 });
+      else if (type === 'matrix') particles.push({ x: Math.random() * w, y: Math.random() * h, char: String.fromCharCode(0x30A0 + Math.random() * 96), vy: Math.random() * 1 + 0.4, size: Math.random() * 3 + 7, opacity: Math.random() });
+      else if (type === 'dots') particles.push({ x: Math.random() * w, y: Math.random() * h, r: Math.random() * 1 + 0.4, vx: (Math.random() * 0.3 - 0.15), vy: (Math.random() * 0.3 - 0.15), opacity: Math.random() * 0.5 + 0.3, pulse: Math.random() * Math.PI * 2 });
+      else if (type === 'embers') particles.push({ x: Math.random() * w, y: h + Math.random() * 10, r: Math.random() * 1.2 + 0.4, vx: (Math.random() - 0.5) * 0.4, vy: -(Math.random() * 0.6 + 0.2), life: Math.random(), decay: Math.random() * 0.006 + 0.003 });
+    }
+
+    const runtime = { canvas, raf: null };
+    const loop = () => {
+      ctx.clearRect(0, 0, w, h);
+      for (let i = 0; i < particles.length; i++) {
+        const p = particles[i];
+        if (type === 'snow') {
+          p.x += p.vx; p.y += p.vy;
+          ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+          ctx.fillStyle = color; ctx.globalAlpha = 0.6; ctx.fill();
+          if (p.y > h) { p.y = -2; p.x = Math.random() * w; }
+        } else if (type === 'rain') {
+          p.y += p.vy;
+          ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineTo(p.x, p.y + p.len);
+          ctx.strokeStyle = color; ctx.globalAlpha = 0.45; ctx.lineWidth = 0.7; ctx.stroke();
+          if (p.y > h) { p.y = -p.len; p.x = Math.random() * w; }
+        } else if (type === 'matrix') {
+          p.y += p.vy; p.opacity -= 0.005;
+          ctx.font = `${p.size}px monospace`;
+          ctx.fillStyle = color; ctx.globalAlpha = p.opacity;
+          ctx.fillText(p.char, p.x, p.y);
+          if (p.y > h || p.opacity <= 0) { p.y = -5; p.x = Math.random() * w; p.opacity = 1; p.char = String.fromCharCode(0x30A0 + Math.random() * 96); }
+        } else if (type === 'dots') {
+          p.pulse += 0.012;
+          p.x += p.vx; p.y += p.vy;
+          const pulse = 0.6 + Math.sin(p.pulse) * 0.4;
+          ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+          ctx.fillStyle = color; ctx.globalAlpha = p.opacity * pulse; ctx.fill();
+          if (p.x < 0 || p.x > w) p.vx *= -1;
+          if (p.y < 0 || p.y > h) p.vy *= -1;
+        } else if (type === 'embers') {
+          p.x += p.vx; p.y += p.vy; p.life -= p.decay;
+          if (p.life <= 0) { p.life = 1; p.y = h + 5; p.x = Math.random() * w; }
+          ctx.beginPath(); ctx.arc(p.x, p.y, p.r * p.life, 0, Math.PI * 2);
+          ctx.fillStyle = color; ctx.globalAlpha = p.life * 0.75; ctx.fill();
+        }
+      }
+      ctx.globalAlpha = 1;
+      runtime.raf = requestAnimationFrame(loop);
+    };
+    loop();
+    return runtime;
+  }
+
+  function _spawnMiniCursorTrail(container, canvas) {
+    const ctx = canvas.getContext('2d');
+    const theme = getThemeById(syncState.theme) || (syncState.customThemes || []).find(t => t.id === syncState.theme);
+    const color = theme?.colors?.accent || '#4a6fa5';
+    const points = [];
+    let active = true;
+
+    const onMove = (e) => {
+      const rect = canvas.getBoundingClientRect();
+      points.push({ x: e.clientX - rect.left, y: e.clientY - rect.top, life: 1 });
+      if (points.length > 14) points.shift();
+    };
+    container.addEventListener('mousemove', onMove);
+
+    const runtime = {
+      canvas,
+      raf: null,
+      cleanup: () => {
+        active = false;
+        container.removeEventListener('mousemove', onMove);
+      },
+    };
+
+    const loop = () => {
+      if (!active) return;
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      for (let i = 0; i < points.length; i++) {
+        const p = points[i];
+        const progress = (i + 1) / points.length;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, 3 * progress, 0, Math.PI * 2);
+        ctx.fillStyle = color;
+        ctx.globalAlpha = progress * 0.55;
+        ctx.fill();
+        p.life -= 0.02;
+      }
+      for (let i = points.length - 1; i >= 0; i--) {
+        if (points[i].life <= 0) points.splice(i, 1);
+      }
+      ctx.globalAlpha = 1;
+      runtime.raf = requestAnimationFrame(loop);
+    };
+    loop();
+    return runtime;
+  }
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // Boot
+  // ═══════════════════════════════════════════════════════════════════════════
 
   init().catch(err => console.error('[Themer options] Init error:', err));
 
-  // Bind editor + effects after DOM is ready
+  // Bind editor after DOM is ready
   setTimeout(() => {
     bindEditorEvents();
-    addCustomizeButtons();
-    loadEffectsUI();
-    bindEffectsEvents();
+    document.getElementById('createThemeBtn')?.addEventListener('click', () => {
+      openCreationDialog('connectry');
+    });
   }, 100);
 })();
