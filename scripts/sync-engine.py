@@ -8,6 +8,7 @@ Usage: python3 scripts/sync-engine.py
 """
 
 import re
+import sys
 
 ENGINE_PATH = 'themes/engine.js'
 BG_PATH = 'background.js'
@@ -20,7 +21,7 @@ with open(BG_PATH) as f:
     bg = f.read()
 
 # Extract from engine.js: everything from 'function generateThemeCSS'
-# up to (but NOT including) the module.exports block
+# up to (but NOT including) the module.exports block or EOF marker
 match = re.search(
     r'(function generateThemeCSS\(theme\).*?)(?=\n// Export for use|\nif \(typeof module)',
     engine,
@@ -28,9 +29,14 @@ match = re.search(
 )
 if not match:
     print('ERROR: Could not find generateThemeCSS in engine.js')
-    exit(1)
+    sys.exit(1)
 
 engine_code = match.group(1).rstrip()
+
+# Safety check: engine code must NOT contain module.exports
+if 'module.exports' in engine_code or 'typeof module' in engine_code:
+    print('ERROR: Engine code contains module.exports — extraction boundary is wrong')
+    sys.exit(1)
 
 # Replace in background.js: from 'function generateThemeCSS'
 # up to '// ─── Inline: derivation engine'
@@ -41,9 +47,12 @@ bg_match = re.search(
 )
 if not bg_match:
     print('ERROR: Could not find engine boundaries in background.js')
-    exit(1)
+    sys.exit(1)
 
 new_bg = bg[:bg_match.start()] + engine_code + '\n' + bg[bg_match.end():]
+
+# Safety: remove any orphaned module.exports that leaked in
+new_bg = re.sub(r'\nif \(typeof module !== .undefined.\) \{\n', '\n', new_bg)
 
 with open(BG_PATH, 'w') as f:
     f.write(new_bg)

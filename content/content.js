@@ -1,6 +1,10 @@
 (() => {
   'use strict';
 
+  // Only theme Salesforce-origin frames (all_frames=true catches all iframes)
+  const hostname = window.location.hostname;
+  if (!hostname.includes('salesforce.com') && !hostname.includes('force.com')) return;
+
   // Skip login, verification, and other pre-auth pages — don't theme them
   const skipPatterns = [
     '/login',
@@ -39,6 +43,14 @@
           color ${TRANSITION_DURATION}ms ease,
           border-color ${TRANSITION_DURATION}ms ease,
           box-shadow ${TRANSITION_DURATION}ms ease !important;
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .sf-themer-transitioning,
+        .sf-themer-transitioning *,
+        .sf-themer-transitioning *::before,
+        .sf-themer-transitioning *::after {
+          transition: none !important;
+        }
       }
     `;
     const target = document.head || document.documentElement;

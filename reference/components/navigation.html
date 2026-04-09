@@ -1,0 +1,98 @@
+<!-- Component: Global Navigation Bar (Context Bar) -->
+<!-- Page: Any Lightning page -->
+<!-- Date: 2026-04-09 -->
+<!-- SLDS version: 1 (LWC runtime with one-app-nav-bar) -->
+<!-- Source: Noland's org — connectry.lightning.force.com -->
+
+<!-- Key findings:
+  - Outer: .oneAppNavContainer > one-appnav > .slds-context-bar
+  - Left side: .slds-context-bar__primary.navLeft
+    - App launcher: .appLauncher with .slds-icon-waffle (9 divs .slds-r1 through .slds-r9)
+    - App name: h1.appName.slds-context-bar__label-action.slds-context-bar__app-name
+  - Right side: one-app-nav-bar > nav.slds-context-bar__secondary.navCenter
+    - Each tab: one-app-nav-bar-item-root.navItem.slds-context-bar__item
+    - Tab link: a.slds-context-bar__label-action.dndItem
+    - Tab dropdown: one-app-nav-bar-item-dropdown with chevron SVG
+
+  - ACTIVE TAB (record tab): has .slds-is-active AND .slds-is-unsaved
+    - Inner link has aria-current="page"
+    - Has close button: button.slds-button.slds-button_icon with utility:close SVG
+    - Has unsaved indicator: abbr.slds-indicator_unsaved (asterisk *)
+    - SF likely applies its own background/border via aria-current="page"
+
+  - "More" overflow: div.more-item with dropdown
+  - Edit nav: lightning-button-icon with utility:edit SVG
+
+  - CRITICAL: The inner a.slds-context-bar__label-action on the active tab
+    must have transparent background to let the nav color show through.
+    SF may style aria-current="page" with a white background.
+-->
+
+<div class="oneAppNavContainer" style="top: 100px;">
+  <one-appnav>
+    <div class="slds-context-bar">
+
+      <!-- Left: App launcher + name -->
+      <div class="slds-context-bar__primary navLeft">
+        <div class="slds-context-bar__item slds-no-hover">
+          <div class="appLauncher slds-context-bar__icon-action">
+            <button class="slds-button slds-context-bar__button slds-icon-waffle_container" title="App Launcher">
+              <div class="slds-icon-waffle">
+                <div class="slds-r1"></div><!-- ... through slds-r9 -->
+              </div>
+            </button>
+          </div>
+          <h1 class="appName slds-context-bar__label-action slds-context-bar__app-name">
+            <span class="slds-truncate" title="Connectry Hub">Connectry Hub</span>
+          </h1>
+        </div>
+      </div>
+
+      <!-- Right: Nav tabs -->
+      <one-app-nav-bar class="slds-grid slds-has-flexi-truncate">
+        <nav class="slds-context-bar__secondary navCenter" role="navigation">
+          <div class="slds-grid slds-has-flexi-truncate navUL" role="list">
+
+            <!-- Regular tab -->
+            <one-app-nav-bar-item-root class="navItem slds-context-bar__item slds-shrink-none" data-id="home" role="listitem">
+              <a class="slds-context-bar__label-action dndItem" href="/lightning/page/home" title="Home" aria-current="false">
+                <span class="slds-truncate">Home</span>
+              </a>
+            </one-app-nav-bar-item-root>
+
+            <!-- Tab with dropdown -->
+            <one-app-nav-bar-item-root class="navItem slds-context-bar__item slds-shrink-none" data-id="Case" role="listitem">
+              <a class="slds-context-bar__label-action dndItem" href="/lightning/o/Case/home" title="Cases" aria-current="false">
+                <span class="slds-truncate">Cases</span>
+              </a>
+              <one-app-nav-bar-item-dropdown>
+                <!-- chevron dropdown button -->
+              </one-app-nav-bar-item-dropdown>
+            </one-app-nav-bar-item-root>
+
+            <!-- ACTIVE record tab — key classes: slds-is-active, slds-is-unsaved -->
+            <one-app-nav-bar-item-root class="navItem slds-is-unsaved slds-context-bar__item slds-shrink-none slds-is-active" data-id="temp-..." role="listitem">
+              <a class="slds-context-bar__label-action dndItem" href="/lightning/r/Lead/.../view" title="Jack Popescu | Lead" aria-current="page">
+                <abbr class="slds-indicator_unsaved" title="Not added to nav bar">*</abbr>
+                <span class="slds-truncate">Jack Popescu | Lead</span>
+              </a>
+              <one-app-nav-bar-item-dropdown>
+                <!-- chevron + close button -->
+              </one-app-nav-bar-item-dropdown>
+              <button class="slds-button slds-button_icon">
+                <!-- close icon -->
+              </button>
+            </one-app-nav-bar-item-root>
+
+            <!-- More overflow -->
+            <div class="more-item slds-context-bar__item slds-context-bar__dropdown-trigger" role="listitem">
+              <!-- "More" button with hidden tabs -->
+            </div>
+
+          </div>
+        </nav>
+      </one-app-nav-bar>
+
+    </div>
+  </one-appnav>
+</div>

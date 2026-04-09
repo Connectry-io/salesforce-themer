@@ -780,6 +780,38 @@ body .slds-path__item.slds-is-incomplete.slds-is-active::after {
   background: ${c.accentHover} !important;
 }
 
+/* Won (Closed Won) */
+body .slds-path__item.slds-is-won,
+body .slds-path__item.slds-is-won .slds-path__link,
+body .slds-path__item.slds-is-won a.slds-path__link {
+  background-color: ${c.success} !important;
+}
+
+body .slds-path__item.slds-is-won::before,
+body .slds-path__item.slds-is-won::after {
+  background: ${c.success} !important;
+}
+
+body .slds-path__item.slds-is-won .slds-path__title {
+  color: #ffffff !important;
+}
+
+/* Lost (Closed Lost) */
+body .slds-path__item.slds-is-lost,
+body .slds-path__item.slds-is-lost .slds-path__link,
+body .slds-path__item.slds-is-lost a.slds-path__link {
+  background-color: ${c.error} !important;
+}
+
+body .slds-path__item.slds-is-lost::before,
+body .slds-path__item.slds-is-lost::after {
+  background: ${c.error} !important;
+}
+
+body .slds-path__item.slds-is-lost .slds-path__title {
+  color: #ffffff !important;
+}
+
 /* Path text colors */
 .slds-path__title {
   color: ${c.textPrimary} !important;

@@ -18,32 +18,32 @@ we theme. It serves two purposes:
 
 | Component | SLDS Ref | Live DOM | Engine CSS | Verified |
 |-----------|----------|----------|------------|----------|
-| Card (.slds-card) | | | Yes | |
-| Path (.slds-path) | | | Yes | |
-| Page Header | | | Yes | |
-| Record Header / Highlights | | | Yes | |
-| Navigation (context-bar) | | | Yes | |
-| Data Table (.slds-table) | | | Yes | |
-| Form Element | | | Yes | |
-| Modal | | | Yes | |
-| Buttons (brand, neutral) | | | Yes | |
-| Tabs | | | Yes | |
-| Dropdown / Menu | | | Yes | |
-| Popover | | | Yes | |
-| Pill | | | Yes | |
-| Badge | | | Yes | |
-| Panel / Split View | | | Yes | |
-| Related List | | | Yes | |
+| Card (.slds-card) | Yes | Yes | Yes | Recolor only, border on .slds-card only |
+| Path (.slds-path) | Yes | Yes | Yes | Skewed bg, won/lost states, active combo |
+| Page Header | Yes | | Yes | |
+| Record Header / Highlights | | | Yes | Recolored, not stripped |
+| Navigation (context-bar) | Yes | Yes | Yes | Active tab pill override, aria-current |
+| Global Header | Yes | Yes | Yes | White header, dark icons forced |
+| Data Table (.slds-table) | Yes | | Yes | |
+| Form Element | Yes | | Yes | No border-bottom lines |
+| Modal | Yes | | Yes | |
+| Buttons (brand, neutral) | Yes | | Yes | |
+| Tabs | Yes | | Yes | ::after indicator override |
+| Dropdown / Menu | Yes | | Yes | |
+| Popover | Yes | | Yes | |
+| Pill | Yes | | Yes | |
+| Badge | Yes | | Yes | |
+| Panel / Split View | Yes | | Yes | |
+| Related List | | Yes | Yes | No double borders |
 | Scrollbar | | | Yes | |
-| Setup Page | | | Yes | |
+| Setup Page | | | Yes | all_frames + scope toggle |
 | Reports | | | Yes | |
 | Console / Service Console | | | Yes | |
-| Edit Modal | | | |
-| Toast / Alert | | | |
-| Progress Bar / Spinner | | | |
-| Breadcrumbs | | | |
-| Avatar | | | |
-| Global Header | | | Yes | |
+| Edit Modal | | | Yes | No form field lines |
+| Toast / Alert | | | | |
+| Progress Bar / Spinner | | | | |
+| Breadcrumbs | | | | |
+| Avatar | | | Yes | Transparent bg |
 
 ## Design Rules (apply to ALL components)
 
