@@ -164,10 +164,13 @@
         const effectPill = e.target.closest('[data-effect-pill]');
         if (effectPill) {
           e.stopPropagation();
-          // Jump to the Effects tab (becomes Guide tab in next commit) so
-          // the user can read about this specific effect.
+          // Jump to the Guide tab and highlight the specific effect card.
+          // The Tabs activate() trigger will fire renderGuideTab via the
+          // existing onChange handler.
+          const effectId = effectPill.dataset.effectPill;
           if (_tabsInstance) _tabsInstance.activate('effects');
-          // TODO (next commit): scroll to and highlight the specific effect
+          // Wait one frame for the tab to render before scrolling
+          setTimeout(() => highlightGuideEffect(effectId), 80);
           return;
         }
         selectTheme(theme.id);
@@ -956,6 +959,11 @@
 
     // Dev panel: Easter-egg unlock + premium override toggle
     bindDevPanel();
+
+    // Guide tab — Builder CTA button
+    document.getElementById('guideBuilderCta')?.addEventListener('click', () => {
+      if (_tabsInstance) _tabsInstance.activate('builder');
+    });
 
     // Mark <body> with the current premium state so CSS can hide gating
     syncPremiumBodyClass();
@@ -2038,18 +2046,146 @@
     dialog.open();
   }
 
+  /**
+   * V3.1: the Effects tab is now the Guide tab (data-tabpanel="effects" is
+   * kept for storage/handoff compatibility, only the visible label changed).
+   * The Guide tab is purely documentation — anatomy diagram, effects gallery
+   * with live previews, placeholder sections for V1 features, and a CTA
+   * to open the Theme Builder. Per-effect editing lives ONLY in the Theme
+   * Builder's Effects sub-tab.
+   */
   function renderEffectsTabForActiveTheme() {
-    const { config, mode } = resolveEffectsEditingTarget();
-    updateEffectsContextBanner();
-    // Hide the preset grid section entirely on OOTB themes — the volume knob
-    // in the Theme Application card replaces it. Custom themes still see the
-    // 4-preset selector for quick "apply this preset to my theme" actions.
-    const presetSection = document.getElementById('presetGrid')?.closest('.cx-section');
-    if (presetSection) presetSection.hidden = (mode === 'ootb');
-    if (mode !== 'ootb') {
-      renderPresetGrid(config);
+    renderGuideTab();
+  }
+
+  function renderGuideTab() {
+    renderGuideAnatomyDiagram();
+    renderGuideEffectsGrid();
+  }
+
+  /**
+   * Render the sample theme card in the anatomy section. Uses the user's
+   * currently active theme as the example so they recognize it.
+   */
+  function renderGuideAnatomyDiagram() {
+    const target = document.getElementById('guideAnatomyDiagram');
+    if (!target) return;
+    const activeId = syncState.theme && syncState.theme !== 'none' ? syncState.theme : 'connectry';
+    const theme = getThemeById(activeId) || getThemeById('connectry');
+    if (!theme) return;
+
+    target.innerHTML = `
+      <div class="theme-card is-active" style="max-width: 280px; cursor: default;">
+        <div class="theme-swatch">${buildSwatch(theme)}</div>
+        <div class="theme-card-body">
+          <div class="theme-card-header">
+            <span class="theme-name">${Connectry.Settings.escape(theme.name)}</span>
+            <span class="theme-category-badge ${theme.category}">${theme.category === 'light' ? 'Light' : 'Dark'}</span>
+          </div>
+          <div class="theme-description">${Connectry.Settings.escape(theme.description)}</div>
+          ${buildEffectIndicators(theme.id)}
+        </div>
+        <div class="theme-card-actions">
+          <div class="theme-card-status">
+            <span class="theme-card-status-dot"></span>
+            <span>Apply</span>
+          </div>
+          <button class="theme-card-clone-btn" type="button" title="Clone preview" disabled>
+            <svg width="10" height="10" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+              <rect x="2.5" y="5.5" width="7" height="5" rx="1" stroke="currentColor" stroke-width="1.3"/>
+              <path d="M4 5.5V4a2 2 0 0 1 4 0v1.5" stroke="currentColor" stroke-width="1.3"/>
+            </svg>
+            Clone
+          </button>
+        </div>
+      </div>
+    `;
+  }
+
+  /**
+   * Render the 9 effect explainer cards (8 standard + background patterns).
+   * Each card has a live CSS preview and a list of which themes ship with
+   * that effect. Click jumps to the Theme Builder opened on the active theme.
+   */
+  const GUIDE_EFFECT_CATALOG = [
+    { id: 'hoverLift',       name: 'Hover Lift',        desc: 'Cards, buttons, and list items gently float up when you hover. Modals and dropdowns are never affected.', preview: 'Hover me' },
+    { id: 'ambientGlow',     name: 'Ambient Glow',      desc: 'Brand buttons, active nav items, and focused inputs gain a slow pulsing glow in your theme accent color.', preview: 'Glow' },
+    { id: 'borderShimmer',   name: 'Border Shimmer',    desc: 'A thin line of light sweeps across the top of each card, giving a subtle animated edge.', preview: 'Shimmer' },
+    { id: 'gradientBorders', name: 'Gradient Borders',  desc: 'Card borders become animated conic gradients that slowly rotate around the edge.', preview: 'Border' },
+    { id: 'aurora',          name: 'Aurora Background', desc: 'A soft, slow-moving gradient glow sits behind all content. Colors derive from your theme accent.', preview: '' },
+    { id: 'neonFlicker',     name: 'Neon Flicker',      desc: 'Page titles and active navigation gain a neon text glow with occasional flicker, like a sign.', preview: 'NEON' },
+    { id: 'particles',       name: 'Particles',         desc: 'Animated background particles. Pick from snow, rain, matrix rain, floating dots, or rising embers.', preview: 'Particles' },
+    { id: 'cursorTrail',     name: 'Cursor Trail',      desc: 'A short glowing trail follows your mouse pointer, fading as it goes.', preview: 'Hover me' },
+    { id: 'backgroundPattern', name: 'Background Pattern', desc: 'A subtle structural pattern behind all content. Six styles available: dot grid, line grid, hatch, noise, subway tile, crosshatch.', preview: '' },
+  ];
+
+  function renderGuideEffectsGrid() {
+    const grid = document.getElementById('guideEffectsGrid');
+    if (!grid) return;
+    grid.innerHTML = '';
+
+    // Build a reverse lookup: effect → list of themes that ship with it
+    const effectToThemes = {};
+    for (const t of THEMES) {
+      const cfg = getSuggestedEffectsFor(t.id);
+      for (const eff of GUIDE_EFFECT_CATALOG) {
+        if (eff.id === 'backgroundPattern') continue; // not yet shipped per-theme
+        if (cfg[eff.id]) {
+          (effectToThemes[eff.id] = effectToThemes[eff.id] || []).push(t.name);
+        }
+      }
     }
-    renderEffectsGrid(config, mode === 'ootb');
+
+    for (const eff of GUIDE_EFFECT_CATALOG) {
+      const themeList = effectToThemes[eff.id] || [];
+      const themeBlurb = themeList.length
+        ? `Ships with: <strong>${themeList.slice(0, 3).join(', ')}</strong>${themeList.length > 3 ? ` and ${themeList.length - 3} more` : ''}`
+        : 'New in V1 — no themes ship with this yet';
+
+      const card = document.createElement('div');
+      card.className = 'guide-effect-card';
+      card.dataset.effect = eff.id;
+      card.id = `guide-effect-${eff.id}`;
+      card.innerHTML = `
+        <div class="guide-effect-preview">
+          <div class="guide-effect-preview-card">${eff.preview}</div>
+        </div>
+        <div class="guide-effect-body">
+          <div class="guide-effect-name">${eff.name}</div>
+          <div class="guide-effect-desc">${eff.desc}</div>
+          <div class="guide-effect-themes">${themeBlurb}</div>
+        </div>
+      `;
+
+      // Apply the active theme's accent so previews match
+      const theme = getThemeById(syncState.theme) || getThemeById('connectry');
+      if (theme) {
+        card.style.setProperty('--fx-accent', theme.colors.accent);
+        card.style.setProperty('--fx-accent-rgb', _hexToRgbCsv(theme.colors.accent));
+      }
+
+      // Click → open Builder on the active theme so user can customize
+      card.addEventListener('click', () => {
+        if (_tabsInstance) _tabsInstance.activate('builder');
+      });
+
+      grid.appendChild(card);
+    }
+  }
+
+  /**
+   * Highlight a specific effect card in the Guide tab and scroll to it.
+   * Called when a theme card pill is clicked, to deep-link the user
+   * straight to the relevant explainer.
+   */
+  function highlightGuideEffect(effectId) {
+    const card = document.getElementById(`guide-effect-${effectId}`);
+    if (!card) return;
+    card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    card.classList.remove('is-highlight');
+    // Reflow then re-add so the animation replays on every click
+    void card.offsetWidth;
+    card.classList.add('is-highlight');
   }
 
   function renderPresetGrid(config) {

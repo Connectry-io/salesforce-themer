@@ -30,6 +30,7 @@ const EFFECTS_PRESETS = {
     neonFlicker: false, neonFlickerIntensity: 'medium',
     particles: false, particlesIntensity: 'medium',
     cursorTrail: false, cursorTrailIntensity: 'medium',
+    backgroundPattern: 'none', backgroundPatternIntensity: 'medium',
   },
 
   subtle: {
@@ -42,6 +43,7 @@ const EFFECTS_PRESETS = {
     neonFlicker: false, neonFlickerIntensity: 'subtle',
     particles: false, particlesIntensity: 'subtle',
     cursorTrail: false, cursorTrailIntensity: 'subtle',
+    backgroundPattern: 'none', backgroundPatternIntensity: 'subtle',
   },
 
   alive: {
@@ -54,6 +56,7 @@ const EFFECTS_PRESETS = {
     neonFlicker: false, neonFlickerIntensity: 'medium',
     particles: false, particlesIntensity: 'medium',
     cursorTrail: false, cursorTrailIntensity: 'medium',
+    backgroundPattern: 'none', backgroundPatternIntensity: 'medium',
   },
 
   immersive: {
@@ -66,6 +69,7 @@ const EFFECTS_PRESETS = {
     neonFlicker: false, neonFlickerIntensity: 'medium',
     particles: false, particlesIntensity: 'medium',
     cursorTrail: true, cursorTrailIntensity: 'medium',
+    backgroundPattern: 'none', backgroundPatternIntensity: 'medium',
   },
 };
 
@@ -257,6 +261,7 @@ function applyVolume(config, volume) {
       neonFlicker: false,
       particles: false,
       cursorTrail: false,
+      backgroundPattern: 'none',
     };
   }
   if (volume === 'default' || !volume) {
@@ -265,7 +270,7 @@ function applyVolume(config, volume) {
   // 'subtle' or 'immersive' → clamp every intensity field
   const targetIntensity = volume === 'immersive' ? 'strong' : 'subtle';
   const out = { ...config };
-  const effects = ['hoverLift', 'ambientGlow', 'borderShimmer', 'gradientBorders', 'aurora', 'neonFlicker', 'particles', 'cursorTrail'];
+  const effects = ['hoverLift', 'ambientGlow', 'borderShimmer', 'gradientBorders', 'aurora', 'neonFlicker', 'particles', 'cursorTrail', 'backgroundPattern'];
   for (const eff of effects) {
     out[eff + 'Intensity'] = targetIntensity;
   }

@@ -2557,6 +2557,416 @@ td.upgrade-compare-col-premium,
   }
 }
 
+/* ═══════════════════════════════════════════════════════════════════════════
+   Guide Tab (formerly Effects)
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* Hero */
+.guide-hero-section {
+  margin-bottom: var(--cx-space-6);
+}
+
+.guide-hero {
+  text-align: left;
+  padding: var(--cx-space-5) 0 var(--cx-space-3);
+}
+
+.guide-hero-title {
+  font-size: 28px;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  color: var(--cx-text);
+  margin-bottom: var(--cx-space-3);
+}
+
+.guide-hero-sub {
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--cx-text-muted);
+  max-width: 720px;
+}
+
+/* "coming soon" inline badge */
+.guide-coming-soon {
+  display: inline-block;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 2px 8px;
+  background: var(--cx-accent-light);
+  color: var(--cx-accent);
+  border-radius: var(--cx-radius-full);
+  vertical-align: middle;
+  margin-left: 6px;
+}
+
+/* Anatomy section: diagram on left, callouts on right */
+.guide-anatomy {
+  display: grid;
+  grid-template-columns: minmax(280px, 360px) 1fr;
+  gap: var(--cx-space-8);
+  align-items: start;
+}
+
+@media (max-width: 900px) {
+  .guide-anatomy { grid-template-columns: 1fr; }
+}
+
+.guide-anatomy-diagram {
+  background: var(--cx-surface-alt);
+  border: 1.5px dashed var(--cx-border-hover);
+  border-radius: var(--cx-radius-lg);
+  padding: var(--cx-space-6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 280px;
+}
+
+.guide-anatomy-callouts {
+  list-style: none;
+  counter-reset: anatomy-counter;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--cx-space-3);
+}
+
+.guide-anatomy-callouts li {
+  counter-increment: anatomy-counter;
+  position: relative;
+  padding-left: 32px;
+  font-size: 13px;
+  line-height: 1.55;
+  color: var(--cx-text-muted);
+}
+
+.guide-anatomy-callouts li::before {
+  content: counter(anatomy-counter);
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 22px;
+  height: 22px;
+  background: var(--cx-accent);
+  color: #ffffff;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.guide-anatomy-callouts strong {
+  display: block;
+  color: var(--cx-text);
+  font-weight: 700;
+  margin-bottom: 2px;
+}
+
+.guide-anatomy-callouts span {
+  display: block;
+}
+
+/* Effects gallery — 9 cards in a responsive grid */
+.guide-effects-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: var(--cx-space-4);
+}
+
+.guide-effect-card {
+  background: var(--cx-surface);
+  border: 1.5px solid var(--cx-border);
+  border-radius: var(--cx-radius-md);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  transition: border-color var(--cx-transition), box-shadow var(--cx-transition), transform var(--cx-transition);
+  cursor: pointer;
+}
+
+.guide-effect-card:hover {
+  border-color: var(--cx-accent);
+  box-shadow: 0 4px 14px rgba(74, 111, 165, 0.10);
+  transform: translateY(-1px);
+}
+
+.guide-effect-card.is-highlight {
+  border-color: var(--cx-accent);
+  box-shadow: 0 0 0 3px rgba(74, 111, 165, 0.18), 0 4px 14px rgba(74, 111, 165, 0.15);
+  animation: guide-pulse 1.2s ease-out;
+}
+
+@keyframes guide-pulse {
+  0% { box-shadow: 0 0 0 0 rgba(74, 111, 165, 0.4); }
+  100% { box-shadow: 0 0 0 3px rgba(74, 111, 165, 0.18), 0 4px 14px rgba(74, 111, 165, 0.15); }
+}
+
+.guide-effect-preview {
+  height: 110px;
+  position: relative;
+  background: var(--cx-surface-alt);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-bottom: 1px solid var(--cx-border);
+  overflow: hidden;
+}
+
+.guide-effect-preview-card {
+  width: 70%;
+  height: 50px;
+  background: var(--cx-surface);
+  border: 1px solid var(--cx-border);
+  border-radius: var(--cx-radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--cx-text-muted);
+  transition: transform 220ms cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 220ms ease;
+  position: relative;
+}
+
+.guide-effect-body {
+  padding: var(--cx-space-4);
+}
+
+.guide-effect-name {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--cx-text);
+  margin-bottom: var(--cx-space-1);
+}
+
+.guide-effect-desc {
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--cx-text-muted);
+  margin-bottom: var(--cx-space-3);
+}
+
+.guide-effect-themes {
+  font-size: 11px;
+  color: var(--cx-text-subtle);
+  padding-top: var(--cx-space-2);
+  border-top: 1px solid var(--cx-border);
+  line-height: 1.5;
+}
+
+.guide-effect-themes strong {
+  color: var(--cx-text-muted);
+  font-weight: 600;
+}
+
+.guide-footnote {
+  font-size: 12px;
+  color: var(--cx-text-subtle);
+  margin-top: var(--cx-space-4);
+  padding: var(--cx-space-3) var(--cx-space-4);
+  background: var(--cx-surface-alt);
+  border-radius: var(--cx-radius-sm);
+}
+
+.guide-footnote code {
+  background: var(--cx-surface);
+  padding: 1px 6px;
+  border-radius: 3px;
+  font-size: 11px;
+  font-family: ui-monospace, Menlo, monospace;
+}
+
+/* Placeholder cards (for Typography + Favicons sections until V1 lands) */
+.guide-placeholder-card {
+  background: var(--cx-surface-alt);
+  border: 1px dashed var(--cx-border-hover);
+  border-radius: var(--cx-radius-md);
+  padding: var(--cx-space-5);
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--cx-text-muted);
+}
+
+.guide-placeholder-card strong {
+  color: var(--cx-text);
+}
+
+/* Builder CTA at the bottom */
+.guide-builder-cta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--cx-space-6);
+  padding: var(--cx-space-6);
+  background: linear-gradient(135deg, rgba(74, 111, 165, 0.06) 0%, rgba(74, 111, 165, 0.02) 100%);
+  border: 1.5px solid var(--cx-accent-light);
+  border-radius: var(--cx-radius-lg);
+}
+
+.guide-builder-cta-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--cx-text);
+  margin-bottom: var(--cx-space-2);
+}
+
+.guide-builder-cta-body {
+  font-size: 13px;
+  color: var(--cx-text-muted);
+  line-height: 1.55;
+  max-width: 600px;
+}
+
+@media (max-width: 800px) {
+  .guide-builder-cta {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+/* ─── Effect-card preview animations (used inside guide cards) ───────────── */
+/* These reuse the same intensity-aware preview styles I added to .effect-preview
+   earlier. The guide cards use a slightly different selector so we set their
+   own variables and let CSS animate. */
+
+.guide-effect-card[data-effect] {
+  --fx-accent: #4a6fa5;
+  --fx-accent-rgb: 74, 111, 165;
+  --fx-mult: 1;
+  --fx-speed-mult: 1;
+}
+
+/* Hover lift: lifts on hover */
+.guide-effect-card[data-effect="hoverLift"]:hover .guide-effect-preview-card {
+  transform: translateY(calc(-5px * var(--fx-mult)));
+  box-shadow:
+    0 calc(10px * var(--fx-mult)) calc(20px * var(--fx-mult)) rgba(0, 0, 0, calc(0.14 * var(--fx-mult))),
+    0 2px 6px rgba(0, 0, 0, calc(0.06 * var(--fx-mult)));
+}
+
+/* Glow */
+.guide-effect-card[data-effect="ambientGlow"] .guide-effect-preview-card {
+  animation: guide-fx-glow calc(3s * var(--fx-speed-mult)) ease-in-out infinite;
+}
+@keyframes guide-fx-glow {
+  0%, 100% { box-shadow: 0 0 calc(8px * var(--fx-mult)) rgba(var(--fx-accent-rgb), calc(0.12 * var(--fx-mult))); }
+  50%      { box-shadow: 0 0 calc(22px * var(--fx-mult)) rgba(var(--fx-accent-rgb), calc(0.32 * var(--fx-mult))); }
+}
+
+/* Shimmer */
+.guide-effect-card[data-effect="borderShimmer"] .guide-effect-preview-card {
+  overflow: clip;
+  position: relative;
+}
+.guide-effect-card[data-effect="borderShimmer"] .guide-effect-preview-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%, transparent 40%,
+    rgba(var(--fx-accent-rgb), 0.85) 50%,
+    transparent 60%, transparent 100%
+  );
+  background-size: 200% 100%;
+  animation: guide-fx-shimmer 3s ease-in-out infinite;
+}
+@keyframes guide-fx-shimmer {
+  0%   { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+
+/* Gradient border */
+@property --guide-fx-angle {
+  syntax: '<angle>';
+  initial-value: 0deg;
+  inherits: false;
+}
+@keyframes guide-fx-rotate {
+  to { --guide-fx-angle: 360deg; }
+}
+.guide-effect-card[data-effect="gradientBorders"] .guide-effect-preview-card {
+  position: relative;
+  border-color: transparent;
+}
+.guide-effect-card[data-effect="gradientBorders"] .guide-effect-preview-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  padding: 1.5px;
+  border-radius: inherit;
+  background: conic-gradient(
+    from var(--guide-fx-angle),
+    rgba(var(--fx-accent-rgb), 1) 0%,
+    transparent 25%,
+    transparent 75%,
+    rgba(var(--fx-accent-rgb), 1) 100%
+  );
+  -webkit-mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  animation: guide-fx-rotate 4s linear infinite;
+}
+
+/* Aurora */
+.guide-effect-card[data-effect="aurora"] .guide-effect-preview {
+  background: var(--cx-surface);
+}
+.guide-effect-card[data-effect="aurora"] .guide-effect-preview::before {
+  content: '';
+  position: absolute;
+  inset: -30%;
+  background:
+    radial-gradient(ellipse at 20% 50%, rgba(var(--fx-accent-rgb), 0.6) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 20%, rgba(var(--fx-accent-rgb), 0.45) 0%, transparent 50%),
+    radial-gradient(ellipse at 50% 80%, rgba(var(--fx-accent-rgb), 0.5) 0%, transparent 50%);
+  background-size: 200% 200%;
+  filter: blur(30px);
+  opacity: 0.6;
+  animation: guide-fx-aurora 12s ease-in-out infinite;
+  pointer-events: none;
+}
+@keyframes guide-fx-aurora {
+  0%   { background-position: 0% 50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* Neon flicker */
+.guide-effect-card[data-effect="neonFlicker"] .guide-effect-preview-card {
+  background: #0a0f1a;
+  color: var(--fx-accent);
+  border-color: rgba(var(--fx-accent-rgb), 0.3);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  animation: guide-fx-neon 4s ease-in-out infinite;
+}
+@keyframes guide-fx-neon {
+  0%, 19%, 21%, 23%, 25%, 54%, 56%, 100% {
+    text-shadow:
+      0 0 4px rgba(var(--fx-accent-rgb), 0.9),
+      0 0 11px rgba(var(--fx-accent-rgb), 0.6),
+      0 0 19px rgba(var(--fx-accent-rgb), 0.4);
+  }
+  20%, 24%, 55% { text-shadow: none; }
+}
+
+/* Background patterns — 6 sub-cards, each showing a different pattern */
+.guide-effect-card[data-effect="backgroundPattern"] .guide-effect-preview {
+  background-image: radial-gradient(rgba(var(--fx-accent-rgb), 0.18) 1px, transparent 1px);
+  background-size: 14px 14px;
+}
+
 /* ─── Dev panel (hidden by default, unlocked via Easter egg) ─────────────── */
 
 .dev-panel {

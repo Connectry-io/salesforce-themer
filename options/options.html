@@ -38,9 +38,10 @@
         </button>
         <button class="cx-tab" role="tab" data-tab="effects" aria-selected="false">
           <svg class="cx-tab-icon" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-            <path d="M8 1l1.8 4.2L14 6l-3.2 2.8L12 13 8 10.6 4 13l1.2-4.2L2 6l4.2-0.8L8 1z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
+            <circle cx="8" cy="8" r="6.5" stroke="currentColor" stroke-width="1.5"/>
+            <path d="M8 5v3.5l2 1.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
           </svg>
-          Effects
+          Guide
         </button>
         <button class="cx-tab" role="tab" data-tab="builder" aria-selected="false">
           <svg class="cx-tab-icon" viewBox="0 0 16 16" fill="none" aria-hidden="true">
@@ -440,52 +441,96 @@
 
     </div>
 
-    <!-- ═══ Effects Tab ═══ -->
+    <!-- ═══ Guide Tab (formerly Effects) ═══ -->
     <div class="cx-tabpanel" role="tabpanel" data-tabpanel="effects" hidden>
 
-      <!-- Context banner (which theme's effects are being edited) -->
-      <div class="cx-banner cx-banner-info" id="effectsContextBanner">
-        <svg class="cx-banner-icon" viewBox="0 0 18 18" fill="none" aria-hidden="true">
-          <circle cx="9" cy="9" r="7.5" stroke="currentColor" stroke-width="1.5"/>
-          <path d="M9 8v4M9 6h.01" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-        </svg>
-        <div class="cx-banner-text" id="effectsContextText">
-          Editing global effects — applies to all built-in themes.
-        </div>
-        <div class="cx-banner-actions" id="effectsContextActions"></div>
-      </div>
-
-      <!-- Preset selector -->
-      <section class="cx-section">
-        <div class="cx-section-header">
-          <div>
-            <h2 class="cx-section-title">Effects Preset</h2>
-            <p class="cx-section-subtitle">Start with a preset, then fine-tune individual effects below</p>
-          </div>
-        </div>
-
-        <div class="preset-grid" role="radiogroup" aria-label="Effects intensity preset" id="presetGrid">
-          <!-- populated by JS -->
+      <!-- Hero intro -->
+      <section class="cx-section guide-hero-section">
+        <div class="guide-hero">
+          <h1 class="guide-hero-title">How Salesforce Themer Works</h1>
+          <p class="guide-hero-sub">Everything you can customize, illustrated. Click any effect to see it in action, or jump to the Theme Builder to make your own.</p>
         </div>
       </section>
 
-      <!-- Individual effects -->
+      <!-- Section 1: Anatomy of a Theme Card -->
       <section class="cx-section">
         <div class="cx-section-header">
           <div>
-            <h2 class="cx-section-title">Individual Effects</h2>
-            <p class="cx-section-subtitle">Toggle and fine-tune each effect. Previews update live.</p>
+            <h2 class="cx-section-title">Anatomy of a Theme Card</h2>
+            <p class="cx-section-subtitle">Each theme is a complete artifact: colors, effects, and (soon) typography + favicon. Here's how to read one.</p>
           </div>
         </div>
 
-        <div class="effects-grid" id="effectsGrid">
-          <!-- populated by JS -->
+        <div class="guide-anatomy">
+          <div class="guide-anatomy-diagram" id="guideAnatomyDiagram">
+            <!-- populated by JS — sample theme card with numbered callouts -->
+          </div>
+          <ol class="guide-anatomy-callouts">
+            <li><strong>Color swatch</strong><span>The four key colors: background, surface, accent, and text. Click any theme card on the Themes tab to apply it.</span></li>
+            <li><strong>Theme name + category</strong><span>Light or Dark badge tells you which group it belongs to.</span></li>
+            <li><strong>Description</strong><span>What the theme is going for — its mood and design language.</span></li>
+            <li><strong>Effect pills</strong><span>The animations and visual flourishes this theme ships with. Click any pill to read about that specific effect below.</span></li>
+            <li><strong>Typography <span class="guide-coming-soon">soon</span></strong><span>Font family, size scale, and line height. Customizable in the Theme Builder once V1.1 lands.</span></li>
+            <li><strong>Favicon <span class="guide-coming-soon">soon</span></strong><span>The browser tab icon for this theme. Each built-in theme will ship with its own.</span></li>
+            <li><strong>Apply / Clone</strong><span>Apply uses the theme as-is. Clone opens the Theme Builder where you customize it. Saving custom themes is Premium.</span></li>
+          </ol>
         </div>
       </section>
 
-      <p class="effects-footnote">
-        Effects respect <code>prefers-reduced-motion</code> and auto-pause when the tab is hidden. Particles reduce density on battery power. Modals, dropdowns, and comboboxes are never transformed.
-      </p>
+      <!-- Section 2: Effects, illustrated (the live previews live here) -->
+      <section class="cx-section">
+        <div class="cx-section-header">
+          <div>
+            <h2 class="cx-section-title">Effects, illustrated</h2>
+            <p class="cx-section-subtitle">Nine animations and visual flourishes you can layer on any theme. Each one is curated per theme, but you can clone any theme to customize them. Hover any card to see the effect live.</p>
+          </div>
+        </div>
+
+        <div class="guide-effects-grid" id="guideEffectsGrid">
+          <!-- populated by JS — 9 effect explainer cards with live previews -->
+        </div>
+
+        <p class="guide-footnote">
+          All effects respect <code>prefers-reduced-motion</code> and pause when the tab is hidden. Particles reduce density on battery power. Modals, dropdowns, and comboboxes are never transformed.
+        </p>
+      </section>
+
+      <!-- Section 3: Typography (placeholder for V1.1) -->
+      <section class="cx-section">
+        <div class="cx-section-header">
+          <div>
+            <h2 class="cx-section-title">Typography <span class="guide-coming-soon">coming in V1.1</span></h2>
+            <p class="cx-section-subtitle">When V1.1 ships, themes will customize fonts, sizes, and line height alongside colors and effects.</p>
+          </div>
+        </div>
+        <div class="guide-placeholder-card">
+          <p>Premium users will be able to pick from a curated list of font stacks (Inter, system, serif, monospace, Salesforce Sans default), adjust the base size and line height, and tune the heading scale ratio. All from a new <strong>Type</strong> sub-tab in the Theme Builder.</p>
+        </div>
+      </section>
+
+      <!-- Section 4: Favicons (placeholder for V1) -->
+      <section class="cx-section">
+        <div class="cx-section-header">
+          <div>
+            <h2 class="cx-section-title">Favicons <span class="guide-coming-soon">coming in V1</span></h2>
+            <p class="cx-section-subtitle">The browser tab icon you see when Salesforce is open. Each theme will ship with its own.</p>
+          </div>
+        </div>
+        <div class="guide-placeholder-card">
+          <p>Today, Salesforce shows its own cloud icon. When V1 lands, each Connectry theme will replace it with a curated favicon matching the theme's identity — a snowflake for Arctic, a flame for Ember, a moon for Midnight, and so on. Premium users will be able to upload their own.</p>
+        </div>
+      </section>
+
+      <!-- Section 5: Builder CTA -->
+      <section class="cx-section">
+        <div class="guide-builder-cta">
+          <div>
+            <h3 class="guide-builder-cta-title">Want to customize anything?</h3>
+            <p class="guide-builder-cta-body">Clone any built-in theme to open the Theme Builder. Tweak colors, toggle effects, set their intensity, pick particle styles. Free users can preview everything; Premium users can save their custom themes.</p>
+          </div>
+          <button class="cx-btn cx-btn-primary" id="guideBuilderCta">Open Theme Builder →</button>
+        </div>
+      </section>
 
     </div>
 
