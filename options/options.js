@@ -621,7 +621,7 @@
       lastLightTheme: 'connectry',
       lastDarkTheme: 'connectry-dark',
       orgThemes: {},
-      themeScope: 'both',
+      themeScope: 'lightning',
       effectsConfig: null,
       customThemes: [],
     });

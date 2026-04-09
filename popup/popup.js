@@ -439,8 +439,12 @@
     const body = document.getElementById('settingsCardBody');
     if (!header || !body) return;
 
-    // Restore persisted state
-    const collapsed = localStorage.getItem(COLLAPSE_KEY) === '1';
+    // Restore persisted state — default to COLLAPSED so themes are the
+    // first thing the user sees. The settings card is for configuration
+    // they only touch occasionally; surfacing it expanded by default
+    // pushes the theme grid below the fold.
+    const stored = localStorage.getItem(COLLAPSE_KEY);
+    const collapsed = stored === null ? true : stored === '1';
     setCollapsed(collapsed);
 
     header.addEventListener('click', () => {
@@ -502,22 +506,22 @@
         'This will:\n' +
         '• Switch back to the Connectry theme\n' +
         '• Turn off Follow System mode\n' +
-        '• Apply theme to Both Lightning and Setup\n' +
-        '• Turn off all effects\n' +
+        '• Apply theme to Lightning pages only\n' +
+        '• Set effects to the Subtle preset\n' +
         '• Clear all per-org overrides\n\n' +
         'Custom themes you\'ve created will be kept.'
       );
       if (!confirmed) return;
 
-      // Reset only the user-configurable settings — keep custom themes
+      // Reset to the same defaults the onInstalled handler uses
       const defaults = {
         theme: 'connectry',
         autoMode: false,
         lastLightTheme: 'connectry',
         lastDarkTheme: 'connectry-dark',
         orgThemes: {},
-        themeScope: 'both',
-        effectsConfig: null,
+        themeScope: 'lightning',
+        effectsConfig: { ...POPUP_EFFECTS_PRESETS.subtle },
       };
       await chrome.storage.sync.set(defaults);
       // Re-apply to active tab
@@ -589,7 +593,7 @@
         lastLightTheme: 'connectry',
         lastDarkTheme: 'connectry-dark',
         orgThemes: {},
-        themeScope: 'both',
+        themeScope: 'lightning',
         effectsConfig: null,
       }),
       detectCurrentOrg(),

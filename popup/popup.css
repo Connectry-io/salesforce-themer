@@ -158,8 +158,12 @@ body {
   cursor: pointer;
   font-family: var(--font);
   outline: none;
-  transition: background-color var(--transition);
+  transition: background-color var(--transition), border-bottom-color var(--transition);
   -webkit-tap-highlight-color: transparent;
+}
+
+.settings-card-header[aria-expanded="false"] {
+  border-bottom-color: transparent;
 }
 
 .settings-card-header:hover {

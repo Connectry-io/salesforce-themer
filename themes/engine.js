@@ -565,8 +565,46 @@ a:hover {
 .onesetupSetupLayout,
 .setupTabContent,
 .slds-setup-summary,
-.forceSetupDesktop {
+.forceSetupDesktop,
+.bodyDiv,
+.setupHasMenu,
+.contentRegion,
+.contentWrapper,
+.individualPalette,
+.bPageBlock,
+.pbBody,
+.pbSubsection {
   background-color: ${c.background} !important;
+  color: ${c.textPrimary} !important;
+}
+
+/* Legacy Visualforce-backed Setup pages: these load in iframes from
+   *.visualforce.com and have a totally different DOM (no Lightning shell).
+   Paint the html/body of those iframes directly so the user doesn't see a
+   bright white block embedded inside their themed Setup page. */
+html.setupBody,
+body.setupBody,
+body.setupTab,
+body[class*="setup"],
+.setupHelpContent,
+.setupBodyDiv {
+  background-color: ${c.background} !important;
+  color: ${c.textPrimary} !important;
+}
+
+.setupBody a,
+.setupBody .topNav,
+.setupBody .secondaryPalette {
+  color: ${c.textPrimary} !important;
+}
+
+.setupBody table,
+.setupBody .list,
+.setupBody .pbBody,
+.setupBody .pbSubsection,
+.setupBody .pbHeader {
+  background-color: ${c.surface} !important;
+  border-color: ${c.border} !important;
   color: ${c.textPrimary} !important;
 }
 

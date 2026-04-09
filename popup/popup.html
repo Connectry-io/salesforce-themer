@@ -34,7 +34,7 @@
     <section class="settings-card" aria-label="Theme settings">
 
       <!-- Card header — collapse toggle + status indicator -->
-      <button class="settings-card-header" id="settingsCardToggle" type="button" aria-expanded="true" aria-controls="settingsCardBody">
+      <button class="settings-card-header" id="settingsCardToggle" type="button" aria-expanded="false" aria-controls="settingsCardBody">
         <span class="settings-card-status" id="settingsCardStatus">
           <span class="status-dot status-dot--on" id="statusDot"></span>
           <span id="statusText">Theme on</span>
@@ -46,8 +46,8 @@
         </svg>
       </button>
 
-      <!-- Collapsible body -->
-      <div class="settings-card-body" id="settingsCardBody">
+      <!-- Collapsible body — starts collapsed to avoid flash on first paint -->
+      <div class="settings-card-body is-collapsed" id="settingsCardBody">
 
         <!-- Row 1: Theme on/off (toggle switch — clear ON/OFF affordance) -->
         <div class="settings-row" id="themeOnRow">
@@ -177,7 +177,9 @@
         <a href="#" class="popup-tooltip-link" id="effectsTooltipLink">Configure individual effects →</a>
       </div>
       <div class="popup-tooltip" id="orgTooltip" hidden>
-        Pin the current theme to <em>just this Salesforce org</em>. Useful for keeping production and sandbox visually distinct (e.g. Production = Connectry Dark, Sandbox = Tron).
+        Pin the current theme to <em>just this Salesforce org</em>.
+        <br><br>
+        When you switch to a <strong>different org</strong>, that org gets its <em>own</em> pinned theme if it has one, or your global theme otherwise. Pins are independent per org — useful for keeping Production and Sandbox visually distinct.
       </div>
     </section>
 

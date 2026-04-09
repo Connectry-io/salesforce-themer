@@ -1,9 +1,18 @@
 (() => {
   'use strict';
 
-  // Only theme Salesforce-origin frames (all_frames=true catches all iframes)
+  // Only theme Salesforce-origin frames (all_frames=true catches all iframes,
+  // including legacy Visualforce iframes and the salesforce-setup.com /
+  // cloudforce.com subdomains used by various Setup pages).
   const hostname = window.location.hostname;
-  if (!hostname.includes('salesforce.com') && !hostname.includes('force.com')) return;
+  const isSfHost = (
+    hostname.includes('salesforce.com') ||
+    hostname.includes('force.com') ||
+    hostname.includes('visualforce.com') ||
+    hostname.includes('salesforce-setup.com') ||
+    hostname.includes('cloudforce.com')
+  );
+  if (!isSfHost) return;
 
   // Skip login, verification, and other pre-auth pages — don't theme them
   const skipPatterns = [
@@ -26,8 +35,17 @@
   let cursorTrailSystem = null;
   let currentEffectsConfig = null;
 
-  // Detect page type for scope filtering
-  const isSetupPage = path.includes('/lightning/setup/');
+  // Detect page type for scope filtering. Setup pages can live on any of
+  // these patterns: /lightning/setup/ (modern Lightning Setup),
+  // /setup/ (classic Setup, also used by VF iframes),
+  // *.visualforce.com (legacy VF Setup), *.salesforce-setup.com (newer host).
+  const isSetupPage = (
+    path.includes('/lightning/setup/') ||
+    path.startsWith('/setup/') ||
+    path.includes('/_ui/setup/') ||
+    hostname.includes('visualforce.com') ||
+    hostname.includes('salesforce-setup.com')
+  );
 
   let currentTheme = null;
   let observer = null;
@@ -423,7 +441,7 @@
         lastLightTheme: 'connectry',
         lastDarkTheme: 'connectry-dark',
         orgThemes: {},
-        themeScope: 'both',
+        themeScope: 'lightning',
       });
 
       if (!shouldApplyToPage(syncResult.themeScope)) return;
@@ -468,7 +486,7 @@
 
   function preInit() {
     chrome.storage.sync.get(
-      { theme: 'connectry', autoMode: false, lastLightTheme: 'connectry', lastDarkTheme: 'connectry-dark', orgThemes: {}, themeScope: 'both' },
+      { theme: 'connectry', autoMode: false, lastLightTheme: 'connectry', lastDarkTheme: 'connectry-dark', orgThemes: {}, themeScope: 'lightning' },
       (syncData) => {
         if (!shouldApplyToPage(syncData.themeScope)) return;
         if (chrome.runtime.lastError) return;
