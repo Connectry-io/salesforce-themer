@@ -585,15 +585,12 @@
     if (!meta) return;
     const theme = getThemeById(activeThemeId) || (syncState.customThemes || []).find(t => t.id === activeThemeId);
     const name = theme ? theme.name : activeThemeId;
+    // Compact DEV badge — placed AFTER the active theme so it doesn't push
+    // the tabs out of view. Just "DEV" instead of "DEV · Premium unlocked".
     const devBadge = _localPremiumOverride
-      ? `<span class="dev-mode-badge" title="Premium override is active. Disable in About tab.">
-           <svg width="10" height="10" viewBox="0 0 12 12" fill="none" aria-hidden="true">
-             <path d="M2.5 5.5L1 7l5 5 5-5-1.5-1.5M2.5 5.5L6 2l3.5 3.5M2.5 5.5L6 9l3.5-3.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
-           </svg>
-           DEV · Premium unlocked
-         </span>`
+      ? `<span class="dev-mode-badge" title="DEV mode: Premium override is active. Disable in About tab.">DEV</span>`
       : '';
-    meta.innerHTML = `${devBadge}<span class="header-meta-active">Active: <strong>${Connectry.Settings.escape(name)}</strong></span>`;
+    meta.innerHTML = `<span class="header-meta-active">Active: <strong>${Connectry.Settings.escape(name)}</strong></span>${devBadge}`;
   }
 
   // ─── Version ──────────────────────────────────────────────────────────────
@@ -731,6 +728,9 @@
     // Dev panel: Easter-egg unlock + premium override toggle
     bindDevPanel();
 
+    // Mark <body> with the current premium state so CSS can hide gating
+    syncPremiumBodyClass();
+
     // Empty-state buttons in custom themes section
     document.getElementById('createThemeBtnEmpty')?.addEventListener('click', () => {
       if (!_guardPremium()) return;
@@ -769,6 +769,16 @@
     if (isPremium()) return true;
     openUpgradeDialog();
     return false;
+  }
+
+  /**
+   * Reflect the current premium state on <body>. CSS rules under
+   * `body.is-premium` hide free-tier visual gating (lock badges, gold
+   * Premium pills, etc.) so unlocked users get a clean experience that
+   * matches what a paying customer would see.
+   */
+  function syncPremiumBodyClass() {
+    document.body.classList.toggle('is-premium', isPremium());
   }
 
   // ═══════════════════════════════════════════════════════════════════════════
@@ -1494,6 +1504,7 @@
       await chrome.storage.local.set({ premiumOverride: enabled });
       _localPremiumOverride = enabled;
       // Re-render anything that depends on premium state
+      syncPremiumBodyClass();
       renderEffectsTabForActiveTheme();
       updateHeaderMeta(syncState.theme);
       // Re-render theme grid so clone button gates update too

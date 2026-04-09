@@ -47,6 +47,21 @@
     hostname.includes('salesforce-setup.com')
   );
 
+  // Diagnostic logging — leave on during development. Lets us see in DevTools
+  // exactly which frames the content script is running in and whether the
+  // scope check is excluding them. Search the SF tab console for [SFT].
+  const isTopFrame = (window === window.top);
+  console.log(
+    `[SFT] content script loaded`,
+    {
+      hostname,
+      path: path.slice(0, 80),
+      isSetupPage,
+      isTopFrame,
+      url: window.location.href.slice(0, 120),
+    }
+  );
+
   let currentTheme = null;
   let observer = null;
   let mediaQuery = null;
@@ -444,7 +459,11 @@
         themeScope: 'lightning',
       });
 
-      if (!shouldApplyToPage(syncResult.themeScope)) return;
+      if (!shouldApplyToPage(syncResult.themeScope)) {
+        console.log(`[SFT] BAILED — scope='${syncResult.themeScope}' excludes this frame (isSetupPage=${isSetupPage}). Switch scope to 'both' or 'setup' in the popup to theme Setup pages.`);
+        return;
+      }
+      console.log(`[SFT] applying theme — scope='${syncResult.themeScope}' isSetupPage=${isSetupPage}`);
 
       const themeName = await resolveTheme(syncResult);
 
@@ -488,8 +507,11 @@
     chrome.storage.sync.get(
       { theme: 'connectry', autoMode: false, lastLightTheme: 'connectry', lastDarkTheme: 'connectry-dark', orgThemes: {}, themeScope: 'lightning' },
       (syncData) => {
-        if (!shouldApplyToPage(syncData.themeScope)) return;
         if (chrome.runtime.lastError) return;
+        if (!shouldApplyToPage(syncData.themeScope)) {
+          console.log(`[SFT preInit] BAILED — scope='${syncData.themeScope}' excludes this frame (isSetupPage=${isSetupPage}).`);
+          return;
+        }
 
         const hostname = getOrgHostname();
         const orgThemes = syncData.orgThemes || {};

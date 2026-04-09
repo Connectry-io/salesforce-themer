@@ -246,10 +246,11 @@ body.cx-settings {
 .cx-header-meta {
   display: flex;
   align-items: center;
-  gap: var(--cx-space-4);
+  gap: var(--cx-space-2);
   font-size: 12px;
   color: var(--cx-text-subtle);
   flex-shrink: 0;
+  min-width: 0;
 }
 
 /* ─── Main & Tab Panels ──────────────────────────────────────────────────── */

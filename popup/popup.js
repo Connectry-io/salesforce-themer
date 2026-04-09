@@ -430,6 +430,20 @@
     });
   }
 
+  /**
+   * Hide the popup's "Unlock Premium" CTA when the user is already premium
+   * (real subscription or DEV override). Premium users shouldn't see upsells.
+   */
+  async function applyPremiumStateToPopup() {
+    try {
+      const { premiumOverride = false } = await chrome.storage.local.get({ premiumOverride: false });
+      // TODO: when real auth ships, also check chrome.storage.local.premiumStatus
+      const isPremium = !!premiumOverride;
+      const cta = document.getElementById('upgradeCta');
+      if (cta) cta.hidden = isPremium;
+    } catch (_) {}
+  }
+
   // ─── Collapsible settings card ────────────────────────────────────────────
 
   const COLLAPSE_KEY = 'sft-popup-settings-collapsed';
@@ -585,6 +599,7 @@
     bindThemeOnToggle();
     bindPerOrgToggle();
     bindResetSettings();
+    applyPremiumStateToPopup();
 
     const [result, orgHostname] = await Promise.all([
       chrome.storage.sync.get({
