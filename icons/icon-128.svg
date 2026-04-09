@@ -1,6 +1,6 @@
 <svg width="128" height="128" viewBox="0 0 128 128" fill="none" xmlns="http://www.w3.org/2000/svg">
   <!-- Background circle -->
-  <circle cx="64" cy="64" r="60" fill="#f7f7f5" stroke="#e8e8e6" stroke-width="1"/>
+  <circle cx="64" cy="64" r="60" fill="#ffffff" stroke="#e8e8e6" stroke-width="1"/>
   <!-- Left node (graphite) -->
   <circle cx="34" cy="64" r="18" fill="#2D2D2D"/>
   <!-- Connection line -->

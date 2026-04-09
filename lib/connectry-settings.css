@@ -82,7 +82,7 @@
   --cx-transition-slow: 260ms cubic-bezier(0.16, 1, 0.3, 1);
 
   /* Layout */
-  --cx-max-width: 1100px;
+  --cx-max-width: 1180px;
   --cx-header-height: 64px;
 }
 
@@ -125,10 +125,10 @@ body.cx-settings {
 .cx-header-inner {
   max-width: var(--cx-max-width);
   margin: 0 auto;
-  padding: 0 var(--cx-space-8);
+  padding: 0 var(--cx-space-6);
   display: flex;
   align-items: stretch;
-  gap: var(--cx-space-8);
+  gap: var(--cx-space-5);
   min-height: var(--cx-header-height);
 }
 
@@ -173,27 +173,34 @@ body.cx-settings {
 .cx-tabs {
   display: flex;
   align-items: stretch;
-  gap: var(--cx-space-1);
+  gap: 0;
   flex: 1;
+  min-width: 0;
+  overflow-x: auto;
+  scrollbar-width: none;
 }
+
+.cx-tabs::-webkit-scrollbar { display: none; }
 
 .cx-tab {
   position: relative;
-  padding: 0 var(--cx-space-5);
+  padding: 0 var(--cx-space-3);
   background: transparent;
   border: none;
   border-bottom: 2px solid transparent;
   color: var(--cx-text-muted);
   font-family: var(--cx-font);
   font-weight: 500;
-  font-size: 14px;
+  font-size: 13px;
   letter-spacing: -0.1px;
   cursor: pointer;
   transition: color var(--cx-transition), border-color var(--cx-transition);
   outline: none;
   display: flex;
   align-items: center;
-  gap: var(--cx-space-2);
+  gap: 6px;
+  flex-shrink: 0;
+  white-space: nowrap;
 }
 
 .cx-tab:hover {

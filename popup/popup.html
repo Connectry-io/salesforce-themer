@@ -22,108 +22,116 @@
         <h1 class="header-title">Salesforce Themer</h1>
         <p class="header-subtitle">by Connectry</p>
       </div>
-      <button class="header-expand-btn" id="openOptionsBtn" title="Open theme gallery" aria-label="Open full theme gallery">
-        <svg width="15" height="15" viewBox="0 0 15 15" fill="none" aria-hidden="true">
+      <button class="header-expand-btn" id="openOptionsBtn" title="Open the full settings page" aria-label="Open the full settings page">
+        <span>More settings</span>
+        <svg width="13" height="13" viewBox="0 0 15 15" fill="none" aria-hidden="true">
           <path d="M3 7.5h9M7.5 3l4.5 4.5L7.5 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
         </svg>
       </button>
     </header>
 
-    <!-- Auto mode bar -->
-    <div class="auto-mode-bar" id="autoModeBar">
-      <div class="auto-mode-toggle-row">
-        <div class="auto-mode-label">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+    <!-- ─── Settings card (cohesive) ──────────────────────────────────────── -->
+    <section class="settings-card" aria-label="Theme settings">
+
+      <!-- Row 1: Follow system theme -->
+      <div class="settings-row" id="autoModeRow">
+        <div class="settings-row-label">
+          <svg class="settings-row-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
             <circle cx="12" cy="12" r="4" fill="currentColor"/>
             <path d="M12 2v2M12 20v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M2 12h2M20 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
           </svg>
-          <span>Follow system theme</span>
-          <button class="auto-help-btn" id="autoHelpBtn" aria-label="Learn more about auto mode" title="How does this work?">
-            <svg width="13" height="13" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+          <span class="settings-row-text">Follow system theme</span>
+          <button class="settings-help-btn" data-tooltip="autoTooltip" aria-label="About follow system theme" title="What does this do?">
+            <svg width="12" height="12" viewBox="0 0 14 14" fill="none" aria-hidden="true">
               <circle cx="7" cy="7" r="6" stroke="currentColor" stroke-width="1.3"/>
               <path d="M7 6.5v3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
               <circle cx="7" cy="4.5" r="0.65" fill="currentColor"/>
             </svg>
           </button>
         </div>
-        <label class="toggle-switch" title="Follow system light/dark preference">
+        <label class="toggle-switch">
           <input type="checkbox" id="autoModeToggle" />
           <span class="toggle-track"><span class="toggle-thumb"></span></span>
         </label>
-      </div>
-      <div class="auto-help-tooltip" id="autoHelpTooltip" hidden>
-        Automatically switches between your last selected light and dark theme based on your system's appearance setting.
       </div>
       <div class="auto-mode-status" id="autoModeStatus" hidden>
         <span class="auto-status-item">&#9728; <span id="autoLightName">Connectry Light</span></span>
         <span class="auto-status-dot">·</span>
         <span class="auto-status-item">&#9790; <span id="autoDarkName">Connectry Dark</span></span>
       </div>
-    </div>
 
-    <!-- Scope selector -->
-    <div class="scope-bar" id="scopeBar">
-      <div class="scope-label-wrap">
-        <span class="scope-label">Apply to</span>
-        <button class="popup-help-btn" id="scopeHelpBtn" aria-label="About scope" title="What does this do?">
-          <svg width="12" height="12" viewBox="0 0 14 14" fill="none" aria-hidden="true">
-            <circle cx="7" cy="7" r="6" stroke="currentColor" stroke-width="1.3"/>
-            <path d="M7 6.5v3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
-            <circle cx="7" cy="4.5" r="0.65" fill="currentColor"/>
+      <!-- Row 2: Apply to -->
+      <div class="settings-row settings-row--stacked" id="scopeRow">
+        <div class="settings-row-label">
+          <svg class="settings-row-icon" width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+            <rect x="2" y="3" width="12" height="10" rx="1.5" stroke="currentColor" stroke-width="1.4"/>
+            <path d="M2 6h12" stroke="currentColor" stroke-width="1.4"/>
           </svg>
-        </button>
+          <span class="settings-row-text">Apply to</span>
+          <button class="settings-help-btn" data-tooltip="scopeTooltip" aria-label="About apply scope" title="What does this do?">
+            <svg width="12" height="12" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+              <circle cx="7" cy="7" r="6" stroke="currentColor" stroke-width="1.3"/>
+              <path d="M7 6.5v3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
+              <circle cx="7" cy="4.5" r="0.65" fill="currentColor"/>
+            </svg>
+          </button>
+        </div>
+        <div class="scope-pills" id="scopePills">
+          <button class="scope-pill" data-scope="both">Both</button>
+          <button class="scope-pill" data-scope="lightning">Lightning</button>
+          <button class="scope-pill" data-scope="setup">Setup</button>
+        </div>
       </div>
-      <div class="scope-pills" id="scopePills">
-        <button class="scope-pill" data-scope="both">Both</button>
-        <button class="scope-pill" data-scope="lightning">Lightning</button>
-        <button class="scope-pill" data-scope="setup">Setup</button>
-      </div>
-      <button class="power-button" data-theme="none" role="radio" aria-checked="false" title="Turn theme off — back to default Salesforce" aria-label="Turn theme off">
-        <svg width="12" height="12" viewBox="0 0 14 14" fill="none" aria-hidden="true">
-          <path d="M7 1.5v5.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
-          <path d="M4 3.5a5 5 0 1 0 6 0" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
-        </svg>
-      </button>
-    </div>
-    <div class="popup-tooltip" id="scopeTooltip" hidden>
-      Choose where the theme applies. <strong>Lightning</strong> = Sales/Service app pages. <strong>Setup</strong> = Setup area only. <strong>Both</strong> = everywhere (default).
-    </div>
 
-    <!-- Effects preset bar -->
-    <div class="effects-bar" id="effectsBar">
-      <div class="effects-label-wrap">
-        <span class="effects-label">Effects</span>
-        <button class="popup-help-btn" id="effectsHelpBtn" aria-label="About effects" title="What are effects?">
-          <svg width="12" height="12" viewBox="0 0 14 14" fill="none" aria-hidden="true">
-            <circle cx="7" cy="7" r="6" stroke="currentColor" stroke-width="1.3"/>
-            <path d="M7 6.5v3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
-            <circle cx="7" cy="4.5" r="0.65" fill="currentColor"/>
+      <!-- Row 3: Effects -->
+      <div class="settings-row settings-row--stacked" id="effectsRow">
+        <div class="settings-row-label">
+          <svg class="settings-row-icon" width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+            <path d="M8 1l1.8 4.2L14 6l-3.2 2.8L12 13 8 10.6 4 13l1.2-4.2L2 6l4.2-0.8L8 1z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/>
           </svg>
+          <span class="settings-row-text">Effects</span>
+          <button class="settings-help-btn" data-tooltip="effectsTooltip" aria-label="About effects" title="What are effects?">
+            <svg width="12" height="12" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+              <circle cx="7" cy="7" r="6" stroke="currentColor" stroke-width="1.3"/>
+              <path d="M7 6.5v3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
+              <circle cx="7" cy="4.5" r="0.65" fill="currentColor"/>
+            </svg>
+          </button>
+        </div>
+        <div class="effects-pills" id="effectsPills" role="radiogroup" aria-label="Visual effects intensity">
+          <button class="effects-pill" data-preset="none" role="radio" aria-checked="false" title="No visual effects">None</button>
+          <button class="effects-pill" data-preset="subtle" role="radio" aria-checked="false" title="Hover lift on cards & buttons">Subtle</button>
+          <button class="effects-pill" data-preset="alive" role="radio" aria-checked="false" title="Glow, shimmer & hover effects">Alive</button>
+          <button class="effects-pill" data-preset="immersive" role="radio" aria-checked="false" title="Full effects with trails & borders">Immersive</button>
+        </div>
+      </div>
+
+      <!-- Row 4: Off button (clear, labeled) -->
+      <div class="settings-row settings-row--off">
+        <div class="settings-row-label">
+          <svg class="settings-row-icon" width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+            <path d="M7 1.5v5.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+            <path d="M4 3.5a5 5 0 1 0 6 0" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+          </svg>
+          <span class="settings-row-text">Theme</span>
+        </div>
+        <button class="off-button" data-theme="none" role="radio" aria-checked="false" aria-label="Turn theme off">
+          Turn Off
         </button>
       </div>
-      <div class="effects-pills" id="effectsPills" role="radiogroup" aria-label="Visual effects intensity">
-        <button class="effects-pill" data-preset="none" role="radio" aria-checked="false" title="No visual effects">
-          <span class="effects-pill-icon">&#9675;</span>
-          <span>None</span>
-        </button>
-        <button class="effects-pill" data-preset="subtle" role="radio" aria-checked="false" title="Hover lift on cards & buttons">
-          <span class="effects-pill-icon">&#9680;</span>
-          <span>Subtle</span>
-        </button>
-        <button class="effects-pill" data-preset="alive" role="radio" aria-checked="false" title="Glow, shimmer & hover effects">
-          <span class="effects-pill-icon">&#9673;</span>
-          <span>Alive</span>
-        </button>
-        <button class="effects-pill" data-preset="immersive" role="radio" aria-checked="false" title="Full effects with trails & borders">
-          <span class="effects-pill-icon">&#10022;</span>
-          <span>Immersive</span>
-        </button>
+
+      <!-- Floating tooltips (overlay style, matching original auto-mode pattern) -->
+      <div class="popup-tooltip" id="autoTooltip" hidden>
+        Automatically switches between your last selected light and dark theme based on your system's appearance setting.
       </div>
-    </div>
-    <div class="popup-tooltip" id="effectsTooltip" hidden>
-      Visual polish that layers on top of any theme — hover lifts, ambient glows, particles, and more. Presets give you a one-click vibe.
-      <a href="#" class="popup-tooltip-link" id="effectsTooltipLink">Configure individual effects →</a>
-    </div>
+      <div class="popup-tooltip" id="scopeTooltip" hidden>
+        Choose where the theme applies. <strong>Lightning</strong> = Sales/Service app pages. <strong>Setup</strong> = Setup area only. <strong>Both</strong> = everywhere (default).
+      </div>
+      <div class="popup-tooltip" id="effectsTooltip" hidden>
+        Visual polish on top of any theme — hover lifts, ambient glows, particles, and more. Presets give you a one-click vibe.
+        <a href="#" class="popup-tooltip-link" id="effectsTooltipLink">Configure individual effects →</a>
+      </div>
+    </section>
 
     <!-- Theme grid — dynamic, populated by popup.js from themes.json -->
     <main class="themes-section" id="themesSection" role="radiogroup" aria-label="Select a theme">

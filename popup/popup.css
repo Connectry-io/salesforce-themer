@@ -62,28 +62,36 @@ body {
   border-bottom: 1px solid var(--color-border);
 }
 
-/* Expand button — opens options page */
+/* Expand button — opens options page (labeled for clear affordance) */
 .header-expand-btn {
   margin-left: auto;
-  width: 28px;
-  height: 28px;
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  justify-content: center;
-  background: none;
+  gap: 5px;
+  padding: 5px 10px;
+  background: var(--color-bg);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-sm);
   cursor: pointer;
   color: var(--color-text-muted);
+  font-family: var(--font);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: -0.1px;
   transition: color var(--transition), border-color var(--transition), background-color var(--transition);
   flex-shrink: 0;
   outline: none;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .header-expand-btn:hover {
   color: var(--color-accent);
   border-color: var(--color-accent);
   background: var(--color-accent-light, rgba(74, 111, 165, 0.08));
+}
+
+.header-expand-btn svg {
+  flex-shrink: 0;
 }
 
 .header-expand-btn:focus-visible {
@@ -124,28 +132,42 @@ body {
   letter-spacing: 0.01em;
 }
 
-/* ─── Auto Mode Bar ──────────────────────────────────────────────────────── */
+/* ─── Settings Card (cohesive container for all controls) ────────────────── */
 
-.auto-mode-bar {
+.settings-card {
   position: relative;
   background: var(--color-surface);
   border: 1.5px solid var(--color-border);
   border-radius: var(--radius-md);
-  padding: 9px 12px;
+  padding: 4px 12px;
   display: flex;
   flex-direction: column;
-  gap: 8px;
   box-shadow: var(--shadow-sm);
 }
 
-.auto-mode-toggle-row {
+/* Each row inside the settings card */
+.settings-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 8px;
+  padding: 9px 0;
+  border-bottom: 1px solid var(--color-border);
 }
 
-.auto-mode-label {
+.settings-row:last-of-type {
+  border-bottom: none;
+}
+
+/* Stacked variant: label on top, control below (used for pill rows so they
+   have room to breathe and don't overflow horizontally) */
+.settings-row--stacked {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 7px;
+}
+
+.settings-row-label {
   display: flex;
   align-items: center;
   gap: 6px;
@@ -154,9 +176,42 @@ body {
   color: var(--color-text-muted);
 }
 
-.auto-mode-label svg {
+.settings-row-icon {
   flex-shrink: 0;
   color: var(--color-text-subtle);
+}
+
+.settings-row-text {
+  flex: 1;
+  min-width: 0;
+}
+
+/* Generic help button — single style used across all rows */
+.settings-help-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  color: var(--color-text-subtle);
+  border-radius: 50%;
+  transition: color var(--transition), background-color var(--transition);
+  flex-shrink: 0;
+  outline: none;
+}
+
+.settings-help-btn:hover {
+  color: var(--color-accent);
+  background-color: rgba(74, 111, 165, 0.08);
+}
+
+.settings-help-btn:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 1px;
 }
 
 /* Toggle switch */
@@ -209,57 +264,7 @@ body {
   outline-offset: 2px;
 }
 
-/* Help icon button */
-.auto-help-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 18px;
-  height: 18px;
-  background: none;
-  border: none;
-  padding: 0;
-  cursor: pointer;
-  color: var(--color-text-subtle);
-  border-radius: 50%;
-  transition: color var(--transition), background-color var(--transition);
-  flex-shrink: 0;
-  outline: none;
-}
-
-.auto-help-btn:hover {
-  color: var(--color-accent);
-  background-color: rgba(74, 111, 165, 0.08);
-}
-
-.auto-help-btn:focus-visible {
-  outline: 2px solid var(--color-accent);
-  outline-offset: 1px;
-}
-
-/* Help tooltip — floating overlay, does NOT expand the card */
-.auto-help-tooltip[hidden] {
-  display: none !important;
-}
-
-.auto-help-tooltip {
-  position: absolute;
-  top: 100%;
-  left: 12px;
-  right: 12px;
-  z-index: 100;
-  font-size: 11px;
-  line-height: 1.5;
-  color: var(--color-text-muted);
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-sm);
-  padding: 8px 10px;
-  box-shadow: var(--shadow-lg);
-  margin-top: 4px;
-}
-
-/* Auto mode status line */
+/* Auto mode status line — sub-row under the Follow System toggle */
 .auto-mode-status {
   display: flex;
   align-items: center;
@@ -267,7 +272,9 @@ body {
   gap: 6px;
   font-size: 11px;
   color: var(--color-text-muted);
-  padding-top: 4px;
+  padding: 0 0 9px;
+  margin-top: -4px;
+  border-bottom: 1px solid var(--color-border);
 }
 
 .auto-mode-status[hidden] {
@@ -285,72 +292,120 @@ body {
   color: var(--color-text-subtle);
 }
 
-/* ─── Scope Selector ────────────────────────────────────────────────────── */
+/* ─── Pill groups (used by Apply To and Effects rows) ────────────────────── */
 
-.scope-bar {
+.scope-pills,
+.effects-pills {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  padding: 0 2px;
+  gap: 2px;
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: 100px;
+  padding: 2px;
+  width: 100%;
+  box-sizing: border-box;
 }
 
-.scope-label-wrap,
-.effects-label-wrap {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-}
-
-.scope-label {
-  font-size: 11px;
-  font-weight: 500;
-  color: var(--color-text-subtle);
-}
-
-/* Generic popup help button (matches auto-help style) */
-.popup-help-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 16px;
-  height: 16px;
-  background: none;
+.scope-pill,
+.effects-pill {
+  flex: 1;
+  padding: 4px 6px;
   border: none;
-  padding: 0;
-  cursor: pointer;
+  background: transparent;
+  border-radius: 100px;
+  font-family: var(--font);
+  font-size: 10px;
+  font-weight: 600;
   color: var(--color-text-subtle);
-  border-radius: 50%;
-  transition: color var(--transition), background-color var(--transition);
-  flex-shrink: 0;
+  cursor: pointer;
+  transition: background-color var(--transition), color var(--transition);
   outline: none;
+  white-space: nowrap;
+  text-align: center;
+  min-width: 0;
 }
 
-.popup-help-btn:hover {
-  color: var(--color-accent);
-  background-color: rgba(74, 111, 165, 0.08);
+.scope-pill:hover,
+.effects-pill:hover {
+  color: var(--color-text-muted);
 }
 
-.popup-help-btn:focus-visible {
+.scope-pill.is-active,
+.effects-pill.is-active {
+  background: var(--color-accent);
+  color: #ffffff;
+}
+
+.scope-pill:focus-visible,
+.effects-pill:focus-visible {
   outline: 2px solid var(--color-accent);
   outline-offset: 1px;
 }
 
-/* Generic popup tooltip (inline, below scope/effects bars) */
+/* ─── Off button (replaces the old power icon — now a clear labeled button) */
+
+.off-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 5px 14px;
+  background: transparent;
+  border: 1.5px solid var(--color-border);
+  border-radius: 100px;
+  cursor: pointer;
+  font-family: var(--font);
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  transition:
+    color var(--transition),
+    border-color var(--transition),
+    background-color var(--transition),
+    box-shadow var(--transition);
+  flex-shrink: 0;
+  outline: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.off-button:hover {
+  color: #cc4444;
+  border-color: #cc4444;
+  background: rgba(204, 68, 68, 0.06);
+}
+
+.off-button:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+.off-button.is-active {
+  color: #cc4444;
+  border-color: #cc4444;
+  background: rgba(204, 68, 68, 0.12);
+  box-shadow: 0 0 0 2px rgba(204, 68, 68, 0.15);
+}
+
+/* ─── Floating tooltips (overlay style — never push content) ─────────────── */
+
 .popup-tooltip[hidden] {
   display: none !important;
 }
 
 .popup-tooltip {
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  z-index: 100;
   font-size: 11px;
   line-height: 1.5;
   color: var(--color-text-muted);
   background: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-sm);
-  padding: 8px 10px;
-  box-shadow: var(--shadow-sm);
-  margin-top: -6px;
+  padding: 9px 11px;
+  box-shadow: var(--shadow-lg);
+  pointer-events: auto;
 }
 
 .popup-tooltip strong {
@@ -373,139 +428,9 @@ body {
   text-decoration: underline;
 }
 
-/* Power / Turn Off icon button (inline in scope bar) */
-.power-button {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 22px;
-  height: 22px;
-  background: transparent;
-  border: 1px solid var(--color-border);
-  border-radius: 50%;
-  cursor: pointer;
-  color: var(--color-text-subtle);
-  transition:
-    color var(--transition),
-    border-color var(--transition),
-    background-color var(--transition);
-  flex-shrink: 0;
-  outline: none;
-  padding: 0;
-  margin-left: 2px;
-  -webkit-tap-highlight-color: transparent;
-}
-
-.power-button:hover {
-  color: #cc4444;
-  border-color: #cc4444;
-  background: rgba(204, 68, 68, 0.06);
-}
-
-.power-button:focus-visible {
-  outline: 2px solid var(--color-accent);
-  outline-offset: 2px;
-}
-
-.power-button.is-active {
-  color: #cc4444;
-  border-color: #cc4444;
-  background: rgba(204, 68, 68, 0.12);
-  box-shadow: 0 0 0 2px rgba(204, 68, 68, 0.15);
-}
-
-.scope-pills {
-  display: flex;
-  gap: 2px;
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: 100px;
-  padding: 2px;
-}
-
-.scope-pill {
-  padding: 3px 10px;
-  border: none;
-  background: transparent;
-  border-radius: 100px;
-  font-family: var(--font);
-  font-size: 10px;
-  font-weight: 600;
-  color: var(--color-text-subtle);
-  cursor: pointer;
-  transition: background-color var(--transition), color var(--transition);
-  outline: none;
-}
-
-.scope-pill:hover {
-  color: var(--color-text-muted);
-}
-
-.scope-pill.is-active {
-  background: var(--color-accent);
-  color: #ffffff;
-}
-
-/* ─── Effects Preset Bar ──────���─────────────────────────────────────────── */
-
-.effects-bar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  padding: 0 2px;
-}
-
-.effects-label {
-  font-size: 11px;
-  font-weight: 500;
-  color: var(--color-text-subtle);
-}
-
-.effects-pills {
-  display: flex;
-  gap: 2px;
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: 100px;
-  padding: 2px;
-}
-
-.effects-pill {
-  display: flex;
-  align-items: center;
-  gap: 3px;
-  padding: 3px 8px;
-  border: none;
-  background: transparent;
-  border-radius: 100px;
-  font-family: var(--font);
-  font-size: 10px;
-  font-weight: 600;
-  color: var(--color-text-subtle);
-  cursor: pointer;
-  transition: background-color var(--transition), color var(--transition);
-  outline: none;
-  white-space: nowrap;
-}
-
-.effects-pill:hover {
-  color: var(--color-text-muted);
-}
-
-.effects-pill.is-active {
-  background: var(--color-accent);
-  color: #ffffff;
-}
-
-.effects-pill:focus-visible {
-  outline: 2px solid var(--color-accent);
-  outline-offset: 1px;
-}
-
+/* Hidden — kept as filler so the legacy block ID below still parses cleanly */
 .effects-pill-icon {
-  font-size: 10px;
-  line-height: 1;
+  display: none;
 }
 
 /* ─── Theme Section (groups + grid) ─────────────────────────────────────── */

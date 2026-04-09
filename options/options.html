@@ -91,6 +91,73 @@
     <!-- ═══ Themes Tab ═══ -->
     <div class="cx-tabpanel" role="tabpanel" data-tabpanel="themes" id="galleryView">
 
+      <!-- Theme application settings — at top, mirrors the popup settings card -->
+      <section class="cx-section" aria-labelledby="apply-heading">
+        <div class="cx-section-header">
+          <div>
+            <h2 class="cx-section-title" id="apply-heading">Theme Application</h2>
+            <p class="cx-section-subtitle">Control when and where your theme is applied</p>
+          </div>
+        </div>
+
+        <div class="options-settings-card">
+
+          <!-- Row 1: Follow system theme -->
+          <div class="options-setting-row">
+            <div class="options-setting-label">
+              <svg class="options-setting-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <circle cx="12" cy="12" r="4" fill="currentColor"/>
+                <path d="M12 2v2M12 20v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M2 12h2M20 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+              </svg>
+              <div class="options-setting-text">
+                <div class="options-setting-name">Follow system theme</div>
+                <div class="options-setting-desc">Automatically switch between your preferred light and dark theme based on your system's appearance setting.</div>
+              </div>
+            </div>
+            <label class="cx-toggle">
+              <input type="checkbox" id="autoModeToggle" />
+              <span class="cx-toggle-track"><span class="cx-toggle-thumb"></span></span>
+            </label>
+          </div>
+
+          <!-- Row 2: Apply to (segmented control matching popup) -->
+          <div class="options-setting-row">
+            <div class="options-setting-label">
+              <svg class="options-setting-icon" width="15" height="15" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                <rect x="2" y="3" width="12" height="10" rx="1.5" stroke="currentColor" stroke-width="1.4"/>
+                <path d="M2 6h12" stroke="currentColor" stroke-width="1.4"/>
+              </svg>
+              <div class="options-setting-text">
+                <div class="options-setting-name">Apply theme to</div>
+                <div class="options-setting-desc">Choose whether to theme Lightning pages, Setup pages, or both.</div>
+              </div>
+            </div>
+            <div class="options-scope-pills" id="optionsScopePills" role="group" aria-label="Theme scope">
+              <button class="options-scope-pill" data-scope="both">Both</button>
+              <button class="options-scope-pill" data-scope="lightning">Lightning</button>
+              <button class="options-scope-pill" data-scope="setup">Setup</button>
+            </div>
+          </div>
+
+          <!-- Row 3: Per-org themes -->
+          <div class="options-setting-row options-setting-row--column" id="orgSettingsRow" hidden>
+            <div class="options-setting-label">
+              <svg class="options-setting-icon" width="15" height="15" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                <path d="M3 14h10M3 14V6l5-3 5 3v8M6 14V9h4v5" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/>
+              </svg>
+              <div class="options-setting-text">
+                <div class="options-setting-name">Per-org themes</div>
+                <div class="options-setting-desc">Individual Salesforce orgs can have their own theme override, independent of the global setting.</div>
+              </div>
+            </div>
+            <div class="org-list" id="orgList">
+              <!-- populated by JS -->
+            </div>
+          </div>
+
+        </div>
+      </section>
+
       <!-- Built-in Themes -->
       <section class="cx-section" aria-labelledby="ootb-heading">
         <div class="cx-section-header">
@@ -107,55 +174,27 @@
           </div>
         </div>
 
-        <div class="theme-grid" id="themeGrid" role="radiogroup" aria-label="Select a built-in theme">
-          <!-- populated by JS -->
-        </div>
-      </section>
-
-      <!-- Theme application settings -->
-      <section class="cx-section" aria-labelledby="apply-heading">
-        <div class="cx-section-header">
-          <div>
-            <h2 class="cx-section-title" id="apply-heading">Theme Application</h2>
-            <p class="cx-section-subtitle">Control when and where your theme is applied</p>
-          </div>
+        <!-- Light themes group -->
+        <div class="theme-group" id="lightThemeGroup">
+          <h3 class="theme-group-label">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <circle cx="12" cy="12" r="4" fill="currentColor"/>
+              <path d="M12 2v2M12 20v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M2 12h2M20 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+            </svg>
+            Light Themes
+          </h3>
+          <div class="theme-grid" id="lightThemeGrid" role="radiogroup" aria-label="Light themes"></div>
         </div>
 
-        <div class="cx-card cx-card-pad settings-stack">
-
-          <div class="setting-row">
-            <div class="setting-info">
-              <div class="setting-label">Follow system theme</div>
-              <div class="setting-desc">Automatically switch between your preferred light and dark theme based on your system's appearance setting.</div>
-            </div>
-            <label class="cx-toggle">
-              <input type="checkbox" id="autoModeToggle" />
-              <span class="cx-toggle-track"><span class="cx-toggle-thumb"></span></span>
-            </label>
-          </div>
-
-          <div class="setting-row">
-            <div class="setting-info">
-              <div class="setting-label">Apply theme to</div>
-              <div class="setting-desc">Choose whether to theme Lightning pages, Setup pages, or both.</div>
-            </div>
-            <select class="setting-select" id="themeScopeSelect">
-              <option value="both">Both (default)</option>
-              <option value="lightning">Lightning only</option>
-              <option value="setup">Setup only</option>
-            </select>
-          </div>
-
-          <div class="setting-row setting-row--column" id="orgSettingsRow" hidden>
-            <div class="setting-info">
-              <div class="setting-label">Per-org themes</div>
-              <div class="setting-desc">Individual Salesforce orgs can have their own theme override, independent of the global setting.</div>
-            </div>
-            <div class="org-list" id="orgList">
-              <!-- populated by JS -->
-            </div>
-          </div>
-
+        <!-- Dark themes group -->
+        <div class="theme-group" id="darkThemeGroup">
+          <h3 class="theme-group-label">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" fill="currentColor"/>
+            </svg>
+            Dark Themes
+          </h3>
+          <div class="theme-grid" id="darkThemeGrid" role="radiogroup" aria-label="Dark themes"></div>
         </div>
       </section>
 
@@ -444,6 +483,24 @@
             <div class="about-link-title">Other Connectry Apps</div>
             <div class="about-link-desc">VAT Checker, LEI Lookup, and more</div>
           </a>
+        </div>
+
+        <!-- Dev panel: hidden until the user clicks the version 7 times -->
+        <div class="dev-panel" id="devPanel" hidden>
+          <div class="dev-panel-header">
+            <span class="dev-panel-badge">DEV</span>
+            <span class="dev-panel-title">Developer testing</span>
+          </div>
+          <div class="dev-panel-row">
+            <div class="dev-panel-info">
+              <div class="dev-panel-name">Premium override</div>
+              <div class="dev-panel-desc">Force-unlock all Premium features in the UI without a real subscription. Persists across reloads. Reload the page after toggling.</div>
+            </div>
+            <label class="cx-toggle">
+              <input type="checkbox" id="devPremiumToggle" />
+              <span class="cx-toggle-track"><span class="cx-toggle-thumb"></span></span>
+            </label>
+          </div>
         </div>
 
       </section>

@@ -85,8 +85,11 @@
   };
 
   function renderThemeGrid(activeThemeId) {
-    const grid = document.getElementById('themeGrid');
-    grid.innerHTML = '';
+    const lightGrid = document.getElementById('lightThemeGrid');
+    const darkGrid = document.getElementById('darkThemeGrid');
+    if (!lightGrid || !darkGrid) return;
+    lightGrid.innerHTML = '';
+    darkGrid.innerHTML = '';
 
     for (const theme of THEMES) {
       const isActive = theme.id === activeThemeId;
@@ -94,7 +97,7 @@
       const showHint = suggestedPreset !== 'none';
 
       const card = document.createElement('div');
-      card.className = `theme-card${isActive ? ' is-active' : ''}${activeFilter !== 'all' && theme.category !== activeFilter ? ' is-hidden' : ''}`;
+      card.className = `theme-card${isActive ? ' is-active' : ''}`;
       card.dataset.theme = theme.id;
       card.setAttribute('role', 'radio');
       card.setAttribute('aria-checked', String(isActive));
@@ -157,8 +160,24 @@
         }
       });
 
-      grid.appendChild(card);
+      // Append to the matching group
+      (theme.category === 'light' ? lightGrid : darkGrid).appendChild(card);
     }
+
+    // Apply current filter to show/hide groups
+    applyThemeFilter();
+  }
+
+  /**
+   * Show/hide the Light Themes and Dark Themes groups based on the
+   * activeFilter pill state. 'all' shows both; 'light'/'dark' shows one.
+   */
+  function applyThemeFilter() {
+    const lightGroup = document.getElementById('lightThemeGroup');
+    const darkGroup = document.getElementById('darkThemeGroup');
+    if (!lightGroup || !darkGroup) return;
+    lightGroup.hidden = activeFilter === 'dark';
+    darkGroup.hidden = activeFilter === 'light';
   }
 
   function updateGridActiveState(activeThemeId) {
@@ -292,21 +311,13 @@
   // ─── Filter pills ─────────────────────────────────────────────────────────
 
   function bindFilterPills() {
-    document.querySelectorAll('#themes-heading').forEach(() => {});
-    // Target the filter pills specifically (inside the Built-in Themes section)
     const filterPills = document.querySelectorAll('.cx-pill[data-filter]');
     filterPills.forEach(pill => {
       pill.addEventListener('click', () => {
         activeFilter = pill.dataset.filter;
         filterPills.forEach(p => p.classList.remove('is-active'));
         pill.classList.add('is-active');
-
-        document.querySelectorAll('#themeGrid .theme-card').forEach(card => {
-          const theme = getThemeById(card.dataset.theme);
-          if (!theme) return;
-          const hidden = activeFilter !== 'all' && theme.category !== activeFilter;
-          card.classList.toggle('is-hidden', hidden);
-        });
+        applyThemeFilter();
       });
     });
   }
@@ -616,12 +627,17 @@
     autoToggle.checked = syncState.autoMode;
     autoToggle.addEventListener('change', handleAutoModeToggle);
 
-    // Theme scope select
-    const scopeSelect = document.getElementById('themeScopeSelect');
-    scopeSelect.value = syncState.themeScope || 'both';
-    scopeSelect.addEventListener('change', async () => {
-      await chrome.storage.sync.set({ themeScope: scopeSelect.value });
-      syncState.themeScope = scopeSelect.value;
+    // Theme scope pills (segmented control matching popup pattern)
+    const scopePills = document.querySelectorAll('#optionsScopePills .options-scope-pill');
+    const currentScope = syncState.themeScope || 'both';
+    scopePills.forEach(pill => {
+      pill.classList.toggle('is-active', pill.dataset.scope === currentScope);
+      pill.addEventListener('click', async () => {
+        const scope = pill.dataset.scope;
+        scopePills.forEach(p => p.classList.toggle('is-active', p === pill));
+        await chrome.storage.sync.set({ themeScope: scope });
+        syncState.themeScope = scope;
+      });
     });
 
     // Effects tab
@@ -663,6 +679,12 @@
         _tabsInstance = new Connectry.Settings.Tabs(tabContainer, {
           storageKey: 'cx-themer-active-tab',
           onChange: (tabName) => {
+            // Auto-close the theme editor on any tab change. The editor is
+            // a top-level overlay (not a tabpanel), so without this it would
+            // remain visible underneath every tab's content.
+            if (editorState && editorState.active) {
+              closeEditor();
+            }
             // Start/stop preview canvases when leaving/entering Effects tab
             if (tabName === 'effects') {
               startEffectPreviews();
@@ -685,6 +707,9 @@
 
     // Bind Upgrade tab plan CTAs
     bindUpgradePlanCtas();
+
+    // Dev panel: Easter-egg unlock + premium override toggle
+    bindDevPanel();
 
     // Empty-state buttons in custom themes section
     document.getElementById('createThemeBtnEmpty')?.addEventListener('click', () => {
@@ -1405,6 +1430,54 @@
     });
   }
 
+  /**
+   * Wire up the hidden dev panel in the About tab. Click the version label
+   * 7 times to reveal it. The premium override toggle persists in
+   * chrome.storage.local.premiumOverride and unlocks all Premium UI gates
+   * without a real subscription. Reload the page after toggling.
+   */
+  function bindDevPanel() {
+    const versionEl = document.getElementById('aboutVersion') || document.getElementById('versionLabel');
+    const panel = document.getElementById('devPanel');
+    const toggle = document.getElementById('devPremiumToggle');
+    if (!panel || !toggle) return;
+
+    // Reflect current override state
+    toggle.checked = !!_localPremiumOverride;
+
+    // Easter-egg unlock: click version 7 times within 4 seconds
+    let clickCount = 0;
+    let resetTimer = null;
+    const unlock = () => {
+      clickCount++;
+      clearTimeout(resetTimer);
+      resetTimer = setTimeout(() => { clickCount = 0; }, 4000);
+      if (clickCount >= 7) {
+        panel.hidden = false;
+        clickCount = 0;
+        // Scroll the dev panel into view
+        panel.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    };
+    versionEl?.addEventListener('click', unlock);
+    versionEl?.style.setProperty('cursor', 'default');
+
+    // If override is already set, reveal the panel automatically (so the
+    // user can see what's enabled and turn it off without re-doing the gesture)
+    if (_localPremiumOverride) {
+      panel.hidden = false;
+    }
+
+    // Toggle handler
+    toggle.addEventListener('change', async () => {
+      const enabled = toggle.checked;
+      await chrome.storage.local.set({ premiumOverride: enabled });
+      _localPremiumOverride = enabled;
+      // Re-render anything that depends on premium state
+      renderEffectsTabForActiveTheme();
+    });
+  }
+
   function _showCheckoutPlaceholder(plan) {
     const planLabels = {
       monthly: { name: 'Monthly', price: '$5/month' },
@@ -1552,7 +1625,6 @@
     for (const effect of EFFECT_CATALOG) {
       const isOn = !!config[effect.id];
       const intensity = config[effect.id + 'Intensity'] || 'medium';
-      const intensityVal = INTENSITY_TO_VAL[intensity] || 2;
 
       const card = document.createElement('div');
       card.className = `effect-card${isOn ? ' is-enabled' : ''}${locked ? ' is-locked' : ''}`;
@@ -1571,6 +1643,14 @@
           </select>
         </div>
       ` : '';
+
+      const intensityButtons = ['subtle', 'medium', 'strong'].map(level => `
+        <button type="button"
+                class="intensity-btn${intensity === level ? ' is-active' : ''}"
+                data-effect-intensity="${effect.id}"
+                data-level="${level}"
+                ${locked ? 'disabled' : ''}>${_capitalize(level)}</button>
+      `).join('');
 
       const lockBadge = locked ? `
         <div class="effect-lock-badge" title="Upgrade to Premium to control this effect individually">
@@ -1602,8 +1682,9 @@
         <div class="effect-controls">
           <div class="effect-slider-row">
             <span class="effect-slider-label">Intensity</span>
-            <input type="range" class="effect-slider" data-effect-slider="${effect.id}" min="1" max="3" step="1" value="${intensityVal}" ${locked ? 'disabled' : ''} />
-            <span class="effect-slider-value">${_capitalize(intensity)}</span>
+            <div class="intensity-segmented" role="group" aria-label="Effect intensity for ${effect.name}">
+              ${intensityButtons}
+            </div>
           </div>
           ${particleSelectRow}
         </div>
@@ -1630,16 +1711,18 @@
           await saveEffectsConfig(next);
         });
 
-        // Slider
-        const slider = card.querySelector(`[data-effect-slider="${effect.id}"]`);
-        slider?.addEventListener('input', async () => {
-          const intensityName = VAL_TO_INTENSITY[parseInt(slider.value)] || 'medium';
-          const { config: current } = resolveEffectsEditingTarget();
-          const next = { ...current, preset: 'custom' };
-          next[effect.id + 'Intensity'] = intensityName;
-          const label = card.querySelector('.effect-slider-value');
-          if (label) label.textContent = _capitalize(intensityName);
-          await saveEffectsConfig(next);
+        // Intensity segmented buttons
+        const intensityBtns = card.querySelectorAll(`[data-effect-intensity="${effect.id}"]`);
+        intensityBtns.forEach(btn => {
+          btn.addEventListener('click', async () => {
+            const level = btn.dataset.level;
+            const { config: current } = resolveEffectsEditingTarget();
+            const next = { ...current, preset: 'custom' };
+            next[effect.id + 'Intensity'] = level;
+            // Optimistic UI: highlight clicked, unhighlight siblings
+            intensityBtns.forEach(b => b.classList.toggle('is-active', b === btn));
+            await saveEffectsConfig(next);
+          });
         });
 
         // Particle select

@@ -400,70 +400,137 @@
   line-height: 1.55;
 }
 
-/* ─── Settings rows ──────────────────────────────────────────────────────── */
+/* ─── Options settings card (mirrors popup pattern for visual consistency) ─ */
 
-.settings-stack {
-  display: flex;
-  flex-direction: column;
+.options-settings-card {
+  background: var(--cx-surface);
+  border: 1px solid var(--cx-border);
+  border-radius: var(--cx-radius-md);
+  padding: 4px var(--cx-space-5);
+  box-shadow: var(--cx-shadow-sm);
 }
 
-.setting-row {
+.options-setting-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: var(--cx-space-4);
+  gap: var(--cx-space-5);
   padding: var(--cx-space-4) 0;
   border-bottom: 1px solid var(--cx-border);
 }
 
-.setting-row:last-child {
+.options-setting-row:last-of-type {
   border-bottom: none;
-  padding-bottom: 0;
 }
 
-.setting-row:first-child {
-  padding-top: 0;
-}
-
-.setting-row--column {
+.options-setting-row--column {
   flex-direction: column;
   align-items: stretch;
   gap: var(--cx-space-3);
 }
 
-.setting-info {
+.options-setting-label {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--cx-space-3);
   flex: 1;
   min-width: 0;
 }
 
-.setting-label {
+.options-setting-icon {
+  flex-shrink: 0;
+  color: var(--cx-text-subtle);
+  margin-top: 2px;
+}
+
+.options-setting-text {
+  flex: 1;
+  min-width: 0;
+}
+
+.options-setting-name {
   font-size: 14px;
   font-weight: 600;
   color: var(--cx-text);
   margin-bottom: 2px;
 }
 
-.setting-desc {
+.options-setting-desc {
   font-size: 12px;
   color: var(--cx-text-muted);
   line-height: 1.5;
 }
 
-.setting-select {
-  font-family: var(--cx-font);
-  font-size: 13px;
-  padding: 7px 12px;
+/* Segmented Apply-To pills (matches popup pattern) */
+.options-scope-pills {
+  display: flex;
+  gap: 2px;
+  background: var(--cx-surface-alt);
   border: 1px solid var(--cx-border);
-  border-radius: var(--cx-radius-sm);
-  background: var(--cx-surface);
-  color: var(--cx-text);
-  cursor: pointer;
-  outline: none;
-  min-width: 180px;
+  border-radius: var(--cx-radius-full);
+  padding: 2px;
+  flex-shrink: 0;
 }
 
-.setting-select:focus {
-  border-color: var(--cx-accent);
+.options-scope-pill {
+  padding: 5px 14px;
+  border: none;
+  background: transparent;
+  border-radius: var(--cx-radius-full);
+  font-family: var(--cx-font);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--cx-text-subtle);
+  cursor: pointer;
+  transition: background-color var(--cx-transition), color var(--cx-transition);
+  outline: none;
+  white-space: nowrap;
+}
+
+.options-scope-pill:hover {
+  color: var(--cx-text-muted);
+}
+
+.options-scope-pill.is-active {
+  background: var(--cx-accent);
+  color: #ffffff;
+}
+
+.options-scope-pill:focus-visible {
+  outline: 2px solid var(--cx-accent);
+  outline-offset: 1px;
+}
+
+/* ─── Theme groups (Light / Dark) ────────────────────────────────────────── */
+
+.theme-group {
+  margin-bottom: var(--cx-space-6);
+}
+
+.theme-group:last-child {
+  margin-bottom: 0;
+}
+
+.theme-group[hidden] {
+  display: none !important;
+}
+
+.theme-group-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--cx-text-muted);
+  padding-bottom: var(--cx-space-3);
+  margin-bottom: var(--cx-space-4);
+  border-bottom: 1px solid var(--cx-border);
+}
+
+.theme-group-label svg {
+  color: var(--cx-text-subtle);
 }
 
 /* ─── Org list ───────────────────────────────────────────────────────────── */
@@ -634,7 +701,7 @@
   pointer-events: none;
 }
 
-.effect-card.is-locked .effect-slider {
+.effect-card.is-locked .intensity-btn {
   cursor: not-allowed;
 }
 
@@ -687,12 +754,7 @@
   font-size: 11px;
   color: var(--cx-text-subtle);
   line-height: 1.5;
-  display: none;
   margin-top: var(--cx-space-1);
-}
-
-.effect-card:hover .effect-long {
-  display: block;
 }
 
 /* ─── Effect Mini Preview ────────────────────────────────────────────────── */
@@ -916,41 +978,50 @@
   letter-spacing: 0.03em;
 }
 
-.effect-slider {
+/* Segmented intensity control (3 buttons: Subtle / Medium / Strong) */
+.intensity-segmented {
+  display: flex;
   flex: 1;
-  height: 4px;
-  appearance: none;
-  -webkit-appearance: none;
-  background: var(--cx-border);
-  border-radius: 2px;
-  outline: none;
-  cursor: pointer;
+  background: var(--cx-surface-alt);
+  border: 1px solid var(--cx-border);
+  border-radius: var(--cx-radius-full);
+  padding: 2px;
+  gap: 2px;
 }
 
-.effect-slider::-webkit-slider-thumb {
-  appearance: none;
-  -webkit-appearance: none;
-  width: 16px;
-  height: 16px;
-  border-radius: 50%;
-  background: var(--cx-accent);
-  border: 2px solid var(--cx-surface);
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
-  cursor: pointer;
-}
-
-.effect-slider:focus-visible {
-  outline: 2px solid var(--cx-accent);
-  outline-offset: 4px;
-}
-
-.effect-slider-value {
+.intensity-btn {
+  flex: 1;
+  padding: 5px 8px;
+  border: none;
+  background: transparent;
+  border-radius: var(--cx-radius-full);
+  font-family: var(--cx-font);
   font-size: 11px;
   font-weight: 600;
-  color: var(--cx-text);
-  width: 54px;
-  text-align: right;
-  text-transform: capitalize;
+  color: var(--cx-text-subtle);
+  cursor: pointer;
+  transition: background-color var(--cx-transition), color var(--cx-transition);
+  outline: none;
+  white-space: nowrap;
+}
+
+.intensity-btn:hover:not(:disabled):not(.is-active) {
+  color: var(--cx-text-muted);
+}
+
+.intensity-btn.is-active {
+  background: var(--cx-accent);
+  color: #ffffff;
+}
+
+.intensity-btn:focus-visible {
+  outline: 2px solid var(--cx-accent);
+  outline-offset: 1px;
+}
+
+.intensity-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .effect-select {
@@ -1999,4 +2070,81 @@ td.upgrade-compare-col-premium,
     width: 100%;
     flex-wrap: wrap;
   }
+}
+
+/* ─── Dev panel (hidden by default, unlocked via Easter egg) ─────────────── */
+
+.dev-panel {
+  margin-top: var(--cx-space-6);
+  padding: var(--cx-space-5);
+  background: repeating-linear-gradient(
+    135deg,
+    #fef9e7 0,
+    #fef9e7 10px,
+    #fdf6dd 10px,
+    #fdf6dd 20px
+  );
+  border: 1.5px dashed #d4a22a;
+  border-radius: var(--cx-radius-md);
+}
+
+.dev-panel[hidden] { display: none !important; }
+
+.dev-panel-header {
+  display: flex;
+  align-items: center;
+  gap: var(--cx-space-2);
+  margin-bottom: var(--cx-space-4);
+}
+
+.dev-panel-badge {
+  background: #d4a22a;
+  color: #ffffff;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+
+.dev-panel-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: #8f6413;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.dev-panel-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--cx-space-4);
+  padding: var(--cx-space-3) var(--cx-space-4);
+  background: rgba(255, 255, 255, 0.7);
+  border-radius: var(--cx-radius-sm);
+}
+
+.dev-panel-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.dev-panel-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--cx-text);
+  margin-bottom: 2px;
+}
+
+.dev-panel-desc {
+  font-size: 11px;
+  color: var(--cx-text-muted);
+  line-height: 1.5;
+}
+
+/* Make the version label clickable-looking when hovered (Easter egg hint) */
+#aboutVersion {
+  cursor: default;
+  user-select: none;
 }

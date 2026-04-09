@@ -93,11 +93,11 @@
       section.appendChild(grid);
     }
 
-    // Bind power / turn-off button
-    const powerBtn = document.querySelector('.power-button');
-    if (powerBtn) {
-      powerBtn.addEventListener('click', () => selectTheme('none'));
-      powerBtn.addEventListener('keydown', (e) => {
+    // Bind off button
+    const offBtn = document.querySelector('.off-button');
+    if (offBtn) {
+      offBtn.addEventListener('click', () => selectTheme('none'));
+      offBtn.addEventListener('keydown', (e) => {
         if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); selectTheme('none'); }
       });
     }
@@ -342,33 +342,28 @@
   }
 
   // ─── Help tooltips ────────────────────────────────────────────────────────
+  //
+  // All three tooltips share one pattern: a [data-tooltip="targetId"] button
+  // toggles the tooltip with the matching ID, positioning it as a floating
+  // overlay anchored just below the row that owns the help button. Click
+  // outside or press Esc to dismiss.
+
+  const TOOLTIP_IDS = ['autoTooltip', 'scopeTooltip', 'effectsTooltip'];
 
   function bindHelpTooltip() {
-    // Auto-mode tooltip (existing)
-    const autoBtn = document.getElementById('autoHelpBtn');
-    const autoTip = document.getElementById('autoHelpTooltip');
-    autoBtn?.addEventListener('click', (e) => {
-      e.stopPropagation();
-      autoTip.hidden = !autoTip.hidden;
-      hideOtherTooltips(autoTip);
-    });
-
-    // Scope tooltip
-    const scopeBtn = document.getElementById('scopeHelpBtn');
-    const scopeTip = document.getElementById('scopeTooltip');
-    scopeBtn?.addEventListener('click', (e) => {
-      e.stopPropagation();
-      scopeTip.hidden = !scopeTip.hidden;
-      hideOtherTooltips(scopeTip);
-    });
-
-    // Effects tooltip
-    const effectsBtn = document.getElementById('effectsHelpBtn');
-    const effectsTip = document.getElementById('effectsTooltip');
-    effectsBtn?.addEventListener('click', (e) => {
-      e.stopPropagation();
-      effectsTip.hidden = !effectsTip.hidden;
-      hideOtherTooltips(effectsTip);
+    document.querySelectorAll('.settings-help-btn[data-tooltip]').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const tipId = btn.dataset.tooltip;
+        const tip = document.getElementById(tipId);
+        if (!tip) return;
+        const wasHidden = tip.hidden;
+        hideAllTooltips();
+        if (wasHidden) {
+          positionTooltipBelow(tip, btn);
+          tip.hidden = false;
+        }
+      });
     });
 
     // Effects tooltip → open options page on Effects tab
@@ -377,19 +372,39 @@
       openOptionsOnTab('effects');
     });
 
-    // Click outside closes all tooltips
+    // Click outside closes any open tooltip
     document.addEventListener('click', (e) => {
-      if (!e.target.closest('#autoModeBar') && autoTip) autoTip.hidden = true;
-      if (!e.target.closest('.scope-bar') && !e.target.closest('#scopeTooltip') && scopeTip) scopeTip.hidden = true;
-      if (!e.target.closest('.effects-bar') && !e.target.closest('#effectsTooltip') && effectsTip) effectsTip.hidden = true;
+      if (e.target.closest('.popup-tooltip') || e.target.closest('.settings-help-btn')) return;
+      hideAllTooltips();
+    });
+
+    // Esc closes
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') hideAllTooltips();
     });
   }
 
-  function hideOtherTooltips(keep) {
-    ['autoHelpTooltip', 'scopeTooltip', 'effectsTooltip'].forEach(id => {
+  function hideAllTooltips() {
+    TOOLTIP_IDS.forEach(id => {
       const el = document.getElementById(id);
-      if (el && el !== keep) el.hidden = true;
+      if (el) el.hidden = true;
     });
+  }
+
+  /**
+   * Position a tooltip directly below the row that owns the given help button.
+   * Tooltips are absolute-positioned children of the .settings-card so we
+   * compute coordinates relative to it.
+   */
+  function positionTooltipBelow(tooltip, anchorBtn) {
+    const card = anchorBtn.closest('.settings-card');
+    if (!card) return;
+    const row = anchorBtn.closest('.settings-row');
+    if (!row) return;
+    const cardRect = card.getBoundingClientRect();
+    const rowRect = row.getBoundingClientRect();
+    const top = rowRect.bottom - cardRect.top + 4;
+    tooltip.style.top = `${top}px`;
   }
 
   function openOptionsOnTab(tabName) {
