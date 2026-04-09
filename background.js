@@ -308,8 +308,7 @@ ${fx ? `
 
 .slds-card__header {
   background-color: ${c.surface} !important;
-  border-color: ${c.border} !important;
-  border-bottom: 1px solid ${isDark ? 'rgba(255,255,255,0.06)' : c.border} !important;
+  border-bottom-color: ${isDark ? 'rgba(255,255,255,0.06)' : c.border} !important;
 }
 
 /* ─── Buttons ────────────────────────────────────────────────────────────── */
