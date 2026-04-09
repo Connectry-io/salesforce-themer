@@ -72,22 +72,21 @@
 
   // ─── Theme grid rendering ─────────────────────────────────────────────────
 
-  // Mini effect indicator icons — one per effect type. Used on theme cards
-  // to communicate at a glance what effects ship with each theme.
-  const EFFECT_ICONS = {
-    hoverLift:       { svg: '<path d="M2 11l4-4 4 4 4-7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>', label: 'Hover lift' },
-    ambientGlow:     { svg: '<circle cx="8" cy="8" r="3" fill="currentColor"/><circle cx="8" cy="8" r="6" fill="none" stroke="currentColor" stroke-width="1.2" opacity="0.5"/>', label: 'Ambient glow' },
-    borderShimmer:   { svg: '<path d="M2 8h12M5 5l2 3-2 3M11 5l-2 3 2 3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" fill="none"/>', label: 'Border shimmer' },
-    gradientBorders: { svg: '<rect x="2.5" y="2.5" width="11" height="11" rx="2" stroke="currentColor" stroke-width="1.4" stroke-dasharray="3 2" fill="none"/>', label: 'Gradient borders' },
-    aurora:          { svg: '<path d="M2 11c2-3 4-3 6-1s4 2 6-1" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" fill="none"/><path d="M2 8c2-3 4-3 6-1s4 2 6-1" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" fill="none" opacity="0.6"/>', label: 'Aurora' },
-    neonFlicker:     { svg: '<path d="M9 1L4 9h4l-1 6 5-8H8l1-6z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round" fill="currentColor" fill-opacity="0.4"/>', label: 'Neon flicker' },
-    particles:       { svg: '<circle cx="4" cy="4" r="1" fill="currentColor"/><circle cx="11" cy="3" r="1" fill="currentColor"/><circle cx="6" cy="9" r="1" fill="currentColor"/><circle cx="12" cy="9" r="1" fill="currentColor"/><circle cx="3" cy="12" r="1" fill="currentColor"/><circle cx="9" cy="13" r="1" fill="currentColor"/>', label: 'Particles' },
-    cursorTrail:     { svg: '<path d="M3 3l5 9 1.5-3.5L13 7 3 3z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round" fill="currentColor" fill-opacity="0.4"/>', label: 'Cursor trail' },
+  // Effect display names — used by the theme card pills and the Guide tab.
+  const EFFECT_LABELS = {
+    hoverLift:       'Hover lift',
+    ambientGlow:     'Glow',
+    borderShimmer:   'Shimmer',
+    gradientBorders: 'Gradient',
+    aurora:          'Aurora',
+    neonFlicker:     'Neon',
+    particles:       'Particles',
+    cursorTrail:     'Cursor trail',
   };
 
   /**
-   * Build the inline effect-indicator HTML for a theme card. Returns a row
-   * of mini SVG icons with a hover tooltip listing the full set by name.
+   * Build the effect text pills for a theme card. Each pill is clickable —
+   * clicking jumps to the Effects/Guide tab so the user can read about it.
    */
   function buildEffectIndicators(themeId) {
     const cfg = getSuggestedEffectsFor(themeId);
@@ -96,15 +95,13 @@
       if (cfg[eff]) enabled.push(eff);
     }
     if (!enabled.length) {
-      return `<div class="theme-effects-indicators is-empty" title="No effects shipped"><span class="theme-effects-empty">No effects</span></div>`;
+      return `<div class="theme-effects-indicators is-empty"><span class="theme-effects-empty">No effects</span></div>`;
     }
-    const tooltipLabel = enabled.map(e => EFFECT_ICONS[e]?.label || e).join(' · ');
-    const icons = enabled.map(e => `
-      <span class="theme-effect-icon" title="${EFFECT_ICONS[e]?.label || e}" aria-label="${EFFECT_ICONS[e]?.label || e}">
-        <svg width="14" height="14" viewBox="0 0 16 16" aria-hidden="true">${EFFECT_ICONS[e]?.svg || ''}</svg>
-      </span>
-    `).join('');
-    return `<div class="theme-effects-indicators" title="Effects: ${tooltipLabel}">${icons}</div>`;
+    const pills = enabled.map(e => {
+      const label = EFFECT_LABELS[e] || e;
+      return `<button type="button" class="theme-effect-pill" data-effect-pill="${e}" title="${label} — click to learn more">${label}</button>`;
+    }).join('');
+    return `<div class="theme-effects-indicators">${pills}</div>`;
   }
 
   function renderThemeGrid(activeThemeId) {
@@ -164,6 +161,15 @@
           openCreationDialog(cloneBtn.dataset.clone);
           return;
         }
+        const effectPill = e.target.closest('[data-effect-pill]');
+        if (effectPill) {
+          e.stopPropagation();
+          // Jump to the Effects tab (becomes Guide tab in next commit) so
+          // the user can read about this specific effect.
+          if (_tabsInstance) _tabsInstance.activate('effects');
+          // TODO (next commit): scroll to and highlight the specific effect
+          return;
+        }
         selectTheme(theme.id);
       });
 
@@ -192,6 +198,46 @@
     if (!lightGroup || !darkGroup) return;
     lightGroup.hidden = activeFilter === 'dark';
     darkGroup.hidden = activeFilter === 'light';
+  }
+
+  /**
+   * Light/Dark group collapsible. Click the section header to toggle.
+   * State persists per group in localStorage so it stays the way you left it.
+   */
+  const THEME_GROUP_COLLAPSE_KEYS = {
+    light: 'sft-light-group-collapsed',
+    dark:  'sft-dark-group-collapsed',
+  };
+
+  function bindThemeGroupCollapse() {
+    document.querySelectorAll('.theme-group-label[data-group-toggle]').forEach(btn => {
+      const groupKey = btn.dataset.groupToggle;
+      const group = btn.closest('.theme-group');
+      // Restore persisted state (default: expanded)
+      const stored = localStorage.getItem(THEME_GROUP_COLLAPSE_KEYS[groupKey]);
+      const collapsed = stored === '1';
+      applyGroupCollapse(group, btn, collapsed);
+
+      btn.addEventListener('click', () => {
+        const nowCollapsed = group.dataset.collapsed !== 'true';
+        applyGroupCollapse(group, btn, nowCollapsed);
+        try { localStorage.setItem(THEME_GROUP_COLLAPSE_KEYS[groupKey], nowCollapsed ? '1' : '0'); } catch (_) {}
+      });
+    });
+
+    // Update theme counts in each header
+    const lightCount = document.querySelectorAll('#lightThemeGrid .theme-card').length;
+    const darkCount = document.querySelectorAll('#darkThemeGrid .theme-card').length;
+    const lightLabel = document.getElementById('lightThemeCount');
+    const darkLabel = document.getElementById('darkThemeCount');
+    if (lightLabel) lightLabel.textContent = `${lightCount}`;
+    if (darkLabel) darkLabel.textContent = `${darkCount}`;
+  }
+
+  function applyGroupCollapse(group, btn, collapsed) {
+    if (!group || !btn) return;
+    group.dataset.collapsed = String(collapsed);
+    btn.setAttribute('aria-expanded', String(!collapsed));
   }
 
   function updateGridActiveState(activeThemeId) {
@@ -542,6 +588,47 @@
     tooltip.style.top = `${top}px`;
   }
 
+  // ─── Theme Application card collapse toggle ──────────────────────────────
+
+  const OPT_SETTINGS_COLLAPSE_KEY = 'sft-opt-settings-collapsed';
+
+  function bindOptSettingsCardCollapse() {
+    const header = document.getElementById('optSettingsCardToggle');
+    const body = document.getElementById('optSettingsCardBody');
+    if (!header || !body) return;
+
+    // Default collapsed (mirrors popup pattern)
+    const stored = localStorage.getItem(OPT_SETTINGS_COLLAPSE_KEY);
+    const collapsed = stored === null ? true : stored === '1';
+    applyCollapse(collapsed);
+
+    header.addEventListener('click', () => {
+      const nowCollapsed = !body.classList.contains('is-collapsed');
+      applyCollapse(nowCollapsed);
+      try { localStorage.setItem(OPT_SETTINGS_COLLAPSE_KEY, nowCollapsed ? '1' : '0'); } catch (_) {}
+    });
+
+    function applyCollapse(c) {
+      body.classList.toggle('is-collapsed', c);
+      header.setAttribute('aria-expanded', String(!c));
+      // Hide tooltips when collapsing
+      if (c) _hideAllOptTooltips();
+    }
+  }
+
+  /**
+   * Reflect the current theme on/off state in the collapsed-card header.
+   * Called whenever the active theme changes.
+   */
+  function syncOptSettingsCardStatus(activeThemeId) {
+    const dot = document.getElementById('optStatusDot');
+    const text = document.getElementById('optStatusText');
+    if (!dot || !text) return;
+    const isOn = activeThemeId && activeThemeId !== 'none';
+    dot.classList.toggle('opt-status-dot--on', !!isOn);
+    text.textContent = isOn ? 'Theme on' : 'Theme off';
+  }
+
   // ─── Theme on/off toggle (matches popup) ─────────────────────────────────
 
   // Tracks the most recently picked non-'none' theme so we can restore it
@@ -738,7 +825,9 @@
     renderThemeGrid(activeTheme);
     renderCustomThemeGrid(activeTheme);
     bindFilterPills();
+    bindThemeGroupCollapse();
     updateHeaderMeta(activeTheme);
+    syncOptSettingsCardStatus(activeTheme);
     renderOrgList(syncState.orgThemes);
     setVersion();
 
@@ -763,6 +852,9 @@
     // Theme Application tooltips (mirror popup floating tooltip pattern)
     bindOptThemeApplicationTooltips();
 
+    // Theme Application card collapse toggle
+    bindOptSettingsCardCollapse();
+
     // Theme on/off toggle (mirrors popup row)
     bindOptThemeOnToggle();
 
@@ -782,6 +874,7 @@
         syncState.theme = changes.theme.newValue;
         updateGridActiveState(syncState.theme);
         updateHeaderMeta(syncState.theme);
+        syncOptSettingsCardStatus(syncState.theme);
         updateEffectsContextBanner();
         renderEffectsTabForActiveTheme();
         // Sync the Theme Application on/off toggle
@@ -1860,6 +1953,7 @@
       syncPremiumBodyClass();
       renderEffectsTabForActiveTheme();
       updateHeaderMeta(syncState.theme);
+        syncOptSettingsCardStatus(syncState.theme);
       // Re-render theme grid so clone button gates update too
       renderThemeGrid(syncState.theme);
     });

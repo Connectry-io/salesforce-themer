@@ -91,16 +91,25 @@
     <!-- ═══ Themes Tab ═══ -->
     <div class="cx-tabpanel" role="tabpanel" data-tabpanel="themes" id="galleryView">
 
-      <!-- Theme application settings — mirrors the popup settings card design -->
+      <!-- Theme application settings — mirrors the popup settings card design,
+           with the same collapsible header pattern (default collapsed) -->
       <section class="cx-section" aria-labelledby="apply-heading">
-        <div class="cx-section-header">
-          <div>
-            <h2 class="cx-section-title" id="apply-heading">Theme Application</h2>
-            <p class="cx-section-subtitle">Control when and where your theme is applied</p>
-          </div>
-        </div>
-
         <div class="opt-settings-card">
+
+          <!-- Collapsible header — click to toggle, default collapsed -->
+          <button class="opt-settings-card-header" id="optSettingsCardToggle" type="button" aria-expanded="false" aria-controls="optSettingsCardBody">
+            <span class="opt-settings-card-status">
+              <span class="opt-status-dot opt-status-dot--on" id="optStatusDot"></span>
+              <span id="optStatusText">Theme on</span>
+            </span>
+            <span class="opt-settings-card-spacer"></span>
+            <span class="opt-settings-card-label">Theme Application</span>
+            <svg class="opt-settings-card-chevron" width="14" height="14" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+              <path d="M3 4.5L6 7.5L9 4.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
+
+          <div class="opt-settings-card-body is-collapsed" id="optSettingsCardBody">
 
           <!-- Row 0: Theme on/off (mirrors popup) -->
           <div class="opt-settings-row">
@@ -210,7 +219,10 @@
             <button type="button" class="opt-reset-link" id="optResetSettingsBtn">Reset all settings to defaults</button>
           </div>
 
-          <!-- Floating tooltips, mirror popup pattern -->
+          </div><!-- /opt-settings-card-body -->
+
+          <!-- Floating tooltips — siblings of the body so collapse animation
+               doesn't clip them -->
           <div class="opt-settings-tooltip" id="optAutoTooltip" hidden>
             Pick both a light theme and a dark theme — Themer will automatically switch between them whenever your computer toggles light/dark mode. Off by default.
           </div>
@@ -245,24 +257,32 @@
 
         <!-- Light themes group -->
         <div class="theme-group" id="lightThemeGroup">
-          <h3 class="theme-group-label">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <button class="theme-group-label" type="button" data-group-toggle="light" aria-expanded="true">
+            <svg class="theme-group-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" aria-hidden="true">
               <circle cx="12" cy="12" r="4" fill="currentColor"/>
               <path d="M12 2v2M12 20v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M2 12h2M20 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
             </svg>
-            Light Themes
-          </h3>
+            <span>Light Themes</span>
+            <span class="theme-group-count" id="lightThemeCount"></span>
+            <svg class="theme-group-chevron" width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+              <path d="M3 4.5L6 7.5L9 4.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
           <div class="theme-grid" id="lightThemeGrid" role="radiogroup" aria-label="Light themes"></div>
         </div>
 
         <!-- Dark themes group -->
         <div class="theme-group" id="darkThemeGroup">
-          <h3 class="theme-group-label">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <button class="theme-group-label" type="button" data-group-toggle="dark" aria-expanded="true">
+            <svg class="theme-group-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" aria-hidden="true">
               <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" fill="currentColor"/>
             </svg>
-            Dark Themes
-          </h3>
+            <span>Dark Themes</span>
+            <span class="theme-group-count" id="darkThemeCount"></span>
+            <svg class="theme-group-chevron" width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+              <path d="M3 4.5L6 7.5L9 4.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
           <div class="theme-grid" id="darkThemeGrid" role="radiogroup" aria-label="Dark themes"></div>
         </div>
       </section>

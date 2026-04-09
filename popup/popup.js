@@ -34,48 +34,6 @@
     return [c.background, c.surface, c.accent, c.textPrimary];
   }
 
-  // Local copy of theme → shipped effects map. Mirrors options.js
-  // getSuggestedEffectsFor() so the popup can show effect indicators
-  // without loading effects/presets.js (different script context).
-  const POPUP_THEME_EFFECTS = {
-    'connectry':       ['hoverLift'],
-    'connectry-dark':  ['hoverLift', 'ambientGlow'],
-    'midnight':        ['hoverLift', 'aurora', 'particles'],
-    'slate':           ['hoverLift'],
-    'tron':            ['hoverLift', 'ambientGlow', 'borderShimmer', 'gradientBorders', 'cursorTrail', 'neonFlicker'],
-    'obsidian':        ['hoverLift', 'ambientGlow'],
-    'arctic':          ['hoverLift', 'ambientGlow', 'borderShimmer', 'aurora', 'particles'],
-    'sakura':          ['hoverLift', 'borderShimmer'],
-    'ember':           ['hoverLift', 'ambientGlow', 'particles'],
-    'nord':            ['hoverLift', 'aurora'],
-    'terminal':        ['hoverLift', 'ambientGlow', 'borderShimmer', 'neonFlicker', 'particles'],
-    'high-contrast':   [],
-    'dracula':         ['hoverLift', 'ambientGlow', 'borderShimmer'],
-    'solarized-light': ['hoverLift'],
-    'solarized-dark':  ['hoverLift', 'ambientGlow'],
-  };
-
-  const POPUP_EFFECT_LABELS = {
-    hoverLift: 'Hover lift',
-    ambientGlow: 'Ambient glow',
-    borderShimmer: 'Border shimmer',
-    gradientBorders: 'Gradient borders',
-    aurora: 'Aurora',
-    neonFlicker: 'Neon flicker',
-    particles: 'Particles',
-    cursorTrail: 'Cursor trail',
-  };
-
-  function buildPopupEffectIndicators(themeId) {
-    const effects = POPUP_THEME_EFFECTS[themeId] || [];
-    if (!effects.length) {
-      return `<span class="theme-effects-mini is-empty" title="No effects">–</span>`;
-    }
-    const tooltip = effects.map(e => POPUP_EFFECT_LABELS[e] || e).join(' · ');
-    const dots = effects.map(() => `<span class="theme-effect-dot"></span>`).join('');
-    return `<span class="theme-effects-mini" title="Effects: ${tooltip}">${dots}</span>`;
-  }
-
   function renderThemesSection() {
     const section = document.getElementById('themesSection');
     section.innerHTML = '';
@@ -121,7 +79,6 @@
             <span class="theme-name">${theme.name}</span>
             ${descOrTag}
           </div>
-          ${buildPopupEffectIndicators(theme.id)}
           <div class="theme-check" aria-hidden="true">
             <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
               <path d="M2.5 7L5.5 10L11.5 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
