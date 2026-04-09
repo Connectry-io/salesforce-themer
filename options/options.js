@@ -652,6 +652,17 @@
     document.getElementById('cloneFirstBtn')?.addEventListener('click', () => {
       openCreationDialog('connectry');
     });
+
+    // Builder tab: create-method cards
+    document.querySelectorAll('.create-method-card[data-method]').forEach(card => {
+      card.addEventListener('click', () => {
+        const method = card.dataset.method;
+        if (method === 'manual') {
+          openCreationDialog('connectry');
+        }
+        // ai / brand-guide / url are coming-soon — disabled, no handler needed
+      });
+    });
   }
 
   // ═══════════════════════════════════════════════════════════════════════════

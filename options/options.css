@@ -229,6 +229,112 @@
   background: rgba(220, 38, 38, 0.08);
 }
 
+/* ─── Builder: Create Method Cards ───────────────────────────────────────── */
+
+.create-method-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: var(--cx-space-4);
+}
+
+.create-method-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: var(--cx-space-3);
+  padding: var(--cx-space-5);
+  background: var(--cx-surface);
+  border: 1.5px solid var(--cx-border);
+  border-radius: var(--cx-radius-md);
+  text-align: left;
+  cursor: pointer;
+  transition:
+    border-color var(--cx-transition),
+    box-shadow var(--cx-transition),
+    transform var(--cx-transition);
+  font-family: inherit;
+  color: inherit;
+  outline: none;
+}
+
+.create-method-card:hover:not(.is-coming-soon) {
+  border-color: var(--cx-accent);
+  box-shadow: var(--cx-shadow-md);
+  transform: translateY(-2px);
+}
+
+.create-method-card:focus-visible {
+  outline: 2px solid var(--cx-accent);
+  outline-offset: 2px;
+}
+
+.create-method-card.is-coming-soon {
+  cursor: default;
+  opacity: 0.85;
+  background: var(--cx-surface-alt);
+}
+
+.create-method-card.is-coming-soon:hover {
+  border-color: var(--cx-border);
+}
+
+.create-method-badge {
+  position: absolute;
+  top: var(--cx-space-3);
+  right: var(--cx-space-3);
+  background: rgba(217, 119, 6, 0.1);
+  color: var(--cx-warning);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 3px 8px;
+  border-radius: var(--cx-radius-full);
+  border: 1px solid rgba(217, 119, 6, 0.2);
+}
+
+.create-method-icon {
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--cx-accent-light);
+  color: var(--cx-accent);
+  border-radius: var(--cx-radius-md);
+  flex-shrink: 0;
+}
+
+.create-method-card.is-coming-soon .create-method-icon {
+  background: var(--cx-bg);
+  color: var(--cx-text-muted);
+}
+
+.create-method-name {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--cx-text);
+  letter-spacing: -0.2px;
+}
+
+.create-method-desc {
+  font-size: 12px;
+  color: var(--cx-text-muted);
+  line-height: 1.55;
+  flex: 1;
+}
+
+.create-method-cta {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--cx-accent);
+  letter-spacing: -0.1px;
+}
+
+.create-method-card.is-coming-soon .create-method-cta {
+  color: var(--cx-text-subtle);
+}
+
 /* ─── Marketplace preview ────────────────────────────────────────────────── */
 
 .marketplace-preview {
@@ -256,9 +362,42 @@
 .marketplace-preview-body {
   font-size: 13px;
   color: var(--cx-text-muted);
-  max-width: 480px;
+  max-width: 520px;
   margin: 0 auto;
   line-height: 1.6;
+}
+
+.marketplace-features {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: var(--cx-space-4);
+  margin-top: var(--cx-space-6);
+}
+
+.marketplace-feature {
+  background: var(--cx-surface);
+  border: 1px solid var(--cx-border);
+  border-radius: var(--cx-radius-md);
+  padding: var(--cx-space-4);
+}
+
+.marketplace-feature-icon {
+  font-size: 22px;
+  margin-bottom: var(--cx-space-2);
+}
+
+.marketplace-feature-name {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--cx-text);
+  margin-bottom: var(--cx-space-1);
+  letter-spacing: -0.1px;
+}
+
+.marketplace-feature-desc {
+  font-size: 12px;
+  color: var(--cx-text-muted);
+  line-height: 1.55;
 }
 
 /* ─── Settings rows ──────────────────────────────────────────────────────── */
