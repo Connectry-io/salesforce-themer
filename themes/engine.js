@@ -166,23 +166,40 @@ one-app-nav-bar,
   color: ${c.navActiveText} !important;` : ''}
 }
 
-/* Active nav tab — target all SF variations */
+/* Active nav tab — target all SF variations with max specificity */
 .slds-context-bar__item.slds-is-active,
+.slds-context-bar__item.slds-is-active.slds-is-unsaved,
 one-app-nav-bar-item-root.slds-is-active,
+one-app-nav-bar-item-root.navItem.slds-is-active,
 .navexConsoleTabItem.active {
   background-color: ${c.navActive} !important;
   background: ${c.navActive} !important;
-  border-bottom: 3px solid ${c.navActiveBorder} !important;
+  border-bottom-color: ${c.navActiveBorder} !important;
   border-radius: 0 !important;
   box-shadow: none !important;${fx && fx.navActiveBoxShadow ? `
   box-shadow: ${fx.navActiveBoxShadow} !important;` : ''}
   color: ${c.navActiveText} !important;
 }
 
+/* Kill the underline pseudo-elements on active tab */
+.slds-context-bar__item.slds-is-active::before,
+.slds-context-bar__item.slds-is-active::after,
+one-app-nav-bar-item-root.slds-is-active::before,
+one-app-nav-bar-item-root.slds-is-active::after,
+.slds-context-bar__item.slds-is-active a::before,
+.slds-context-bar__item.slds-is-active a::after,
+one-app-nav-bar-item-root.slds-is-active a::before,
+one-app-nav-bar-item-root.slds-is-active a::after {
+  background-color: ${c.navActiveBorder} !important;
+  background: ${c.navActiveBorder} !important;
+  border-color: ${c.navActiveBorder} !important;
+}
+
 /* Active tab inner link — must beat SF's aria-current="page" + pill styling */
 .slds-context-bar__item.slds-is-active .slds-context-bar__label-action,
 .slds-context-bar__item.slds-is-active a,
 one-app-nav-bar-item-root.slds-is-active a,
+one-app-nav-bar-item-root.slds-is-active a.dndItem,
 one-app-nav-bar-item-root.slds-is-active .slds-context-bar__label-action,
 .slds-context-bar a[aria-current="page"] {
   color: ${c.navActiveText} !important;
@@ -190,6 +207,7 @@ one-app-nav-bar-item-root.slds-is-active .slds-context-bar__label-action,
   background: transparent !important;
   border-color: transparent !important;
   box-shadow: none !important;
+  border-radius: 0 !important;
 }
 
 /* Nav text and icons */
