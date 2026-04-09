@@ -590,6 +590,150 @@
     tooltip.style.top = `${top}px`;
   }
 
+  // ─── Theme on/off toggle (matches popup) ─────────────────────────────────
+
+  // Tracks the most recently picked non-'none' theme so we can restore it
+  // when the user flips the toggle back on.
+  let _optLastEnabledTheme = 'connectry';
+
+  function bindOptThemeOnToggle() {
+    const toggle = document.getElementById('optThemeOnToggle');
+    if (!toggle) return;
+    // Initial state — derived from current syncState.theme
+    const isOn = syncState.theme && syncState.theme !== 'none';
+    toggle.checked = !!isOn;
+    if (isOn) _optLastEnabledTheme = syncState.theme;
+
+    toggle.addEventListener('change', async () => {
+      if (toggle.checked) {
+        const restore = (_optLastEnabledTheme && _optLastEnabledTheme !== 'none')
+          ? _optLastEnabledTheme : 'connectry';
+        await selectTheme(restore);
+      } else {
+        if (syncState.theme && syncState.theme !== 'none') {
+          _optLastEnabledTheme = syncState.theme;
+        }
+        await selectTheme('none');
+      }
+    });
+  }
+
+  // ─── Effects preset pills (matches popup) ────────────────────────────────
+
+  // Same preset definitions as popup.js POPUP_EFFECTS_PRESETS
+  const OPT_EFFECTS_PRESETS = {
+    none: {
+      preset: 'none',
+      hoverLift: false, hoverLiftIntensity: 'medium',
+      ambientGlow: false, ambientGlowIntensity: 'medium',
+      borderShimmer: false, borderShimmerIntensity: 'medium',
+      gradientBorders: false, gradientBordersIntensity: 'medium',
+      aurora: false, auroraIntensity: 'medium',
+      neonFlicker: false, neonFlickerIntensity: 'medium',
+      particles: false, particlesIntensity: 'medium',
+      cursorTrail: false, cursorTrailIntensity: 'medium',
+    },
+    subtle: {
+      preset: 'subtle',
+      hoverLift: true, hoverLiftIntensity: 'subtle',
+      ambientGlow: false, ambientGlowIntensity: 'subtle',
+      borderShimmer: false, borderShimmerIntensity: 'subtle',
+      gradientBorders: false, gradientBordersIntensity: 'subtle',
+      aurora: false, auroraIntensity: 'subtle',
+      neonFlicker: false, neonFlickerIntensity: 'subtle',
+      particles: false, particlesIntensity: 'subtle',
+      cursorTrail: false, cursorTrailIntensity: 'subtle',
+    },
+    alive: {
+      preset: 'alive',
+      hoverLift: true, hoverLiftIntensity: 'medium',
+      ambientGlow: true, ambientGlowIntensity: 'medium',
+      borderShimmer: true, borderShimmerIntensity: 'medium',
+      gradientBorders: false, gradientBordersIntensity: 'medium',
+      aurora: false, auroraIntensity: 'medium',
+      neonFlicker: false, neonFlickerIntensity: 'medium',
+      particles: false, particlesIntensity: 'medium',
+      cursorTrail: false, cursorTrailIntensity: 'medium',
+    },
+    immersive: {
+      preset: 'immersive',
+      hoverLift: true, hoverLiftIntensity: 'strong',
+      ambientGlow: true, ambientGlowIntensity: 'strong',
+      borderShimmer: true, borderShimmerIntensity: 'medium',
+      gradientBorders: true, gradientBordersIntensity: 'strong',
+      aurora: false, auroraIntensity: 'medium',
+      neonFlicker: false, neonFlickerIntensity: 'medium',
+      particles: false, particlesIntensity: 'medium',
+      cursorTrail: true, cursorTrailIntensity: 'medium',
+    },
+  };
+
+  function bindOptEffectsPills() {
+    const pills = document.querySelectorAll('#optEffectsPills .opt-scope-pill[data-effect-preset]');
+    if (!pills.length) return;
+
+    // Initial state from sync
+    const activePreset = syncState.effectsConfig?.preset || 'none';
+    pills.forEach(p => p.classList.toggle('is-active', p.dataset.effectPreset === activePreset));
+
+    pills.forEach(pill => {
+      pill.addEventListener('click', async () => {
+        const preset = pill.dataset.effectPreset;
+        const config = OPT_EFFECTS_PRESETS[preset] || OPT_EFFECTS_PRESETS.none;
+        pills.forEach(p => p.classList.toggle('is-active', p === pill));
+        await chrome.storage.sync.set({ effectsConfig: { ...config } });
+        syncState.effectsConfig = { ...config };
+        // Re-render the dedicated Effects tab so it stays in sync
+        renderEffectsTabForActiveTheme();
+      });
+    });
+
+    // Tooltip "Effects tab" link → switch tabs
+    document.querySelectorAll('.opt-settings-tooltip-link[data-tab-link]').forEach(link => {
+      link.addEventListener('click', (e) => {
+        e.preventDefault();
+        const targetTab = link.dataset.tabLink;
+        if (_tabsInstance && targetTab) {
+          _tabsInstance.activate(targetTab);
+          _hideAllOptTooltips();
+        }
+      });
+    });
+  }
+
+  // ─── Reset all settings (matches popup) ──────────────────────────────────
+
+  function bindOptResetSettings() {
+    const btn = document.getElementById('optResetSettingsBtn');
+    if (!btn) return;
+    btn.addEventListener('click', async () => {
+      const confirmed = confirm(
+        'Reset Salesforce Themer to defaults?\n\n' +
+        'This will:\n' +
+        '• Switch back to the Connectry theme\n' +
+        '• Turn off Follow System mode\n' +
+        '• Apply theme to Lightning pages only\n' +
+        '• Set effects to the Subtle preset\n' +
+        '• Clear all per-org overrides\n\n' +
+        'Custom themes you\'ve created will be kept.'
+      );
+      if (!confirmed) return;
+
+      const defaults = {
+        theme: 'connectry',
+        autoMode: false,
+        lastLightTheme: 'connectry',
+        lastDarkTheme: 'connectry-dark',
+        orgThemes: {},
+        themeScope: 'lightning',
+        effectsConfig: { ...OPT_EFFECTS_PRESETS.subtle },
+      };
+      await chrome.storage.sync.set(defaults);
+      pushThemeToAllSfTabs('connectry');
+      window.location.reload();
+    });
+  }
+
   // ─── Per-org settings ────────────────────────────────────────────────────
 
   function renderOrgList(orgThemes) {
@@ -711,6 +855,15 @@
     // Theme Application tooltips (mirror popup floating tooltip pattern)
     bindOptThemeApplicationTooltips();
 
+    // Theme on/off toggle (mirrors popup row)
+    bindOptThemeOnToggle();
+
+    // Effects preset pills (mirrors popup row)
+    bindOptEffectsPills();
+
+    // Reset to defaults link
+    bindOptResetSettings();
+
     // Effects tab
     renderEffectsTabForActiveTheme();
 
@@ -723,6 +876,13 @@
         updateHeaderMeta(syncState.theme);
         updateEffectsContextBanner();
         renderEffectsTabForActiveTheme();
+        // Sync the Theme Application on/off toggle
+        const optThemeToggle = document.getElementById('optThemeOnToggle');
+        if (optThemeToggle) {
+          const on = syncState.theme && syncState.theme !== 'none';
+          optThemeToggle.checked = !!on;
+          if (on) _optLastEnabledTheme = syncState.theme;
+        }
       }
       if (changes.autoMode) {
         syncState.autoMode = changes.autoMode.newValue;
@@ -740,6 +900,17 @@
       if (changes.effectsConfig) {
         syncState.effectsConfig = changes.effectsConfig.newValue;
         renderEffectsTabForActiveTheme();
+        // Sync the Theme Application effects pills
+        const activePreset = syncState.effectsConfig?.preset || 'none';
+        document.querySelectorAll('#optEffectsPills .opt-scope-pill[data-effect-preset]').forEach(p => {
+          p.classList.toggle('is-active', p.dataset.effectPreset === activePreset);
+        });
+      }
+      if (changes.themeScope) {
+        syncState.themeScope = changes.themeScope.newValue;
+        document.querySelectorAll('#optionsScopePills .opt-scope-pill').forEach(p => {
+          p.classList.toggle('is-active', p.dataset.scope === syncState.themeScope);
+        });
       }
     });
 
