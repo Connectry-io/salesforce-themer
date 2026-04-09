@@ -796,12 +796,62 @@
   display: flex;
   flex-direction: column;
   gap: var(--cx-space-3);
-  transition: border-color var(--cx-transition), box-shadow var(--cx-transition);
+  transition:
+    border-color var(--cx-transition),
+    box-shadow var(--cx-transition),
+    background-color var(--cx-transition),
+    transform var(--cx-transition);
+  position: relative;
 }
 
+/* Enabled state — distinctive blue border, subtle accent-tinted background,
+   soft outer ring, and a tiny lift. The card should obviously read as
+   "this effect is on" even from across the screen. */
 .effect-card.is-enabled {
   border-color: var(--cx-accent);
-  box-shadow: 0 0 0 1px var(--cx-accent-light);
+  border-width: 2px;
+  padding: calc(var(--cx-space-4) - 0.5px);
+  background: linear-gradient(180deg, rgba(74, 111, 165, 0.05) 0%, transparent 60%);
+  box-shadow:
+    0 0 0 4px rgba(74, 111, 165, 0.10),
+    0 4px 14px rgba(74, 111, 165, 0.10);
+}
+
+.effect-card.is-enabled .effect-name {
+  color: var(--cx-accent);
+}
+
+/* Status pill on the card header — visible label of state */
+.effect-card-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  padding: 2px 8px;
+  border-radius: var(--cx-radius-full);
+  background: var(--cx-surface-alt);
+  color: var(--cx-text-subtle);
+  border: 1px solid var(--cx-border);
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+.effect-card-status::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+  display: inline-block;
+}
+
+.effect-card.is-enabled .effect-card-status {
+  background: var(--cx-accent);
+  color: #ffffff;
+  border-color: var(--cx-accent);
 }
 
 .effect-card.is-locked {
@@ -877,7 +927,22 @@
 
 /* ─── Effect Mini Preview ────────────────────────────────────────────────── */
 
+/*
+ * Each .effect-preview element has these custom properties set in JS,
+ * derived from the current intensity and theme accent:
+ *   --fx-accent       hex of theme accent
+ *   --fx-accent-rgb   "r, g, b" comma-separated for use in rgba()
+ *   --fx-mult         intensity multiplier (subtle 0.5, medium 1.0, strong 1.5)
+ *   --fx-speed-mult   speed inversion — higher intensity = faster animation
+ *
+ * This makes previews actually reflect the user's intensity choice
+ * AND adapt to the current theme's accent color.
+ */
 .effect-preview {
+  --fx-accent: #4a6fa5;
+  --fx-accent-rgb: 74, 111, 165;
+  --fx-mult: 1;
+  --fx-speed-mult: 1;
   height: 96px;
   border-radius: var(--cx-radius-sm);
   background: var(--cx-surface-alt);
@@ -906,23 +971,25 @@
   transition: transform 220ms cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 220ms ease;
 }
 
-/* Hover lift preview */
+/* Hover lift preview — lift distance and shadow scale with intensity */
 .effect-preview[data-effect="hoverLift"]:hover .effect-preview-card {
-  transform: translateY(-4px);
-  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.12), 0 2px 6px rgba(0, 0, 0, 0.06);
+  transform: translateY(calc(-4px * var(--fx-mult)));
+  box-shadow:
+    0 calc(8px * var(--fx-mult)) calc(20px * var(--fx-mult)) rgba(0, 0, 0, calc(0.12 * var(--fx-mult))),
+    0 2px 6px rgba(0, 0, 0, calc(0.06 * var(--fx-mult)));
 }
 
-/* Glow preview */
+/* Glow preview — pulse intensity, color, and speed all derived */
 .effect-preview[data-effect="ambientGlow"] .effect-preview-card {
-  animation: fx-preview-glow 3s ease-in-out infinite;
+  animation: fx-preview-glow calc(3s * var(--fx-speed-mult)) ease-in-out infinite;
 }
 
 @keyframes fx-preview-glow {
-  0%, 100% { box-shadow: 0 0 8px rgba(74, 111, 165, 0.08); }
-  50%      { box-shadow: 0 0 18px rgba(74, 111, 165, 0.25); }
+  0%, 100% { box-shadow: 0 0 calc(8px * var(--fx-mult)) rgba(var(--fx-accent-rgb), calc(0.12 * var(--fx-mult))); }
+  50%      { box-shadow: 0 0 calc(22px * var(--fx-mult)) rgba(var(--fx-accent-rgb), calc(0.32 * var(--fx-mult))); }
 }
 
-/* Shimmer preview */
+/* Shimmer preview — uses theme accent and intensity-driven speed */
 .effect-preview[data-effect="borderShimmer"] .effect-preview-card {
   overflow: clip;
   position: relative;
@@ -934,15 +1001,15 @@
   top: 0;
   left: 0;
   right: 0;
-  height: 1px;
+  height: calc(1px * var(--fx-mult));
   background: linear-gradient(
     90deg,
     transparent 0%, transparent 40%,
-    rgba(74, 111, 165, 0.85) 50%,
+    rgba(var(--fx-accent-rgb), calc(0.85 * var(--fx-mult))) 50%,
     transparent 60%, transparent 100%
   );
   background-size: 200% 100%;
-  animation: fx-preview-shimmer 3s ease-in-out infinite;
+  animation: fx-preview-shimmer calc(3s * var(--fx-speed-mult)) ease-in-out infinite;
 }
 
 @keyframes fx-preview-shimmer {
@@ -950,7 +1017,7 @@
   100% { background-position: 200% center; }
 }
 
-/* Gradient border preview */
+/* Gradient border preview — uses theme accent + intensity-driven speed */
 @property --fx-preview-angle {
   syntax: '<angle>';
   initial-value: 0deg;
@@ -970,24 +1037,24 @@
   content: '';
   position: absolute;
   inset: 0;
-  padding: 1.5px;
+  padding: calc(1.5px * var(--fx-mult));
   border-radius: inherit;
   background: conic-gradient(
     from var(--fx-preview-angle),
-    rgba(74, 111, 165, 1) 0%,
+    rgba(var(--fx-accent-rgb), 1) 0%,
     transparent 25%,
     transparent 75%,
-    rgba(74, 111, 165, 1) 100%
+    rgba(var(--fx-accent-rgb), 1) 100%
   );
   -webkit-mask:
     linear-gradient(#fff 0 0) content-box,
     linear-gradient(#fff 0 0);
   -webkit-mask-composite: xor;
   mask-composite: exclude;
-  animation: fx-preview-border-rotate 4s linear infinite;
+  animation: fx-preview-border-rotate calc(4s * var(--fx-speed-mult)) linear infinite;
 }
 
-/* Aurora preview */
+/* Aurora preview — uses theme accent, intensity-driven opacity */
 .effect-preview[data-effect="aurora"] {
   background: var(--cx-surface);
 }
@@ -997,13 +1064,13 @@
   position: absolute;
   inset: -30%;
   background:
-    radial-gradient(ellipse at 20% 50%, #d5deec 0%, transparent 50%),
-    radial-gradient(ellipse at 80% 20%, #decee9 0%, transparent 50%),
-    radial-gradient(ellipse at 50% 80%, #ceddec 0%, transparent 50%);
+    radial-gradient(ellipse at 20% 50%, rgba(var(--fx-accent-rgb), 0.6) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 20%, rgba(var(--fx-accent-rgb), 0.45) 0%, transparent 50%),
+    radial-gradient(ellipse at 50% 80%, rgba(var(--fx-accent-rgb), 0.5) 0%, transparent 50%);
   background-size: 200% 200%;
   filter: blur(30px);
-  opacity: 0.85;
-  animation: fx-preview-aurora 12s ease-in-out infinite;
+  opacity: calc(0.6 * var(--fx-mult));
+  animation: fx-preview-aurora calc(12s * var(--fx-speed-mult)) ease-in-out infinite;
   pointer-events: none;
 }
 
@@ -1013,22 +1080,22 @@
   100% { background-position: 0% 50%; filter: blur(30px) hue-rotate(0deg); }
 }
 
-/* Neon flicker preview */
+/* Neon flicker preview — uses theme accent for the glow color */
 .effect-preview[data-effect="neonFlicker"] .effect-preview-card {
   background: #0a0f1a;
-  color: #00e5ff;
-  border-color: rgba(0, 229, 255, 0.3);
+  color: var(--fx-accent);
+  border-color: rgba(var(--fx-accent-rgb), 0.3);
   font-weight: 700;
   letter-spacing: 0.08em;
-  animation: fx-preview-neon 4s ease-in-out infinite;
+  animation: fx-preview-neon calc(4s * var(--fx-speed-mult)) ease-in-out infinite;
 }
 
 @keyframes fx-preview-neon {
   0%, 19%, 21%, 23%, 25%, 54%, 56%, 100% {
     text-shadow:
-      0 0 4px rgba(0, 229, 255, 0.9),
-      0 0 11px rgba(0, 229, 255, 0.6),
-      0 0 19px rgba(0, 229, 255, 0.4);
+      0 0 calc(4px * var(--fx-mult)) rgba(var(--fx-accent-rgb), calc(0.9 * var(--fx-mult))),
+      0 0 calc(11px * var(--fx-mult)) rgba(var(--fx-accent-rgb), calc(0.6 * var(--fx-mult))),
+      0 0 calc(19px * var(--fx-mult)) rgba(var(--fx-accent-rgb), calc(0.4 * var(--fx-mult)));
   }
   20%, 24%, 55% {
     text-shadow: none;

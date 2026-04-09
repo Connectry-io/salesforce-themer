@@ -1927,7 +1927,10 @@
         </div>
         <div class="effect-card-header">
           <div class="effect-info">
-            <div class="effect-name">${effect.name}</div>
+            <div class="effect-name">
+              ${effect.name}
+              <span class="effect-card-status">${isOn ? 'On' : 'Off'}</span>
+            </div>
             <div class="effect-short">${effect.short}</div>
             <div class="effect-long">${effect.long}</div>
           </div>
@@ -1995,9 +1998,48 @@
       }
 
       grid.appendChild(card);
+      // Apply intensity + theme-accent CSS variables to the preview
+      _applyPreviewVars(card.querySelector('.effect-preview'), effect.id, intensity);
     }
 
     startEffectPreviews();
+  }
+
+  /**
+   * Set CSS custom properties on a preview element so its CSS animation
+   * reflects the current intensity AND the current theme accent. Without
+   * this, all previews use hardcoded blue and a fixed intensity.
+   *
+   * Variables set:
+   *   --fx-accent       hex string of theme accent
+   *   --fx-accent-rgb   "r, g, b" comma-separated for use in rgba()
+   *   --fx-mult         numeric multiplier (subtle 0.5, medium 1.0, strong 1.5)
+   *   --fx-speed-mult   inverse — animations get faster as intensity grows
+   */
+  function _applyPreviewVars(previewEl, effectId, intensity) {
+    if (!previewEl) return;
+    const theme = getThemeById(syncState.theme) || (syncState.customThemes || []).find(t => t.id === syncState.theme);
+    const accent = theme?.colors?.accent || '#4a6fa5';
+    const accentRgb = _hexToRgbCsv(accent);
+    const mult = intensity === 'subtle' ? 0.5 : intensity === 'strong' ? 1.5 : 1.0;
+    const speedMult = intensity === 'subtle' ? 1.6 : intensity === 'strong' ? 0.65 : 1.0;
+    previewEl.style.setProperty('--fx-accent', accent);
+    previewEl.style.setProperty('--fx-accent-rgb', accentRgb);
+    previewEl.style.setProperty('--fx-mult', String(mult));
+    previewEl.style.setProperty('--fx-speed-mult', String(speedMult));
+  }
+
+  function _hexToRgbCsv(hex) {
+    if (!hex) return '74, 111, 165';
+    const clean = hex.replace('#', '');
+    const expand = clean.length === 3
+      ? clean.split('').map(c => c + c).join('')
+      : clean;
+    if (expand.length < 6) return '74, 111, 165';
+    const r = parseInt(expand.slice(0, 2), 16);
+    const g = parseInt(expand.slice(2, 4), 16);
+    const b = parseInt(expand.slice(4, 6), 16);
+    return `${r}, ${g}, ${b}`;
   }
 
   function _previewLabel(effectId) {
