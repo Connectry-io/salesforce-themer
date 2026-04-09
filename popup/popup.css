@@ -139,10 +139,133 @@ body {
   background: var(--color-surface);
   border: 1.5px solid var(--color-border);
   border-radius: var(--radius-md);
-  padding: 4px 12px;
   display: flex;
   flex-direction: column;
   box-shadow: var(--shadow-sm);
+  overflow: hidden;
+}
+
+/* Card header — collapse toggle */
+.settings-card-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 9px 12px;
+  background: var(--color-surface);
+  border: none;
+  border-bottom: 1px solid var(--color-border);
+  cursor: pointer;
+  font-family: var(--font);
+  outline: none;
+  transition: background-color var(--transition);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.settings-card-header:hover {
+  background: var(--color-bg);
+}
+
+.settings-card-header:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: -2px;
+}
+
+.settings-card-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #cc4444;
+  flex-shrink: 0;
+  box-shadow: 0 0 0 2px rgba(204, 68, 68, 0.18);
+}
+
+.status-dot--on {
+  background: #16a34a;
+  box-shadow: 0 0 0 2px rgba(22, 163, 74, 0.18);
+}
+
+.settings-card-header-spacer {
+  flex: 1;
+}
+
+.settings-card-collapse-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--color-text-subtle);
+  letter-spacing: 0.02em;
+}
+
+.settings-card-chevron {
+  color: var(--color-text-subtle);
+  transition: transform var(--transition);
+  flex-shrink: 0;
+}
+
+.settings-card[aria-collapsed="true"] .settings-card-chevron,
+.settings-card-header[aria-expanded="false"] .settings-card-chevron {
+  transform: rotate(-90deg);
+}
+
+/* Collapsible body */
+.settings-card-body {
+  padding: 4px 12px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  max-height: 1000px;
+  transition: max-height 220ms ease, padding 220ms ease;
+}
+
+.settings-card-body.is-collapsed {
+  max-height: 0;
+  padding-top: 0;
+  padding-bottom: 0;
+}
+
+/* Footer row inside the settings card — for reset link */
+.settings-row-footer {
+  display: flex;
+  justify-content: center;
+  padding: 9px 0 4px;
+  border-top: 1px solid var(--color-border);
+  margin-top: 2px;
+}
+
+.reset-link {
+  background: none;
+  border: none;
+  padding: 2px 6px;
+  font-family: var(--font);
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--color-text-subtle);
+  cursor: pointer;
+  text-decoration: underline;
+  text-decoration-color: transparent;
+  transition: color var(--transition), text-decoration-color var(--transition);
+  outline: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.reset-link:hover {
+  color: #cc4444;
+  text-decoration-color: #cc4444;
+}
+
+.reset-link:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+  border-radius: 3px;
 }
 
 /* Each row inside the settings card */
@@ -184,6 +307,17 @@ body {
 .settings-row-text {
   flex: 1;
   min-width: 0;
+}
+
+/* In stacked rows the label sits on its own line above the control, so the
+   text should NOT grow to fill the row — otherwise the help button gets
+   pushed to the right edge. Shrink to content so help sits next to text. */
+.settings-row--stacked .settings-row-label {
+  align-self: flex-start;
+}
+
+.settings-row--stacked .settings-row-text {
+  flex: 0 0 auto;
 }
 
 /* Generic help button — single style used across all rows */

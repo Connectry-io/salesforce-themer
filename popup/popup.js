@@ -113,12 +113,27 @@
 
   // ─── UI state helpers ────────────────────────────────────────────────────
 
+  // Tracks the most recently picked non-'none' theme. Used by the Theme on/off
+  // toggle so we can restore the user's last theme when they flip it back on.
+  let _lastEnabledTheme = 'connectry';
+
   function setActiveUI(activeTheme) {
     document.querySelectorAll('[data-theme]').forEach(el => {
       const isActive = el.dataset.theme === activeTheme;
       el.classList.toggle('is-active', isActive);
       el.setAttribute('aria-checked', String(isActive));
     });
+
+    // Update the header status indicator and the on/off toggle
+    const isOn = activeTheme && activeTheme !== 'none';
+    const dot = document.getElementById('statusDot');
+    const text = document.getElementById('statusText');
+    const themeToggle = document.getElementById('themeOnToggle');
+    if (dot) dot.classList.toggle('status-dot--on', !!isOn);
+    if (text) text.textContent = isOn ? 'Theme on' : 'Theme off';
+    if (themeToggle) themeToggle.checked = !!isOn;
+
+    if (isOn) _lastEnabledTheme = activeTheme;
   }
 
   function setAutoModeUI(autoMode) {
@@ -163,29 +178,18 @@
     }
   }
 
-  function updateOrgRow(orgThemes, activeTheme) {
-    if (!currentOrgHostname) return;
-
-    const orgRow = document.getElementById('orgRow');
-    const orgStatus = document.getElementById('orgStatus');
-    const hasOverride = !!(orgThemes && orgThemes[currentOrgHostname]);
-    orgRow.hidden = false;
-
-    if (hasOverride) {
-      const shortName = currentOrgHostname
-        .replace('.lightning.force.com', '')
-        .replace('.my.salesforce.com', '');
-      orgStatus.innerHTML = `
-        <span class="org-status-text" title="${currentOrgHostname}">Theme set for ${shortName}</span>
-        <button class="org-reset-btn" id="orgResetBtn">Reset to global</button>
-      `;
-      document.getElementById('orgResetBtn')?.addEventListener('click', resetOrgTheme);
-    } else {
-      orgStatus.innerHTML = `
-        <button class="org-set-link" id="orgSetLink">Set for this org only</button>
-      `;
-      document.getElementById('orgSetLink')?.addEventListener('click', setOrgTheme);
+  function updateOrgRow(orgThemes /*, activeTheme */) {
+    // Show the per-org row only when we're on a Salesforce tab
+    const row = document.getElementById('perOrgRow');
+    const toggle = document.getElementById('perOrgToggle');
+    if (!row || !toggle) return;
+    if (!currentOrgHostname) {
+      row.hidden = true;
+      return;
     }
+    row.hidden = false;
+    const hasOverride = !!(orgThemes && orgThemes[currentOrgHostname]);
+    toggle.checked = hasOverride;
   }
 
   // ─── Theme application ───────────────────────────────────────────────────
@@ -348,7 +352,7 @@
   // overlay anchored just below the row that owns the help button. Click
   // outside or press Esc to dismiss.
 
-  const TOOLTIP_IDS = ['autoTooltip', 'scopeTooltip', 'effectsTooltip'];
+  const TOOLTIP_IDS = ['autoTooltip', 'scopeTooltip', 'effectsTooltip', 'orgTooltip'];
 
   function bindHelpTooltip() {
     document.querySelectorAll('.settings-help-btn[data-tooltip]').forEach(btn => {
@@ -423,6 +427,103 @@
     });
   }
 
+  // ─── Collapsible settings card ────────────────────────────────────────────
+
+  const COLLAPSE_KEY = 'sft-popup-settings-collapsed';
+
+  function bindSettingsCollapse() {
+    const header = document.getElementById('settingsCardToggle');
+    const body = document.getElementById('settingsCardBody');
+    if (!header || !body) return;
+
+    // Restore persisted state
+    const collapsed = localStorage.getItem(COLLAPSE_KEY) === '1';
+    setCollapsed(collapsed);
+
+    header.addEventListener('click', () => {
+      const nowCollapsed = !body.classList.contains('is-collapsed');
+      setCollapsed(nowCollapsed);
+      try { localStorage.setItem(COLLAPSE_KEY, nowCollapsed ? '1' : '0'); } catch (_) {}
+    });
+
+    function setCollapsed(c) {
+      body.classList.toggle('is-collapsed', c);
+      header.setAttribute('aria-expanded', String(!c));
+      // Hide any open tooltips when collapsing
+      if (c) hideAllTooltips();
+    }
+  }
+
+  // ─── Theme on/off toggle ──────────────────────────────────────────────────
+
+  function bindThemeOnToggle() {
+    const toggle = document.getElementById('themeOnToggle');
+    if (!toggle) return;
+    toggle.addEventListener('change', async () => {
+      if (toggle.checked) {
+        // Restore the user's last enabled theme
+        const restore = _lastEnabledTheme || syncState.theme || 'connectry';
+        await selectTheme(restore === 'none' ? 'connectry' : restore);
+      } else {
+        // Capture the current theme so we can restore it on toggle-on
+        if (syncState.theme && syncState.theme !== 'none') {
+          _lastEnabledTheme = syncState.theme;
+        }
+        await selectTheme('none');
+      }
+    });
+  }
+
+  // ─── Per-org toggle ───────────────────────────────────────────────────────
+
+  function bindPerOrgToggle() {
+    const toggle = document.getElementById('perOrgToggle');
+    if (!toggle) return;
+    toggle.addEventListener('change', async () => {
+      if (toggle.checked) {
+        await setOrgTheme();
+      } else {
+        await resetOrgTheme();
+      }
+    });
+  }
+
+  // ─── Reset all settings ───────────────────────────────────────────────────
+
+  function bindResetSettings() {
+    const btn = document.getElementById('resetSettingsBtn');
+    if (!btn) return;
+    btn.addEventListener('click', async () => {
+      const confirmed = confirm(
+        'Reset Salesforce Themer to defaults?\n\n' +
+        'This will:\n' +
+        '• Switch back to the Connectry theme\n' +
+        '• Turn off Follow System mode\n' +
+        '• Apply theme to Both Lightning and Setup\n' +
+        '• Turn off all effects\n' +
+        '• Clear all per-org overrides\n\n' +
+        'Custom themes you\'ve created will be kept.'
+      );
+      if (!confirmed) return;
+
+      // Reset only the user-configurable settings — keep custom themes
+      const defaults = {
+        theme: 'connectry',
+        autoMode: false,
+        lastLightTheme: 'connectry',
+        lastDarkTheme: 'connectry-dark',
+        orgThemes: {},
+        themeScope: 'both',
+        effectsConfig: null,
+      };
+      await chrome.storage.sync.set(defaults);
+      // Re-apply to active tab
+      await applyThemeToTab('connectry');
+      // Reload the popup to reflect fresh state
+      window.location.reload();
+    });
+  }
+
   // ─── Scope selector ──────────────────────────────────────────────────────
 
   function bindScopeSelector() {
@@ -473,6 +574,10 @@
     bindScopeSelector();
     bindEffectsSelector();
     bindUpgradeCta();
+    bindSettingsCollapse();
+    bindThemeOnToggle();
+    bindPerOrgToggle();
+    bindResetSettings();
 
     const [result, orgHostname] = await Promise.all([
       chrome.storage.sync.get({
@@ -505,12 +610,16 @@
         : (result.lastLightTheme || 'connectry');
     }
 
+    // Seed _lastEnabledTheme so the on/off toggle has something to restore to
+    if (effectiveTheme && effectiveTheme !== 'none') {
+      _lastEnabledTheme = effectiveTheme;
+    } else if (result.theme && result.theme !== 'none') {
+      _lastEnabledTheme = result.theme;
+    }
+
     setActiveUI(effectiveTheme);
     setAutoModeUI(result.autoMode);
-
-    if (orgHostname) {
-      updateOrgRow(result.orgThemes, effectiveTheme);
-    }
+    updateOrgRow(result.orgThemes, effectiveTheme);
 
     document.getElementById('autoModeToggle')?.addEventListener('change', handleAutoModeToggle);
   }
