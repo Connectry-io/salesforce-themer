@@ -26,6 +26,7 @@
   let THEMES = [];
   let syncState = {};
   let activeFilter = 'all';
+  let _tabsInstance = null;
 
   // ─── Theme registry loading ──────────────────────────────────────────────
 
@@ -659,7 +660,7 @@
     if (window.Connectry && Connectry.Settings && Connectry.Settings.Tabs) {
       const tabContainer = document.querySelector('.cx-tabs');
       if (tabContainer) {
-        new Connectry.Settings.Tabs(tabContainer, {
+        _tabsInstance = new Connectry.Settings.Tabs(tabContainer, {
           storageKey: 'cx-themer-active-tab',
           onChange: (tabName) => {
             // Start/stop preview canvases when leaving/entering Effects tab
@@ -672,6 +673,18 @@
         });
       }
     }
+
+    // Handoff from popup: if popup set openOptionsTab, honour it and clear the flag
+    try {
+      const handoff = await chrome.storage.local.get({ openOptionsTab: null });
+      if (handoff.openOptionsTab && _tabsInstance) {
+        _tabsInstance.activate(handoff.openOptionsTab);
+        await chrome.storage.local.remove('openOptionsTab');
+      }
+    } catch (_) {}
+
+    // Bind Upgrade tab plan CTAs
+    bindUpgradePlanCtas();
 
     // Empty-state buttons in custom themes section
     document.getElementById('createThemeBtnEmpty')?.addEventListener('click', () => {
@@ -1363,34 +1376,59 @@
     }
   }
 
+  /**
+   * Switch to the Upgrade tab. Replaces the old modal dialog — a full-tab
+   * experience is a better sales pitch than a popup.
+   */
   function openUpgradeDialog() {
+    if (_tabsInstance) {
+      _tabsInstance.activate('upgrade');
+      // Scroll main content to top so the hero is visible
+      const main = document.querySelector('.cx-main');
+      if (main) main.scrollTop = 0;
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  }
+
+  /**
+   * Bind the "Choose X" buttons on the Upgrade tab. Stub for now — when
+   * Stripe is wired up this will kick off a checkout session.
+   * TODO: when auth ships, POST to the backend to create a Stripe Checkout
+   * session and redirect to the returned URL.
+   */
+  function bindUpgradePlanCtas() {
+    document.querySelectorAll('.upgrade-plan-cta[data-plan], .upgrade-footer-cta-actions [data-plan]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const plan = btn.dataset.plan;
+        _showCheckoutPlaceholder(plan);
+      });
+    });
+  }
+
+  function _showCheckoutPlaceholder(plan) {
+    const planLabels = {
+      monthly: { name: 'Monthly', price: '$5/month' },
+      yearly:  { name: 'Yearly',  price: '$45/year' },
+      lifetime:{ name: 'Lifetime',price: '$200 one-time' },
+    };
+    const info = planLabels[plan] || { name: 'Premium', price: '' };
+
     const body = document.createElement('div');
     body.innerHTML = `
-      <p style="margin-bottom:16px;">Upgrade to Connectry Themer Premium to unlock the advanced features:</p>
-      <ul style="margin: 0 0 16px 18px; padding: 0; font-size: 13px; line-height: 1.7; color: var(--cx-text-muted);">
-        <li><strong>Individual effect control</strong> — turn any effect on or off, not just presets</li>
-        <li><strong>Per-effect intensity sliders</strong> — subtle, medium, or strong for each effect</li>
-        <li><strong>Particle style picker</strong> — snow, rain, matrix, dots, or embers on any theme</li>
-        <li><strong>Per-theme effects</strong> — custom themes carry their own effect configs</li>
-        <li><strong>Custom theme builder</strong> — clone, tweak, import/export JSON</li>
-        <li><strong>AI theme generation</strong> — describe a vibe or paste a URL (coming soon)</li>
-        <li><strong>Marketplace access</strong> — share themes and install community packs (coming soon)</li>
-      </ul>
-      <p style="font-size: 12px; color: var(--cx-text-subtle); margin-bottom: 0;">Free tier keeps everything you have now: all 15 themes, 4 effect presets, auto dark mode, per-org themes, and keyboard shortcuts.</p>
+      <p style="margin-bottom:12px;">You selected the <strong>${info.name}</strong> plan (${info.price}).</p>
+      <p style="margin-bottom:16px; font-size:13px; color: var(--cx-text-muted); line-height:1.6;">
+        Checkout isn't wired up yet — Stripe integration is on the roadmap and will arrive alongside the Connectry account system. For now, this button is a placeholder so we can validate the UI and pricing.
+      </p>
+      <p style="font-size:12px; color: var(--cx-text-subtle); margin-bottom:0;">
+        Dev tip: set <code style="background:var(--cx-surface-alt); padding:2px 6px; border-radius:4px;">premiumOverride: true</code> in <code style="background:var(--cx-surface-alt); padding:2px 6px; border-radius:4px;">chrome.storage.local</code> to unlock Premium features for testing.
+      </p>
     `;
 
     const dialog = new Connectry.Settings.Dialog({
-      title: 'Upgrade to Premium',
+      title: `Checkout — ${info.name}`,
       body,
       actions: [
-        { label: 'Maybe later', variant: 'secondary' },
-        {
-          label: 'Learn more',
-          variant: 'primary',
-          onClick: () => {
-            window.open('https://connectry.io', '_blank', 'noopener');
-          },
-        },
+        { label: 'Close', variant: 'secondary' },
       ],
     });
     dialog.open();

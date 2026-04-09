@@ -74,6 +74,12 @@
           </svg>
           About
         </button>
+        <button class="cx-tab cx-tab-upgrade" role="tab" data-tab="upgrade" aria-selected="false">
+          <svg class="cx-tab-icon" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+            <path d="M8 1.5l1.9 4.2 4.6.5-3.5 3.2 1 4.6L8 11.8 3.9 14l1-4.6L1.5 6.2l4.6-.5L8 1.5z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round" fill="currentColor" fill-opacity="0.2"/>
+          </svg>
+          Upgrade
+        </button>
       </nav>
 
       <div class="cx-header-meta" id="headerMeta"></div>
@@ -440,6 +446,250 @@
           </a>
         </div>
 
+      </section>
+
+    </div>
+
+    <!-- ═══ Upgrade Tab ═══ -->
+    <div class="cx-tabpanel" role="tabpanel" data-tabpanel="upgrade" hidden>
+
+      <section class="cx-section upgrade-hero-section">
+        <div class="upgrade-hero">
+          <div class="upgrade-hero-badge" aria-hidden="true">
+            <svg width="18" height="18" viewBox="0 0 16 16" fill="none">
+              <path d="M8 1.5l1.9 4.2 4.6.5-3.5 3.2 1 4.6L8 11.8 3.9 14l1-4.6L1.5 6.2l4.6-.5L8 1.5z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round" fill="currentColor" fill-opacity="0.3"/>
+            </svg>
+            <span>Connectry Themer Premium</span>
+          </div>
+          <h1 class="upgrade-hero-title">Unlock the full experience</h1>
+          <p class="upgrade-hero-sub">Build custom themes, fine-tune every effect, and generate brand-matched themes with AI. Your free tier keeps everything it has today — Premium just opens up the creative tools.</p>
+        </div>
+      </section>
+
+      <!-- Pricing tiers -->
+      <section class="cx-section upgrade-pricing-section">
+        <div class="upgrade-pricing-grid">
+
+          <!-- Free -->
+          <div class="upgrade-plan upgrade-plan-free">
+            <div class="upgrade-plan-header">
+              <div class="upgrade-plan-name">Free</div>
+              <div class="upgrade-plan-price">
+                <span class="upgrade-plan-amount">$0</span>
+                <span class="upgrade-plan-period">forever</span>
+              </div>
+              <p class="upgrade-plan-desc">Everything you have today.</p>
+            </div>
+            <ul class="upgrade-plan-features">
+              <li>All 15 built-in themes</li>
+              <li>4 effect presets</li>
+              <li>Auto dark mode</li>
+              <li>Per-org themes</li>
+              <li>Keyboard shortcuts</li>
+              <li>Setup, Reports & Console coverage</li>
+            </ul>
+            <button class="cx-btn cx-btn-ghost upgrade-plan-cta" id="upgradeFreeCta" disabled>Current plan</button>
+          </div>
+
+          <!-- Monthly -->
+          <div class="upgrade-plan upgrade-plan-monthly">
+            <div class="upgrade-plan-header">
+              <div class="upgrade-plan-name">Monthly</div>
+              <div class="upgrade-plan-price">
+                <span class="upgrade-plan-currency">$</span><span class="upgrade-plan-amount">5</span>
+                <span class="upgrade-plan-period">/month</span>
+              </div>
+              <p class="upgrade-plan-desc">Try it out, cancel anytime.</p>
+            </div>
+            <ul class="upgrade-plan-features upgrade-plan-features-premium">
+              <li><strong>Everything in Free</strong></li>
+              <li>Custom theme builder</li>
+              <li>Individual effect control</li>
+              <li>Per-effect intensity sliders</li>
+              <li>Per-theme effect configs</li>
+              <li>AI theme generation <em>(soon)</em></li>
+              <li>Marketplace access <em>(soon)</em></li>
+            </ul>
+            <button class="cx-btn cx-btn-primary upgrade-plan-cta" data-plan="monthly">Choose Monthly</button>
+          </div>
+
+          <!-- Yearly (featured) -->
+          <div class="upgrade-plan upgrade-plan-yearly is-featured">
+            <div class="upgrade-plan-ribbon">Best value</div>
+            <div class="upgrade-plan-header">
+              <div class="upgrade-plan-name">Yearly</div>
+              <div class="upgrade-plan-price">
+                <span class="upgrade-plan-currency">$</span><span class="upgrade-plan-amount">45</span>
+                <span class="upgrade-plan-period">/year</span>
+              </div>
+              <p class="upgrade-plan-desc">Save 25% — just $3.75/month.</p>
+            </div>
+            <ul class="upgrade-plan-features upgrade-plan-features-premium">
+              <li><strong>Everything in Monthly</strong></li>
+              <li><strong>Save $15/year</strong> vs. monthly</li>
+              <li>Priority email support</li>
+              <li>Early access to new effects</li>
+              <li>Vote on the roadmap</li>
+            </ul>
+            <button class="cx-btn cx-btn-primary upgrade-plan-cta" data-plan="yearly">Choose Yearly</button>
+          </div>
+
+          <!-- Lifetime -->
+          <div class="upgrade-plan upgrade-plan-lifetime">
+            <div class="upgrade-plan-ribbon upgrade-plan-ribbon-gold">Early Supporter · Limited</div>
+            <div class="upgrade-plan-header">
+              <div class="upgrade-plan-name">Lifetime</div>
+              <div class="upgrade-plan-price">
+                <span class="upgrade-plan-currency">$</span><span class="upgrade-plan-amount">200</span>
+                <span class="upgrade-plan-period">one-time</span>
+              </div>
+              <p class="upgrade-plan-desc">Pay once, keep it forever.</p>
+            </div>
+            <ul class="upgrade-plan-features upgrade-plan-features-premium">
+              <li><strong>Everything in Yearly</strong></li>
+              <li><strong>Never pay again</strong></li>
+              <li>Early Supporter badge in Marketplace</li>
+              <li>Direct line to the founders</li>
+              <li>Your name in the About credits</li>
+            </ul>
+            <button class="cx-btn cx-btn-primary upgrade-plan-cta" data-plan="lifetime">Choose Lifetime</button>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- Feature comparison table -->
+      <section class="cx-section">
+        <div class="cx-section-header">
+          <div>
+            <h2 class="cx-section-title">What's included</h2>
+            <p class="cx-section-subtitle">Exactly what changes when you upgrade. Nothing gets removed from free.</p>
+          </div>
+        </div>
+
+        <div class="cx-card upgrade-compare">
+          <table class="upgrade-compare-table">
+            <thead>
+              <tr>
+                <th class="upgrade-compare-feature">Feature</th>
+                <th class="upgrade-compare-col">Free</th>
+                <th class="upgrade-compare-col upgrade-compare-col-premium">Premium</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>15 built-in themes (Connectry, Midnight, Tron, …)</td>
+                <td class="upgrade-compare-check"><span class="upgrade-check">&check;</span></td>
+                <td class="upgrade-compare-check"><span class="upgrade-check">&check;</span></td>
+              </tr>
+              <tr>
+                <td>4 effect presets (None / Subtle / Alive / Immersive)</td>
+                <td class="upgrade-compare-check"><span class="upgrade-check">&check;</span></td>
+                <td class="upgrade-compare-check"><span class="upgrade-check">&check;</span></td>
+              </tr>
+              <tr>
+                <td>Auto dark mode · per-org themes · shortcuts</td>
+                <td class="upgrade-compare-check"><span class="upgrade-check">&check;</span></td>
+                <td class="upgrade-compare-check"><span class="upgrade-check">&check;</span></td>
+              </tr>
+              <tr class="upgrade-compare-divider">
+                <td colspan="3">Premium unlocks</td>
+              </tr>
+              <tr>
+                <td>Custom theme builder (clone, tweak, import/export)</td>
+                <td class="upgrade-compare-check"><span class="upgrade-dash">—</span></td>
+                <td class="upgrade-compare-check"><span class="upgrade-check">&check;</span></td>
+              </tr>
+              <tr>
+                <td>Individual effect toggles (not just presets)</td>
+                <td class="upgrade-compare-check"><span class="upgrade-dash">—</span></td>
+                <td class="upgrade-compare-check"><span class="upgrade-check">&check;</span></td>
+              </tr>
+              <tr>
+                <td>Per-effect intensity sliders (subtle / medium / strong)</td>
+                <td class="upgrade-compare-check"><span class="upgrade-dash">—</span></td>
+                <td class="upgrade-compare-check"><span class="upgrade-check">&check;</span></td>
+              </tr>
+              <tr>
+                <td>Particle style picker (snow, rain, matrix, dots, embers)</td>
+                <td class="upgrade-compare-check"><span class="upgrade-dash">—</span></td>
+                <td class="upgrade-compare-check"><span class="upgrade-check">&check;</span></td>
+              </tr>
+              <tr>
+                <td>Per-theme effects (each custom theme gets its own config)</td>
+                <td class="upgrade-compare-check"><span class="upgrade-dash">—</span></td>
+                <td class="upgrade-compare-check"><span class="upgrade-check">&check;</span></td>
+              </tr>
+              <tr>
+                <td>AI theme generation (from text or URL) <em>coming soon</em></td>
+                <td class="upgrade-compare-check"><span class="upgrade-dash">—</span></td>
+                <td class="upgrade-compare-check"><span class="upgrade-check">&check;</span></td>
+              </tr>
+              <tr>
+                <td>Brand-guide upload <em>coming soon</em></td>
+                <td class="upgrade-compare-check"><span class="upgrade-dash">—</span></td>
+                <td class="upgrade-compare-check"><span class="upgrade-check">&check;</span></td>
+              </tr>
+              <tr>
+                <td>Theme marketplace (share & install community themes) <em>coming soon</em></td>
+                <td class="upgrade-compare-check"><span class="upgrade-dash">—</span></td>
+                <td class="upgrade-compare-check"><span class="upgrade-check">&check;</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- FAQ -->
+      <section class="cx-section">
+        <div class="cx-section-header">
+          <div>
+            <h2 class="cx-section-title">Questions</h2>
+            <p class="cx-section-subtitle">The short answers</p>
+          </div>
+        </div>
+
+        <div class="upgrade-faq">
+          <details class="upgrade-faq-item">
+            <summary>Does the free tier stay free forever?</summary>
+            <p>Yes. All 15 themes, the four presets, auto mode, per-org theming, and shortcuts will always be free. Premium only adds new capabilities on top — nothing is taken away.</p>
+          </details>
+          <details class="upgrade-faq-item">
+            <summary>Can I cancel anytime?</summary>
+            <p>Yes. Cancel monthly or yearly at any time and you'll keep Premium until the end of the billing period. After that you drop back to the free tier with all your OOTB themes intact.</p>
+          </details>
+          <details class="upgrade-faq-item">
+            <summary>What happens to my custom themes if I cancel?</summary>
+            <p>They stay on your machine, archived. If you re-subscribe later they come right back. You just can't create or edit custom themes while on the free tier.</p>
+          </details>
+          <details class="upgrade-faq-item">
+            <summary>Why is Lifetime limited?</summary>
+            <p>Early-supporter pricing. We're keeping it available while we build the product out — it rewards the folks who back us early. After the window closes it comes off the pricing page for good.</p>
+          </details>
+          <details class="upgrade-faq-item">
+            <summary>How does payment work?</summary>
+            <p>We'll use Stripe for monthly and yearly subscriptions and for the lifetime purchase. No card on file for the free tier — upgrading only happens when you explicitly choose a plan above.</p>
+          </details>
+          <details class="upgrade-faq-item">
+            <summary>Is my Salesforce data involved?</summary>
+            <p>No. Themer never reads, writes, or transmits any data from your Salesforce org. Themes apply locally in your browser. Upgrading changes nothing about how the extension touches SF — it just unlocks more UI features.</p>
+          </details>
+        </div>
+      </section>
+
+      <!-- Footer CTA -->
+      <section class="cx-section">
+        <div class="upgrade-footer-cta">
+          <div>
+            <div class="upgrade-footer-cta-title">Ready to unlock Premium?</div>
+            <div class="upgrade-footer-cta-sub">Start with yearly and save 25% — or go lifetime while the early-supporter window is open.</div>
+          </div>
+          <div class="upgrade-footer-cta-actions">
+            <button class="cx-btn cx-btn-ghost" data-plan="monthly">Monthly · $5</button>
+            <button class="cx-btn cx-btn-primary" data-plan="yearly">Yearly · $45</button>
+            <button class="cx-btn cx-btn-primary upgrade-btn-lifetime" data-plan="lifetime">Lifetime · $200</button>
+          </div>
+        </div>
       </section>
 
     </div>

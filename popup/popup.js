@@ -93,11 +93,11 @@
       section.appendChild(grid);
     }
 
-    // Bind off button
-    const offBtn = document.querySelector('.off-button');
-    if (offBtn) {
-      offBtn.addEventListener('click', () => selectTheme('none'));
-      offBtn.addEventListener('keydown', (e) => {
+    // Bind power / turn-off button
+    const powerBtn = document.querySelector('.power-button');
+    if (powerBtn) {
+      powerBtn.addEventListener('click', () => selectTheme('none'));
+      powerBtn.addEventListener('keydown', (e) => {
         if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); selectTheme('none'); }
       });
     }
@@ -341,18 +341,70 @@
     });
   }
 
-  // ─── Help tooltip ─────────────────────────────────────────────────────────
+  // ─── Help tooltips ────────────────────────────────────────────────────────
 
   function bindHelpTooltip() {
-    const helpBtn = document.getElementById('autoHelpBtn');
-    const tooltip = document.getElementById('autoHelpTooltip');
-    helpBtn?.addEventListener('click', () => {
-      tooltip.hidden = !tooltip.hidden;
+    // Auto-mode tooltip (existing)
+    const autoBtn = document.getElementById('autoHelpBtn');
+    const autoTip = document.getElementById('autoHelpTooltip');
+    autoBtn?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      autoTip.hidden = !autoTip.hidden;
+      hideOtherTooltips(autoTip);
     });
+
+    // Scope tooltip
+    const scopeBtn = document.getElementById('scopeHelpBtn');
+    const scopeTip = document.getElementById('scopeTooltip');
+    scopeBtn?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      scopeTip.hidden = !scopeTip.hidden;
+      hideOtherTooltips(scopeTip);
+    });
+
+    // Effects tooltip
+    const effectsBtn = document.getElementById('effectsHelpBtn');
+    const effectsTip = document.getElementById('effectsTooltip');
+    effectsBtn?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      effectsTip.hidden = !effectsTip.hidden;
+      hideOtherTooltips(effectsTip);
+    });
+
+    // Effects tooltip → open options page on Effects tab
+    document.getElementById('effectsTooltipLink')?.addEventListener('click', (e) => {
+      e.preventDefault();
+      openOptionsOnTab('effects');
+    });
+
+    // Click outside closes all tooltips
     document.addEventListener('click', (e) => {
-      if (!e.target.closest('#autoModeBar')) {
-        if (tooltip) tooltip.hidden = true;
-      }
+      if (!e.target.closest('#autoModeBar') && autoTip) autoTip.hidden = true;
+      if (!e.target.closest('.scope-bar') && !e.target.closest('#scopeTooltip') && scopeTip) scopeTip.hidden = true;
+      if (!e.target.closest('.effects-bar') && !e.target.closest('#effectsTooltip') && effectsTip) effectsTip.hidden = true;
+    });
+  }
+
+  function hideOtherTooltips(keep) {
+    ['autoHelpTooltip', 'scopeTooltip', 'effectsTooltip'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el && el !== keep) el.hidden = true;
+    });
+  }
+
+  function openOptionsOnTab(tabName) {
+    // Stash target tab so options.js picks it up on load
+    chrome.storage.local.set({ openOptionsTab: tabName }).then(() => {
+      chrome.runtime.openOptionsPage();
+      window.close();
+    });
+  }
+
+  // ─── Upgrade CTA ──────────────────────────────────────────────────────────
+
+  function bindUpgradeCta() {
+    document.getElementById('upgradeCta')?.addEventListener('click', () => {
+      openOptionsOnTab('upgrade');
     });
   }
 
@@ -405,6 +457,7 @@
     bindHelpTooltip();
     bindScopeSelector();
     bindEffectsSelector();
+    bindUpgradeCta();
 
     const [result, orgHostname] = await Promise.all([
       chrome.storage.sync.get({

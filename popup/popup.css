@@ -295,10 +295,123 @@ body {
   padding: 0 2px;
 }
 
+.scope-label-wrap,
+.effects-label-wrap {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
 .scope-label {
   font-size: 11px;
   font-weight: 500;
   color: var(--color-text-subtle);
+}
+
+/* Generic popup help button (matches auto-help style) */
+.popup-help-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  color: var(--color-text-subtle);
+  border-radius: 50%;
+  transition: color var(--transition), background-color var(--transition);
+  flex-shrink: 0;
+  outline: none;
+}
+
+.popup-help-btn:hover {
+  color: var(--color-accent);
+  background-color: rgba(74, 111, 165, 0.08);
+}
+
+.popup-help-btn:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 1px;
+}
+
+/* Generic popup tooltip (inline, below scope/effects bars) */
+.popup-tooltip[hidden] {
+  display: none !important;
+}
+
+.popup-tooltip {
+  font-size: 11px;
+  line-height: 1.5;
+  color: var(--color-text-muted);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: 8px 10px;
+  box-shadow: var(--shadow-sm);
+  margin-top: -6px;
+}
+
+.popup-tooltip strong {
+  color: var(--color-text);
+  font-weight: 600;
+}
+
+.popup-tooltip-link {
+  display: inline-block;
+  margin-top: 6px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--color-accent);
+  text-decoration: none;
+  transition: color var(--transition);
+}
+
+.popup-tooltip-link:hover {
+  color: var(--color-accent-hover);
+  text-decoration: underline;
+}
+
+/* Power / Turn Off icon button (inline in scope bar) */
+.power-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  background: transparent;
+  border: 1px solid var(--color-border);
+  border-radius: 50%;
+  cursor: pointer;
+  color: var(--color-text-subtle);
+  transition:
+    color var(--transition),
+    border-color var(--transition),
+    background-color var(--transition);
+  flex-shrink: 0;
+  outline: none;
+  padding: 0;
+  margin-left: 2px;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.power-button:hover {
+  color: #cc4444;
+  border-color: #cc4444;
+  background: rgba(204, 68, 68, 0.06);
+}
+
+.power-button:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+.power-button.is-active {
+  color: #cc4444;
+  border-color: #cc4444;
+  background: rgba(204, 68, 68, 0.12);
+  box-shadow: 0 0 0 2px rgba(204, 68, 68, 0.15);
 }
 
 .scope-pills {
@@ -657,51 +770,93 @@ body {
   border-color: #cc4444;
 }
 
-/* ─── Off Button ─────────────────────────────────────────────────────────── */
+/* ─── Upgrade CTA ─────────────────────────────────────────────────────────── */
 
-.off-row {
-  display: flex;
-  justify-content: center;
-}
-
-.off-button {
+.upgrade-cta {
   display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 7px 16px;
-  background: transparent;
-  border: 1.5px solid var(--color-border);
-  border-radius: 20px;
+  gap: 10px;
+  width: 100%;
+  padding: 10px 12px;
+  background: linear-gradient(135deg, #4a6fa5 0%, #6b8bc4 50%, #3d7a7a 100%);
+  background-size: 200% 200%;
+  background-position: 0% 50%;
+  border: none;
+  border-radius: var(--radius-md);
   cursor: pointer;
   font-family: var(--font);
-  font-size: 12px;
-  font-weight: 500;
-  color: var(--color-text-muted);
+  color: #ffffff;
+  box-shadow: 0 2px 8px rgba(74, 111, 165, 0.25), 0 1px 2px rgba(0,0,0,0.08);
   transition:
-    border-color var(--transition),
-    color var(--transition),
-    background-color var(--transition),
-    box-shadow var(--transition);
+    transform var(--transition),
+    box-shadow var(--transition),
+    background-position 400ms ease;
   outline: none;
   -webkit-tap-highlight-color: transparent;
+  text-align: left;
 }
 
-.off-button:hover {
-  border-color: #cc4444;
-  color: #cc4444;
-  background: rgba(204, 68, 68, 0.05);
+.upgrade-cta:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 14px rgba(74, 111, 165, 0.35), 0 2px 4px rgba(0,0,0,0.08);
+  background-position: 100% 50%;
 }
 
-.off-button:focus-visible {
+.upgrade-cta:active {
+  transform: translateY(0);
+}
+
+.upgrade-cta:focus-visible {
   outline: 2px solid var(--color-accent);
   outline-offset: 2px;
 }
 
-.off-button.is-active {
-  border-color: #cc4444;
-  color: #cc4444;
-  background: rgba(204, 68, 68, 0.08);
-  box-shadow: 0 0 0 3px rgba(204, 68, 68, 0.1);
+.upgrade-cta-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  background: rgba(255, 255, 255, 0.18);
+  border-radius: 50%;
+  font-size: 14px;
+  line-height: 1;
+  flex-shrink: 0;
+  backdrop-filter: blur(4px);
+}
+
+.upgrade-cta-text {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  flex: 1;
+  min-width: 0;
+}
+
+.upgrade-cta-title {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: -0.1px;
+  color: #ffffff;
+}
+
+.upgrade-cta-sub {
+  font-size: 10px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.82);
+  letter-spacing: 0.01em;
+}
+
+.upgrade-cta-arrow {
+  font-size: 18px;
+  line-height: 1;
+  color: rgba(255, 255, 255, 0.9);
+  flex-shrink: 0;
+  transition: transform var(--transition);
+}
+
+.upgrade-cta:hover .upgrade-cta-arrow {
+  transform: translateX(2px);
 }
 
 /* ─── Footer ─────────────────────────────────────────────────────────────── */

@@ -63,17 +63,44 @@
 
     <!-- Scope selector -->
     <div class="scope-bar" id="scopeBar">
-      <span class="scope-label">Apply to</span>
+      <div class="scope-label-wrap">
+        <span class="scope-label">Apply to</span>
+        <button class="popup-help-btn" id="scopeHelpBtn" aria-label="About scope" title="What does this do?">
+          <svg width="12" height="12" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+            <circle cx="7" cy="7" r="6" stroke="currentColor" stroke-width="1.3"/>
+            <path d="M7 6.5v3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
+            <circle cx="7" cy="4.5" r="0.65" fill="currentColor"/>
+          </svg>
+        </button>
+      </div>
       <div class="scope-pills" id="scopePills">
         <button class="scope-pill" data-scope="both">Both</button>
         <button class="scope-pill" data-scope="lightning">Lightning</button>
         <button class="scope-pill" data-scope="setup">Setup</button>
       </div>
+      <button class="power-button" data-theme="none" role="radio" aria-checked="false" title="Turn theme off — back to default Salesforce" aria-label="Turn theme off">
+        <svg width="12" height="12" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+          <path d="M7 1.5v5.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+          <path d="M4 3.5a5 5 0 1 0 6 0" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+        </svg>
+      </button>
+    </div>
+    <div class="popup-tooltip" id="scopeTooltip" hidden>
+      Choose where the theme applies. <strong>Lightning</strong> = Sales/Service app pages. <strong>Setup</strong> = Setup area only. <strong>Both</strong> = everywhere (default).
     </div>
 
     <!-- Effects preset bar -->
     <div class="effects-bar" id="effectsBar">
-      <span class="effects-label">Effects</span>
+      <div class="effects-label-wrap">
+        <span class="effects-label">Effects</span>
+        <button class="popup-help-btn" id="effectsHelpBtn" aria-label="About effects" title="What are effects?">
+          <svg width="12" height="12" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+            <circle cx="7" cy="7" r="6" stroke="currentColor" stroke-width="1.3"/>
+            <path d="M7 6.5v3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
+            <circle cx="7" cy="4.5" r="0.65" fill="currentColor"/>
+          </svg>
+        </button>
+      </div>
       <div class="effects-pills" id="effectsPills" role="radiogroup" aria-label="Visual effects intensity">
         <button class="effects-pill" data-preset="none" role="radio" aria-checked="false" title="No visual effects">
           <span class="effects-pill-icon">&#9675;</span>
@@ -93,6 +120,10 @@
         </button>
       </div>
     </div>
+    <div class="popup-tooltip" id="effectsTooltip" hidden>
+      Visual polish that layers on top of any theme — hover lifts, ambient glows, particles, and more. Presets give you a one-click vibe.
+      <a href="#" class="popup-tooltip-link" id="effectsTooltipLink">Configure individual effects →</a>
+    </div>
 
     <!-- Theme grid — dynamic, populated by popup.js from themes.json -->
     <main class="themes-section" id="themesSection" role="radiogroup" aria-label="Select a theme">
@@ -104,16 +135,15 @@
       <div class="org-status" id="orgStatus"></div>
     </div>
 
-    <!-- Off button -->
-    <div class="off-row">
-      <button class="off-button" data-theme="none" role="radio" aria-checked="false">
-        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
-          <circle cx="7" cy="7" r="5.5" stroke="currentColor" stroke-width="1.5"/>
-          <line x1="4.5" y1="4.5" x2="9.5" y2="9.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-        </svg>
-        Turn Off
-      </button>
-    </div>
+    <!-- Premium upgrade CTA -->
+    <button class="upgrade-cta" id="upgradeCta" type="button" aria-label="Unlock Premium features">
+      <span class="upgrade-cta-icon" aria-hidden="true">&#10022;</span>
+      <span class="upgrade-cta-text">
+        <span class="upgrade-cta-title">Unlock Premium</span>
+        <span class="upgrade-cta-sub">Custom themes, AI generation & more</span>
+      </span>
+      <span class="upgrade-cta-arrow" aria-hidden="true">&rsaquo;</span>
+    </button>
 
     <!-- Footer -->
     <footer class="footer">
