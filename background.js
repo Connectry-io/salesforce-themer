@@ -1319,6 +1319,18 @@ async function cacheAllThemes() {
 
 // ─── Install / update handler ─────────────────────────────────────────────────
 
+const SUBTLE_EFFECTS_DEFAULT = {
+  preset: 'subtle',
+  hoverLift: true, hoverLiftIntensity: 'subtle',
+  ambientGlow: false, ambientGlowIntensity: 'subtle',
+  borderShimmer: false, borderShimmerIntensity: 'subtle',
+  gradientBorders: false, gradientBordersIntensity: 'subtle',
+  aurora: false, auroraIntensity: 'subtle',
+  neonFlicker: false, neonFlickerIntensity: 'subtle',
+  particles: false, particlesIntensity: 'subtle',
+  cursorTrail: false, cursorTrailIntensity: 'subtle',
+};
+
 chrome.runtime.onInstalled.addListener(async (details) => {
   await loadThemeRegistry();
 
@@ -1330,23 +1342,58 @@ chrome.runtime.onInstalled.addListener(async (details) => {
       lastDarkTheme: 'connectry-dark',
       orgThemes: {},
       themeScope: 'lightning',
-      effectsConfig: {
-        preset: 'subtle',
-        hoverLift: true, hoverLiftIntensity: 'subtle',
-        ambientGlow: false, ambientGlowIntensity: 'subtle',
-        borderShimmer: false, borderShimmerIntensity: 'subtle',
-        gradientBorders: false, gradientBordersIntensity: 'subtle',
-        aurora: false, auroraIntensity: 'subtle',
-        neonFlicker: false, neonFlickerIntensity: 'subtle',
-        particles: false, particlesIntensity: 'subtle',
-        cursorTrail: false, cursorTrailIntensity: 'subtle',
-      },
+      effectsConfig: { ...SUBTLE_EFFECTS_DEFAULT },
     });
+  } else if (details.reason === 'update') {
+    // Backfill new defaults for existing installs that predate them.
+    // Only sets keys that are missing/null — does NOT overwrite explicit
+    // user choices. Safe to run on every update.
+    await migrateDefaultsForExistingInstall();
   }
 
   await migrateCustomThemeEffects();
   await cacheAllThemes();
 });
+
+/**
+ * One-time backfill for existing installs. Sets sensible defaults for any
+ * keys the user has never explicitly configured. Never overwrites a value
+ * the user has actively set.
+ */
+async function migrateDefaultsForExistingInstall() {
+  try {
+    const current = await chrome.storage.sync.get([
+      'effectsConfig',
+      'themeScope',
+      'autoMode',
+    ]);
+    const updates = {};
+
+    // Effects: backfill to Subtle if missing or explicitly null/undefined.
+    // Don't touch existing configs (even 'none' — that's a deliberate choice).
+    if (current.effectsConfig === undefined || current.effectsConfig === null) {
+      updates.effectsConfig = { ...SUBTLE_EFFECTS_DEFAULT };
+    }
+
+    // Scope: only set if completely missing (legacy installs predating the
+    // scope option). 'both' was the previous default — leave it alone.
+    if (current.themeScope === undefined) {
+      updates.themeScope = 'lightning';
+    }
+
+    // Auto mode: only set if missing — never override a user toggle.
+    if (current.autoMode === undefined) {
+      updates.autoMode = false;
+    }
+
+    if (Object.keys(updates).length) {
+      await chrome.storage.sync.set(updates);
+      console.log('[Salesforce Themer] Migrated defaults for existing install:', Object.keys(updates));
+    }
+  } catch (err) {
+    console.warn('[Salesforce Themer] Default migration error:', err.message);
+  }
+}
 
 /**
  * Backfill the `effects` snapshot on existing custom themes that were created
