@@ -833,13 +833,133 @@
     });
   }
 
+  // ═══════════════════════════════════════════════════════════════════════════
+  // Effects Control Panel
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  const INTENSITY_LABELS = { 1: 'Subtle', 2: 'Medium', 3: 'Strong' };
+  const INTENSITY_MAP = { 1: 'subtle', 2: 'medium', 3: 'strong' };
+
+  // Preset definitions (mirrors effects/presets.js — inlined for options page)
+  const FX_PRESETS = {
+    none: { hoverLift: false, ambientGlow: false, borderShimmer: false, gradientBorders: false, aurora: false, neonFlicker: false, particles: false, cursorTrail: false },
+    subtle: { hoverLift: true, ambientGlow: false, borderShimmer: false, gradientBorders: false, aurora: false, neonFlicker: false, particles: false, cursorTrail: false },
+    alive: { hoverLift: true, ambientGlow: true, borderShimmer: true, gradientBorders: false, aurora: false, neonFlicker: false, particles: false, cursorTrail: false },
+    immersive: { hoverLift: true, ambientGlow: true, borderShimmer: true, gradientBorders: true, aurora: false, neonFlicker: false, particles: false, cursorTrail: true },
+  };
+
+  let effectsConfig = { preset: 'none', intensity: 'medium' };
+
+  function loadEffectsUI() {
+    chrome.storage.sync.get({ effectsConfig: null }, (result) => {
+      if (result.effectsConfig) {
+        effectsConfig = { preset: 'none', intensity: 'medium', ...result.effectsConfig };
+      }
+      renderEffectsState();
+    });
+  }
+
+  function renderEffectsState() {
+    // Set preset pills
+    document.querySelectorAll('.effects-preset-pill').forEach(pill => {
+      const isActive = pill.dataset.preset === effectsConfig.preset;
+      pill.classList.toggle('is-active', isActive);
+      pill.setAttribute('aria-checked', String(isActive));
+    });
+
+    // Set individual toggles
+    document.querySelectorAll('.effect-toggle').forEach(toggle => {
+      const effect = toggle.dataset.effect;
+      toggle.checked = !!effectsConfig[effect];
+    });
+
+    // Set sliders
+    document.querySelectorAll('.effect-slider').forEach(slider => {
+      const intensity = effectsConfig.intensity || 'medium';
+      const val = { subtle: 1, medium: 2, strong: 3 }[intensity] || 2;
+      slider.value = val;
+      const label = slider.closest('.effect-card')?.querySelector('.effect-slider-value');
+      if (label) label.textContent = INTENSITY_LABELS[val];
+    });
+
+    // Set particle type select
+    const particleSelect = document.querySelector('.effect-select[data-effect="particleType"]');
+    if (particleSelect) {
+      const pType = typeof effectsConfig.particles === 'string' ? effectsConfig.particles : 'snow';
+      particleSelect.value = pType;
+    }
+  }
+
+  async function saveEffectsConfig() {
+    await chrome.storage.sync.set({ effectsConfig });
+  }
+
+  function bindEffectsEvents() {
+    // Preset pills
+    document.querySelectorAll('.effects-preset-pill').forEach(pill => {
+      pill.addEventListener('click', async () => {
+        const preset = pill.dataset.preset;
+        const base = FX_PRESETS[preset] || FX_PRESETS.none;
+        effectsConfig = {
+          preset,
+          intensity: preset === 'none' ? 'medium' : (preset === 'subtle' ? 'subtle' : preset === 'immersive' ? 'strong' : 'medium'),
+          ...base,
+        };
+        renderEffectsState();
+        await saveEffectsConfig();
+      });
+    });
+
+    // Individual effect toggles
+    document.querySelectorAll('.effect-toggle').forEach(toggle => {
+      toggle.addEventListener('change', async () => {
+        const effect = toggle.dataset.effect;
+        effectsConfig[effect] = toggle.checked;
+        effectsConfig.preset = 'custom';
+        renderEffectsState();
+        await saveEffectsConfig();
+      });
+    });
+
+    // Intensity sliders (global intensity)
+    document.querySelectorAll('.effect-slider').forEach(slider => {
+      slider.addEventListener('input', async () => {
+        const val = parseInt(slider.value);
+        effectsConfig.intensity = INTENSITY_MAP[val] || 'medium';
+        effectsConfig.preset = 'custom';
+        // Update all slider labels
+        document.querySelectorAll('.effect-slider').forEach(s => {
+          s.value = val;
+          const label = s.closest('.effect-card')?.querySelector('.effect-slider-value');
+          if (label) label.textContent = INTENSITY_LABELS[val];
+        });
+        renderEffectsState();
+        await saveEffectsConfig();
+      });
+    });
+
+    // Particle type select
+    const particleSelect = document.querySelector('.effect-select[data-effect="particleType"]');
+    if (particleSelect) {
+      particleSelect.addEventListener('change', async () => {
+        if (effectsConfig.particles) {
+          effectsConfig.particles = particleSelect.value;
+        }
+        effectsConfig.preset = 'custom';
+        await saveEffectsConfig();
+      });
+    }
+  }
+
   // ─── Init (extended) ──────────────────────────────────────────────────────
 
   init().catch(err => console.error('[Themer options] Init error:', err));
 
-  // Bind editor after DOM is ready
+  // Bind editor + effects after DOM is ready
   setTimeout(() => {
     bindEditorEvents();
     addCustomizeButtons();
+    loadEffectsUI();
+    bindEffectsEvents();
   }, 100);
 })();

@@ -263,7 +263,29 @@
     await applyThemeToTab(syncState.theme || 'connectry');
   }
 
-  // ─── Options page button ──────────────────────────────────────────────────
+  // ─── Effects preset selector ──────���────────────────────────────────────────
+
+  function bindEffectsSelector() {
+    const pills = document.querySelectorAll('.effects-pill');
+    pills.forEach(pill => {
+      pill.addEventListener('click', async () => {
+        const preset = pill.dataset.preset;
+        await chrome.storage.sync.set({ effectsConfig: { preset } });
+        setEffectsUI(preset);
+      });
+    });
+  }
+
+  function setEffectsUI(preset) {
+    const pills = document.querySelectorAll('.effects-pill');
+    pills.forEach(p => {
+      const isActive = p.dataset.preset === preset;
+      p.classList.toggle('is-active', isActive);
+      p.setAttribute('aria-checked', String(isActive));
+    });
+  }
+
+  // ─── Options page button ──────────────���───────────────────────────────────
 
   function bindOptionsButton() {
     document.getElementById('openOptionsBtn')?.addEventListener('click', () => {
@@ -334,6 +356,7 @@
     bindOptionsButton();
     bindHelpTooltip();
     bindScopeSelector();
+    bindEffectsSelector();
 
     const [result, orgHostname] = await Promise.all([
       chrome.storage.sync.get({
@@ -343,6 +366,7 @@
         lastDarkTheme: 'connectry-dark',
         orgThemes: {},
         themeScope: 'both',
+        effectsConfig: null,
       }),
       detectCurrentOrg(),
     ]);
@@ -350,6 +374,10 @@
     syncState = result;
     currentOrgHostname = orgHostname;
     setScopeUI(result.themeScope || 'both');
+
+    // Set effects UI — show active preset or 'none' if not configured
+    const activePreset = result.effectsConfig?.preset || 'none';
+    setEffectsUI(activePreset);
 
     let effectiveTheme = result.theme;
     if (orgHostname && result.orgThemes[orgHostname]) {

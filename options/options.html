@@ -104,6 +104,194 @@
       </div>
     </section>
 
+    <!-- ═══ Effects Section ═══ -->
+    <section class="section effects-section" aria-labelledby="effects-heading">
+      <div class="section-header">
+        <h2 class="section-title" id="effects-heading">Visual Effects</h2>
+        <span class="effects-premium-badge">Premium</span>
+      </div>
+
+      <!-- Preset row -->
+      <div class="effects-preset-row">
+        <span class="effects-preset-label">Preset</span>
+        <div class="effects-preset-pills" id="effectsPresetPills" role="radiogroup" aria-label="Effects intensity preset">
+          <button class="effects-preset-pill is-active" data-preset="none" role="radio" aria-checked="true">
+            <span class="effects-preset-icon">&#9675;</span> None
+          </button>
+          <button class="effects-preset-pill" data-preset="subtle" role="radio" aria-checked="false">
+            <span class="effects-preset-icon">&#9680;</span> Subtle
+          </button>
+          <button class="effects-preset-pill" data-preset="alive" role="radio" aria-checked="false">
+            <span class="effects-preset-icon">&#9673;</span> Alive
+          </button>
+          <button class="effects-preset-pill" data-preset="immersive" role="radio" aria-checked="false">
+            <span class="effects-preset-icon">&#10022;</span> Immersive
+          </button>
+        </div>
+      </div>
+
+      <!-- Individual effect toggles -->
+      <div class="effects-grid" id="effectsGrid">
+
+        <div class="effect-card" data-effect="hoverLift">
+          <div class="effect-header">
+            <div class="effect-info">
+              <span class="effect-name">Hover Lift</span>
+              <span class="effect-desc">Cards and buttons float up on hover</span>
+            </div>
+            <label class="toggle-switch">
+              <input type="checkbox" class="effect-toggle" data-effect="hoverLift" />
+              <span class="toggle-track"><span class="toggle-thumb"></span></span>
+            </label>
+          </div>
+          <div class="effect-slider-row">
+            <span class="effect-slider-label">Intensity</span>
+            <input type="range" class="effect-slider" data-effect="hoverLift" min="1" max="3" step="1" value="2" />
+            <span class="effect-slider-value" data-effect="hoverLift">Medium</span>
+          </div>
+        </div>
+
+        <div class="effect-card" data-effect="ambientGlow">
+          <div class="effect-header">
+            <div class="effect-info">
+              <span class="effect-name">Ambient Glow</span>
+              <span class="effect-desc">Subtle pulsing glow on accent elements</span>
+            </div>
+            <label class="toggle-switch">
+              <input type="checkbox" class="effect-toggle" data-effect="ambientGlow" />
+              <span class="toggle-track"><span class="toggle-thumb"></span></span>
+            </label>
+          </div>
+          <div class="effect-slider-row">
+            <span class="effect-slider-label">Intensity</span>
+            <input type="range" class="effect-slider" data-effect="ambientGlow" min="1" max="3" step="1" value="2" />
+            <span class="effect-slider-value" data-effect="ambientGlow">Medium</span>
+          </div>
+        </div>
+
+        <div class="effect-card" data-effect="borderShimmer">
+          <div class="effect-header">
+            <div class="effect-info">
+              <span class="effect-name">Border Shimmer</span>
+              <span class="effect-desc">Animated light sweep along card borders</span>
+            </div>
+            <label class="toggle-switch">
+              <input type="checkbox" class="effect-toggle" data-effect="borderShimmer" />
+              <span class="toggle-track"><span class="toggle-thumb"></span></span>
+            </label>
+          </div>
+          <div class="effect-slider-row">
+            <span class="effect-slider-label">Intensity</span>
+            <input type="range" class="effect-slider" data-effect="borderShimmer" min="1" max="3" step="1" value="2" />
+            <span class="effect-slider-value" data-effect="borderShimmer">Medium</span>
+          </div>
+        </div>
+
+        <div class="effect-card" data-effect="gradientBorders">
+          <div class="effect-header">
+            <div class="effect-info">
+              <span class="effect-name">Gradient Borders</span>
+              <span class="effect-desc">Animated rotating gradient on card edges</span>
+            </div>
+            <label class="toggle-switch">
+              <input type="checkbox" class="effect-toggle" data-effect="gradientBorders" />
+              <span class="toggle-track"><span class="toggle-thumb"></span></span>
+            </label>
+          </div>
+          <div class="effect-slider-row">
+            <span class="effect-slider-label">Intensity</span>
+            <input type="range" class="effect-slider" data-effect="gradientBorders" min="1" max="3" step="1" value="2" />
+            <span class="effect-slider-value" data-effect="gradientBorders">Medium</span>
+          </div>
+        </div>
+
+        <div class="effect-card" data-effect="aurora">
+          <div class="effect-header">
+            <div class="effect-info">
+              <span class="effect-name">Aurora Background</span>
+              <span class="effect-desc">Slow-moving gradient background glow</span>
+            </div>
+            <label class="toggle-switch">
+              <input type="checkbox" class="effect-toggle" data-effect="aurora" />
+              <span class="toggle-track"><span class="toggle-thumb"></span></span>
+            </label>
+          </div>
+          <div class="effect-slider-row">
+            <span class="effect-slider-label">Intensity</span>
+            <input type="range" class="effect-slider" data-effect="aurora" min="1" max="3" step="1" value="2" />
+            <span class="effect-slider-value" data-effect="aurora">Medium</span>
+          </div>
+        </div>
+
+        <div class="effect-card" data-effect="neonFlicker">
+          <div class="effect-header">
+            <div class="effect-info">
+              <span class="effect-name">Neon Flicker</span>
+              <span class="effect-desc">Glowing text-shadow flicker effect</span>
+            </div>
+            <label class="toggle-switch">
+              <input type="checkbox" class="effect-toggle" data-effect="neonFlicker" />
+              <span class="toggle-track"><span class="toggle-thumb"></span></span>
+            </label>
+          </div>
+          <div class="effect-slider-row">
+            <span class="effect-slider-label">Intensity</span>
+            <input type="range" class="effect-slider" data-effect="neonFlicker" min="1" max="3" step="1" value="2" />
+            <span class="effect-slider-value" data-effect="neonFlicker">Medium</span>
+          </div>
+        </div>
+
+        <div class="effect-card" data-effect="particles">
+          <div class="effect-header">
+            <div class="effect-info">
+              <span class="effect-name">Particles</span>
+              <span class="effect-desc">Snow, matrix rain, floating dots, embers</span>
+            </div>
+            <label class="toggle-switch">
+              <input type="checkbox" class="effect-toggle" data-effect="particles" />
+              <span class="toggle-track"><span class="toggle-thumb"></span></span>
+            </label>
+          </div>
+          <div class="effect-slider-row">
+            <span class="effect-slider-label">Density</span>
+            <input type="range" class="effect-slider" data-effect="particles" min="1" max="3" step="1" value="2" />
+            <span class="effect-slider-value" data-effect="particles">Medium</span>
+          </div>
+          <div class="effect-select-row">
+            <span class="effect-select-label">Style</span>
+            <select class="effect-select" data-effect="particleType">
+              <option value="snow">Snow</option>
+              <option value="dots">Floating Dots</option>
+              <option value="matrix">Matrix Rain</option>
+              <option value="embers">Embers</option>
+              <option value="rain">Rain</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="effect-card" data-effect="cursorTrail">
+          <div class="effect-header">
+            <div class="effect-info">
+              <span class="effect-name">Cursor Trail</span>
+              <span class="effect-desc">Subtle light trail following your mouse</span>
+            </div>
+            <label class="toggle-switch">
+              <input type="checkbox" class="effect-toggle" data-effect="cursorTrail" />
+              <span class="toggle-track"><span class="toggle-thumb"></span></span>
+            </label>
+          </div>
+          <div class="effect-slider-row">
+            <span class="effect-slider-label">Intensity</span>
+            <input type="range" class="effect-slider" data-effect="cursorTrail" min="1" max="3" step="1" value="2" />
+            <span class="effect-slider-value" data-effect="cursorTrail">Medium</span>
+          </div>
+        </div>
+
+      </div>
+
+      <p class="effects-note">Effects respect <code>prefers-reduced-motion</code> and auto-pause when the tab is hidden. Particles reduce density on battery power.</p>
+    </section>
+
     <!-- Keyboard shortcuts -->
     <section class="section" aria-labelledby="shortcuts-heading">
       <h2 class="section-title" id="shortcuts-heading">Keyboard Shortcuts</h2>

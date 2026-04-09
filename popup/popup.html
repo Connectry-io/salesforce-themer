@@ -71,6 +71,29 @@
       </div>
     </div>
 
+    <!-- Effects preset bar -->
+    <div class="effects-bar" id="effectsBar">
+      <span class="effects-label">Effects</span>
+      <div class="effects-pills" id="effectsPills" role="radiogroup" aria-label="Visual effects intensity">
+        <button class="effects-pill" data-preset="none" role="radio" aria-checked="false" title="No visual effects">
+          <span class="effects-pill-icon">&#9675;</span>
+          <span>None</span>
+        </button>
+        <button class="effects-pill" data-preset="subtle" role="radio" aria-checked="false" title="Hover lift on cards & buttons">
+          <span class="effects-pill-icon">&#9680;</span>
+          <span>Subtle</span>
+        </button>
+        <button class="effects-pill" data-preset="alive" role="radio" aria-checked="false" title="Glow, shimmer & hover effects">
+          <span class="effects-pill-icon">&#9673;</span>
+          <span>Alive</span>
+        </button>
+        <button class="effects-pill" data-preset="immersive" role="radio" aria-checked="false" title="Full effects with trails & borders">
+          <span class="effects-pill-icon">&#10022;</span>
+          <span>Immersive</span>
+        </button>
+      </div>
+    </div>
+
     <!-- Theme grid — dynamic, populated by popup.js from themes.json -->
     <main class="themes-section" id="themesSection" role="radiogroup" aria-label="Select a theme">
       <!-- populated by popup.js -->

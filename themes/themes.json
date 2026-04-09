@@ -87,7 +87,8 @@
         "panelBorder": "#e8e8e6",
         "colorScheme": "light",
         "globalHeaderWhite": true
-      }
+      },
+      "suggestedEffects": "subtle"
     },
     {
       "id": "connectry-dark",
@@ -182,7 +183,8 @@
         "searchPlaceholder": "#9aa0a9",
         "searchFocusBorder": "#6d9fd4",
         "searchFocusShadow": "0 0 0 2px rgba(109, 159, 212, 0.25)"
-      }
+      },
+      "suggestedEffects": "subtle"
     },
     {
       "id": "midnight",
@@ -277,7 +279,8 @@
         "searchPlaceholder": "#94a3b8",
         "searchFocusBorder": "#60a5fa",
         "searchFocusShadow": "0 0 0 2px rgba(96, 165, 250, 0.25)"
-      }
+      },
+      "suggestedEffects": "subtle"
     },
     {
       "id": "slate",
@@ -366,7 +369,8 @@
         "panelBorder": "#e5e7eb",
         "colorScheme": "light",
         "globalHeaderWhite": false
-      }
+      },
+      "suggestedEffects": "subtle"
     },
     {
       "id": "tron",
@@ -472,7 +476,8 @@
           "linkTextShadow": "0 0 6px rgba(0, 229, 255, 0.3)",
           "linkHoverTextShadow": "0 0 10px rgba(0, 229, 255, 0.5)"
         }
-      }
+      },
+      "suggestedEffects": "immersive"
     },
     {
       "id": "obsidian",
@@ -567,7 +572,8 @@
         "searchPlaceholder": "#a39e93",
         "searchFocusBorder": "#d4a853",
         "searchFocusShadow": "0 0 0 2px rgba(212, 168, 83, 0.25)"
-      }
+      },
+      "suggestedEffects": "subtle"
     },
     {
       "id": "arctic",
@@ -656,7 +662,8 @@
         "panelBorder": "#d2dce8",
         "colorScheme": "light",
         "globalHeaderWhite": false
-      }
+      },
+      "suggestedEffects": "alive"
     },
     {
       "id": "sakura",
@@ -745,7 +752,8 @@
         "panelBorder": "#f5d0d8",
         "colorScheme": "light",
         "globalHeaderWhite": false
-      }
+      },
+      "suggestedEffects": "subtle"
     },
     {
       "id": "ember",
@@ -840,7 +848,8 @@
         "searchPlaceholder": "#b89880",
         "searchFocusBorder": "#d48353",
         "searchFocusShadow": "0 0 0 2px rgba(212, 133, 83, 0.25)"
-      }
+      },
+      "suggestedEffects": "subtle"
     },
     {
       "id": "nord",
@@ -935,7 +944,8 @@
         "searchPlaceholder": "#d8dee9",
         "searchFocusBorder": "#88c0d0",
         "searchFocusShadow": "0 0 0 2px rgba(136, 192, 208, 0.25)"
-      }
+      },
+      "suggestedEffects": "subtle"
     },
     {
       "id": "terminal",
@@ -1030,7 +1040,8 @@
         "searchPlaceholder": "#00cc33",
         "searchFocusBorder": "#00ff41",
         "searchFocusShadow": "0 0 0 2px rgba(0, 255, 65, 0.3)"
-      }
+      },
+      "suggestedEffects": "alive"
     },
     {
       "id": "high-contrast",
@@ -1119,7 +1130,8 @@
         "panelBorder": "#000000",
         "colorScheme": "light",
         "globalHeaderWhite": false
-      }
+      },
+      "suggestedEffects": "none"
     },
     {
       "id": "dracula",
@@ -1214,7 +1226,8 @@
         "searchPlaceholder": "#6272a4",
         "searchFocusBorder": "#bd93f9",
         "searchFocusShadow": "0 0 0 2px rgba(189, 147, 249, 0.3)"
-      }
+      },
+      "suggestedEffects": "subtle"
     },
     {
       "id": "solarized-light",
@@ -1303,7 +1316,8 @@
         "panelBorder": "#d0c9b0",
         "colorScheme": "light",
         "globalHeaderWhite": false
-      }
+      },
+      "suggestedEffects": "subtle"
     },
     {
       "id": "solarized-dark",
@@ -1398,7 +1412,8 @@
         "searchPlaceholder": "#657b83",
         "searchFocusBorder": "#268bd2",
         "searchFocusShadow": "0 0 0 2px rgba(38, 139, 210, 0.25)"
-      }
+      },
+      "suggestedEffects": "subtle"
     }
   ]
 }

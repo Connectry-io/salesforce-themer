@@ -41,7 +41,11 @@
         "https://*.lightning.force.com/*",
         "https://*.my.salesforce.com/*"
       ],
-      "js": ["content/content.js"],
+      "js": [
+        "effects/effects.js",
+        "effects/presets.js",
+        "content/content.js"
+      ],
       "run_at": "document_start",
       "all_frames": true
     }
@@ -53,7 +57,9 @@
     {
       "resources": [
         "themes/themes.json",
-        "content/themes/*.css"
+        "content/themes/*.css",
+        "effects/effects.js",
+        "effects/presets.js"
       ],
       "matches": [
         "https://*.salesforce.com/*",

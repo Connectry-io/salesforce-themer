@@ -1321,7 +1321,21 @@ chrome.storage.onChanged.addListener(async (changes, area) => {
     if (!THEME_REGISTRY.themes.length) await loadThemeRegistry();
     await cacheThemeCSS(changes.theme.newValue);
   }
+  if (changes.effectsConfig) {
+    // Broadcast effects update to active SF tabs
+    broadcastEffectsToActiveTabs();
+  }
 });
+
+async function broadcastEffectsToActiveTabs() {
+  try {
+    const tabs = await chrome.tabs.query({ active: true, currentWindow: true });
+    for (const tab of tabs) {
+      if (!tab.id) continue;
+      chrome.tabs.sendMessage(tab.id, { action: 'setEffects' }).catch(() => {});
+    }
+  } catch (_) {}
+}
 
 // ─── Keyboard commands ────────────────────────────────────────────────────────
 

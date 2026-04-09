@@ -17,8 +17,14 @@
   if (skipPatterns.some(p => path.includes(p))) return;
 
   const STYLE_ID = 'sf-themer-styles';
+  const EFFECTS_STYLE_ID = 'sf-themer-effects';
   const TRANSITION_CLASS = 'sf-themer-transitioning';
   const TRANSITION_DURATION = 300;
+
+  // Effects state
+  let particleSystem = null;
+  let cursorTrailSystem = null;
+  let currentEffectsConfig = null;
 
   // Detect page type for scope filtering
   const isSetupPage = path.includes('/lightning/setup/');
@@ -90,6 +96,106 @@
     const response = await fetch(url);
     if (!response.ok) throw new Error(`Failed to fetch theme: ${themeName} (${response.status})`);
     return response.text();
+  }
+
+  // ─── Effects layer ────────────────────────────────────────────────────────
+
+  function removeEffectsStyles() {
+    const existing = document.getElementById(EFFECTS_STYLE_ID);
+    if (existing) existing.remove();
+  }
+
+  function injectEffectsCSS(css) {
+    removeEffectsStyles();
+    if (!css) return;
+    const style = document.createElement('style');
+    style.id = EFFECTS_STYLE_ID;
+    style.textContent = css;
+    const target = document.head || document.documentElement;
+    target.appendChild(style);
+  }
+
+  function destroyCanvasEffects() {
+    if (particleSystem) { particleSystem.destroy(); particleSystem = null; }
+    if (cursorTrailSystem) { cursorTrailSystem.destroy(); cursorTrailSystem = null; }
+  }
+
+  /**
+   * Apply effects based on config + current theme colors.
+   * @param {Object} config - Effects config from resolveEffectsConfig()
+   * @param {Object} themeColors - Current theme's color values
+   */
+  function applyEffects(config, themeColors) {
+    currentEffectsConfig = config;
+
+    // Respect prefers-reduced-motion
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      destroyCanvasEffects();
+      removeEffectsStyles();
+      if (typeof applyEffectsClasses === 'function') applyEffectsClasses(null);
+      return;
+    }
+
+    // Generate and inject effects CSS
+    if (typeof generateEffectsCSS === 'function') {
+      const css = generateEffectsCSS(config, themeColors);
+      injectEffectsCSS(css);
+    }
+
+    // Apply body classes
+    if (typeof applyEffectsClasses === 'function') {
+      applyEffectsClasses(config);
+    }
+
+    // Manage canvas-based effects
+    destroyCanvasEffects();
+
+    if (config && config.particles && config.particles !== false) {
+      const pType = typeof config.particles === 'string' ? config.particles : 'dots';
+      particleSystem = new SFThemerParticles(pType, {
+        color: config.particleColor || themeColors?.accent || '#ffffff',
+        density: config.particleDensity || 40,
+        speed: config.particleSpeed || 1,
+        opacity: config.particleOpacity || 0.5,
+      });
+      particleSystem.init();
+    }
+
+    if (config && config.cursorTrail) {
+      cursorTrailSystem = new SFThemerCursorTrail({
+        color: config.cursorTrailColor || themeColors?.accent || '#ffffff',
+        length: config.cursorTrailLength || 20,
+        size: config.cursorTrailSize || 4,
+        opacity: 0.5,
+      });
+      cursorTrailSystem.init();
+    }
+  }
+
+  /**
+   * Load and apply effects for the current theme.
+   * Reads effectsConfig from storage, resolves against theme defaults.
+   */
+  async function loadAndApplyEffects(themeName) {
+    try {
+      const [syncData, themeData] = await Promise.all([
+        chrome.storage.sync.get({ effectsConfig: null }),
+        fetch(chrome.runtime.getURL('themes/themes.json')).then(r => r.json()),
+      ]);
+
+      const theme = themeData.themes.find(t => t.id === themeName);
+      if (!theme) return;
+
+      const config = typeof resolveEffectsConfig === 'function'
+        ? resolveEffectsConfig(themeName, syncData.effectsConfig)
+        : null;
+
+      if (config) {
+        applyEffects(config, theme.colors);
+      }
+    } catch (err) {
+      console.warn('[Salesforce Themer] Effects load error:', err.message);
+    }
   }
 
   // ─── Apply theme (with zero-flash fast path via local storage) ───────────
@@ -186,18 +292,24 @@
 
     observer = new MutationObserver((mutations) => {
       let needsReinjection = false;
+      let needsEffectsReinjection = false;
       for (const mutation of mutations) {
         for (const node of mutation.removedNodes) {
           if (node.id === STYLE_ID || node.id === 'sf-themer-transitions') {
             needsReinjection = true;
-            break;
+          }
+          if (node.id === EFFECTS_STYLE_ID) {
+            needsEffectsReinjection = true;
           }
         }
-        if (needsReinjection) break;
+        if (needsReinjection && needsEffectsReinjection) break;
       }
       if (needsReinjection) {
         injectTransitionStyles();
         ensureThemePresent();
+      }
+      if (needsEffectsReinjection && currentTheme && currentTheme !== 'none') {
+        loadAndApplyEffects(currentTheme);
       }
     });
 
@@ -214,6 +326,8 @@
   chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
     if (message.action === 'setTheme') {
       applyTheme(message.theme, true).then(() => {
+        // Re-apply effects for new theme (colors may differ)
+        loadAndApplyEffects(message.theme);
         sendResponse({ success: true, theme: message.theme });
       }).catch((err) => {
         sendResponse({ success: false, error: err.message });
@@ -223,6 +337,20 @@
 
     if (message.action === 'getTheme') {
       sendResponse({ theme: currentTheme });
+      return false;
+    }
+
+    if (message.action === 'setEffects') {
+      // Direct effects config update (from popup/options)
+      if (currentTheme && currentTheme !== 'none') {
+        loadAndApplyEffects(currentTheme);
+      }
+      sendResponse({ success: true });
+      return false;
+    }
+
+    if (message.action === 'getEffects') {
+      sendResponse({ config: currentEffectsConfig });
       return false;
     }
   });
@@ -257,6 +385,9 @@
       } else {
         await applyTheme(themeName, false);
       }
+
+      // Load effects layer after theme is applied
+      loadAndApplyEffects(themeName);
     } catch (err) {
       console.warn('[Salesforce Themer] Init error:', err.message);
       try {
