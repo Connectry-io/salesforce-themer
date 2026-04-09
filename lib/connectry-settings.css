@@ -236,6 +236,13 @@ body.cx-settings {
   text-transform: uppercase;
 }
 
+/* Premium variant — gold gradient matching the Upgrade tab styling */
+.cx-tab-badge--premium {
+  background: linear-gradient(135deg, #d4a22a 0%, #b07d1a 100%);
+  color: #ffffff;
+  border: none;
+}
+
 .cx-header-meta {
   display: flex;
   align-items: center;

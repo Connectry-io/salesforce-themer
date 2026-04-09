@@ -126,12 +126,13 @@
             <span class="theme-card-status-dot"></span>
             <span>${isActive ? 'Active' : 'Apply'}</span>
           </div>
-          <button class="theme-card-clone-btn" data-clone="${theme.id}" title="Clone & customize this theme">
-            <svg width="11" height="11" viewBox="0 0 12 12" fill="none" aria-hidden="true">
-              <rect x="3.5" y="3.5" width="7" height="7" rx="1" stroke="currentColor" stroke-width="1.2"/>
-              <path d="M8.5 3.5v-1a1 1 0 0 0-1-1h-5a1 1 0 0 0-1 1v5a1 1 0 0 0 1 1h1" stroke="currentColor" stroke-width="1.2"/>
+          <button class="theme-card-clone-btn" data-clone="${theme.id}" title="Clone & customize this theme (Premium)">
+            <svg width="10" height="10" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+              <rect x="2.5" y="5.5" width="7" height="5" rx="1" stroke="currentColor" stroke-width="1.3"/>
+              <path d="M4 5.5V4a2 2 0 0 1 4 0v1.5" stroke="currentColor" stroke-width="1.3"/>
             </svg>
             Clone
+            <span class="theme-card-clone-badge">Premium</span>
           </button>
         </div>
       `;
@@ -340,11 +341,27 @@
     updateEffectsContextBanner();
     renderEffectsTabForActiveTheme();
 
-    // Apply to any active SF tab
+    // Push the theme to all open Salesforce tabs across all windows.
+    // (We can't use {active: true, currentWindow: true} from the options page
+    //  because that returns the options tab itself, which has no content
+    //  script and would silently swallow the message.)
+    pushThemeToAllSfTabs(themeId);
+  }
+
+  async function pushThemeToAllSfTabs(themeId) {
     try {
-      const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-      if (tab?.id) {
-        chrome.tabs.sendMessage(tab.id, { action: 'setTheme', theme: themeId }).catch(() => {});
+      const tabs = await chrome.tabs.query({
+        url: [
+          'https://*.lightning.force.com/*',
+          'https://*.my.salesforce.com/*',
+          'https://*.salesforce.com/*',
+          'https://*.visualforce.com/*',
+        ],
+      });
+      for (const tab of tabs) {
+        if (tab.id) {
+          chrome.tabs.sendMessage(tab.id, { action: 'setTheme', theme: themeId }).catch(() => {});
+        }
       }
     } catch (_) {}
   }
@@ -518,12 +535,7 @@
       const next = isDark
         ? (syncState.lastDarkTheme || 'connectry-dark')
         : (syncState.lastLightTheme || 'connectry');
-      try {
-        const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-        if (tab?.id) {
-          chrome.tabs.sendMessage(tab.id, { action: 'setTheme', theme: next }).catch(() => {});
-        }
-      } catch (_) {}
+      pushThemeToAllSfTabs(next);
     }
   }
 
@@ -573,7 +585,15 @@
     if (!meta) return;
     const theme = getThemeById(activeThemeId) || (syncState.customThemes || []).find(t => t.id === activeThemeId);
     const name = theme ? theme.name : activeThemeId;
-    meta.innerHTML = `<span>Active: <strong>${Connectry.Settings.escape(name)}</strong></span>`;
+    const devBadge = _localPremiumOverride
+      ? `<span class="dev-mode-badge" title="Premium override is active. Disable in About tab.">
+           <svg width="10" height="10" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+             <path d="M2.5 5.5L1 7l5 5 5-5-1.5-1.5M2.5 5.5L6 2l3.5 3.5M2.5 5.5L6 9l3.5-3.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
+           </svg>
+           DEV · Premium unlocked
+         </span>`
+      : '';
+    meta.innerHTML = `${devBadge}<span class="header-meta-active">Active: <strong>${Connectry.Settings.escape(name)}</strong></span>`;
   }
 
   // ─── Version ──────────────────────────────────────────────────────────────
@@ -1475,6 +1495,9 @@
       _localPremiumOverride = enabled;
       // Re-render anything that depends on premium state
       renderEffectsTabForActiveTheme();
+      updateHeaderMeta(syncState.theme);
+      // Re-render theme grid so clone button gates update too
+      renderThemeGrid(syncState.theme);
     });
   }
 

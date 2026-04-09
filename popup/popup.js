@@ -341,7 +341,10 @@
 
   function bindOptionsButton() {
     document.getElementById('openOptionsBtn')?.addEventListener('click', () => {
-      chrome.runtime.openOptionsPage();
+      // Always land on the Themes tab from the More Settings button —
+      // the popup is theme-centric, so the user expects the theme gallery
+      // first. Effects has its own dedicated entry via the effects tooltip.
+      openOptionsOnTab('themes');
     });
   }
 

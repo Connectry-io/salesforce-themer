@@ -209,9 +209,22 @@
 
 .theme-card-clone-btn:hover,
 .theme-card-edit-btn:hover {
-  border-color: var(--cx-accent);
-  color: var(--cx-accent);
-  background: var(--cx-accent-light);
+  border-color: #b07d1a;
+  color: #8f6413;
+  background: rgba(212, 162, 42, 0.1);
+}
+
+/* Premium badge inside the clone button */
+.theme-card-clone-badge {
+  background: linear-gradient(135deg, #d4a22a 0%, #b07d1a 100%);
+  color: #ffffff;
+  font-size: 9px;
+  font-weight: 700;
+  padding: 1px 5px;
+  border-radius: 3px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  margin-left: 2px;
 }
 
 .theme-card-delete-btn {
@@ -291,6 +304,13 @@
   padding: 3px 8px;
   border-radius: var(--cx-radius-full);
   border: 1px solid rgba(217, 119, 6, 0.2);
+}
+
+/* Premium variant — gold gradient matching the Upgrade tab styling */
+.create-method-badge--premium {
+  background: linear-gradient(135deg, #d4a22a 0%, #b07d1a 100%);
+  color: #ffffff;
+  border: 1px solid #b07d1a;
 }
 
 .create-method-icon {
@@ -714,14 +734,14 @@
   align-items: center;
   gap: 4px;
   padding: 4px 10px;
-  background: rgba(217, 119, 6, 0.1);
-  border: 1px solid rgba(217, 119, 6, 0.25);
+  background: linear-gradient(135deg, #d4a22a 0%, #b07d1a 100%);
+  border: 1px solid #b07d1a;
   border-radius: var(--cx-radius-full);
   font-size: 10px;
   font-weight: 700;
   letter-spacing: 0.04em;
   text-transform: uppercase;
-  color: var(--cx-warning);
+  color: #ffffff;
   flex-shrink: 0;
 }
 
@@ -2147,4 +2167,35 @@ td.upgrade-compare-col-premium,
 #aboutVersion {
   cursor: default;
   user-select: none;
+}
+
+/* DEV mode badge in the header — appears when premium override is on */
+.dev-mode-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  background: repeating-linear-gradient(
+    135deg,
+    #fef9e7 0,
+    #fef9e7 6px,
+    #fdf3ca 6px,
+    #fdf3ca 12px
+  );
+  border: 1.5px dashed #d4a22a;
+  border-radius: var(--cx-radius-full);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #8f6413;
+  margin-right: var(--cx-space-3);
+}
+
+.dev-mode-badge svg {
+  flex-shrink: 0;
+}
+
+.header-meta-active {
+  color: var(--cx-text-subtle);
 }
