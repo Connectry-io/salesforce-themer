@@ -539,6 +539,57 @@
     }
   }
 
+  // ─── Theme Application tooltips ──────────────────────────────────────────
+  // Mirrors the popup's floating-tooltip pattern: click a help icon to toggle
+  // the matching tooltip, click outside or press Esc to dismiss. Tooltips are
+  // absolute-positioned children of the .opt-settings-card so they overlay
+  // without pushing rows down.
+
+  const OPT_TOOLTIP_IDS = ['optAutoTooltip', 'optScopeTooltip', 'optOrgTooltip'];
+
+  function bindOptThemeApplicationTooltips() {
+    document.querySelectorAll('.opt-settings-help-btn[data-tooltip]').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const tipId = btn.dataset.tooltip;
+        const tip = document.getElementById(tipId);
+        if (!tip) return;
+        const wasHidden = tip.hidden;
+        _hideAllOptTooltips();
+        if (wasHidden) {
+          _positionOptTooltipBelow(tip, btn);
+          tip.hidden = false;
+        }
+      });
+    });
+
+    document.addEventListener('click', (e) => {
+      if (e.target.closest('.opt-settings-tooltip') || e.target.closest('.opt-settings-help-btn')) return;
+      _hideAllOptTooltips();
+    });
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') _hideAllOptTooltips();
+    });
+  }
+
+  function _hideAllOptTooltips() {
+    OPT_TOOLTIP_IDS.forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.hidden = true;
+    });
+  }
+
+  function _positionOptTooltipBelow(tooltip, anchorBtn) {
+    const card = anchorBtn.closest('.opt-settings-card');
+    if (!card) return;
+    const row = anchorBtn.closest('.opt-settings-row');
+    if (!row) return;
+    const cardRect = card.getBoundingClientRect();
+    const rowRect = row.getBoundingClientRect();
+    const top = rowRect.bottom - cardRect.top + 6;
+    tooltip.style.top = `${top}px`;
+  }
+
   // ─── Per-org settings ────────────────────────────────────────────────────
 
   function renderOrgList(orgThemes) {
@@ -645,8 +696,8 @@
     autoToggle.addEventListener('change', handleAutoModeToggle);
 
     // Theme scope pills (segmented control matching popup pattern)
-    const scopePills = document.querySelectorAll('#optionsScopePills .options-scope-pill');
-    const currentScope = syncState.themeScope || 'both';
+    const scopePills = document.querySelectorAll('#optionsScopePills .opt-scope-pill');
+    const currentScope = syncState.themeScope || 'lightning';
     scopePills.forEach(pill => {
       pill.classList.toggle('is-active', pill.dataset.scope === currentScope);
       pill.addEventListener('click', async () => {
@@ -656,6 +707,9 @@
         syncState.themeScope = scope;
       });
     });
+
+    // Theme Application tooltips (mirror popup floating tooltip pattern)
+    bindOptThemeApplicationTooltips();
 
     // Effects tab
     renderEffectsTabForActiveTheme();

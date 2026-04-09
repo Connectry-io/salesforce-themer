@@ -420,80 +420,129 @@
   line-height: 1.55;
 }
 
-/* ─── Options settings card (mirrors popup pattern for visual consistency) ─ */
+/* ─── Theme Application card (visually identical to the popup settings card) */
 
-.options-settings-card {
+.opt-settings-card {
+  position: relative;
   background: var(--cx-surface);
-  border: 1px solid var(--cx-border);
+  border: 1.5px solid var(--cx-border);
   border-radius: var(--cx-radius-md);
-  padding: 4px var(--cx-space-5);
   box-shadow: var(--cx-shadow-sm);
+  padding: 4px var(--cx-space-5);
+  max-width: 560px;
 }
 
-.options-setting-row {
+.opt-settings-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: var(--cx-space-5);
-  padding: var(--cx-space-4) 0;
+  gap: var(--cx-space-3);
+  padding: 11px 0;
   border-bottom: 1px solid var(--cx-border);
 }
 
-.options-setting-row:last-of-type {
+.opt-settings-row:last-of-type {
   border-bottom: none;
 }
 
-.options-setting-row--column {
+/* Stacked variant: label on top, control below — used for the pill rows
+   so the segmented control gets full width */
+.opt-settings-row--stacked {
   flex-direction: column;
   align-items: stretch;
-  gap: var(--cx-space-3);
+  gap: 8px;
 }
 
-.options-setting-label {
+.opt-settings-label {
   display: flex;
-  align-items: flex-start;
-  gap: var(--cx-space-3);
-  flex: 1;
-  min-width: 0;
+  align-items: center;
+  gap: 7px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--cx-text-muted);
 }
 
-.options-setting-icon {
+.opt-settings-row--stacked .opt-settings-label {
+  align-self: flex-start;
+}
+
+.opt-settings-icon {
   flex-shrink: 0;
   color: var(--cx-text-subtle);
-  margin-top: 2px;
 }
 
-.options-setting-text {
-  flex: 1;
-  min-width: 0;
+.opt-settings-text {
+  flex: 0 0 auto;
 }
 
-.options-setting-name {
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--cx-text);
-  margin-bottom: 2px;
+/* Help button — same shape/size as the popup */
+.opt-settings-help-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 17px;
+  height: 17px;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  color: var(--cx-text-subtle);
+  border-radius: 50%;
+  transition: color var(--cx-transition), background-color var(--cx-transition);
+  flex-shrink: 0;
+  outline: none;
 }
 
-.options-setting-desc {
+.opt-settings-help-btn:hover {
+  color: var(--cx-accent);
+  background-color: rgba(74, 111, 165, 0.08);
+}
+
+.opt-settings-help-btn:focus-visible {
+  outline: 2px solid var(--cx-accent);
+  outline-offset: 1px;
+}
+
+/* Floating tooltip — absolute positioned inside the card, never pushes content */
+.opt-settings-tooltip[hidden] {
+  display: none !important;
+}
+
+.opt-settings-tooltip {
+  position: absolute;
+  left: var(--cx-space-5);
+  right: var(--cx-space-5);
+  z-index: 100;
   font-size: 12px;
+  line-height: 1.55;
   color: var(--cx-text-muted);
-  line-height: 1.5;
+  background: var(--cx-surface);
+  border: 1px solid var(--cx-border);
+  border-radius: var(--cx-radius-sm);
+  padding: 10px 12px;
+  box-shadow: var(--cx-shadow-md);
 }
 
-/* Segmented Apply-To pills (matches popup pattern) */
-.options-scope-pills {
+.opt-settings-tooltip strong {
+  color: var(--cx-text);
+  font-weight: 600;
+}
+
+/* Segmented Apply-To pills — full width inside stacked row */
+.opt-scope-pills {
   display: flex;
   gap: 2px;
   background: var(--cx-surface-alt);
   border: 1px solid var(--cx-border);
   border-radius: var(--cx-radius-full);
   padding: 2px;
-  flex-shrink: 0;
+  width: 100%;
+  box-sizing: border-box;
 }
 
-.options-scope-pill {
-  padding: 5px 14px;
+.opt-scope-pill {
+  flex: 1;
+  padding: 6px 12px;
   border: none;
   background: transparent;
   border-radius: var(--cx-radius-full);
@@ -505,18 +554,19 @@
   transition: background-color var(--cx-transition), color var(--cx-transition);
   outline: none;
   white-space: nowrap;
+  text-align: center;
 }
 
-.options-scope-pill:hover {
+.opt-scope-pill:hover {
   color: var(--cx-text-muted);
 }
 
-.options-scope-pill.is-active {
+.opt-scope-pill.is-active {
   background: var(--cx-accent);
   color: #ffffff;
 }
 
-.options-scope-pill:focus-visible {
+.opt-scope-pill:focus-visible {
   outline: 2px solid var(--cx-accent);
   outline-offset: 1px;
 }
