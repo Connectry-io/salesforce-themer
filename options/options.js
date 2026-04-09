@@ -72,6 +72,41 @@
 
   // ─── Theme grid rendering ─────────────────────────────────────────────────
 
+  // Mini effect indicator icons — one per effect type. Used on theme cards
+  // to communicate at a glance what effects ship with each theme.
+  const EFFECT_ICONS = {
+    hoverLift:       { svg: '<path d="M2 11l4-4 4 4 4-7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>', label: 'Hover lift' },
+    ambientGlow:     { svg: '<circle cx="8" cy="8" r="3" fill="currentColor"/><circle cx="8" cy="8" r="6" fill="none" stroke="currentColor" stroke-width="1.2" opacity="0.5"/>', label: 'Ambient glow' },
+    borderShimmer:   { svg: '<path d="M2 8h12M5 5l2 3-2 3M11 5l-2 3 2 3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" fill="none"/>', label: 'Border shimmer' },
+    gradientBorders: { svg: '<rect x="2.5" y="2.5" width="11" height="11" rx="2" stroke="currentColor" stroke-width="1.4" stroke-dasharray="3 2" fill="none"/>', label: 'Gradient borders' },
+    aurora:          { svg: '<path d="M2 11c2-3 4-3 6-1s4 2 6-1" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" fill="none"/><path d="M2 8c2-3 4-3 6-1s4 2 6-1" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" fill="none" opacity="0.6"/>', label: 'Aurora' },
+    neonFlicker:     { svg: '<path d="M9 1L4 9h4l-1 6 5-8H8l1-6z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round" fill="currentColor" fill-opacity="0.4"/>', label: 'Neon flicker' },
+    particles:       { svg: '<circle cx="4" cy="4" r="1" fill="currentColor"/><circle cx="11" cy="3" r="1" fill="currentColor"/><circle cx="6" cy="9" r="1" fill="currentColor"/><circle cx="12" cy="9" r="1" fill="currentColor"/><circle cx="3" cy="12" r="1" fill="currentColor"/><circle cx="9" cy="13" r="1" fill="currentColor"/>', label: 'Particles' },
+    cursorTrail:     { svg: '<path d="M3 3l5 9 1.5-3.5L13 7 3 3z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round" fill="currentColor" fill-opacity="0.4"/>', label: 'Cursor trail' },
+  };
+
+  /**
+   * Build the inline effect-indicator HTML for a theme card. Returns a row
+   * of mini SVG icons with a hover tooltip listing the full set by name.
+   */
+  function buildEffectIndicators(themeId) {
+    const cfg = getSuggestedEffectsFor(themeId);
+    const enabled = [];
+    for (const eff of ['hoverLift', 'ambientGlow', 'borderShimmer', 'gradientBorders', 'aurora', 'neonFlicker', 'particles', 'cursorTrail']) {
+      if (cfg[eff]) enabled.push(eff);
+    }
+    if (!enabled.length) {
+      return `<div class="theme-effects-indicators is-empty" title="No effects shipped"><span class="theme-effects-empty">No effects</span></div>`;
+    }
+    const tooltipLabel = enabled.map(e => EFFECT_ICONS[e]?.label || e).join(' · ');
+    const icons = enabled.map(e => `
+      <span class="theme-effect-icon" title="${EFFECT_ICONS[e]?.label || e}" aria-label="${EFFECT_ICONS[e]?.label || e}">
+        <svg width="14" height="14" viewBox="0 0 16 16" aria-hidden="true">${EFFECT_ICONS[e]?.svg || ''}</svg>
+      </span>
+    `).join('');
+    return `<div class="theme-effects-indicators" title="Effects: ${tooltipLabel}">${icons}</div>`;
+  }
+
   function renderThemeGrid(activeThemeId) {
     const lightGrid = document.getElementById('lightThemeGrid');
     const darkGrid = document.getElementById('darkThemeGrid');
@@ -103,6 +138,7 @@
             <span class="theme-category-badge ${theme.category}">${theme.category === 'light' ? 'Light' : 'Dark'}</span>
           </div>
           <div class="theme-description">${theme.description}</div>
+          ${buildEffectIndicators(theme.id)}
         </div>
         <div class="theme-card-actions">
           <div class="theme-card-status">

@@ -696,6 +696,37 @@ body {
   letter-spacing: 0.01em;
 }
 
+/* Mini effect indicator dots — one per shipped effect on the theme */
+.theme-effects-mini {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  margin-top: 4px;
+  cursor: help;
+  flex-wrap: wrap;
+}
+
+.theme-effects-mini.is-empty {
+  color: var(--color-text-subtle);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+}
+
+.theme-effect-dot {
+  display: inline-block;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--color-accent);
+  opacity: 0.55;
+}
+
+.theme-effect-dot:hover,
+.theme-effects-mini:hover .theme-effect-dot {
+  opacity: 0.9;
+}
+
 /* ─── Active Check Icon ──────────────────────────────────────────────────── */
 
 .theme-check {

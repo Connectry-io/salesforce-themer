@@ -214,6 +214,48 @@
   background: rgba(212, 162, 42, 0.1);
 }
 
+/* Theme card effect indicators — mini icons showing what each theme ships with */
+.theme-effects-indicators {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: var(--cx-space-3);
+  padding-top: var(--cx-space-3);
+  border-top: 1px dashed var(--cx-border);
+  flex-wrap: wrap;
+}
+
+.theme-effects-indicators.is-empty {
+  border-top-style: solid;
+  opacity: 0.6;
+}
+
+.theme-effect-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--cx-accent-light);
+  color: var(--cx-accent);
+  flex-shrink: 0;
+  transition: transform var(--cx-transition);
+  cursor: help;
+}
+
+.theme-effect-icon:hover {
+  transform: scale(1.15);
+}
+
+.theme-effects-empty {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--cx-text-subtle);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
 /* Premium badge inside the clone button */
 .theme-card-clone-badge {
   background: linear-gradient(135deg, #d4a22a 0%, #b07d1a 100%);
