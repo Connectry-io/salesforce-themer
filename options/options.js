@@ -72,18 +72,6 @@
 
   // ─── Theme grid rendering ─────────────────────────────────────────────────
 
-  // Suggested preset name for each OOTB theme (for hint badges on cards)
-  const THEME_SUGGESTED_PRESET = {
-    'connectry': 'subtle', 'connectry-dark': 'subtle',
-    'midnight': 'subtle', 'slate': 'subtle',
-    'tron': 'immersive', 'obsidian': 'subtle',
-    'arctic': 'alive', 'sakura': 'subtle',
-    'ember': 'subtle', 'nord': 'subtle',
-    'terminal': 'alive', 'high-contrast': 'none',
-    'dracula': 'subtle', 'solarized-light': 'subtle',
-    'solarized-dark': 'subtle',
-  };
-
   function renderThemeGrid(activeThemeId) {
     const lightGrid = document.getElementById('lightThemeGrid');
     const darkGrid = document.getElementById('darkThemeGrid');
@@ -93,8 +81,6 @@
 
     for (const theme of THEMES) {
       const isActive = theme.id === activeThemeId;
-      const suggestedPreset = THEME_SUGGESTED_PRESET[theme.id] || 'none';
-      const showHint = suggestedPreset !== 'none';
 
       const card = document.createElement('div');
       card.className = `theme-card${isActive ? ' is-active' : ''}`;
@@ -104,12 +90,10 @@
       card.setAttribute('tabindex', '0');
       card.setAttribute('title', theme.name);
 
-      const hintBadge = showHint
-        ? `<button class="theme-fx-hint" data-suggested-for="${theme.id}" title="Apply suggested effects to your global config">
-             <span class="theme-fx-hint-icon">✨</span>
-             Suggests ${_capitalize(suggestedPreset)}
-           </button>`
-        : '';
+      // Note: V3 model removed the "Try these effects" hint badge — themes
+      // now ALWAYS ship with their effects (no opt-in nudge needed).
+      // Theme card effect indicators (mini icons showing what each theme has)
+      // come in Commit C.
 
       card.innerHTML = `
         <div class="theme-swatch">${buildSwatch(theme)}</div>
@@ -119,36 +103,30 @@
             <span class="theme-category-badge ${theme.category}">${theme.category === 'light' ? 'Light' : 'Dark'}</span>
           </div>
           <div class="theme-description">${theme.description}</div>
-          ${hintBadge}
         </div>
         <div class="theme-card-actions">
           <div class="theme-card-status">
             <span class="theme-card-status-dot"></span>
             <span>${isActive ? 'Active' : 'Apply'}</span>
           </div>
-          <button class="theme-card-clone-btn" data-clone="${theme.id}" title="Clone & customize this theme (Premium)">
+          <button class="theme-card-clone-btn" data-clone="${theme.id}" title="Clone & customize this theme">
             <svg width="10" height="10" viewBox="0 0 12 12" fill="none" aria-hidden="true">
               <rect x="2.5" y="5.5" width="7" height="5" rx="1" stroke="currentColor" stroke-width="1.3"/>
               <path d="M4 5.5V4a2 2 0 0 1 4 0v1.5" stroke="currentColor" stroke-width="1.3"/>
             </svg>
             Clone
-            <span class="theme-card-clone-badge">Premium</span>
           </button>
         </div>
       `;
 
       card.addEventListener('click', (e) => {
         const cloneBtn = e.target.closest('[data-clone]');
-        const hintBtn = e.target.closest('[data-suggested-for]');
         if (cloneBtn) {
           e.stopPropagation();
+          // Builder is open to all in Commit B; for now, still gated.
+          // (Remove _guardPremium call in Commit B.)
           if (!_guardPremium()) return;
           openCreationDialog(cloneBtn.dataset.clone);
-          return;
-        }
-        if (hintBtn) {
-          e.stopPropagation();
-          applySuggestedEffectsToGlobal(hintBtn.dataset.suggestedFor);
           return;
         }
         selectTheme(theme.id);
@@ -366,36 +344,9 @@
     } catch (_) {}
   }
 
-  // ─── Suggested effects hint (click-to-apply) ────────────────────────────
-
-  async function applySuggestedEffectsToGlobal(themeId) {
-    const suggested = getSuggestedEffectsFor(themeId);
-    const theme = getThemeById(themeId);
-    const themeName = theme ? theme.name : themeId;
-
-    const dialog = new Connectry.Settings.Dialog({
-      title: `Apply suggested effects from ${themeName}?`,
-      body: `
-        <p>This will update your global effects config to the <strong>${_capitalize(THEME_SUGGESTED_PRESET[themeId] || 'subtle')}</strong> preset as designed for ${themeName}.</p>
-        <p>Your current global effects will be replaced. This affects all built-in themes, but custom themes keep their own effects.</p>
-      `,
-      actions: [
-        { label: 'Cancel', variant: 'secondary' },
-        {
-          label: `Apply effects`,
-          variant: 'primary',
-          onClick: async () => {
-            await chrome.storage.sync.set({ effectsConfig: suggested });
-            syncState.effectsConfig = suggested;
-            renderEffectsTabForActiveTheme();
-            // Flash a brief confirmation
-            _flashToast(`Applied ${_capitalize(THEME_SUGGESTED_PRESET[themeId] || 'subtle')} preset globally`);
-          },
-        },
-      ],
-    });
-    dialog.open();
-  }
+  // (V3 removed: applySuggestedEffectsToGlobal — under the new model, themes
+  // always ship with their own effects, so there's no "suggestion to apply".
+  // The Volume knob in the Theme Application card replaces this control.)
 
   /**
    * Inline suggested-effects generator — mirrors effects/presets.js
@@ -477,46 +428,12 @@
   function openCreationDialog(baseThemeId) {
     const base = getThemeById(baseThemeId);
     const baseName = base ? base.name : baseThemeId;
-    const suggestedPreset = _capitalize(THEME_SUGGESTED_PRESET[baseThemeId] || 'none');
-    const globalPreset = _capitalize((syncState.effectsConfig?.preset) || 'none');
 
-    const body = document.createElement('div');
-    body.innerHTML = `
-      <p style="margin-bottom: 16px;">Your custom theme will keep its own effects, independent from the global settings. Pick a starting point:</p>
-
-      <label class="cx-option-card">
-        <input type="radio" name="start-mode" value="basic" checked />
-        <div class="cx-option-card-title">Start with ${baseName}'s suggested effects</div>
-        <div class="cx-option-card-desc">Uses the <strong>${suggestedPreset}</strong> preset — the effects this theme was designed with.</div>
-      </label>
-
-      <label class="cx-option-card">
-        <input type="radio" name="start-mode" value="global" />
-        <div class="cx-option-card-title">Copy my current global effects</div>
-        <div class="cx-option-card-desc">Starts with your current global config (<strong>${globalPreset}</strong>). Changes after this won't affect the global config.</div>
-      </label>
-    `;
-
-    const dialog = new Connectry.Settings.Dialog({
-      title: `Clone & Customize: ${baseName}`,
-      body,
-      actions: [
-        { label: 'Cancel', variant: 'secondary' },
-        {
-          label: 'Create',
-          variant: 'primary',
-          onClick: () => {
-            const mode = body.querySelector('input[name="start-mode"]:checked')?.value || 'basic';
-            const initialEffects = mode === 'global'
-              ? { ...(syncState.effectsConfig || getSuggestedEffectsFor(baseThemeId)) }
-              : getSuggestedEffectsFor(baseThemeId);
-            _pendingCreateEffects = initialEffects;
-            openEditor(baseThemeId, null);
-          },
-        },
-      ],
-    });
-    dialog.open();
+    // Under V3, custom themes always start with their base theme's shipped
+    // effects. The old "Copy my current global effects" option is gone —
+    // there's no global effects config anymore.
+    _pendingCreateEffects = getSuggestedEffectsFor(baseThemeId);
+    openEditor(baseThemeId, null);
   }
 
   // Holds effects snapshot staged by the creation dialog — picked up by saveCustomTheme
@@ -618,72 +535,28 @@
     });
   }
 
-  // ─── Effects preset pills (matches popup) ────────────────────────────────
-
-  // Same preset definitions as popup.js POPUP_EFFECTS_PRESETS
-  const OPT_EFFECTS_PRESETS = {
-    none: {
-      preset: 'none',
-      hoverLift: false, hoverLiftIntensity: 'medium',
-      ambientGlow: false, ambientGlowIntensity: 'medium',
-      borderShimmer: false, borderShimmerIntensity: 'medium',
-      gradientBorders: false, gradientBordersIntensity: 'medium',
-      aurora: false, auroraIntensity: 'medium',
-      neonFlicker: false, neonFlickerIntensity: 'medium',
-      particles: false, particlesIntensity: 'medium',
-      cursorTrail: false, cursorTrailIntensity: 'medium',
-    },
-    subtle: {
-      preset: 'subtle',
-      hoverLift: true, hoverLiftIntensity: 'subtle',
-      ambientGlow: false, ambientGlowIntensity: 'subtle',
-      borderShimmer: false, borderShimmerIntensity: 'subtle',
-      gradientBorders: false, gradientBordersIntensity: 'subtle',
-      aurora: false, auroraIntensity: 'subtle',
-      neonFlicker: false, neonFlickerIntensity: 'subtle',
-      particles: false, particlesIntensity: 'subtle',
-      cursorTrail: false, cursorTrailIntensity: 'subtle',
-    },
-    alive: {
-      preset: 'alive',
-      hoverLift: true, hoverLiftIntensity: 'medium',
-      ambientGlow: true, ambientGlowIntensity: 'medium',
-      borderShimmer: true, borderShimmerIntensity: 'medium',
-      gradientBorders: false, gradientBordersIntensity: 'medium',
-      aurora: false, auroraIntensity: 'medium',
-      neonFlicker: false, neonFlickerIntensity: 'medium',
-      particles: false, particlesIntensity: 'medium',
-      cursorTrail: false, cursorTrailIntensity: 'medium',
-    },
-    immersive: {
-      preset: 'immersive',
-      hoverLift: true, hoverLiftIntensity: 'strong',
-      ambientGlow: true, ambientGlowIntensity: 'strong',
-      borderShimmer: true, borderShimmerIntensity: 'medium',
-      gradientBorders: true, gradientBordersIntensity: 'strong',
-      aurora: false, auroraIntensity: 'medium',
-      neonFlicker: false, neonFlickerIntensity: 'medium',
-      particles: false, particlesIntensity: 'medium',
-      cursorTrail: true, cursorTrailIntensity: 'medium',
-    },
-  };
+  // ─── Effects volume knob (matches popup) ─────────────────────────────────
+  //
+  // The 4 buttons are the Volume knob: 'off' | 'subtle' | 'default' | 'immersive'.
+  // They scale the active theme's SHIPPED effects rather than overwriting them.
+  // Free users can adjust volume; Premium can also clone themes to customize
+  // individual effects in the Theme Builder.
 
   function bindOptEffectsPills() {
-    const pills = document.querySelectorAll('#optEffectsPills .opt-scope-pill[data-effect-preset]');
+    const pills = document.querySelectorAll('#optEffectsPills .opt-scope-pill[data-effect-volume]');
     if (!pills.length) return;
 
     // Initial state from sync
-    const activePreset = syncState.effectsConfig?.preset || 'none';
-    pills.forEach(p => p.classList.toggle('is-active', p.dataset.effectPreset === activePreset));
+    const activeVolume = syncState.effectsVolume || 'default';
+    pills.forEach(p => p.classList.toggle('is-active', p.dataset.effectVolume === activeVolume));
 
     pills.forEach(pill => {
       pill.addEventListener('click', async () => {
-        const preset = pill.dataset.effectPreset;
-        const config = OPT_EFFECTS_PRESETS[preset] || OPT_EFFECTS_PRESETS.none;
+        const volume = pill.dataset.effectVolume;
         pills.forEach(p => p.classList.toggle('is-active', p === pill));
-        await chrome.storage.sync.set({ effectsConfig: { ...config } });
-        syncState.effectsConfig = { ...config };
-        // Re-render the dedicated Effects tab so it stays in sync
+        await chrome.storage.sync.set({ effectsVolume: volume });
+        syncState.effectsVolume = volume;
+        // Re-render the Effects tab (read-only) so it reflects new volume
         renderEffectsTabForActiveTheme();
       });
     });
@@ -713,7 +586,7 @@
         '• Switch back to the Connectry theme\n' +
         '• Turn off Follow System mode\n' +
         '• Apply theme to Lightning pages only\n' +
-        '• Set effects to the Subtle preset\n' +
+        '• Set effects volume to Default\n' +
         '• Clear all per-org overrides\n\n' +
         'Custom themes you\'ve created will be kept.'
       );
@@ -726,7 +599,7 @@
         lastDarkTheme: 'connectry-dark',
         orgThemes: {},
         themeScope: 'lightning',
-        effectsConfig: { ...OPT_EFFECTS_PRESETS.subtle },
+        effectsVolume: 'default',
       };
       await chrome.storage.sync.set(defaults);
       pushThemeToAllSfTabs('connectry');
@@ -814,7 +687,7 @@
       lastDarkTheme: 'connectry-dark',
       orgThemes: {},
       themeScope: 'lightning',
-      effectsConfig: null,
+      effectsVolume: 'default',
       customThemes: [],
     });
 
@@ -897,14 +770,17 @@
         renderCustomThemeGrid(syncState.theme);
         renderEffectsTabForActiveTheme();
       }
-      if (changes.effectsConfig) {
-        syncState.effectsConfig = changes.effectsConfig.newValue;
+      if (changes.effectsVolume) {
+        syncState.effectsVolume = changes.effectsVolume.newValue;
         renderEffectsTabForActiveTheme();
-        // Sync the Theme Application effects pills
-        const activePreset = syncState.effectsConfig?.preset || 'none';
-        document.querySelectorAll('#optEffectsPills .opt-scope-pill[data-effect-preset]').forEach(p => {
-          p.classList.toggle('is-active', p.dataset.effectPreset === activePreset);
+        // Sync the Theme Application effects volume pills
+        const activeVolume = syncState.effectsVolume || 'default';
+        document.querySelectorAll('#optEffectsPills .opt-scope-pill[data-effect-volume]').forEach(p => {
+          p.classList.toggle('is-active', p.dataset.effectVolume === activeVolume);
         });
+      }
+      if (changes.customThemes) {
+        // Already handled above; ensure we re-render effects when a custom theme's snapshot changes
       }
       if (changes.themeScope) {
         syncState.themeScope = changes.themeScope.newValue;
@@ -1609,6 +1485,12 @@
   let effectsEditingCustomId = null;
   let previewCanvases = new Map();      // effectId -> { canvas, raf, cleanup? }
 
+  /**
+   * V3 model: effects belong to themes.
+   *   - OOTB themes: shipped effects scaled by user's Volume knob (READ-ONLY in this tab)
+   *   - Custom themes: snapshot in customTheme.effects (still editable here for now;
+   *                    will move to the Theme Builder Effects sub-tab in Commit B)
+   */
   function resolveEffectsEditingTarget() {
     const activeId = syncState.theme;
     const customs = syncState.customThemes || [];
@@ -1618,9 +1500,18 @@
       effectsEditingCustomId = custom.id;
       return { config: custom.effects || { ...NONE_EFFECTS }, mode: 'custom', theme: custom };
     }
-    effectsEditingMode = 'global';
+    effectsEditingMode = 'ootb';
     effectsEditingCustomId = null;
-    return { config: syncState.effectsConfig || { ...NONE_EFFECTS }, mode: 'global', theme: null };
+    // Resolve the OOTB theme's shipped effects, then scale by current Volume.
+    // This is what the user actually sees on the Salesforce tab right now.
+    const shipped = (typeof getThemeEffects === 'function')
+      ? getThemeEffects(activeId)
+      : { ...NONE_EFFECTS };
+    const volume = syncState.effectsVolume || 'default';
+    const scaled = (typeof applyVolume === 'function')
+      ? applyVolume(shipped, volume)
+      : shipped;
+    return { config: scaled, mode: 'ootb', theme: null };
   }
 
   function updateEffectsContextBanner() {
@@ -1630,30 +1521,33 @@
     if (!banner || !text) return;
 
     const { mode, theme } = resolveEffectsEditingTarget();
+    const activeThemeObj = getThemeById(syncState.theme);
+    const themeName = activeThemeObj?.name || syncState.theme;
+    const volume = syncState.effectsVolume || 'default';
 
-    if (!isPremium()) {
-      // Free tier: show a friendly "presets only" notice instead of editing-mode banner
+    if (mode === 'custom' && theme) {
+      // Custom themes still editable here for now (Commit B will move this
+      // into the Theme Builder)
       banner.className = 'cx-banner cx-banner-info';
-      text.innerHTML = `
-        <strong>Free tier:</strong> Pick any of the four presets below to style every built-in theme.
-        Upgrade to <strong>Premium</strong> to customize individual effects, set a different intensity per effect,
-        or give each custom theme its own effect config.
-      `;
-      actions.innerHTML = `<button class="cx-btn cx-btn-sm cx-btn-primary" id="upgradeFromBannerBtn">Upgrade</button>`;
-      document.getElementById('upgradeFromBannerBtn')?.addEventListener('click', openUpgradeDialog);
+      text.innerHTML = `Editing effects for <strong>${Connectry.Settings.escape(theme.name)}</strong>. These effects are saved with this theme only.`;
+      actions.innerHTML = `<button class="cx-btn cx-btn-sm cx-btn-ghost" id="effectsResetBtn">Reset ▾</button>`;
+      document.getElementById('effectsResetBtn')?.addEventListener('click', openEffectsResetMenu);
       return;
     }
 
-    if (mode === 'custom' && theme) {
-      banner.className = 'cx-banner cx-banner-info';
-      text.innerHTML = `Editing effects for <strong>${Connectry.Settings.escape(theme.name)}</strong>. These effects are saved with this theme only — global changes won't affect it.`;
-      actions.innerHTML = `<button class="cx-btn cx-btn-sm cx-btn-ghost" id="effectsResetBtn">Reset ▾</button>`;
-      document.getElementById('effectsResetBtn')?.addEventListener('click', openEffectsResetMenu);
-    } else {
-      banner.className = 'cx-banner cx-banner-warning';
-      text.innerHTML = `Editing <strong>global effects</strong> — these apply to all built-in themes.`;
-      actions.innerHTML = '';
-    }
+    // OOTB theme — read-only V3 view
+    banner.className = 'cx-banner cx-banner-info';
+    text.innerHTML = `
+      <strong>${Connectry.Settings.escape(themeName)}</strong> ships with these effects, currently at
+      <strong>${_capitalize(volume)}</strong> volume. To change the volume, use the Effects row in the
+      Theme Application card on the Themes tab. To customize <em>which</em> effects this theme has,
+      clone it in the Theme Builder.
+    `;
+    actions.innerHTML = `<button class="cx-btn cx-btn-sm cx-btn-primary" id="effectsCloneCta">Clone & customize</button>`;
+    document.getElementById('effectsCloneCta')?.addEventListener('click', () => {
+      // Switch to the Builder tab — user will pick a starting point there
+      if (_tabsInstance) _tabsInstance.activate('builder');
+    });
   }
 
   /**
@@ -1776,13 +1670,8 @@
       <p style="margin-bottom:16px;">Reset the effects for this custom theme to:</p>
       <label class="cx-option-card">
         <input type="radio" name="reset-mode" value="suggested" checked />
-        <div class="cx-option-card-title">Suggested effects for ${Connectry.Settings.escape(getThemeById(custom.basedOn)?.name || custom.basedOn)}</div>
-        <div class="cx-option-card-desc">Restore the base theme's suggested effect preset.</div>
-      </label>
-      <label class="cx-option-card">
-        <input type="radio" name="reset-mode" value="global" />
-        <div class="cx-option-card-title">Copy current global effects</div>
-        <div class="cx-option-card-desc">Replace with your current global config snapshot.</div>
+        <div class="cx-option-card-title">Effects shipped with ${Connectry.Settings.escape(getThemeById(custom.basedOn)?.name || custom.basedOn)}</div>
+        <div class="cx-option-card-desc">Restore the base theme's curated effects.</div>
       </label>
       <label class="cx-option-card">
         <input type="radio" name="reset-mode" value="none" />
@@ -1802,8 +1691,7 @@
           onClick: async () => {
             const mode = body.querySelector('input[name="reset-mode"]:checked')?.value || 'suggested';
             let newEffects;
-            if (mode === 'global') newEffects = { ...(syncState.effectsConfig || NONE_EFFECTS) };
-            else if (mode === 'none') newEffects = { ...NONE_EFFECTS };
+            if (mode === 'none') newEffects = { ...NONE_EFFECTS };
             else newEffects = getSuggestedEffectsFor(custom.basedOn);
 
             const customs = [...(syncState.customThemes || [])];
@@ -1823,10 +1711,17 @@
   }
 
   function renderEffectsTabForActiveTheme() {
-    const { config } = resolveEffectsEditingTarget();
+    const { config, mode } = resolveEffectsEditingTarget();
     updateEffectsContextBanner();
-    renderPresetGrid(config);
-    renderEffectsGrid(config);
+    // Hide the preset grid section entirely on OOTB themes — the volume knob
+    // in the Theme Application card replaces it. Custom themes still see the
+    // 4-preset selector for quick "apply this preset to my theme" actions.
+    const presetSection = document.getElementById('presetGrid')?.closest('.cx-section');
+    if (presetSection) presetSection.hidden = (mode === 'ootb');
+    if (mode !== 'ootb') {
+      renderPresetGrid(config);
+    }
+    renderEffectsGrid(config, mode === 'ootb');
   }
 
   function renderPresetGrid(config) {
@@ -1858,35 +1753,38 @@
   }
 
   async function saveEffectsConfig(newConfig) {
-    if (effectsEditingMode === 'custom' && effectsEditingCustomId) {
-      const customs = [...(syncState.customThemes || [])];
-      const idx = customs.findIndex(t => t.id === effectsEditingCustomId);
-      if (idx >= 0) {
-        customs[idx] = { ...customs[idx], effects: newConfig };
-        await chrome.storage.sync.set({ customThemes: customs });
-        syncState.customThemes = customs;
-      }
-    } else {
-      await chrome.storage.sync.set({ effectsConfig: newConfig });
-      syncState.effectsConfig = newConfig;
+    // V3: only custom themes have an editable effects snapshot. The OOTB
+    // path is read-only — saveEffectsConfig should never be called in that
+    // mode. Guard with a no-op so any stale callers fail safely.
+    if (effectsEditingMode !== 'custom' || !effectsEditingCustomId) return;
+
+    const customs = [...(syncState.customThemes || [])];
+    const idx = customs.findIndex(t => t.id === effectsEditingCustomId);
+    if (idx >= 0) {
+      customs[idx] = { ...customs[idx], effects: newConfig };
+      await chrome.storage.sync.set({ customThemes: customs });
+      syncState.customThemes = customs;
     }
     renderEffectsTabForActiveTheme();
   }
 
-  function renderEffectsGrid(config) {
+  function renderEffectsGrid(config, readOnly = false) {
     const grid = document.getElementById('effectsGrid');
     if (!grid) return;
     grid.innerHTML = '';
     stopEffectPreviews();
 
-    const locked = !isPremium();
+    // Read-only mode (V3 default for OOTB themes): cards are display-only.
+    // Custom themes still have the existing edit path until Commit B moves
+    // it into the Theme Builder.
+    const locked = readOnly || !isPremium();
 
     for (const effect of EFFECT_CATALOG) {
       const isOn = !!config[effect.id];
       const intensity = config[effect.id + 'Intensity'] || 'medium';
 
       const card = document.createElement('div');
-      card.className = `effect-card${isOn ? ' is-enabled' : ''}${locked ? ' is-locked' : ''}`;
+      card.className = `effect-card${isOn ? ' is-enabled' : ''}${locked ? ' is-locked' : ''}${readOnly ? ' is-readonly' : ''}`;
       card.dataset.effect = effect.id;
 
       const particleType = typeof config.particles === 'string' ? config.particles : 'snow';
@@ -1911,7 +1809,9 @@
                 ${locked ? 'disabled' : ''}>${_capitalize(level)}</button>
       `).join('');
 
-      const lockBadge = locked ? `
+      // Read-only mode (V3 OOTB) shows no lock badge — the cards are
+      // documentation, not gated. Premium gating still uses the gold badge.
+      const lockBadge = (locked && !readOnly) ? `
         <div class="effect-lock-badge" title="Upgrade to Premium to control this effect individually">
           <svg width="11" height="11" viewBox="0 0 12 12" fill="none" aria-hidden="true">
             <rect x="2.5" y="5.5" width="7" height="5" rx="1" stroke="currentColor" stroke-width="1.3"/>
@@ -1952,7 +1852,10 @@
         </div>
       `;
 
-      if (locked) {
+      if (readOnly) {
+        // V3 read-only mode: cards are documentation. No click handlers.
+        // The Clone & Customize CTA in the banner is the entry point.
+      } else if (locked) {
         // Clicking anywhere on a locked card opens the upgrade dialog
         card.addEventListener('click', (e) => {
           // Don't hijack the hover preview interaction

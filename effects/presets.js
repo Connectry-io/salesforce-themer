@@ -213,10 +213,14 @@ const THEME_EFFECTS_MAP = {
 // ─── Resolution ──────────────────────────────────────────────────────────────
 
 /**
- * Get the suggested effects config for a theme (used when the user clicks the
- * "Try these effects" hint on an OOTB theme card). Returns a complete config.
+ * Get the SHIPPED effects config for a theme. THEME_EFFECTS_MAP is the source
+ * of truth — each theme ships with its own effects baked in. Free users
+ * cannot edit these directly; they have the Volume knob to scale them, or
+ * they can clone the theme to customize.
+ *
+ * Returns a complete effects config (all 8 effect keys present).
  */
-function getSuggestedConfig(themeId) {
+function getThemeEffects(themeId) {
   const mapping = THEME_EFFECTS_MAP[themeId];
   if (!mapping) return { ...EFFECTS_PRESETS.none };
 
@@ -229,39 +233,80 @@ function getSuggestedConfig(themeId) {
 }
 
 /**
- * Get the suggested preset name (for display on hint badges).
+ * Apply the Volume knob to a shipped effects config. Volume scales the
+ * theme's designed effects without changing WHICH effects are on:
+ *   - 'off':       all effects disabled
+ *   - 'subtle':    every enabled effect clamped to 'subtle' intensity
+ *   - 'default':   exactly as the theme designer set them
+ *   - 'immersive': every enabled effect clamped to 'strong' intensity
+ *
+ * The point: the theme's identity (which effects make Tron feel like Tron)
+ * is preserved at every volume; only loudness changes.
  */
+function applyVolume(config, volume) {
+  if (!config) return { ...EFFECTS_PRESETS.none };
+  if (volume === 'off') {
+    // Disable all effect toggles, keep intensities as-is
+    return {
+      ...config,
+      hoverLift: false,
+      ambientGlow: false,
+      borderShimmer: false,
+      gradientBorders: false,
+      aurora: false,
+      neonFlicker: false,
+      particles: false,
+      cursorTrail: false,
+    };
+  }
+  if (volume === 'default' || !volume) {
+    return { ...config };
+  }
+  // 'subtle' or 'immersive' → clamp every intensity field
+  const targetIntensity = volume === 'immersive' ? 'strong' : 'subtle';
+  const out = { ...config };
+  const effects = ['hoverLift', 'ambientGlow', 'borderShimmer', 'gradientBorders', 'aurora', 'neonFlicker', 'particles', 'cursorTrail'];
+  for (const eff of effects) {
+    out[eff + 'Intensity'] = targetIntensity;
+  }
+  return out;
+}
+
+// Backwards-compat aliases — old code may call these. Will be removed after
+// the Phase 0 migration sweep.
+function getSuggestedConfig(themeId) { return getThemeEffects(themeId); }
 function getSuggestedPreset(themeId) {
   const mapping = THEME_EFFECTS_MAP[themeId];
   return mapping ? mapping.base : 'none';
 }
 
 /**
- * Resolve the ACTIVE effects config at runtime.
+ * Resolve the ACTIVE effects config at runtime under the V3 model.
  *
  * Resolution rules:
- *   - OOTB themes: use global effectsConfig
- *   - Custom themes: use customTheme.effects (snapshot, decoupled)
- *   - Missing config: return 'none' preset
+ *   - Custom themes: use customTheme.effects (snapshot, decoupled — unchanged)
+ *   - OOTB themes:  use the theme's SHIPPED effects, scaled by the user's Volume
+ *   - Missing/unknown theme: return 'none' preset
+ *
+ * The Volume knob ('off' | 'subtle' | 'default' | 'immersive') is the only
+ * effect-related setting free users can touch on OOTB themes. It scales the
+ * theme's designed effects, never replacing them.
  *
  * @param {string} activeThemeId - Current theme ID
- * @param {Object} globalEffectsConfig - Extension-wide effects config from storage
+ * @param {string} volume - Effects volume: 'off' | 'subtle' | 'default' | 'immersive'
  * @param {Object|null} customTheme - The custom theme object if one is active
  * @returns {Object} Complete effects config
  */
-function resolveActiveEffects(activeThemeId, globalEffectsConfig, customTheme) {
-  // Custom theme active → use its snapshot
+function resolveActiveEffects(activeThemeId, volume, customTheme) {
+  // Custom theme active → use its snapshot, no volume scaling
+  // (custom themes have full per-effect control via the builder)
   if (customTheme && customTheme.id === activeThemeId && customTheme.effects) {
     return { ...EFFECTS_PRESETS.none, ...customTheme.effects };
   }
 
-  // OOTB theme → use global effects config
-  if (globalEffectsConfig) {
-    return { ...EFFECTS_PRESETS.none, ...globalEffectsConfig };
-  }
-
-  // Default: no effects
-  return { ...EFFECTS_PRESETS.none };
+  // OOTB theme → use shipped effects scaled by volume
+  const shipped = getThemeEffects(activeThemeId);
+  return applyVolume(shipped, volume || 'default');
 }
 
 /**
@@ -310,8 +355,10 @@ if (typeof module !== 'undefined') {
     PRESET_DESCRIPTIONS,
     EFFECT_DESCRIPTIONS,
     THEME_EFFECTS_MAP,
-    getSuggestedConfig,
-    getSuggestedPreset,
+    getThemeEffects,
+    applyVolume,
+    getSuggestedConfig,    // backwards-compat alias
+    getSuggestedPreset,    // backwards-compat alias
     resolveActiveEffects,
     initialCustomThemeEffects,
     getPresetNames,

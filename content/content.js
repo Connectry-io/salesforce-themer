@@ -227,13 +227,13 @@
    * Load and apply effects for the current theme.
    * Resolution rules (implemented in resolveActiveEffects):
    *   - Custom theme active → use customTheme.effects snapshot
-   *   - OOTB theme active  → use global effectsConfig
+   *   - OOTB theme active  → use theme's SHIPPED effects, scaled by Volume knob
    */
   async function loadAndApplyEffects(themeName) {
     if (contextDead) return;
     try {
       const [syncData, themeData] = await Promise.all([
-        chrome.storage.sync.get({ effectsConfig: null, customThemes: [] }),
+        chrome.storage.sync.get({ effectsVolume: 'default', customThemes: [] }),
         fetch(chrome.runtime.getURL('themes/themes.json')).then(r => r.json()),
       ]);
 
@@ -256,7 +256,7 @@
       if (!theme) return;
 
       const config = typeof resolveActiveEffects === 'function'
-        ? resolveActiveEffects(themeName, syncData.effectsConfig, customTheme)
+        ? resolveActiveEffects(themeName, syncData.effectsVolume, customTheme)
         : null;
 
       if (config) {

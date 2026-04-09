@@ -1319,18 +1319,6 @@ async function cacheAllThemes() {
 
 // ─── Install / update handler ─────────────────────────────────────────────────
 
-const SUBTLE_EFFECTS_DEFAULT = {
-  preset: 'subtle',
-  hoverLift: true, hoverLiftIntensity: 'subtle',
-  ambientGlow: false, ambientGlowIntensity: 'subtle',
-  borderShimmer: false, borderShimmerIntensity: 'subtle',
-  gradientBorders: false, gradientBordersIntensity: 'subtle',
-  aurora: false, auroraIntensity: 'subtle',
-  neonFlicker: false, neonFlickerIntensity: 'subtle',
-  particles: false, particlesIntensity: 'subtle',
-  cursorTrail: false, cursorTrailIntensity: 'subtle',
-};
-
 chrome.runtime.onInstalled.addListener(async (details) => {
   await loadThemeRegistry();
 
@@ -1342,12 +1330,12 @@ chrome.runtime.onInstalled.addListener(async (details) => {
       lastDarkTheme: 'connectry-dark',
       orgThemes: {},
       themeScope: 'lightning',
-      effectsConfig: { ...SUBTLE_EFFECTS_DEFAULT },
+      effectsVolume: 'default',
     });
   } else if (details.reason === 'update') {
     // Backfill new defaults for existing installs that predate them.
-    // Only sets keys that are missing/null — does NOT overwrite explicit
-    // user choices. Safe to run on every update.
+    // Also drops the legacy effectsConfig key (V3 model uses shipped
+    // effects + volume scaling instead of a global config).
     await migrateDefaultsForExistingInstall();
   }
 
@@ -1357,22 +1345,30 @@ chrome.runtime.onInstalled.addListener(async (details) => {
 
 /**
  * One-time backfill for existing installs. Sets sensible defaults for any
- * keys the user has never explicitly configured. Never overwrites a value
- * the user has actively set.
+ * keys the user has never explicitly configured. Also drops the legacy
+ * V2 effectsConfig key — the V3 model uses theme-shipped effects scaled
+ * by an effectsVolume knob instead of a global per-effect config.
  */
 async function migrateDefaultsForExistingInstall() {
   try {
     const current = await chrome.storage.sync.get([
       'effectsConfig',
+      'effectsVolume',
       'themeScope',
       'autoMode',
     ]);
     const updates = {};
 
-    // Effects: backfill to Subtle if missing or explicitly null/undefined.
-    // Don't touch existing configs (even 'none' — that's a deliberate choice).
-    if (current.effectsConfig === undefined || current.effectsConfig === null) {
-      updates.effectsConfig = { ...SUBTLE_EFFECTS_DEFAULT };
+    // V3 migration: drop the legacy effectsConfig key. It was a global
+    // per-effect config; under V3 this is replaced by per-theme shipped
+    // effects + a Volume scaler. Custom themes keep their own snapshot.
+    if (current.effectsConfig !== undefined) {
+      await chrome.storage.sync.remove('effectsConfig');
+    }
+
+    // V3: backfill effectsVolume to 'default' if missing
+    if (current.effectsVolume === undefined) {
+      updates.effectsVolume = 'default';
     }
 
     // Scope: only set if completely missing (legacy installs predating the
@@ -1503,9 +1499,10 @@ chrome.storage.onChanged.addListener(async (changes, area) => {
     if (!THEME_REGISTRY.themes.length) await loadThemeRegistry();
     await cacheThemeCSS(changes.theme.newValue);
   }
-  if (changes.effectsConfig || changes.customThemes) {
-    // Broadcast effects update to active SF tabs
-    // (customThemes changes matter too since custom themes carry their own snapshot)
+  if (changes.effectsVolume || changes.customThemes) {
+    // Broadcast effects update to active SF tabs.
+    // - effectsVolume change → OOTB themes need to re-resolve their effects
+    // - customThemes change → custom theme snapshots may have updated
     broadcastEffectsToActiveTabs();
   }
 });

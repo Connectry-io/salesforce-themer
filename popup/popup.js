@@ -317,21 +317,22 @@
   };
 
   function bindEffectsSelector() {
-    const pills = document.querySelectorAll('.effects-pill');
+    // The 4 buttons are the Volume knob: 'off' | 'subtle' | 'default' | 'immersive'.
+    // They scale the active theme's SHIPPED effects rather than overwriting them.
+    const pills = document.querySelectorAll('.effects-pill[data-volume]');
     pills.forEach(pill => {
       pill.addEventListener('click', async () => {
-        const preset = pill.dataset.preset;
-        const config = POPUP_EFFECTS_PRESETS[preset] || POPUP_EFFECTS_PRESETS.none;
-        await chrome.storage.sync.set({ effectsConfig: { ...config } });
-        setEffectsUI(preset);
+        const volume = pill.dataset.volume;
+        await chrome.storage.sync.set({ effectsVolume: volume });
+        setEffectsUI(volume);
       });
     });
   }
 
-  function setEffectsUI(preset) {
-    const pills = document.querySelectorAll('.effects-pill');
+  function setEffectsUI(volume) {
+    const pills = document.querySelectorAll('.effects-pill[data-volume]');
     pills.forEach(p => {
-      const isActive = p.dataset.preset === preset;
+      const isActive = p.dataset.volume === volume;
       p.classList.toggle('is-active', isActive);
       p.setAttribute('aria-checked', String(isActive));
     });
@@ -535,7 +536,7 @@
         lastDarkTheme: 'connectry-dark',
         orgThemes: {},
         themeScope: 'lightning',
-        effectsConfig: { ...POPUP_EFFECTS_PRESETS.subtle },
+        effectsVolume: 'default',
       };
       await chrome.storage.sync.set(defaults);
       // Re-apply to active tab
@@ -609,7 +610,7 @@
         lastDarkTheme: 'connectry-dark',
         orgThemes: {},
         themeScope: 'lightning',
-        effectsConfig: null,
+        effectsVolume: 'default',
       }),
       detectCurrentOrg(),
     ]);
@@ -618,9 +619,8 @@
     currentOrgHostname = orgHostname;
     setScopeUI(result.themeScope || 'both');
 
-    // Set effects UI — show active preset or 'none' if not configured
-    const activePreset = result.effectsConfig?.preset || 'none';
-    setEffectsUI(activePreset);
+    // Set effects UI from the Volume knob (default = "as designer intended")
+    setEffectsUI(result.effectsVolume || 'default');
 
     let effectiveTheme = result.theme;
     if (orgHostname && result.orgThemes[orgHostname]) {
