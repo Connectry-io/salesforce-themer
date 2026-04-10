@@ -469,18 +469,71 @@
           </div>
         </div>
 
-        <div class="guide-anatomy">
-          <div class="guide-anatomy-diagram" id="guideAnatomyDiagram">
-            <!-- populated by JS — sample theme card with numbered callouts -->
+        <div class="guide-anatomy" id="guideAnatomy">
+          <!-- LEFT: sample card stage with numbered markers -->
+          <div class="guide-anatomy-stage">
+            <div class="guide-anatomy-diagram" id="guideAnatomyDiagram">
+              <!-- populated by JS — sample theme card with numbered markers -->
+            </div>
+            <p class="guide-anatomy-hint">
+              <svg width="12" height="12" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                <path d="M8 1.5v3M8 11.5v3M1.5 8h3M11.5 8h3M3.5 3.5l2.1 2.1M10.4 10.4l2.1 2.1M3.5 12.5l2.1-2.1M10.4 5.6l2.1-2.1" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+              </svg>
+              Hover or click any number to see what it points to →
+            </p>
           </div>
-          <ol class="guide-anatomy-callouts">
-            <li><strong>Color swatch</strong><span>The four key colors: background, surface, accent, and text. Click any theme card on the Themes tab to apply it.</span></li>
-            <li><strong>Theme name + category</strong><span>Light or Dark badge tells you which group it belongs to.</span></li>
-            <li><strong>Description</strong><span>What the theme is going for — its mood and design language.</span></li>
-            <li><strong>Effect pills</strong><span>The animations and visual flourishes this theme ships with. Click any pill to read about that specific effect below.</span></li>
-            <li><strong>Typography <span class="guide-coming-soon">soon</span></strong><span>Font family, size scale, and line height. Customizable in the Theme Builder once V1.1 lands.</span></li>
-            <li><strong>Favicon <span class="guide-coming-soon">soon</span></strong><span>The browser tab icon for this theme. Each built-in theme will ship with its own.</span></li>
-            <li><strong>Apply / Clone</strong><span>Apply uses the theme as-is. Clone opens the Theme Builder where you customize it. Saving custom themes is Premium.</span></li>
+
+          <!-- RIGHT: callout list, one row per part -->
+          <ol class="guide-anatomy-callouts" id="guideAnatomyCallouts">
+            <li data-callout="1">
+              <span class="anatomy-num">1</span>
+              <div class="anatomy-text">
+                <strong>Color swatch</strong>
+                <span>Background, surface, accent, and text — the four colors that define a theme.</span>
+              </div>
+            </li>
+            <li data-callout="2">
+              <span class="anatomy-num">2</span>
+              <div class="anatomy-text">
+                <strong>Name + category</strong>
+                <span>Light or Dark — auto-detected from the background color when you create a custom theme.</span>
+              </div>
+            </li>
+            <li data-callout="3">
+              <span class="anatomy-num">3</span>
+              <div class="anatomy-text">
+                <strong>Description</strong>
+                <span>The mood and design language. Click the card to apply it; hover to preview the swatch.</span>
+              </div>
+            </li>
+            <li data-callout="4">
+              <span class="anatomy-num">4</span>
+              <div class="anatomy-text">
+                <strong>Effect pills</strong>
+                <span>Curated animations this theme ships with. Click any pill to jump to its explainer below.</span>
+              </div>
+            </li>
+            <li data-callout="5">
+              <span class="anatomy-num">5</span>
+              <div class="anatomy-text">
+                <strong>Typography <span class="guide-coming-soon">soon</span></strong>
+                <span>Font family, size scale, and line height. Customizable in V1.1.</span>
+              </div>
+            </li>
+            <li data-callout="6">
+              <span class="anatomy-num">6</span>
+              <div class="anatomy-text">
+                <strong>Favicon <span class="guide-coming-soon">soon</span></strong>
+                <span>Each theme will ship with its own browser-tab icon.</span>
+              </div>
+            </li>
+            <li data-callout="7">
+              <span class="anatomy-num">7</span>
+              <div class="anatomy-text">
+                <strong>Apply / Clone</strong>
+                <span>Apply uses it as-is. Clone opens the Builder. Saving custom themes is Premium.</span>
+              </div>
+            </li>
           </ol>
         </div>
       </section>

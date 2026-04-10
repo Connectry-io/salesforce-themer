@@ -3079,24 +3079,55 @@ td.upgrade-compare-col-premium,
   margin-left: 4px;
 }
 
-/* Anatomy section: diagram with numbered badges overlaid on the card,
-   callouts in a clean 2-column grid below */
+/* ─── Anatomy section: side-by-side, interactive ─────────────────────────
+   Sample card on the LEFT (sticky stage), compact callout list on the RIGHT.
+   Hover/click a callout → matching marker pulses + the actual card part lights up.
+   Hover/click a marker → matching callout highlights. */
 .guide-anatomy {
+  display: grid;
+  grid-template-columns: minmax(360px, 1fr) minmax(360px, 1.3fr);
+  gap: var(--cx-space-6);
+  align-items: start;
+}
+
+@media (max-width: 900px) {
+  .guide-anatomy {
+    grid-template-columns: 1fr;
+  }
+}
+
+.guide-anatomy-stage {
   display: flex;
   flex-direction: column;
-  gap: var(--cx-space-6);
+  gap: var(--cx-space-3);
+  position: sticky;
+  top: calc(var(--cx-header-height) + 24px);
 }
 
 .guide-anatomy-diagram {
   position: relative;
-  background: var(--cx-surface-alt);
+  background:
+    radial-gradient(ellipse at center top, rgba(74, 111, 165, 0.08) 0%, transparent 60%),
+    var(--cx-surface-alt);
   border: 1px solid var(--cx-border);
   border-radius: var(--cx-radius-lg);
-  padding: var(--cx-space-8);
+  padding: var(--cx-space-8) var(--cx-space-6);
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: 320px;
+  min-height: 380px;
+  overflow: visible;
+}
+
+.guide-anatomy-hint {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  color: var(--cx-text-subtle);
+  margin: 0;
+  padding: 0 var(--cx-space-2);
+  font-style: italic;
 }
 
 /* Wrapper that holds the sample card + numbered markers in a relative
@@ -3106,22 +3137,101 @@ td.upgrade-compare-col-premium,
   display: inline-block;
 }
 
-/* Numbered marker badges that overlay the sample card */
+/* Sample card parts get a glow ring when their corresponding marker /
+   callout is highlighted. data-part is set in JS on the rendered card. */
+.guide-anatomy-card-wrap [data-part] {
+  position: relative;
+  border-radius: 6px;
+  transition:
+    box-shadow 220ms ease,
+    transform 220ms cubic-bezier(0.34, 1.56, 0.64, 1),
+    background-color 220ms ease;
+}
+.guide-anatomy-card-wrap [data-part].is-highlight {
+  box-shadow:
+    0 0 0 2.5px var(--cx-accent),
+    0 0 0 6px rgba(74, 111, 165, 0.18),
+    0 6px 16px rgba(74, 111, 165, 0.28);
+  z-index: 3;
+}
+
+/* Numbered marker badges — now CLICKABLE buttons that pulse to invite
+   interaction. Hover/click syncs with the callout list on the right. */
 .guide-anatomy-marker {
   position: absolute;
-  width: 26px;
-  height: 26px;
+  width: 28px;
+  height: 28px;
   background: var(--cx-accent);
   color: #ffffff;
+  border: none;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
+  font-family: var(--cx-font);
   font-size: 12px;
   font-weight: 800;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.18), 0 0 0 3px var(--cx-surface-alt);
-  z-index: 2;
+  box-shadow:
+    0 2px 8px rgba(0, 0, 0, 0.18),
+    0 0 0 3px var(--cx-surface-alt);
+  z-index: 4;
+  cursor: pointer;
+  padding: 0;
+  transition: transform 200ms cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 200ms ease;
+  animation: anatomy-marker-breathe 3.6s ease-in-out infinite;
+}
+
+.guide-anatomy-marker::after {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border-radius: 50%;
+  border: 2px solid var(--cx-accent);
+  opacity: 0;
+  animation: anatomy-marker-ping 3.6s ease-out infinite;
   pointer-events: none;
+}
+
+/* Stagger the pulse so they don't all fire in unison */
+.guide-anatomy-marker[data-marker="1"] { animation-delay: 0s; }
+.guide-anatomy-marker[data-marker="1"]::after { animation-delay: 0s; }
+.guide-anatomy-marker[data-marker="2"] { animation-delay: 0.45s; }
+.guide-anatomy-marker[data-marker="2"]::after { animation-delay: 0.45s; }
+.guide-anatomy-marker[data-marker="3"] { animation-delay: 0.9s; }
+.guide-anatomy-marker[data-marker="3"]::after { animation-delay: 0.9s; }
+.guide-anatomy-marker[data-marker="4"] { animation-delay: 1.35s; }
+.guide-anatomy-marker[data-marker="4"]::after { animation-delay: 1.35s; }
+.guide-anatomy-marker[data-marker="5"] { animation-delay: 1.8s; }
+.guide-anatomy-marker[data-marker="5"]::after { animation-delay: 1.8s; }
+.guide-anatomy-marker[data-marker="6"] { animation-delay: 2.25s; }
+.guide-anatomy-marker[data-marker="6"]::after { animation-delay: 2.25s; }
+.guide-anatomy-marker[data-marker="7"] { animation-delay: 2.7s; }
+.guide-anatomy-marker[data-marker="7"]::after { animation-delay: 2.7s; }
+
+@keyframes anatomy-marker-breathe {
+  0%, 100% { box-shadow: 0 2px 8px rgba(0, 0, 0, 0.18), 0 0 0 3px var(--cx-surface-alt); }
+  50%      { box-shadow: 0 2px 8px rgba(0, 0, 0, 0.18), 0 0 0 3px var(--cx-surface-alt), 0 0 0 5px rgba(74, 111, 165, 0.22); }
+}
+
+@keyframes anatomy-marker-ping {
+  0%   { opacity: 0.55; transform: scale(1); }
+  70%  { opacity: 0; transform: scale(1.55); }
+  100% { opacity: 0; transform: scale(1.55); }
+}
+
+.guide-anatomy-marker:hover,
+.guide-anatomy-marker.is-highlight {
+  transform: scale(1.18);
+  box-shadow:
+    0 4px 14px rgba(74, 111, 165, 0.5),
+    0 0 0 3px var(--cx-surface-alt),
+    0 0 0 6px rgba(74, 111, 165, 0.35);
+  animation-play-state: paused;
+}
+
+.guide-anatomy-marker:focus-visible {
+  outline: 2px solid var(--cx-accent);
+  outline-offset: 4px;
 }
 
 /* Placeholder rows in the anatomy card showing what Typography + Favicon
@@ -3161,51 +3271,91 @@ td.upgrade-compare-col-premium,
   flex: 1;
 }
 
-/* Callout grid below the diagram — 2 or 3 columns based on width */
+/* Callout list — compact rows, one per part. Hover-to-highlight syncs with
+   the matching marker on the diagram. */
 .guide-anatomy-callouts {
   list-style: none;
-  counter-reset: anatomy-counter;
   padding: 0;
   margin: 0;
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: var(--cx-space-4);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
 }
 
 .guide-anatomy-callouts li {
-  counter-increment: anatomy-counter;
-  position: relative;
-  padding: var(--cx-space-3) var(--cx-space-3) var(--cx-space-3) 40px;
+  display: flex;
+  align-items: flex-start;
+  gap: var(--cx-space-3);
+  padding: var(--cx-space-3) var(--cx-space-4);
   background: var(--cx-surface);
   border: 1px solid var(--cx-border);
   border-radius: var(--cx-radius-md);
-  font-size: 13px;
-  line-height: 1.55;
+  font-size: 12.5px;
+  line-height: 1.5;
   color: var(--cx-text-muted);
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  transition:
+    border-color 200ms ease,
+    background-color 200ms ease,
+    transform 200ms ease,
+    box-shadow 200ms ease;
 }
 
 .guide-anatomy-callouts li::before {
-  content: counter(anatomy-counter);
+  content: '';
   position: absolute;
-  left: var(--cx-space-3);
-  top: var(--cx-space-3);
-  width: 22px;
-  height: 22px;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background: transparent;
+  transition: background-color 200ms ease;
+}
+
+.guide-anatomy-callouts li:hover,
+.guide-anatomy-callouts li.is-highlight {
+  border-color: var(--cx-accent);
+  background: color-mix(in srgb, var(--cx-accent) 5%, var(--cx-surface));
+  transform: translateX(2px);
+}
+
+.guide-anatomy-callouts li:hover::before,
+.guide-anatomy-callouts li.is-highlight::before {
+  background: var(--cx-accent);
+}
+
+.guide-anatomy-callouts li.is-highlight {
+  box-shadow: 0 4px 14px rgba(74, 111, 165, 0.18);
+}
+
+.guide-anatomy-callouts .anatomy-num {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
   background: var(--cx-accent);
   color: #ffffff;
   border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
   font-size: 11px;
   font-weight: 800;
+  flex-shrink: 0;
+  box-shadow: 0 2px 4px rgba(74, 111, 165, 0.25);
+}
+
+.guide-anatomy-callouts .anatomy-text {
+  flex: 1;
+  min-width: 0;
 }
 
 .guide-anatomy-callouts strong {
   display: block;
   color: var(--cx-text);
   font-weight: 700;
-  margin-bottom: 4px;
+  font-size: 13px;
+  margin-bottom: 2px;
 }
 
 .guide-anatomy-callouts span {

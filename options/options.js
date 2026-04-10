@@ -2300,9 +2300,12 @@
   }
 
   /**
-   * Render the sample theme card in the anatomy section, with numbered
-   * marker badges overlaid on each part. Uses the user's currently active
-   * theme as the example so they recognize it.
+   * Render the sample theme card in the anatomy section. Each visible part
+   * gets a `data-part="N"` attribute so the markers + callout list can
+   * interactively highlight it on hover/click. Markers are now real buttons
+   * with click/hover handlers — see _bindGuideAnatomyInteractions.
+   *
+   * Uses the user's currently active theme as the example so they recognize it.
    */
   function renderGuideAnatomyDiagram() {
     const target = document.getElementById('guideAnatomyDiagram');
@@ -2313,26 +2316,26 @@
 
     target.innerHTML = `
       <div class="guide-anatomy-card-wrap">
-        <div class="theme-card is-active" style="width: 320px; cursor: default; pointer-events: none;">
-          <div class="theme-swatch">${buildSwatch(theme)}</div>
+        <div class="theme-card is-active" style="width: 300px; cursor: default; pointer-events: none;">
+          <div class="theme-swatch" data-part="1">${buildSwatch(theme)}</div>
           <div class="theme-card-body">
-            <div class="theme-card-header">
+            <div class="theme-card-header" data-part="2">
               <span class="theme-name">${Connectry.Settings.escape(theme.name)}</span>
               <span class="theme-category-badge ${theme.category}">${theme.category === 'light' ? 'Light' : 'Dark'}</span>
             </div>
-            <div class="theme-description">${Connectry.Settings.escape(theme.description)}</div>
-            ${buildEffectIndicators(theme.id)}
+            <div class="theme-description" data-part="3">${Connectry.Settings.escape(theme.description)}</div>
+            <div data-part="4">${buildEffectIndicators(theme.id)}</div>
             <!-- Placeholder rows for V1.1 typography + V1 favicon -->
-            <div class="guide-anatomy-placeholder-row">
+            <div class="guide-anatomy-placeholder-row" data-part="5">
               <span class="guide-anatomy-placeholder-label">Aa</span>
               <span class="guide-anatomy-placeholder-text">Inter · 13px · 1.5</span>
             </div>
-            <div class="guide-anatomy-placeholder-row">
+            <div class="guide-anatomy-placeholder-row" data-part="6">
               <span class="guide-anatomy-placeholder-favicon">${_faviconPlaceholderSvg(theme.colors.accent)}</span>
               <span class="guide-anatomy-placeholder-text">Tab favicon</span>
             </div>
           </div>
-          <div class="theme-card-actions">
+          <div class="theme-card-actions" data-part="7">
             <div class="theme-card-status">
               <span class="theme-card-status-dot"></span>
               <span>Apply</span>
@@ -2346,16 +2349,61 @@
             </button>
           </div>
         </div>
-        <!-- Numbered marker badges, positioned absolutely over the card -->
-        <div class="guide-anatomy-marker" data-marker="1" style="top: 8px; left: -14px;">1</div>
-        <div class="guide-anatomy-marker" data-marker="2" style="top: 60px; right: -14px;">2</div>
-        <div class="guide-anatomy-marker" data-marker="3" style="top: 92px; right: -14px;">3</div>
-        <div class="guide-anatomy-marker" data-marker="4" style="top: 124px; left: -14px;">4</div>
-        <div class="guide-anatomy-marker" data-marker="5" style="top: 168px; left: -14px;">5</div>
-        <div class="guide-anatomy-marker" data-marker="6" style="top: 196px; left: -14px;">6</div>
-        <div class="guide-anatomy-marker" data-marker="7" style="bottom: 14px; right: -14px;">7</div>
+        <!-- Numbered marker badges, positioned absolutely over the card. Now buttons. -->
+        <button type="button" class="guide-anatomy-marker" data-marker="1" aria-label="Show explainer for color swatch" style="top: 8px; left: -14px;">1</button>
+        <button type="button" class="guide-anatomy-marker" data-marker="2" aria-label="Show explainer for name + category" style="top: 56px; right: -14px;">2</button>
+        <button type="button" class="guide-anatomy-marker" data-marker="3" aria-label="Show explainer for description" style="top: 92px; left: -14px;">3</button>
+        <button type="button" class="guide-anatomy-marker" data-marker="4" aria-label="Show explainer for effect pills" style="top: 128px; right: -14px;">4</button>
+        <button type="button" class="guide-anatomy-marker" data-marker="5" aria-label="Show explainer for typography placeholder" style="top: 170px; left: -14px;">5</button>
+        <button type="button" class="guide-anatomy-marker" data-marker="6" aria-label="Show explainer for favicon placeholder" style="top: 206px; right: -14px;">6</button>
+        <button type="button" class="guide-anatomy-marker" data-marker="7" aria-label="Show explainer for apply / clone" style="bottom: 14px; left: -14px;">7</button>
       </div>
     `;
+
+    _bindGuideAnatomyInteractions();
+  }
+
+  /**
+   * Wire the bidirectional hover/click sync between the diagram markers,
+   * the highlighted card parts, and the callout list. State is held in the
+   * DOM via .is-highlight classes so we don't need a separate model.
+   */
+  function _bindGuideAnatomyInteractions() {
+    const root = document.getElementById('guideAnatomy');
+    if (!root) return;
+
+    const markers = root.querySelectorAll('.guide-anatomy-marker[data-marker]');
+    const callouts = root.querySelectorAll('.guide-anatomy-callouts li[data-callout]');
+    const parts = root.querySelectorAll('.guide-anatomy-card-wrap [data-part]');
+
+    function highlight(id) {
+      markers.forEach(m => m.classList.toggle('is-highlight', m.dataset.marker === id));
+      callouts.forEach(c => c.classList.toggle('is-highlight', c.dataset.callout === id));
+      parts.forEach(p => p.classList.toggle('is-highlight', p.dataset.part === id));
+    }
+
+    function clear() {
+      markers.forEach(m => m.classList.remove('is-highlight'));
+      callouts.forEach(c => c.classList.remove('is-highlight'));
+      parts.forEach(p => p.classList.remove('is-highlight'));
+    }
+
+    // Markers — hover + click both highlight, click also persists until
+    // the user hovers somewhere else
+    markers.forEach(marker => {
+      marker.addEventListener('mouseenter', () => highlight(marker.dataset.marker));
+      marker.addEventListener('mouseleave', clear);
+      marker.addEventListener('focus', () => highlight(marker.dataset.marker));
+      marker.addEventListener('blur', clear);
+      marker.addEventListener('click', () => highlight(marker.dataset.marker));
+    });
+
+    // Callouts — same pattern in reverse
+    callouts.forEach(callout => {
+      callout.addEventListener('mouseenter', () => highlight(callout.dataset.callout));
+      callout.addEventListener('mouseleave', clear);
+      callout.addEventListener('click', () => highlight(callout.dataset.callout));
+    });
   }
 
   /**
