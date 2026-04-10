@@ -920,19 +920,50 @@
       ? `<span class="dev-mode-badge" title="DEV mode: Premium override is active. Disable in About tab.">DEV</span>`
       : '';
 
-    // When auto-mode is on, show current theme + compact auto badge
+    // When auto-mode is on, show current theme with mode toggle
     if (syncState.autoMode) {
       const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-      const currentId = prefersDark
-        ? (syncState.lastDarkTheme || 'connectry-dark')
-        : (syncState.lastLightTheme || 'connectry');
-      const currentTheme = _resolveThemeForMeta(currentId);
-      const currentName = currentTheme ? currentTheme.name : currentId;
+      const lightId = syncState.lastLightTheme || 'connectry';
+      const darkId = syncState.lastDarkTheme || 'connectry-dark';
+      const lightTheme = _resolveThemeForMeta(lightId);
+      const darkTheme = _resolveThemeForMeta(darkId);
+      const lightName = lightTheme ? lightTheme.name : lightId;
+      const darkName = darkTheme ? darkTheme.name : darkId;
+
+      // Show the OS-active theme prominently, with a toggle to peek at the other
+      const activeTheme = prefersDark ? darkTheme : lightTheme;
+      const activeName = prefersDark ? darkName : lightName;
+
       meta.innerHTML = `
-        <span class="header-meta-active">
-          ${_buildMiniSwatch(currentTheme)}<strong>${Connectry.Settings.escape(currentName)}</strong>
-          <span class="header-meta-auto-badge" title="System auto-mode: switches between light and dark themes with your OS">Auto</span>
+        <span class="header-meta-active header-meta-auto-wrap">
+          ${_buildMiniSwatch(activeTheme)}<strong>${Connectry.Settings.escape(activeName)}</strong>
+          <span class="header-meta-mode-toggle" id="headerAutoModeToggle">
+            <button class="header-mode-btn${!prefersDark ? ' is-active' : ''}" data-mode="light" title="${Connectry.Settings.escape(lightName)}">
+              <svg width="10" height="10" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="3.5" stroke="currentColor" stroke-width="1.5"/><path d="M8 1v2M8 13v2M1 8h2M13 8h2M3.3 3.3l1.4 1.4M11.3 11.3l1.4 1.4M3.3 12.7l1.4-1.4M11.3 4.7l1.4-1.4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+            </button>
+            <button class="header-mode-btn${prefersDark ? ' is-active' : ''}" data-mode="dark" title="${Connectry.Settings.escape(darkName)}">
+              <svg width="10" height="10" viewBox="0 0 16 16" fill="none"><path d="M12.5 9.5A5.5 5.5 0 016.5 3.5 6.5 6.5 0 1012.5 9.5z" stroke="currentColor" stroke-width="1.5"/></svg>
+            </button>
+          </span>
+          <span class="header-meta-auto-badge">Auto</span>
         </span>${devBadge}`;
+
+      // Wire the toggle buttons to show the other theme's info
+      meta.querySelectorAll('.header-mode-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const mode = btn.dataset.mode;
+          const t = mode === 'dark' ? darkTheme : lightTheme;
+          const n = mode === 'dark' ? darkName : lightName;
+          const swatch = meta.querySelector('.header-meta-swatch');
+          const nameEl = meta.querySelector('strong');
+          if (swatch && t?.colors) {
+            const four = [t.colors.background, t.colors.surface, t.colors.accent, t.colors.textPrimary];
+            swatch.innerHTML = four.map(v => `<span style="background:${v}"></span>`).join('');
+          }
+          if (nameEl) nameEl.textContent = n;
+          meta.querySelectorAll('.header-mode-btn').forEach(b => b.classList.toggle('is-active', b === btn));
+        });
+      });
       return;
     }
 
