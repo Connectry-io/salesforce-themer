@@ -5140,17 +5140,21 @@ td.upgrade-compare-col-premium,
 .guide-live-preview-sep { height: 1px; background: var(--cx-border); margin: 2px 0; }
 
 /* ─── Guide: Typography stencil card ───────────────────────────────── */
+/* Callout aside — left accent border signals "educational reference"
+   vs the live interactive workspace above it. */
 .guide-type-stencil-wrap {
-  margin-top: var(--cx-space-3);
-  padding-top: var(--cx-space-3);
-  border-top: 1px solid var(--cx-border);
+  margin-top: 16px;
+  padding: 14px 16px;
+  border-left: 3px solid var(--cx-accent);
+  border-radius: 0 var(--cx-radius-sm) var(--cx-radius-sm) 0;
+  background: rgba(74, 111, 165, 0.03);
 }
-.guide-type-stencil-header { margin-bottom: 10px; }
+.guide-type-stencil-header { margin-bottom: 12px; }
 .guide-type-stencil-label {
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 700;
   color: var(--cx-text);
-  margin-bottom: 2px;
+  margin-bottom: 3px;
 }
 .guide-type-stencil-desc {
   font-size: 12px;
