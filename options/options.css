@@ -4835,71 +4835,48 @@ td.upgrade-compare-col-premium,
 }
 
 /* Placeholder cards (for Typography + Favicons sections until V1 lands) */
-/* ─── Guide: Interactive Typography demo ────────────────────────────── */
-.guide-type-demo {
+/* ─── Guide: Shared live-panel layout (Typography + Favicon) ───────── */
+.guide-live-panel {
   display: grid;
-  grid-template-columns: 220px 1fr;
-  gap: var(--cx-space-4);
+  grid-template-columns: minmax(240px, 300px) 1fr;
   background: var(--cx-surface);
   border: 1px solid var(--cx-border);
   border-radius: var(--cx-radius-lg);
   overflow: hidden;
 }
-@media (max-width: 700px) { .guide-type-demo { grid-template-columns: 1fr; } }
-.guide-type-controls {
-  padding: var(--cx-space-4);
+@media (max-width: 750px) { .guide-live-panel { grid-template-columns: 1fr; } }
+.guide-live-editor {
+  padding: var(--cx-space-4) var(--cx-space-5);
   background: var(--cx-surface-alt);
   border-right: 1px solid var(--cx-border);
+}
+.guide-live-preview {
+  padding: var(--cx-space-5);
   display: flex;
   flex-direction: column;
   gap: var(--cx-space-3);
 }
-.guide-type-control { display: flex; flex-direction: column; gap: 4px; }
-.guide-type-control > label {
-  font-size: 10px; font-weight: 700; text-transform: uppercase;
-  letter-spacing: 0.06em; color: var(--cx-text-subtle);
-}
-.guide-type-size-btns { display: flex; gap: 4px; }
-.guide-type-size-btn {
-  flex: 1; padding: 5px 0; background: var(--cx-surface); border: 1px solid var(--cx-border);
-  border-radius: var(--cx-radius-sm); font-family: var(--cx-font); font-size: 11px;
-  font-weight: 600; color: var(--cx-text-muted); cursor: pointer; text-align: center;
-  transition: all var(--cx-transition);
-}
-.guide-type-size-btn:hover { border-color: var(--cx-accent); color: var(--cx-text); }
-.guide-type-size-btn.is-active {
-  border-color: var(--cx-accent); background: rgba(74,111,165,0.08); color: var(--cx-accent);
-}
-.guide-type-preview { padding: var(--cx-space-5); display: flex; flex-direction: column; gap: var(--cx-space-3); }
-.guide-type-preview-label {
+
+/* Typography preview blocks */
+.guide-live-preview-label {
   font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em;
-  color: var(--cx-text-subtle); margin-bottom: 2px;
+  color: var(--cx-accent); margin-bottom: 2px; display: block;
 }
-.guide-type-preview-heading { font-size: 20px; font-weight: 700; color: var(--cx-text); }
-.guide-type-preview-meta { font-size: 13px; color: var(--cx-text-muted); }
-.guide-type-preview-body { font-size: 13px; color: var(--cx-text-muted); line-height: 1.6; }
-.guide-type-preview-table-head {
+.guide-live-preview-heading { font-size: 20px; font-weight: 700; color: var(--cx-text); line-height: 1.3; }
+.guide-live-preview-meta { font-size: 13px; color: var(--cx-text-muted); margin-top: 2px; }
+.guide-live-preview-body { font-size: 13px; color: var(--cx-text-muted); line-height: 1.6; }
+.guide-live-preview-table {
   font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em;
   color: var(--cx-text-subtle);
 }
-.guide-type-preview-divider { height: 1px; background: var(--cx-border); }
-.guide-type-hint {
-  margin-top: var(--cx-space-3); font-size: 12px; color: var(--cx-text-subtle); line-height: 1.5;
-}
+.guide-live-preview-nav { font-size: 12px; font-weight: 500; color: var(--cx-text-muted); }
+.guide-live-preview-sep { height: 1px; background: var(--cx-border); }
 
-/* ─── Guide: Interactive Favicon demo ──────────────────────────────── */
-.guide-favicon-demo {
-  background: var(--cx-surface);
-  border: 1px solid var(--cx-border);
-  border-radius: var(--cx-radius-lg);
-  overflow: hidden;
-}
+/* ─── Guide: Favicon demo ──────────────────────────────────────────── */
 .guide-favicon-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(52px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(44px, 1fr));
   gap: 6px;
-  padding: var(--cx-space-4);
-  border-bottom: 1px solid var(--cx-border);
 }
 .guide-favicon-item {
   display: flex;
@@ -4910,72 +4887,69 @@ td.upgrade-compare-col-premium,
   border-radius: var(--cx-radius-md);
   cursor: pointer;
   transition: all var(--cx-transition);
-  background: var(--cx-surface-alt);
+  background: var(--cx-surface);
   position: relative;
 }
-.guide-favicon-item:hover { border-color: var(--cx-accent); }
-.guide-favicon-item.is-active { border-color: var(--cx-accent); background: rgba(74,111,165,0.06); }
+.guide-favicon-item:hover { border-color: var(--cx-accent); transform: scale(1.1); }
+.guide-favicon-item.is-active {
+  border-color: var(--cx-accent);
+  box-shadow: 0 0 0 2px rgba(74,111,165,0.2);
+}
 .guide-favicon-item-label {
-  position: absolute; bottom: -2px; left: 50%; transform: translateX(-50%);
+  position: absolute; bottom: -14px; left: 50%; transform: translateX(-50%);
   font-size: 7px; font-weight: 700; color: var(--cx-text-subtle); white-space: nowrap;
-  opacity: 0; transition: opacity var(--cx-transition);
+  pointer-events: none;
 }
-.guide-favicon-item:hover .guide-favicon-item-label { opacity: 1; }
 
-.guide-favicon-customizer {
-  display: grid;
-  grid-template-columns: 1fr 200px;
-  gap: var(--cx-space-4);
-  padding: var(--cx-space-4);
-}
-@media (max-width: 600px) { .guide-favicon-customizer { grid-template-columns: 1fr; } }
-.guide-favicon-customizer-left { display: flex; flex-direction: column; gap: var(--cx-space-3); }
-.guide-favicon-control { display: flex; flex-direction: column; gap: 4px; }
-.guide-favicon-control > label {
-  font-size: 10px; font-weight: 700; text-transform: uppercase;
-  letter-spacing: 0.06em; color: var(--cx-text-subtle);
-}
-.guide-favicon-shape-btns { display: flex; gap: 4px; }
-.guide-favicon-shape-btn {
-  padding: 6px 10px; background: var(--cx-surface); border: 1px solid var(--cx-border);
-  border-radius: var(--cx-radius-sm); color: var(--cx-text-muted); cursor: pointer;
-  display: inline-flex; transition: all var(--cx-transition);
-}
-.guide-favicon-shape-btn:hover { border-color: var(--cx-accent); color: var(--cx-text); }
-.guide-favicon-shape-btn.is-active { border-color: var(--cx-accent); color: var(--cx-accent); }
 .guide-favicon-color-input {
-  width: 48px; height: 28px; border: 1px solid var(--cx-border); border-radius: var(--cx-radius-sm);
+  width: 100%; height: 32px; border: 1px solid var(--cx-border); border-radius: var(--cx-radius-sm);
   cursor: pointer; padding: 2px;
 }
 .guide-favicon-icon-grid {
-  display: grid; grid-template-columns: repeat(auto-fill, minmax(32px, 1fr)); gap: 4px;
+  display: grid; grid-template-columns: repeat(6, 1fr); gap: 4px;
 }
 .guide-favicon-icon-btn {
   display: flex; align-items: center; justify-content: center;
-  width: 32px; height: 32px; border: 1px solid var(--cx-border); border-radius: var(--cx-radius-sm);
-  background: var(--cx-surface); color: var(--cx-text-muted); cursor: pointer;
-  font-size: 14px; transition: all var(--cx-transition);
+  aspect-ratio: 1; border: 1.5px solid var(--cx-border); border-radius: var(--cx-radius-sm);
+  background: var(--cx-surface); cursor: pointer;
+  transition: all var(--cx-transition);
 }
-.guide-favicon-icon-btn:hover { border-color: var(--cx-accent); color: var(--cx-text); }
-.guide-favicon-icon-btn.is-active { border-color: var(--cx-accent); color: var(--cx-accent); }
+.guide-favicon-icon-btn:hover { border-color: var(--cx-accent); transform: scale(1.1); }
+.guide-favicon-icon-btn.is-active {
+  border-color: var(--cx-accent); box-shadow: 0 0 0 2px rgba(74,111,165,0.2);
+}
 
-.guide-favicon-customizer-right {
-  display: flex; flex-direction: column; align-items: center; gap: var(--cx-space-3);
+/* Favicon preview area */
+.guide-favicon-preview-area {
+  align-items: center;
+  justify-content: center;
 }
-.guide-favicon-live-preview {
-  width: 80px; height: 80px; border: 1px solid var(--cx-border); border-radius: var(--cx-radius-md);
-  display: flex; align-items: center; justify-content: center; background: var(--cx-surface-alt);
+.guide-favicon-hero {
+  width: 96px; height: 96px;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--cx-surface-alt); border: 1px solid var(--cx-border);
+  border-radius: var(--cx-radius-lg);
+  transition: all 200ms ease;
 }
-.guide-favicon-live-preview svg { width: 64px; height: 64px; }
-.guide-favicon-live-contexts { display: flex; gap: 8px; }
-.guide-favicon-context {
-  display: flex; align-items: center; gap: 4px; padding: 4px 8px;
-  border-radius: var(--cx-radius-sm); font-size: 9px; font-weight: 600;
+.guide-favicon-hero svg { width: 80px; height: 80px; }
+
+/* Fake browser tab context previews */
+.guide-favicon-contexts { display: flex; gap: 8px; margin-top: var(--cx-space-3); }
+.guide-favicon-ctx {
+  display: flex; align-items: center; gap: 5px; padding: 5px 10px;
+  border-radius: 8px 8px 0 0; font-size: 10px; font-weight: 500;
+  max-width: 180px;
 }
-.guide-favicon-context-dark { background: #1e293b; color: #94a3b8; }
-.guide-favicon-context-light { background: #f1f5f9; color: #64748b; border: 1px solid #e2e8f0; }
-.guide-favicon-ctx-icon { display: inline-flex; width: 14px; height: 14px; }
+.guide-favicon-ctx-dark { background: #1e293b; color: #94a3b8; }
+.guide-favicon-ctx-light { background: #f1f5f9; color: #64748b; border: 1px solid #e2e8f0; border-bottom: none; }
+.guide-favicon-ctx-icon { display: inline-flex; flex-shrink: 0; }
 .guide-favicon-ctx-icon svg { width: 14px; height: 14px; }
+.guide-favicon-ctx-text {
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.guide-favicon-ctx-x { opacity: 0.4; margin-left: auto; font-size: 12px; }
+
+.guide-favicon-apply-btn { margin-top: var(--cx-space-3); }
 
 .guide-placeholder-card {
   background: var(--cx-surface-alt);

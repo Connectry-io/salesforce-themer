@@ -647,133 +647,166 @@
         </p>
       </section>
 
-      <!-- Section 3: Typography — interactive demo -->
+      <!-- Section 3: Typography — interactive demo using Builder styling -->
       <section class="cx-section">
         <div class="cx-section-header">
           <div>
             <h2 class="cx-section-title">Typography</h2>
-            <p class="cx-section-subtitle">Change how text looks across your Salesforce org. Try it below.</p>
+            <p class="cx-section-subtitle">Change how text looks across your Salesforce org. Try it live.</p>
           </div>
         </div>
-        <div class="guide-type-demo" id="guideTypeDemo">
-          <div class="guide-type-controls">
-            <div class="guide-type-control">
-              <label>Font</label>
-              <select class="editor-select" id="guideTypeFont">
-                <option value="system-ui">System Default</option>
-                <option value="neo-grotesque">Neo-Grotesque</option>
-                <option value="humanist">Humanist</option>
-                <option value="geometric">Geometric</option>
-                <option value="classic-serif">Classic Serif</option>
-              </select>
-            </div>
-            <div class="guide-type-control">
-              <label>Size</label>
-              <div class="guide-type-size-btns" id="guideTypeSizeBtns">
-                <button type="button" class="guide-type-size-btn" data-scale="0.9">S</button>
-                <button type="button" class="guide-type-size-btn is-active" data-scale="1">M</button>
-                <button type="button" class="guide-type-size-btn" data-scale="1.1">L</button>
-                <button type="button" class="guide-type-size-btn" data-scale="1.2">XL</button>
+        <div class="guide-live-panel">
+          <div class="guide-live-editor">
+            <div class="editor-group">
+              <h3 class="editor-group-title">Font Family</h3>
+              <div class="editor-field">
+                <label>Font</label>
+                <select class="editor-select" id="guideTypeFont">
+                  <option value="system-ui">System Default</option>
+                  <option value="neo-grotesque">Neo-Grotesque</option>
+                  <option value="humanist">Humanist</option>
+                  <option value="geometric">Geometric</option>
+                  <option value="classic-serif">Classic Serif</option>
+                </select>
               </div>
             </div>
-            <div class="guide-type-control">
-              <label>Heading Weight</label>
-              <select class="editor-select" id="guideTypeHeadingWeight">
-                <option value="400">Regular</option>
-                <option value="500">Medium</option>
-                <option value="600">Semi-bold</option>
-                <option value="700" selected>Bold</option>
-              </select>
+            <div class="editor-group">
+              <h3 class="editor-group-title">Size</h3>
+              <div class="editor-type-presets" id="guideTypeSizeBtns">
+                <button type="button" class="editor-type-preset" data-scale="0.9">
+                  <span class="editor-type-preset-icon" style="font-size:10px">A</span>
+                  <span>Compact</span>
+                </button>
+                <button type="button" class="editor-type-preset is-active" data-scale="1">
+                  <span class="editor-type-preset-icon" style="font-size:12px">A</span>
+                  <span>Normal</span>
+                </button>
+                <button type="button" class="editor-type-preset" data-scale="1.1">
+                  <span class="editor-type-preset-icon" style="font-size:14px">A</span>
+                  <span>Comfortable</span>
+                </button>
+                <button type="button" class="editor-type-preset" data-scale="1.2">
+                  <span class="editor-type-preset-icon" style="font-size:16px">A</span>
+                  <span>Large</span>
+                </button>
+              </div>
             </div>
-            <div class="guide-type-control">
-              <label>Body Weight</label>
-              <select class="editor-select" id="guideTypeBodyWeight">
-                <option value="300">Light</option>
-                <option value="400" selected>Regular</option>
-                <option value="500">Medium</option>
-              </select>
+            <div class="editor-group">
+              <h3 class="editor-group-title">Weight</h3>
+              <div class="editor-field">
+                <label>Heading</label>
+                <select class="editor-select" id="guideTypeHeadingWeight">
+                  <option value="400">Regular (400)</option>
+                  <option value="500">Medium (500)</option>
+                  <option value="600">Semi-bold (600)</option>
+                  <option value="700" selected>Bold (700)</option>
+                </select>
+              </div>
+              <div class="editor-field">
+                <label>Body</label>
+                <select class="editor-select" id="guideTypeBodyWeight">
+                  <option value="300">Light (300)</option>
+                  <option value="400" selected>Regular (400)</option>
+                  <option value="500">Medium (500)</option>
+                </select>
+              </div>
             </div>
           </div>
-          <div class="guide-type-preview" id="guideTypePreview">
-            <div class="guide-type-preview-section">
-              <span class="guide-type-preview-label">Record Header</span>
-              <div class="guide-type-preview-heading" id="guideTypeHeading">Lead: John Smith</div>
-              <div class="guide-type-preview-meta" id="guideTypeMeta">Senior Account Executive · Acme Corp</div>
+          <div class="guide-live-preview" id="guideTypePreview">
+            <div class="guide-live-preview-block">
+              <span class="guide-live-preview-label">Record Name</span>
+              <div class="guide-live-preview-heading" id="guideTypeHeading">Lead: John Smith</div>
+              <div class="guide-live-preview-meta" id="guideTypeMeta">Senior Account Executive · Acme Corp</div>
             </div>
-            <div class="guide-type-preview-divider"></div>
-            <div class="guide-type-preview-section">
-              <span class="guide-type-preview-label">Body Text</span>
-              <div class="guide-type-preview-body" id="guideTypeBody">Record details, field values, list views, and related lists all use the body font. Labels like "Phone", "Email", and "Company" appear alongside their values in the compact layout.</div>
+            <div class="guide-live-preview-sep"></div>
+            <div class="guide-live-preview-block">
+              <span class="guide-live-preview-label">Detail Fields</span>
+              <div class="guide-live-preview-body" id="guideTypeBody">Record details, field values, list views, and related lists all use the body font. Labels like "Phone", "Email", and "Company" appear alongside their values in the compact layout.</div>
             </div>
-            <div class="guide-type-preview-divider"></div>
-            <div class="guide-type-preview-section">
-              <span class="guide-type-preview-label">Table Header</span>
-              <div class="guide-type-preview-table-head" id="guideTypeTableHead">Name &nbsp;&nbsp;&nbsp; Email &nbsp;&nbsp;&nbsp; Status &nbsp;&nbsp;&nbsp; Last Modified</div>
+            <div class="guide-live-preview-sep"></div>
+            <div class="guide-live-preview-block">
+              <span class="guide-live-preview-label">Table Column Headers</span>
+              <div class="guide-live-preview-table" id="guideTypeTableHead">Name &nbsp;&nbsp; Email &nbsp;&nbsp; Status &nbsp;&nbsp; Last Modified</div>
+            </div>
+            <div class="guide-live-preview-sep"></div>
+            <div class="guide-live-preview-block">
+              <span class="guide-live-preview-label">Nav Tab</span>
+              <div class="guide-live-preview-nav" id="guideTypeNav">Home &nbsp;&nbsp; Leads &nbsp;&nbsp; Contacts &nbsp;&nbsp; Opportunities</div>
             </div>
           </div>
         </div>
-        <p class="guide-type-hint">These same controls are in the <strong>Type</strong> tab of the Theme Builder. Uses system fonts — zero loading, works offline.</p>
       </section>
 
-      <!-- Section 4: Favicons — interactive grid + customizer -->
+      <!-- Section 4: Favicons — pick or design, applies live to your tab -->
       <section class="cx-section">
         <div class="cx-section-header">
           <div>
             <h2 class="cx-section-title">Favicons</h2>
-            <p class="cx-section-subtitle">Replace the Salesforce cloud icon in your browser tab. Pick one or design your own.</p>
+            <p class="cx-section-subtitle">Replace the Salesforce cloud in your browser tab. Pick a theme icon or design your own — applies instantly.</p>
           </div>
         </div>
-        <div class="guide-favicon-demo" id="guideFaviconDemo">
-          <!-- Pre-built favicon grid -->
-          <div class="guide-favicon-grid" id="guideFaviconGrid">
-            <!-- Populated by JS — one per theme + Connectry default -->
-          </div>
-          <!-- Favicon customizer -->
-          <div class="guide-favicon-customizer">
-            <div class="guide-favicon-customizer-left">
-              <div class="guide-favicon-control">
-                <label>Background</label>
-                <div class="guide-favicon-shape-btns" id="guideFaviconShapeBtns">
-                  <button type="button" class="guide-favicon-shape-btn is-active" data-shape="circle" title="Circle">
-                    <svg width="16" height="16" viewBox="0 0 20 20"><circle cx="10" cy="10" r="8" fill="currentColor"/></svg>
-                  </button>
-                  <button type="button" class="guide-favicon-shape-btn" data-shape="rounded" title="Rounded square">
-                    <svg width="16" height="16" viewBox="0 0 20 20"><rect x="2" y="2" width="16" height="16" rx="4" fill="currentColor"/></svg>
-                  </button>
-                  <button type="button" class="guide-favicon-shape-btn" data-shape="square" title="Square">
-                    <svg width="16" height="16" viewBox="0 0 20 20"><rect x="2" y="2" width="16" height="16" rx="1" fill="currentColor"/></svg>
-                  </button>
-                  <button type="button" class="guide-favicon-shape-btn" data-shape="none" title="No background">
-                    <svg width="16" height="16" viewBox="0 0 20 20"><circle cx="10" cy="10" r="8" stroke="currentColor" stroke-width="1.5" fill="none" stroke-dasharray="3,2"/></svg>
-                  </button>
-                </div>
+        <div class="guide-live-panel">
+          <div class="guide-live-editor">
+            <div class="editor-group">
+              <h3 class="editor-group-title">Theme Icons</h3>
+              <div class="guide-favicon-grid" id="guideFaviconGrid">
+                <!-- Populated by JS — one per built-in theme -->
               </div>
-              <div class="guide-favicon-control">
-                <label>Color</label>
+            </div>
+            <div class="editor-group">
+              <h3 class="editor-group-title">Shape</h3>
+              <div class="editor-type-presets" id="guideFaviconShapeBtns" style="grid-template-columns: repeat(4, 1fr);">
+                <button type="button" class="editor-type-preset is-active" data-shape="circle">
+                  <svg width="18" height="18" viewBox="0 0 20 20"><circle cx="10" cy="10" r="8" fill="currentColor"/></svg>
+                  <span>Circle</span>
+                </button>
+                <button type="button" class="editor-type-preset" data-shape="rounded">
+                  <svg width="18" height="18" viewBox="0 0 20 20"><rect x="2" y="2" width="16" height="16" rx="4" fill="currentColor"/></svg>
+                  <span>Rounded</span>
+                </button>
+                <button type="button" class="editor-type-preset" data-shape="square">
+                  <svg width="18" height="18" viewBox="0 0 20 20"><rect x="2" y="2" width="16" height="16" rx="1" fill="currentColor"/></svg>
+                  <span>Square</span>
+                </button>
+                <button type="button" class="editor-type-preset" data-shape="none">
+                  <svg width="18" height="18" viewBox="0 0 20 20"><circle cx="10" cy="10" r="8" stroke="currentColor" stroke-width="1.5" fill="none" stroke-dasharray="3,2"/></svg>
+                  <span>None</span>
+                </button>
+              </div>
+            </div>
+            <div class="editor-group">
+              <h3 class="editor-group-title">Color</h3>
+              <div class="editor-field">
+                <label>Background</label>
                 <input type="color" class="guide-favicon-color-input" id="guideFaviconColor" value="#4A6FA5" />
               </div>
-              <div class="guide-favicon-control">
-                <label>Icon</label>
-                <div class="guide-favicon-icon-grid" id="guideFaviconIconGrid">
-                  <!-- Populated by JS — icon options -->
-                </div>
+            </div>
+            <div class="editor-group">
+              <h3 class="editor-group-title">Icon</h3>
+              <div class="guide-favicon-icon-grid" id="guideFaviconIconGrid">
+                <!-- Populated by JS — 12 icon options -->
               </div>
             </div>
-            <div class="guide-favicon-customizer-right">
-              <div class="guide-favicon-live-preview" id="guideFaviconLivePreview">
-                <!-- Live SVG preview rendered by JS -->
+          </div>
+          <div class="guide-live-preview guide-favicon-preview-area">
+            <div class="guide-favicon-hero" id="guideFaviconLivePreview">
+              <!-- 96px live SVG preview rendered by JS -->
+            </div>
+            <div class="guide-favicon-contexts">
+              <div class="guide-favicon-ctx guide-favicon-ctx-dark">
+                <span class="guide-favicon-ctx-icon" id="guideFaviconCtxDarkIcon"></span>
+                <span class="guide-favicon-ctx-text">Jack Popescu | Le...</span>
+                <span class="guide-favicon-ctx-x">×</span>
               </div>
-              <div class="guide-favicon-live-contexts">
-                <div class="guide-favicon-context guide-favicon-context-dark" id="guideFaviconCtxDark">
-                  <span class="guide-favicon-ctx-icon" id="guideFaviconCtxDarkIcon"></span>
-                  <span>Dark tab</span>
-                </div>
-                <div class="guide-favicon-context guide-favicon-context-light" id="guideFaviconCtxLight">
-                  <span class="guide-favicon-ctx-icon" id="guideFaviconCtxLightIcon"></span>
-                  <span>Light tab</span>
-                </div>
+              <div class="guide-favicon-ctx guide-favicon-ctx-light">
+                <span class="guide-favicon-ctx-icon" id="guideFaviconCtxLightIcon"></span>
+                <span class="guide-favicon-ctx-text">Home | Salesforce</span>
+                <span class="guide-favicon-ctx-x">×</span>
               </div>
             </div>
+            <button class="cx-btn cx-btn-primary guide-favicon-apply-btn" id="guideFaviconApplyBtn" type="button">
+              Apply to my tabs now
+            </button>
           </div>
         </div>
       </section>

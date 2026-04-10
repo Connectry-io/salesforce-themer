@@ -3352,27 +3352,31 @@
       const headingWeight = headingWeightSelect?.value || '700';
       const bodyWeight = bodyWeightSelect?.value || '400';
 
-      const activeBtn = document.querySelector('#guideTypeSizeBtns .guide-type-size-btn.is-active');
+      const activeBtn = document.querySelector('#guideTypeSizeBtns .editor-type-preset.is-active');
       const scale = activeBtn ? parseFloat(activeBtn.dataset.scale) : 1;
 
-      const heading = document.getElementById('guideTypeHeading');
-      const meta = document.getElementById('guideTypeMeta');
-      const body = document.getElementById('guideTypeBody');
-      const tableHead = document.getElementById('guideTypeTableHead');
+      const els = {
+        heading: document.getElementById('guideTypeHeading'),
+        meta: document.getElementById('guideTypeMeta'),
+        body: document.getElementById('guideTypeBody'),
+        tableHead: document.getElementById('guideTypeTableHead'),
+        nav: document.getElementById('guideTypeNav'),
+      };
 
-      if (heading) { heading.style.fontFamily = stack; heading.style.fontSize = `${20 * scale}px`; heading.style.fontWeight = headingWeight; }
-      if (meta) { meta.style.fontFamily = stack; meta.style.fontSize = `${13 * scale}px`; }
-      if (body) { body.style.fontFamily = stack; body.style.fontSize = `${13 * scale}px`; body.style.fontWeight = bodyWeight; }
-      if (tableHead) { tableHead.style.fontFamily = stack; tableHead.style.fontSize = `${11 * scale}px`; tableHead.style.fontWeight = headingWeight; }
+      if (els.heading) { els.heading.style.fontFamily = stack; els.heading.style.fontSize = `${20 * scale}px`; els.heading.style.fontWeight = headingWeight; }
+      if (els.meta) { els.meta.style.fontFamily = stack; els.meta.style.fontSize = `${13 * scale}px`; }
+      if (els.body) { els.body.style.fontFamily = stack; els.body.style.fontSize = `${13 * scale}px`; els.body.style.fontWeight = bodyWeight; }
+      if (els.tableHead) { els.tableHead.style.fontFamily = stack; els.tableHead.style.fontSize = `${11 * scale}px`; els.tableHead.style.fontWeight = headingWeight; }
+      if (els.nav) { els.nav.style.fontFamily = stack; els.nav.style.fontSize = `${12 * scale}px`; }
     }
 
     fontSelect.addEventListener('change', updateTypePreview);
     headingWeightSelect?.addEventListener('change', updateTypePreview);
     bodyWeightSelect?.addEventListener('change', updateTypePreview);
 
-    document.querySelectorAll('#guideTypeSizeBtns .guide-type-size-btn').forEach(btn => {
+    document.querySelectorAll('#guideTypeSizeBtns .editor-type-preset').forEach(btn => {
       btn.addEventListener('click', () => {
-        document.querySelectorAll('#guideTypeSizeBtns .guide-type-size-btn').forEach(b => b.classList.remove('is-active'));
+        document.querySelectorAll('#guideTypeSizeBtns .editor-type-preset').forEach(b => b.classList.remove('is-active'));
         btn.classList.add('is-active');
         updateTypePreview();
       });
@@ -3422,7 +3426,7 @@
   function _updateGuideFaviconPreview() {
     const { shape, color, icon } = _guideFaviconState;
     const main = document.getElementById('guideFaviconLivePreview');
-    if (main) main.innerHTML = _renderFaviconSVG(shape, color, icon, 64);
+    if (main) main.innerHTML = _renderFaviconSVG(shape, color, icon, 80);
     const dark = document.getElementById('guideFaviconCtxDarkIcon');
     if (dark) dark.innerHTML = _renderFaviconSVG(shape, color, icon, 14);
     const light = document.getElementById('guideFaviconCtxLightIcon');
@@ -3480,11 +3484,11 @@
       }
     }
 
-    // Shape buttons
-    document.querySelectorAll('#guideFaviconShapeBtns .guide-favicon-shape-btn').forEach(btn => {
+    // Shape buttons (using .editor-type-preset classes now)
+    document.querySelectorAll('#guideFaviconShapeBtns .editor-type-preset').forEach(btn => {
       btn.addEventListener('click', () => {
         _guideFaviconState.shape = btn.dataset.shape;
-        document.querySelectorAll('#guideFaviconShapeBtns .guide-favicon-shape-btn').forEach(b => b.classList.remove('is-active'));
+        document.querySelectorAll('#guideFaviconShapeBtns .editor-type-preset').forEach(b => b.classList.remove('is-active'));
         btn.classList.add('is-active');
         _updateGuideFaviconPreview();
       });
@@ -3494,6 +3498,38 @@
     document.getElementById('guideFaviconColor')?.addEventListener('input', (e) => {
       _guideFaviconState.color = e.target.value;
       _updateGuideFaviconPreview();
+    });
+
+    // "Apply to my tabs now" button — pushes the custom favicon to all SF tabs live
+    document.getElementById('guideFaviconApplyBtn')?.addEventListener('click', async () => {
+      const btn = document.getElementById('guideFaviconApplyBtn');
+      const config = { ..._guideFaviconState };
+
+      // Save to storage so it persists
+      await chrome.storage.sync.set({ faviconEnabled: true, faviconConfig: config });
+
+      // Update the editor toolbar toggle to reflect enabled state
+      const toggle = document.getElementById('editorFaviconToggle');
+      if (toggle) toggle.checked = true;
+      const slot = document.getElementById('editorFaviconSlot');
+      if (slot) slot.classList.remove('is-off');
+
+      // Push to all active SF tabs
+      try {
+        const tabs = await chrome.tabs.query({
+          url: ['https://*.lightning.force.com/*', 'https://*.my.salesforce.com/*', 'https://*.salesforce.com/*'],
+        });
+        for (const tab of tabs) {
+          if (tab.id) chrome.tabs.sendMessage(tab.id, { action: 'setFavicon', enabled: true, config }).catch(() => {});
+        }
+      } catch (_) {}
+
+      // Visual feedback
+      if (btn) {
+        btn.textContent = 'Applied!';
+        btn.classList.add('is-success');
+        setTimeout(() => { btn.textContent = 'Apply to my tabs now'; btn.classList.remove('is-success'); }, 2000);
+      }
     });
 
     // Initial render
