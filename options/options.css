@@ -1958,6 +1958,56 @@
   outline-offset: 2px;
 }
 
+/* Right side of the editor toolbar — holds the AI button + Save */
+.editor-toolbar-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+/* "Build with AI" button — distinct pill style with a sparkle gradient
+   so it reads as the alternate creation surface (vs the primary Save).
+   V1: shows a Soon badge and opens the upgrade dialog. When chat ships,
+   this toggles the persistent chat panel. */
+.editor-build-ai-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 12px;
+  background: linear-gradient(135deg, #f3e8ff 0%, #e0e7ff 100%);
+  color: #5b21b6;
+  border: 1px solid #c4b5fd;
+  border-radius: var(--cx-radius-full);
+  font-family: var(--cx-font);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: filter var(--cx-transition), transform var(--cx-transition);
+}
+
+.editor-build-ai-btn:hover {
+  filter: brightness(1.05);
+  transform: translateY(-1px);
+}
+
+.editor-build-ai-btn svg {
+  flex-shrink: 0;
+}
+
+.editor-build-ai-badge {
+  font-size: 8.5px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 2px 6px;
+  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+  color: #8f6413;
+  border: 1px solid #d4a22a;
+  border-radius: var(--cx-radius-full);
+  flex-shrink: 0;
+}
+
 /* Toolbar name + description stacked input */
 .editor-toolbar-name-wrap {
   display: flex;

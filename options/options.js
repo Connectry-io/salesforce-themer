@@ -1089,9 +1089,15 @@
     });
 
     // Builder sidebar: "+ New ▾" button toggles the create popover.
-    // The popover holds all 4 ways to start a new theme (manual = enabled,
-    // AI / brand / URL = locked Premium · Coming Soon).
+    // The popover holds the 3 one-time starting points (manual = enabled,
+    // brand-guide / URL = locked Premium · Coming Soon).
     _bindBuilderCreateMenu();
+
+    // "Build with AI" button in the editor toolbar — the persistent
+    // alternate creation surface. V1: opens the upgrade dialog.
+    document.getElementById('editorBuildWithAiBtn')?.addEventListener('click', () => {
+      openUpgradeDialog();
+    });
   }
 
   /**

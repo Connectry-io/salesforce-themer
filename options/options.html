@@ -333,19 +333,6 @@
                   </span>
                 </button>
                 <div class="builder-create-menu-divider"></div>
-                <button type="button" class="builder-create-menu-item is-locked" data-startfrom="ai" disabled role="menuitem">
-                  <span class="builder-startfrom-icon">
-                    <svg width="14" height="14" viewBox="0 0 22 22" fill="none" aria-hidden="true">
-                      <path d="M11 2v3M11 17v3M2 11h3M17 11h3M4.5 4.5l2 2M15.5 15.5l2 2M4.5 17.5l2-2M15.5 6.5l2-2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
-                      <circle cx="11" cy="11" r="3.5" stroke="currentColor" stroke-width="1.6"/>
-                    </svg>
-                  </span>
-                  <span class="builder-startfrom-body">
-                    <span class="builder-startfrom-name">Describe with AI</span>
-                    <span class="builder-startfrom-desc">"Notion-inspired warm minimalism"</span>
-                  </span>
-                  <span class="builder-startfrom-badge">Soon</span>
-                </button>
                 <button type="button" class="builder-create-menu-item is-locked" data-startfrom="brand-guide" disabled role="menuitem">
                   <span class="builder-startfrom-icon">
                     <svg width="14" height="14" viewBox="0 0 22 22" fill="none" aria-hidden="true">
@@ -1056,6 +1043,18 @@
             </div>
 
             <div class="editor-toolbar-right">
+              <!-- Persistent "Build with AI" entry point. This is the alternate
+                   creation surface — eventually it'll toggle a chat panel that
+                   stays on screen so users can iteratively converse with AI
+                   to refine their theme. For V1 it's a Premium · Coming Soon
+                   placeholder that opens the upgrade dialog. -->
+              <button class="editor-build-ai-btn" id="editorBuildWithAiBtn" type="button" title="Build with AI — coming soon">
+                <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                  <path d="M8 1.5l1.4 3.1 3.4.4-2.6 2.4.7 3.4L8 9.1 5.1 10.8l.7-3.4L3.2 5l3.4-.4L8 1.5z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round" fill="currentColor" fill-opacity="0.18"/>
+                </svg>
+                <span>Build with AI</span>
+                <span class="editor-build-ai-badge">Soon</span>
+              </button>
               <button class="cx-btn cx-btn-primary" id="editorSaveBtn">Save Theme</button>
             </div>
           </div>
