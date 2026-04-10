@@ -353,7 +353,7 @@
                 <!-- Populated by JS — one mini badge per built-in theme -->
               </div>
             </div>
-            <button type="button" class="builder-create-menu-item" data-startfrom="import" role="menuitem">
+            <button type="button" class="builder-create-menu-item is-locked" data-startfrom="import" disabled role="menuitem">
               <span class="builder-startfrom-icon">
                 <svg width="14" height="14" viewBox="0 0 22 22" fill="none" aria-hidden="true">
                   <path d="M4 14v4a2 2 0 002 2h10a2 2 0 002-2v-4M11 2v12M7 10l4 4 4-4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
@@ -363,6 +363,7 @@
                 <span class="builder-startfrom-name">Import from JSON</span>
                 <span class="builder-startfrom-desc">Load a previously exported theme file</span>
               </span>
+              <span class="builder-startfrom-badge">Premium</span>
             </button>
             <div class="builder-create-menu-divider"></div>
             <button type="button" class="builder-create-menu-item is-locked" data-startfrom="brand-guide" disabled role="menuitem">
@@ -1268,63 +1269,73 @@
 
           <!-- Free preview banner moved to top bar as inline notice -->
 
-          <!-- Live mini theme card — mirrors the gallery theme card, updates in real-time -->
-          <div class="editor-mini-card" id="editorMiniCard">
-            <div class="editor-mini-swatch" id="editorMiniSwatch">
+          <!-- Live theme card — uses the SAME classes as gallery cards for consistency -->
+          <div class="theme-card editor-live-card" id="editorMiniCard">
+            <div class="theme-swatch" id="editorMiniSwatch">
               <!-- 4 color spans populated by updateMiniCard() -->
             </div>
-            <div class="editor-mini-body">
-              <div class="editor-mini-name-row">
-                <input type="text" class="editor-name-input editor-mini-name" id="editorName" value="My Custom Theme" spellcheck="false" maxlength="50" />
+            <div class="theme-card-body">
+              <div class="theme-card-header">
+                <div class="editor-live-name-wrap">
+                  <svg class="editor-input-icon" width="10" height="10" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+                    <path d="M9.5 1.5l3 3-8 8H1.5v-3l8-8z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/>
+                  </svg>
+                  <input type="text" class="editor-name-input" id="editorName" value="My Custom Theme" spellcheck="false" maxlength="50" />
+                </div>
                 <span class="theme-category-badge" id="editorCategoryBadge">Light</span>
               </div>
-              <input type="text" class="editor-desc-input editor-mini-desc" id="editorDescription" placeholder="Add a description" spellcheck="false" maxlength="100" />
-              <div class="editor-mini-meta">
-                <div class="editor-mini-effects" id="editorMiniEffects">
-                  <!-- effect pills populated by updateMiniCard() -->
-                </div>
-                <span class="editor-mini-type-hint" id="editorMiniTypeHint">System Default · Normal</span>
-                <div class="editor-mini-favicon" id="editorFaviconSlot">
-                  <button type="button" class="editor-mini-favicon-btn" id="editorFaviconBtn" title="Customize favicon">
-                    <span class="editor-mini-favicon-icon" id="editorFaviconPreview">
-                      <svg width="16" height="16" viewBox="0 0 32 32" fill="none"><circle cx="8" cy="16" r="4" fill="#2D2D2D"/><line x1="12" y1="16" x2="20" y2="16" stroke="#4A6FA5" stroke-width="2" stroke-linecap="round"/><circle cx="24" cy="16" r="4" fill="#4A6FA5"/></svg>
-                    </span>
-                  </button>
-                  <label class="editor-favicon-toggle">
-                    <input type="checkbox" id="editorFaviconToggle" checked />
-                  </label>
-                  <!-- Favicon customizer popout -->
-                  <div class="editor-favicon-popout" id="editorFaviconPopout" hidden>
-                    <div class="editor-favicon-popout-section">
-                      <span class="editor-favicon-popout-label">Shape</span>
-                      <div class="editor-favicon-popout-shapes" id="editorFaviconShapes">
-                        <button type="button" class="editor-favicon-shape-btn is-active" data-shape="circle">
-                          <svg width="14" height="14" viewBox="0 0 20 20"><circle cx="10" cy="10" r="8" fill="currentColor"/></svg>
-                        </button>
-                        <button type="button" class="editor-favicon-shape-btn" data-shape="rounded">
-                          <svg width="14" height="14" viewBox="0 0 20 20"><rect x="2" y="2" width="16" height="16" rx="4" fill="currentColor"/></svg>
-                        </button>
-                        <button type="button" class="editor-favicon-shape-btn" data-shape="square">
-                          <svg width="14" height="14" viewBox="0 0 20 20"><rect x="2" y="2" width="16" height="16" rx="1" fill="currentColor"/></svg>
-                        </button>
-                        <button type="button" class="editor-favicon-shape-btn" data-shape="none">
-                          <svg width="14" height="14" viewBox="0 0 20 20"><circle cx="10" cy="10" r="8" stroke="currentColor" stroke-width="1.5" fill="none" stroke-dasharray="3,2"/></svg>
-                        </button>
-                      </div>
+              <div class="editor-live-desc-wrap">
+                <svg class="editor-input-icon" width="9" height="9" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+                  <path d="M9.5 1.5l3 3-8 8H1.5v-3l8-8z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/>
+                </svg>
+                <input type="text" class="editor-desc-input" id="editorDescription" placeholder="Add a short description" spellcheck="false" maxlength="100" />
+              </div>
+              <div id="editorMiniEffects">
+                <!-- effect pills populated by updateMiniCard() -->
+              </div>
+            </div>
+            <div class="theme-card-actions">
+              <span class="editor-live-type-hint" id="editorMiniTypeHint">System · Normal</span>
+              <div class="editor-live-favicon" id="editorFaviconSlot" style="position:relative;">
+                <button type="button" class="editor-live-favicon-btn" id="editorFaviconBtn" title="Customize favicon">
+                  <span id="editorFaviconPreview">
+                    <svg width="14" height="14" viewBox="0 0 32 32" fill="none"><circle cx="8" cy="16" r="4" fill="#2D2D2D"/><line x1="12" y1="16" x2="20" y2="16" stroke="#4A6FA5" stroke-width="2" stroke-linecap="round"/><circle cx="24" cy="16" r="4" fill="#4A6FA5"/></svg>
+                  </span>
+                </button>
+                <label class="editor-favicon-toggle">
+                  <input type="checkbox" id="editorFaviconToggle" checked />
+                </label>
+                <!-- Favicon customizer popout -->
+                <div class="editor-favicon-popout" id="editorFaviconPopout" hidden>
+                  <div class="editor-favicon-popout-section">
+                    <span class="editor-favicon-popout-label">Shape</span>
+                    <div class="editor-favicon-popout-shapes" id="editorFaviconShapes">
+                      <button type="button" class="editor-favicon-shape-btn is-active" data-shape="circle">
+                        <svg width="14" height="14" viewBox="0 0 20 20"><circle cx="10" cy="10" r="8" fill="currentColor"/></svg>
+                      </button>
+                      <button type="button" class="editor-favicon-shape-btn" data-shape="rounded">
+                        <svg width="14" height="14" viewBox="0 0 20 20"><rect x="2" y="2" width="16" height="16" rx="4" fill="currentColor"/></svg>
+                      </button>
+                      <button type="button" class="editor-favicon-shape-btn" data-shape="square">
+                        <svg width="14" height="14" viewBox="0 0 20 20"><rect x="2" y="2" width="16" height="16" rx="1" fill="currentColor"/></svg>
+                      </button>
+                      <button type="button" class="editor-favicon-shape-btn" data-shape="none">
+                        <svg width="14" height="14" viewBox="0 0 20 20"><circle cx="10" cy="10" r="8" stroke="currentColor" stroke-width="1.5" fill="none" stroke-dasharray="3,2"/></svg>
+                      </button>
                     </div>
-                    <div class="editor-favicon-popout-section">
-                      <span class="editor-favicon-popout-label">Color</span>
-                      <input type="color" class="editor-favicon-popout-color" id="editorFaviconColor" value="#4A6FA5" />
+                  </div>
+                  <div class="editor-favicon-popout-section">
+                    <span class="editor-favicon-popout-label">Color</span>
+                    <input type="color" class="editor-favicon-popout-color" id="editorFaviconColor" value="#4A6FA5" />
+                  </div>
+                  <div class="editor-favicon-popout-section">
+                    <span class="editor-favicon-popout-label">Icon</span>
+                    <div class="editor-favicon-popout-icons" id="editorFaviconIconGrid">
+                      <!-- Populated by JS from FAVICON_ICONS -->
                     </div>
-                    <div class="editor-favicon-popout-section">
-                      <span class="editor-favicon-popout-label">Icon</span>
-                      <div class="editor-favicon-popout-icons" id="editorFaviconIconGrid">
-                        <!-- Populated by JS from FAVICON_ICONS -->
-                      </div>
-                    </div>
-                    <div class="editor-favicon-popout-preview" id="editorFaviconPopoutPreview">
-                      <!-- 48px live preview -->
-                    </div>
+                  </div>
+                  <div class="editor-favicon-popout-preview" id="editorFaviconPopoutPreview">
+                    <!-- 48px live preview -->
                   </div>
                 </div>
               </div>

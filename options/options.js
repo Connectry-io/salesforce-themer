@@ -1408,6 +1408,7 @@
           return;
         }
         if (which === 'import') {
+          if (!isPremium()) { openUpgradeDialog(); return; }
           document.getElementById('editorImportFile')?.click();
           return;
         }
@@ -1851,15 +1852,18 @@
   }
 
   function updateMiniCard(full) {
-    // Swatch — 4 color bars
-    const swatch = document.getElementById('editorMiniSwatch');
-    if (swatch && full) {
+    const card = document.getElementById('editorMiniCard');
+    if (!card || !full) return;
+
+    // Swatch — 4 color bars (uses .theme-swatch class now)
+    const swatch = card.querySelector('.theme-swatch');
+    if (swatch) {
       const four = [full.background, full.surface, full.accent, full.textPrimary];
       swatch.innerHTML = four.map(c => `<span style="background:${c || '#ddd'}"></span>`).join('');
     }
     // Category badge
     const badge = document.getElementById('editorCategoryBadge');
-    if (badge && full) {
+    if (badge) {
       const cat = _detectThemeCategory(full.background) || 'light';
       badge.textContent = cat === 'dark' ? 'Dark' : 'Light';
       badge.className = `theme-category-badge ${cat}`;
