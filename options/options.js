@@ -2939,7 +2939,14 @@
   function renderGuideAnatomyDiagram() {
     const target = document.getElementById('guideAnatomyDiagram');
     if (!target) return;
-    const activeId = syncState.theme && syncState.theme !== 'none' ? syncState.theme : 'connectry';
+    // Resolve the actually-active theme, accounting for auto-mode
+    let activeId = syncState.theme && syncState.theme !== 'none' ? syncState.theme : 'connectry';
+    if (syncState.autoMode) {
+      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      activeId = prefersDark
+        ? (syncState.lastDarkTheme || 'connectry-dark')
+        : (syncState.lastLightTheme || 'connectry');
+    }
     const theme = getThemeById(activeId) || getThemeById('connectry');
     if (!theme) return;
 
@@ -2986,11 +2993,11 @@
               <button type="button" class="anatomy-marker" data-marker="4" aria-label="Effect pills explainer">4</button>
               ${anatomyPills}
             </div>
-            <!-- Typography placeholder row (V1.1) -->
+            <!-- Typography row -->
             <div class="guide-anatomy-placeholder-row" data-part="5">
               <button type="button" class="anatomy-marker" data-marker="5" aria-label="Typography explainer">5</button>
               <span class="guide-anatomy-placeholder-label">Aa</span>
-              <span class="guide-anatomy-placeholder-text">Inter · 13px · 1.5 <em class="guide-coming-soon">soon</em></span>
+              <span class="guide-anatomy-placeholder-text">System Default · Normal · 1.375</span>
             </div>
           </div>
           <div class="theme-card-actions" data-part="6">
