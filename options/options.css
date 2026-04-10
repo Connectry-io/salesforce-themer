@@ -5233,6 +5233,8 @@ td.upgrade-compare-col-premium,
   border-radius: 5px;
   background: rgba(74, 111, 165, 0.06);
   margin-top: 2px;
+  min-width: 0;
+  overflow: hidden;
   transition: background 200ms, box-shadow 200ms;
 }
 .stencil-type-aa {
@@ -5251,6 +5253,8 @@ td.upgrade-compare-col-premium,
   display: flex;
   align-items: baseline;
   gap: 0;
+  overflow: hidden;
+  min-width: 0;
 }
 .stencil-type-text [data-type-seg] {
   cursor: default;
