@@ -1785,7 +1785,6 @@
   align-items: center;
   justify-content: space-between;
   gap: var(--cx-space-4);
-  margin-bottom: var(--cx-space-6);
   flex-wrap: wrap;
 }
 
@@ -1839,45 +1838,57 @@
   background: var(--cx-surface);
 }
 
-/* Editor layout: a horizontal sub-tab bar across the top, then the
-   panel + preview side-by-side below. Both .editor-colors and
-   .editor-effects share the "panel" grid area — only one is visible
-   at a time (the other is [hidden]). */
+/* Editor layout: two cards side-by-side. Left card is the editor
+   workshop (free banner + name/save header + sub-tab bar + form panel
+   all stacked inside one container). Right card is the preview. */
 .editor-layout {
   display: grid;
-  grid-template-areas:
-    "tabs    tabs"
-    "panel   preview";
-  grid-template-columns: minmax(360px, 1fr) minmax(440px, 1.25fr);
-  grid-template-rows: auto 1fr;
+  grid-template-columns: minmax(440px, 1fr) minmax(540px, 1.3fr);
   gap: var(--cx-space-4);
   align-items: start;
 }
 
 @media (max-width: 1100px) {
   .editor-layout {
-    grid-template-areas:
-      "tabs"
-      "panel"
-      "preview";
     grid-template-columns: 1fr;
   }
 }
 
-/* Horizontal sub-tab bar — sits at the top of the editor content area
-   spanning both columns. Tabs are inline-flex so the bar doesn't stretch
-   to fill, leaving room for breathing space on the right. */
+/* The editor card itself — wraps banner / header / tabs / body. The
+   body area is where the active form panel (Colors or Effects) lives;
+   eventually it will also host the AI chat interface as an alternate
+   input mode. */
+.editor-card {
+  background: var(--cx-surface);
+  border: 1px solid var(--cx-border);
+  border-radius: var(--cx-radius-lg);
+  box-shadow: var(--cx-shadow-sm);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.editor-card-header {
+  border-bottom: 1px solid var(--cx-border);
+  margin-bottom: 0;
+  padding: var(--cx-space-4) var(--cx-space-5);
+  background: var(--cx-surface-alt);
+}
+
+.editor-card-body {
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+/* Horizontal sub-tab bar — full-width row inside the editor card,
+   sitting between the toolbar header and the form body. */
 .editor-subtab-bar {
-  grid-area: tabs;
-  display: inline-flex;
+  display: flex;
   align-items: center;
   gap: 2px;
   background: var(--cx-surface);
-  border: 1px solid var(--cx-border);
-  border-radius: var(--cx-radius-md);
-  box-shadow: var(--cx-shadow-sm);
-  padding: 4px;
-  width: fit-content;
+  border-bottom: 1px solid var(--cx-border);
+  padding: 6px var(--cx-space-3);
 }
 
 .editor-subtab {
@@ -1995,8 +2006,8 @@ body:has(.cx-tabpanel[data-tabpanel="builder"]:not([hidden])) .cx-main {
 
 .builder-layout {
   display: grid;
-  grid-template-columns: 260px 1fr;
-  gap: var(--cx-space-6);
+  grid-template-columns: 220px 1fr;
+  gap: var(--cx-space-5);
   align-items: start;
 }
 
@@ -2223,7 +2234,7 @@ body:has(.cx-tabpanel[data-tabpanel="builder"]:not([hidden])) .cx-main {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 7px 8px;
+  padding: 6px 8px;
   background: var(--cx-surface-alt);
   border: 1px dashed var(--cx-border);
   border-radius: var(--cx-radius-sm);
@@ -2243,8 +2254,8 @@ body:has(.cx-tabpanel[data-tabpanel="builder"]:not([hidden])) .cx-main {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 22px;
-  height: 22px;
+  width: 18px;
+  height: 18px;
   border-radius: 4px;
   color: var(--cx-text-muted);
   flex-shrink: 0;
@@ -2253,13 +2264,11 @@ body:has(.cx-tabpanel[data-tabpanel="builder"]:not([hidden])) .cx-main {
 .builder-startfrom-body {
   flex: 1 1 auto;
   min-width: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 1px;
 }
 
 .builder-startfrom-name {
-  font-size: 11.5px;
+  display: block;
+  font-size: 11px;
   font-weight: 600;
   color: var(--cx-text);
   white-space: nowrap;
@@ -2267,12 +2276,10 @@ body:has(.cx-tabpanel[data-tabpanel="builder"]:not([hidden])) .cx-main {
   text-overflow: ellipsis;
 }
 
+/* Description hidden in the compact sidebar — name + Soon badge is
+   enough for the V1 placeholder. Hover-tip carries the longer copy. */
 .builder-startfrom-desc {
-  font-size: 10px;
-  color: var(--cx-text-subtle);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  display: none;
 }
 
 .builder-startfrom-badge {
@@ -2321,9 +2328,17 @@ body:has(.cx-tabpanel[data-tabpanel="builder"]:not([hidden])) .cx-main {
   overflow: hidden;
 }
 
-.editor-colors { padding: 0; grid-area: panel; }
-.editor-effects { grid-area: panel; }
-.editor-preview { grid-area: preview; }
+/* Form panels INSIDE .editor-card-body don't need their own card chrome
+   — the parent card already provides the visual frame. Override the
+   .editor-panel styling so they sit flush inside the card. */
+.editor-card-body > .editor-panel {
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.editor-colors { padding: 0; }
 
 .editor-group {
   padding: var(--cx-space-4) var(--cx-space-5);
