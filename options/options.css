@@ -3717,10 +3717,265 @@ td.upgrade-compare-col-premium,
   20%, 24%, 55% { text-shadow: none; }
 }
 
-/* Background patterns — 6 sub-cards, each showing a different pattern */
+/* ─── Style picker row (for particles + background pattern) ──────────── */
+.guide-effect-style-row {
+  display: flex;
+  align-items: center;
+  gap: var(--cx-space-2);
+  margin-bottom: var(--cx-space-3);
+  padding: 6px 10px;
+  background: var(--cx-surface-alt);
+  border: 1px solid var(--cx-border);
+  border-radius: var(--cx-radius-sm);
+}
+
+.guide-effect-style-label {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--cx-text-subtle);
+  flex-shrink: 0;
+}
+
+.guide-effect-style-select {
+  margin-left: auto;
+  font-family: var(--cx-font);
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--cx-text);
+  background: var(--cx-surface);
+  border: 1px solid var(--cx-border);
+  border-radius: var(--cx-radius-sm);
+  padding: 4px 8px;
+  cursor: pointer;
+  outline: none;
+}
+
+.guide-effect-style-select:hover {
+  border-color: var(--cx-accent);
+}
+
+.guide-effect-style-select:focus {
+  border-color: var(--cx-accent);
+  box-shadow: 0 0 0 3px rgba(74, 111, 165, 0.15);
+}
+
+/* ─── Particles preview (CSS only, no canvas) ──────────────────────────── */
+.guide-effect-card[data-effect="particles"] .guide-effect-preview {
+  background: #0a1020;
+  overflow: hidden;
+}
+
+.guide-effect-card[data-effect="particles"] .guide-effect-preview-card {
+  background: rgba(10, 16, 32, 0.5);
+  border-color: rgba(255, 255, 255, 0.18);
+  color: #e5edff;
+  z-index: 2;
+}
+
+.guide-particle-layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.guide-particle {
+  position: absolute;
+  display: block;
+  /* Spread particles across the width — 30 particles * 3.3% ≈ 99% */
+  left: calc(var(--i) * 3.3%);
+}
+
+/* SNOW: small white circles drifting down */
+.guide-effect-card[data-effect="particles"] .guide-effect-preview[data-style="snow"] .guide-particle {
+  width: 4px;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.85);
+  border-radius: 50%;
+  filter: blur(0.4px);
+  box-shadow: 0 0 4px rgba(255, 255, 255, 0.5);
+  animation: gp-snow calc(4s + (var(--i) * 0.13s)) linear infinite;
+  animation-delay: calc(var(--i) * -0.18s);
+}
+@keyframes gp-snow {
+  0%   { top: -10%; transform: translateX(0); opacity: 0; }
+  10%  { opacity: 1; }
+  90%  { opacity: 1; }
+  100% { top: 110%; transform: translateX(8px); opacity: 0; }
+}
+
+/* RAIN: thin streaks falling diagonally */
+.guide-effect-card[data-effect="particles"] .guide-effect-preview[data-style="rain"] .guide-particle {
+  width: 1px;
+  height: 14px;
+  background: linear-gradient(180deg, transparent 0%, rgba(170, 200, 255, 0.9) 100%);
+  animation: gp-rain calc(0.9s + (var(--i) * 0.025s)) linear infinite;
+  animation-delay: calc(var(--i) * -0.05s);
+}
+@keyframes gp-rain {
+  0%   { top: -20%; opacity: 0; }
+  10%  { opacity: 0.9; }
+  90%  { opacity: 0.9; }
+  100% { top: 110%; opacity: 0; }
+}
+
+/* MATRIX: green digits raining down */
+.guide-effect-card[data-effect="particles"] .guide-effect-preview[data-style="matrix"] .guide-particle {
+  width: 8px;
+  height: 8px;
+  background: transparent;
+  color: #00ff66;
+  font-family: ui-monospace, Menlo, monospace;
+  font-size: 10px;
+  font-weight: 700;
+  text-shadow: 0 0 6px rgba(0, 255, 102, 0.85);
+  animation: gp-matrix calc(2s + (var(--i) * 0.07s)) linear infinite;
+  animation-delay: calc(var(--i) * -0.1s);
+}
+.guide-effect-card[data-effect="particles"] .guide-effect-preview[data-style="matrix"] .guide-particle::before {
+  content: '1';
+}
+.guide-effect-card[data-effect="particles"] .guide-effect-preview[data-style="matrix"] .guide-particle:nth-child(2n)::before { content: '0'; }
+.guide-effect-card[data-effect="particles"] .guide-effect-preview[data-style="matrix"] .guide-particle:nth-child(3n)::before { content: '7'; }
+.guide-effect-card[data-effect="particles"] .guide-effect-preview[data-style="matrix"] .guide-particle:nth-child(5n)::before { content: '3'; }
+@keyframes gp-matrix {
+  0%   { top: -10%; opacity: 0; }
+  10%  { opacity: 1; }
+  90%  { opacity: 1; }
+  100% { top: 110%; opacity: 0; }
+}
+
+/* DOTS: floating accent dots, slow drift */
+.guide-effect-card[data-effect="particles"] .guide-effect-preview[data-style="dots"] .guide-particle {
+  width: 6px;
+  height: 6px;
+  background: rgba(var(--fx-accent-rgb), 0.7);
+  border-radius: 50%;
+  filter: blur(0.5px);
+  box-shadow: 0 0 6px rgba(var(--fx-accent-rgb), 0.6);
+  animation: gp-dots calc(6s + (var(--i) * 0.18s)) ease-in-out infinite;
+  animation-delay: calc(var(--i) * -0.3s);
+}
+@keyframes gp-dots {
+  0%, 100% { top: 80%; transform: translateX(0); opacity: 0.4; }
+  50%      { top: 20%; transform: translateX(12px); opacity: 1; }
+}
+
+/* EMBERS: warm orange dots rising */
+.guide-effect-card[data-effect="particles"] .guide-effect-preview[data-style="embers"] .guide-particle {
+  width: 4px;
+  height: 4px;
+  background: radial-gradient(circle at center, #ffd194 0%, #ff7e3e 70%, transparent 100%);
+  border-radius: 50%;
+  box-shadow: 0 0 6px rgba(255, 126, 62, 0.8);
+  animation: gp-embers calc(3s + (var(--i) * 0.1s)) ease-out infinite;
+  animation-delay: calc(var(--i) * -0.15s);
+}
+@keyframes gp-embers {
+  0%   { top: 110%; transform: translateX(0) scale(1); opacity: 0; }
+  10%  { opacity: 1; }
+  90%  { opacity: 0.6; }
+  100% { top: -10%; transform: translateX(-6px) scale(0.5); opacity: 0; }
+}
+
+/* ─── Cursor trail preview ─────────────────────────────────────────────── */
+/* Pure CSS approximation: an invisible "ghost cursor" walks a circular path
+   inside the preview, leaving a faint accent glow trail behind it. The
+   user gets the idea even though it's not following their real cursor. */
+.guide-effect-card[data-effect="cursorTrail"] .guide-effect-preview {
+  background: var(--cx-surface);
+  overflow: hidden;
+}
+.guide-effect-card[data-effect="cursorTrail"] .guide-effect-preview::before {
+  content: '';
+  position: absolute;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: radial-gradient(circle at center, rgba(var(--fx-accent-rgb), 0.85) 0%, rgba(var(--fx-accent-rgb), 0.4) 40%, transparent 80%);
+  filter: blur(2px);
+  top: 50%;
+  left: 50%;
+  margin-top: -9px;
+  margin-left: -9px;
+  pointer-events: none;
+  animation: gp-cursor-orbit 4s linear infinite;
+}
+.guide-effect-card[data-effect="cursorTrail"] .guide-effect-preview::after {
+  content: '';
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--fx-accent);
+  top: 50%;
+  left: 50%;
+  margin-top: -4px;
+  margin-left: -4px;
+  pointer-events: none;
+  box-shadow: 0 0 12px rgba(var(--fx-accent-rgb), 0.9);
+  animation: gp-cursor-orbit 4s linear infinite;
+}
+@keyframes gp-cursor-orbit {
+  0%   { transform: translate(-44px, -16px); }
+  25%  { transform: translate(44px, -16px); }
+  50%  { transform: translate(44px, 16px); }
+  75%  { transform: translate(-44px, 16px); }
+  100% { transform: translate(-44px, -16px); }
+}
+
+/* ─── Background pattern variants ─────────────────────────────────────── */
 .guide-effect-card[data-effect="backgroundPattern"] .guide-effect-preview {
-  background-image: radial-gradient(rgba(var(--fx-accent-rgb), 0.18) 1px, transparent 1px);
+  background: var(--cx-surface);
+}
+
+.guide-effect-card[data-effect="backgroundPattern"] .guide-effect-preview[data-style="dotGrid"] {
+  background-image: radial-gradient(rgba(var(--fx-accent-rgb), 0.45) 1.2px, transparent 1.2px);
   background-size: 14px 14px;
+}
+
+.guide-effect-card[data-effect="backgroundPattern"] .guide-effect-preview[data-style="lineGrid"] {
+  background-image:
+    linear-gradient(rgba(var(--fx-accent-rgb), 0.18) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(var(--fx-accent-rgb), 0.18) 1px, transparent 1px);
+  background-size: 16px 16px;
+}
+
+.guide-effect-card[data-effect="backgroundPattern"] .guide-effect-preview[data-style="hatch"] {
+  background-image: repeating-linear-gradient(
+    45deg,
+    rgba(var(--fx-accent-rgb), 0.22) 0,
+    rgba(var(--fx-accent-rgb), 0.22) 1px,
+    transparent 1px,
+    transparent 8px
+  );
+}
+
+.guide-effect-card[data-effect="backgroundPattern"] .guide-effect-preview[data-style="noise"] {
+  background-image:
+    radial-gradient(rgba(0, 0, 0, 0.18) 0.5px, transparent 0.5px),
+    radial-gradient(rgba(var(--fx-accent-rgb), 0.18) 0.5px, transparent 0.5px);
+  background-size: 4px 4px, 7px 7px;
+  background-position: 0 0, 2px 2px;
+}
+
+.guide-effect-card[data-effect="backgroundPattern"] .guide-effect-preview[data-style="subway"] {
+  background-color: var(--cx-surface);
+  background-image:
+    linear-gradient(335deg, rgba(var(--fx-accent-rgb), 0.18) 23px, transparent 23px),
+    linear-gradient(155deg, rgba(var(--fx-accent-rgb), 0.18) 23px, transparent 23px),
+    linear-gradient(335deg, rgba(var(--fx-accent-rgb), 0.18) 23px, transparent 23px),
+    linear-gradient(155deg, rgba(var(--fx-accent-rgb), 0.18) 23px, transparent 23px);
+  background-size: 58px 58px;
+  background-position: 0 0, 0 0, 29px 29px, 29px 29px;
+}
+
+.guide-effect-card[data-effect="backgroundPattern"] .guide-effect-preview[data-style="crosshatch"] {
+  background-image:
+    repeating-linear-gradient(45deg, rgba(var(--fx-accent-rgb), 0.20) 0, rgba(var(--fx-accent-rgb), 0.20) 1px, transparent 1px, transparent 6px),
+    repeating-linear-gradient(-45deg, rgba(var(--fx-accent-rgb), 0.20) 0, rgba(var(--fx-accent-rgb), 0.20) 1px, transparent 1px, transparent 6px);
 }
 
 /* ─── Dev panel (hidden by default, unlocked via Easter egg) ─────────────── */

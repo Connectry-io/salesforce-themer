@@ -2430,9 +2430,36 @@
     { id: 'gradientBorders', name: 'Gradient Borders',  desc: 'Card borders become animated conic gradients that slowly rotate around the edge.', preview: 'Border' },
     { id: 'aurora',          name: 'Aurora Background', desc: 'A soft, slow-moving gradient glow sits behind all content. Colors derive from your theme accent.', preview: '' },
     { id: 'neonFlicker',     name: 'Neon Flicker',      desc: 'Page titles and active navigation gain a neon text glow with occasional flicker, like a sign.', preview: 'NEON' },
-    { id: 'particles',       name: 'Particles',         desc: 'Animated background particles. Pick from snow, rain, matrix rain, floating dots, or rising embers.', preview: 'Particles' },
-    { id: 'cursorTrail',     name: 'Cursor Trail',      desc: 'A short glowing trail follows your mouse pointer, fading as it goes.', preview: 'Hover me' },
-    { id: 'backgroundPattern', name: 'Background Pattern', desc: 'A subtle structural pattern behind all content. Six styles available: dot grid, line grid, hatch, noise, subway tile, crosshatch.', preview: '' },
+    {
+      id: 'particles',
+      name: 'Particles',
+      desc: 'Animated background particles. Pick a style and watch it fall.',
+      preview: '',
+      styles: [
+        { value: 'snow',   label: 'Snow' },
+        { value: 'rain',   label: 'Rain' },
+        { value: 'matrix', label: 'Matrix' },
+        { value: 'dots',   label: 'Floating Dots' },
+        { value: 'embers', label: 'Embers' },
+      ],
+      defaultStyle: 'snow',
+    },
+    { id: 'cursorTrail',     name: 'Cursor Trail',      desc: 'A short glowing trail follows your mouse pointer, fading as it goes. Hover the preview to see it.', preview: 'Hover me' },
+    {
+      id: 'backgroundPattern',
+      name: 'Background Pattern',
+      desc: 'A subtle structural pattern behind all content. Six styles available.',
+      preview: '',
+      styles: [
+        { value: 'dotGrid',    label: 'Dot Grid' },
+        { value: 'lineGrid',   label: 'Line Grid' },
+        { value: 'hatch',      label: 'Hatch' },
+        { value: 'noise',      label: 'Noise' },
+        { value: 'subway',     label: 'Subway Tile' },
+        { value: 'crosshatch', label: 'Crosshatch' },
+      ],
+      defaultStyle: 'dotGrid',
+    },
   ];
 
   function renderGuideEffectsGrid() {
@@ -2462,13 +2489,37 @@
       card.className = 'guide-effect-card';
       card.dataset.effect = eff.id;
       card.id = `guide-effect-${eff.id}`;
+
+      // Particles preview gets a layer of 30 absolutely-positioned dots
+      // that CSS animates per particle style. Built once and toggled via
+      // data-style on the preview wrapper.
+      const particleLayer = eff.id === 'particles'
+        ? `<div class="guide-particle-layer" aria-hidden="true">${
+            Array.from({ length: 30 }).map((_, i) => `<span class="guide-particle" style="--i: ${i};"></span>`).join('')
+          }</div>`
+        : '';
+
+      // Style picker for effects that have variants (particles, background pattern)
+      const stylePicker = eff.styles
+        ? `<div class="guide-effect-style-row">
+            <span class="guide-effect-style-label">Style:</span>
+            <select class="guide-effect-style-select" data-style-select="${eff.id}">
+              ${eff.styles.map(s => `<option value="${s.value}">${s.label}</option>`).join('')}
+            </select>
+          </div>`
+        : '';
+
+      const initialStyle = eff.defaultStyle || '';
+
       card.innerHTML = `
-        <div class="guide-effect-preview">
+        <div class="guide-effect-preview" data-style="${initialStyle}">
+          ${particleLayer}
           <div class="guide-effect-preview-card">${eff.preview}</div>
         </div>
         <div class="guide-effect-body">
           <div class="guide-effect-name">${eff.name}</div>
           <div class="guide-effect-desc">${eff.desc}</div>
+          ${stylePicker}
           <div class="guide-effect-playground" data-playground="${eff.id}">
             <span class="guide-effect-playground-label">Try it:</span>
             <div class="guide-effect-playground-pills" role="radiogroup" aria-label="${eff.name} intensity">
@@ -2480,6 +2531,16 @@
           <div class="guide-effect-themes">${themeBlurb}</div>
         </div>
       `;
+
+      // Wire the style picker dropdown — flips the data-style on the preview
+      const styleSelect = card.querySelector('[data-style-select]');
+      if (styleSelect) {
+        styleSelect.addEventListener('change', (e) => {
+          e.stopPropagation();
+          const previewEl = card.querySelector('.guide-effect-preview');
+          if (previewEl) previewEl.dataset.style = styleSelect.value;
+        });
+      }
 
       // Apply the active theme's accent so previews match
       const theme = getThemeById(syncState.theme) || getThemeById('connectry');
@@ -2503,9 +2564,10 @@
         });
       });
 
-      // Click on the body (not the pills) → open Builder on the active theme
+      // Click on the body (not the pills or style picker) → open Builder
       card.addEventListener('click', (e) => {
         if (e.target.closest('.guide-effect-playground')) return;
+        if (e.target.closest('.guide-effect-style-row')) return;
         if (_tabsInstance) _tabsInstance.activate('builder');
       });
 
