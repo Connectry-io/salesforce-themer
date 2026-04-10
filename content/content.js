@@ -183,6 +183,8 @@
 
   const FAVICON_LINK_ID = 'sf-themer-favicon';
   let _originalFavicons = null;
+  let _currentFaviconEnabled = false;
+  let _currentFaviconConfig = null;
 
   function _saveOriginalFavicons() {
     if (_originalFavicons !== null) return;
@@ -222,6 +224,8 @@
   }
 
   function applyFavicon(enabled, config) {
+    _currentFaviconEnabled = enabled;
+    _currentFaviconConfig = config || null;
     if (!enabled) {
       removeFavicon();
       return;
@@ -492,6 +496,7 @@
     observer = new MutationObserver((mutations) => {
       let needsReinjection = false;
       let needsEffectsReinjection = false;
+      let needsFaviconReinjection = false;
       for (const mutation of mutations) {
         for (const node of mutation.removedNodes) {
           if (node.id === STYLE_ID || node.id === 'sf-themer-transitions') {
@@ -500,8 +505,16 @@
           if (node.id === EFFECTS_STYLE_ID) {
             needsEffectsReinjection = true;
           }
+          if (node.id === FAVICON_LINK_ID) {
+            needsFaviconReinjection = true;
+          }
         }
-        if (needsReinjection && needsEffectsReinjection) break;
+        // Also catch Salesforce adding new favicon links that override ours
+        for (const node of mutation.addedNodes) {
+          if (node.nodeName === 'LINK' && node.rel && node.rel.includes('icon') && node.id !== FAVICON_LINK_ID && _currentFaviconEnabled) {
+            needsFaviconReinjection = true;
+          }
+        }
       }
       if (needsReinjection) {
         injectTransitionStyles();
@@ -509,6 +522,9 @@
       }
       if (needsEffectsReinjection && currentTheme && currentTheme !== 'none') {
         loadAndApplyEffects(currentTheme);
+      }
+      if (needsFaviconReinjection && _currentFaviconEnabled) {
+        applyFavicon(true, _currentFaviconConfig);
       }
     });
 

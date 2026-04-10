@@ -3429,12 +3429,14 @@
 
   function _updateGuideFaviconPreview() {
     const { shape, color, icon } = _guideFaviconState;
+    // Large hero preview
     const main = document.getElementById('guideFaviconLivePreview');
-    if (main) main.innerHTML = _renderFaviconSVG(shape, color, icon, 80);
-    const dark = document.getElementById('guideFaviconCtxDarkIcon');
-    if (dark) dark.innerHTML = _renderFaviconSVG(shape, color, icon, 14);
-    const light = document.getElementById('guideFaviconCtxLightIcon');
-    if (light) light.innerHTML = _renderFaviconSVG(shape, color, icon, 14);
+    if (main) main.innerHTML = _renderFaviconSVG(shape, color, icon, 72);
+    // Browser tab icons (fake tab bar)
+    const tab1 = document.getElementById('guideFaviconTabIcon1');
+    if (tab1) tab1.innerHTML = _renderFaviconSVG(shape, color, icon, 12);
+    const tab2 = document.getElementById('guideFaviconTabIcon2');
+    if (tab2) tab2.innerHTML = _renderFaviconSVG(shape, color, icon, 12);
   }
 
   function _bindGuideFaviconDemo() {

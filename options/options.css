@@ -4923,34 +4923,81 @@ td.upgrade-compare-col-premium,
 /* Favicon preview area */
 .guide-favicon-preview-area {
   align-items: center;
-  justify-content: center;
 }
-.guide-favicon-hero {
-  width: 96px; height: 96px;
-  display: flex; align-items: center; justify-content: center;
-  background: var(--cx-surface-alt); border: 1px solid var(--cx-border);
+
+/* Fake browser window mockup */
+.guide-browser-mock {
+  width: 100%;
+  background: #1e293b;
   border-radius: var(--cx-radius-lg);
-  transition: all 200ms ease;
+  overflow: hidden;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.15);
 }
-.guide-favicon-hero svg { width: 80px; height: 80px; }
+.guide-browser-toolbar {
+  display: flex;
+  align-items: center;
+  padding: 8px 12px 0;
+}
+.guide-browser-dots { display: flex; gap: 5px; }
+.guide-browser-dot { width: 8px; height: 8px; border-radius: 50%; }
 
-/* Fake browser tab context previews */
-.guide-favicon-contexts { display: flex; gap: 8px; margin-top: var(--cx-space-3); }
-.guide-favicon-ctx {
-  display: flex; align-items: center; gap: 5px; padding: 5px 10px;
-  border-radius: 8px 8px 0 0; font-size: 10px; font-weight: 500;
-  max-width: 180px;
+.guide-browser-tabs {
+  display: flex;
+  gap: 1px;
+  padding: 8px 8px 0;
 }
-.guide-favicon-ctx-dark { background: #1e293b; color: #94a3b8; }
-.guide-favicon-ctx-light { background: #f1f5f9; color: #64748b; border: 1px solid #e2e8f0; border-bottom: none; }
-.guide-favicon-ctx-icon { display: inline-flex; flex-shrink: 0; }
-.guide-favicon-ctx-icon svg { width: 14px; height: 14px; }
-.guide-favicon-ctx-text {
+.guide-browser-tab {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 10px;
+  background: #2d3a4a;
+  border-radius: 6px 6px 0 0;
+  font-size: 10px;
+  font-weight: 500;
+  color: #8896a8;
+  max-width: 160px;
+  min-width: 0;
+}
+.guide-browser-tab.is-active {
+  background: #334155;
+  color: #e2e8f0;
+}
+.guide-browser-tab-icon { display: inline-flex; flex-shrink: 0; }
+.guide-browser-tab-icon svg { width: 12px; height: 12px; }
+.guide-browser-tab-text {
   overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  flex: 1; min-width: 0;
 }
-.guide-favicon-ctx-x { opacity: 0.4; margin-left: auto; font-size: 12px; }
+.guide-browser-tab-x {
+  opacity: 0; font-size: 11px; margin-left: 2px; flex-shrink: 0;
+  transition: opacity var(--cx-transition);
+}
+.guide-browser-tab:hover .guide-browser-tab-x { opacity: 0.5; }
 
-.guide-favicon-apply-btn { margin-top: var(--cx-space-3); }
+.guide-browser-address {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0 8px 8px;
+  padding: 4px 10px;
+  background: #334155;
+  border-radius: 4px;
+  font-size: 9px;
+  color: #64748b;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+/* Large favicon hero below the browser */
+.guide-favicon-hero {
+  width: 72px; height: 72px;
+  display: flex; align-items: center; justify-content: center;
+  margin-top: var(--cx-space-3);
+}
+.guide-favicon-hero svg { width: 72px; height: 72px; }
+
+.guide-favicon-apply-btn { margin-top: var(--cx-space-3); width: 100%; }
 
 .guide-placeholder-card {
   background: var(--cx-surface-alt);

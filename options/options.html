@@ -800,23 +800,43 @@
             </div>
           </div>
           <div class="guide-live-preview guide-favicon-preview-area">
-            <div class="guide-favicon-hero" id="guideFaviconLivePreview">
-              <!-- 96px live SVG preview rendered by JS -->
+            <!-- Fake browser window with tab bar -->
+            <div class="guide-browser-mock">
+              <div class="guide-browser-toolbar">
+                <div class="guide-browser-dots">
+                  <span class="guide-browser-dot" style="background:#ff5f57"></span>
+                  <span class="guide-browser-dot" style="background:#febc2e"></span>
+                  <span class="guide-browser-dot" style="background:#28c840"></span>
+                </div>
+              </div>
+              <div class="guide-browser-tabs">
+                <div class="guide-browser-tab is-active">
+                  <span class="guide-browser-tab-icon" id="guideFaviconTabIcon1"></span>
+                  <span class="guide-browser-tab-text">Jack Popescu | Lead</span>
+                  <span class="guide-browser-tab-x">×</span>
+                </div>
+                <div class="guide-browser-tab">
+                  <span class="guide-browser-tab-icon" id="guideFaviconTabIcon2"></span>
+                  <span class="guide-browser-tab-text">Home | Salesforce</span>
+                  <span class="guide-browser-tab-x">×</span>
+                </div>
+                <div class="guide-browser-tab">
+                  <svg width="10" height="10" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.5" opacity="0.3"/></svg>
+                  <span class="guide-browser-tab-text">Extensions</span>
+                  <span class="guide-browser-tab-x">×</span>
+                </div>
+              </div>
+              <div class="guide-browser-address">
+                <svg width="10" height="10" viewBox="0 0 16 16" fill="none" opacity="0.3"><rect x="2" y="5" width="12" height="7" rx="1" stroke="currentColor" stroke-width="1.3"/><path d="M5 5V4a3 3 0 016 0v1" stroke="currentColor" stroke-width="1.3"/></svg>
+                <span>connectry.lightning.force.com/lightning/r/Lead/00Q...</span>
+              </div>
             </div>
-            <div class="guide-favicon-contexts">
-              <div class="guide-favicon-ctx guide-favicon-ctx-dark">
-                <span class="guide-favicon-ctx-icon" id="guideFaviconCtxDarkIcon"></span>
-                <span class="guide-favicon-ctx-text">Jack Popescu | Le...</span>
-                <span class="guide-favicon-ctx-x">×</span>
-              </div>
-              <div class="guide-favicon-ctx guide-favicon-ctx-light">
-                <span class="guide-favicon-ctx-icon" id="guideFaviconCtxLightIcon"></span>
-                <span class="guide-favicon-ctx-text">Home | Salesforce</span>
-                <span class="guide-favicon-ctx-x">×</span>
-              </div>
+            <!-- Large preview -->
+            <div class="guide-favicon-hero" id="guideFaviconLivePreview">
+              <!-- Live SVG rendered by JS -->
             </div>
             <button class="cx-btn cx-btn-primary guide-favicon-apply-btn" id="guideFaviconApplyBtn" type="button">
-              Apply to my tabs now
+              Apply to my Salesforce tabs
             </button>
           </div>
         </div>
