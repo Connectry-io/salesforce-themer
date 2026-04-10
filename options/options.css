@@ -103,30 +103,53 @@
   line-height: 1.3;
 }
 
-/* "Managed in Builder" hint shown in the Settings card when the active
-   theme is a custom theme. Replaces the volume pills inline. */
-.opt-effects-managed-hint {
+/* Effects volume strip — sits at the top of the Built-in Themes section.
+   Conceptually belongs to those themes since custom themes manage their
+   own per-effect intensities. */
+.opt-themes-effects-strip {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 8px 12px;
-  background: var(--cx-surface-alt);
-  border: 1px dashed var(--cx-border-hover);
-  border-radius: var(--cx-radius-sm);
-  font-size: 12px;
-  color: var(--cx-text-muted);
-  font-style: italic;
+  gap: var(--cx-space-3);
+  padding: var(--cx-space-3) var(--cx-space-4);
+  background: var(--cx-surface);
+  border: 1px solid var(--cx-border);
+  border-radius: var(--cx-radius-md);
+  margin-bottom: var(--cx-space-4);
 }
 
-.opt-effects-managed-hint a {
-  color: var(--cx-accent);
+.opt-themes-effects-strip-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
   font-weight: 700;
-  text-decoration: none;
-  font-style: normal;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--cx-text-muted);
+  flex-shrink: 0;
 }
 
-.opt-effects-managed-hint a:hover {
-  text-decoration: underline;
+.opt-themes-effects-strip-help {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  padding: 0;
+  background: transparent;
+  border: none;
+  border-radius: 50%;
+  color: var(--cx-text-subtle);
+  cursor: pointer;
+  transition: color var(--cx-transition);
+}
+
+.opt-themes-effects-strip-help:hover {
+  color: var(--cx-accent);
+}
+
+.opt-themes-effects-strip .opt-scope-pills {
+  margin-left: auto;
 }
 
 .theme-category-badge {

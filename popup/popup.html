@@ -114,37 +114,9 @@
           </div>
         </div>
 
-        <!-- Row 4: Effects -->
-        <div class="settings-row settings-row--stacked" id="effectsRow">
-          <div class="settings-row-label">
-            <svg class="settings-row-icon" width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-              <path d="M8 1l1.8 4.2L14 6l-3.2 2.8L12 13 8 10.6 4 13l1.2-4.2L2 6l4.2-0.8L8 1z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/>
-            </svg>
-            <span class="settings-row-text">Effects</span>
-            <button class="settings-help-btn" data-tooltip="effectsTooltip" aria-label="About effects" title="What are effects?">
-              <svg width="12" height="12" viewBox="0 0 14 14" fill="none" aria-hidden="true">
-                <circle cx="7" cy="7" r="6" stroke="currentColor" stroke-width="1.3"/>
-                <path d="M7 6.5v3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
-                <circle cx="7" cy="4.5" r="0.65" fill="currentColor"/>
-              </svg>
-            </button>
-          </div>
-          <div class="effects-pills" id="effectsPills" role="radiogroup" aria-label="Effects volume">
-            <button class="effects-pill" data-volume="off" role="radio" aria-checked="false" title="Disable all effects">Off</button>
-            <button class="effects-pill" data-volume="subtle" role="radio" aria-checked="false" title="Theme effects clamped to subtle">Subtle</button>
-            <button class="effects-pill" data-volume="default" role="radio" aria-checked="false" title="Theme effects exactly as designed">Default</button>
-            <button class="effects-pill" data-volume="immersive" role="radio" aria-checked="false" title="Theme effects amplified to strong">Immersive</button>
-          </div>
-          <!-- Alt: shown instead of the volume pills when a custom theme is active.
-               Custom themes own their per-effect intensities, so a global volume
-               multiplier doesn't make sense for them. -->
-          <div class="effects-managed-hint" id="effectsManagedHint" hidden>
-            <svg width="12" height="12" viewBox="0 0 14 14" fill="none" aria-hidden="true">
-              <path d="M9 2l3 3-7 7H2v-3l7-7z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/>
-            </svg>
-            <span>Managed in <a href="#" id="effectsManagedHintLink">Builder</a></span>
-          </div>
-        </div>
+        <!-- Effects volume moved out of Settings — it lives at the top of the
+             pre-built themes section since it only applies to those themes.
+             See #themesEffectsStrip below. -->
 
         <!-- Row 5: Per-org override (only visible on Salesforce tabs) -->
         <div class="settings-row" id="perOrgRow" hidden>
@@ -191,6 +163,25 @@
         When you switch to a <strong>different org</strong>, that org gets its <em>own</em> pinned theme if it has one, or your global theme otherwise. Pins are independent per org — useful for keeping Production and Sandbox visually distinct.
       </div>
     </section>
+
+    <!-- Effects volume strip — sits at the top of the pre-built themes section
+         because it only applies to those themes. Custom themes (when surfaced
+         via tab separation later) won't show this since they own per-effect
+         intensities chosen in the Builder. -->
+    <div class="themes-effects-strip" id="themesEffectsStrip">
+      <div class="themes-effects-strip-label">
+        <svg width="13" height="13" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+          <path d="M8 1l1.8 4.2L14 6l-3.2 2.8L12 13 8 10.6 4 13l1.2-4.2L2 6l4.2-0.8L8 1z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/>
+        </svg>
+        <span>Effects</span>
+      </div>
+      <div class="effects-pills" id="effectsPills" role="radiogroup" aria-label="Effects volume">
+        <button class="effects-pill" data-volume="off" role="radio" aria-checked="false" title="Disable all effects">Off</button>
+        <button class="effects-pill" data-volume="subtle" role="radio" aria-checked="false" title="Theme effects clamped to subtle">Subtle</button>
+        <button class="effects-pill" data-volume="default" role="radio" aria-checked="false" title="Theme effects exactly as designed">Default</button>
+        <button class="effects-pill" data-volume="immersive" role="radio" aria-checked="false" title="Theme effects amplified to strong">Immersive</button>
+      </div>
+    </div>
 
     <!-- Theme grid — dynamic, populated by popup.js from themes.json -->
     <main class="themes-section" id="themesSection" role="radiogroup" aria-label="Select a theme">

@@ -477,8 +477,6 @@
     renderEffectsTabForActiveTheme();
     // Reflect active state in the Builder sidebar list (cheap re-render)
     renderBuilderSidebar(themeId);
-    // Custom themes manage effects in the Builder, so swap the volume row
-    syncEffectsVolumeVisibility(themeId);
 
     // Push the theme to all open Salesforce tabs across all windows.
     // (We can't use {active: true, currentWindow: true} from the options page
@@ -744,25 +742,6 @@
   // Free users can adjust volume; Premium can also clone themes to customize
   // individual effects in the Theme Builder.
 
-  /**
-   * Toggle the Effects volume row between the volume pills (OOTB themes)
-   * and a "Managed in Builder" hint (custom themes).
-   *
-   * Custom themes own per-effect intensities the user picked in the Builder.
-   * Applying a global volume multiplier on top would silently override their
-   * choices, which is the opposite of what they expect — so we hide the
-   * control entirely and point them at the Builder.
-   */
-  function syncEffectsVolumeVisibility(themeId) {
-    const pills = document.getElementById('optEffectsPills');
-    const hint = document.getElementById('optEffectsManagedHint');
-    if (!pills || !hint) return;
-    // OOTB themes return a real entry; custom themes (or 'none') return null.
-    const isCustom = !getThemeById(themeId) && themeId !== 'none';
-    pills.hidden = isCustom;
-    hint.hidden = !isCustom;
-  }
-
   function bindOptEffectsPills() {
     const pills = document.querySelectorAll('#optEffectsPills .opt-scope-pill[data-effect-volume]');
     if (!pills.length) return;
@@ -924,14 +903,7 @@
     renderThemeGrid(activeTheme);
     renderCustomThemeGrid(activeTheme);
     renderBuilderSidebar(activeTheme);
-    syncEffectsVolumeVisibility(activeTheme);
     bindFilterPills();
-
-    // Hint link → jump to Builder tab
-    document.getElementById('optEffectsManagedHintLink')?.addEventListener('click', (e) => {
-      e.preventDefault();
-      if (_tabsInstance) _tabsInstance.activate('builder');
-    });
     bindThemeGroupCollapse();
     updateHeaderMeta(activeTheme);
     syncOptSettingsCardStatus(activeTheme);

@@ -571,30 +571,34 @@ body {
   display: none;
 }
 
-/* "Managed in Builder" hint — shown instead of the volume pills when the
-   active theme is a custom theme (custom themes own their per-effect intensity). */
-.effects-managed-hint {
+/* Effects volume strip — sits at the top of the pre-built themes section.
+   Conceptually belongs to those themes since custom themes manage their
+   own per-effect intensities. */
+.themes-effects-strip {
   display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 7px 10px;
-  background: var(--color-bg);
-  border: 1px dashed var(--color-border-hover);
-  border-radius: var(--radius-sm);
-  font-size: 11px;
-  color: var(--color-text-muted);
-  font-style: italic;
+  gap: 8px;
+  padding: 8px 10px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  margin-bottom: 8px;
 }
 
-.effects-managed-hint a {
-  color: var(--color-accent);
+.themes-effects-strip-label {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 10px;
   font-weight: 700;
-  text-decoration: none;
-  font-style: normal;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--color-text-muted);
+  flex-shrink: 0;
 }
 
-.effects-managed-hint a:hover {
-  text-decoration: underline;
+.themes-effects-strip .effects-pills {
+  margin-left: auto;
 }
 
 /* ─── Theme Section (groups + grid) ─────────────────────────────────────── */
