@@ -226,13 +226,14 @@ body.cx-settings {
 }
 
 .cx-tab-badge {
-  background: var(--cx-accent-light);
-  color: var(--cx-accent);
-  font-size: 10px;
-  font-weight: 600;
+  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+  color: #8f6413;
+  border: 1px solid #d4a22a;
+  font-size: 9px;
+  font-weight: 700;
   padding: 2px 6px;
   border-radius: var(--cx-radius-full);
-  letter-spacing: 0.02em;
+  letter-spacing: 0.04em;
   text-transform: uppercase;
 }
 

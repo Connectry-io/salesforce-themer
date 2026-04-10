@@ -59,15 +59,6 @@
           Marketplace
           <span class="cx-tab-badge">Soon</span>
         </button>
-        <button class="cx-tab" role="tab" data-tab="shortcuts" aria-selected="false">
-          <svg class="cx-tab-icon" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-            <rect x="2" y="5" width="12" height="7" rx="1.5" stroke="currentColor" stroke-width="1.5"/>
-            <circle cx="5" cy="8.5" r="0.7" fill="currentColor"/>
-            <circle cx="8" cy="8.5" r="0.7" fill="currentColor"/>
-            <circle cx="11" cy="8.5" r="0.7" fill="currentColor"/>
-          </svg>
-          Shortcuts
-        </button>
         <button class="cx-tab" role="tab" data-tab="about" aria-selected="false">
           <svg class="cx-tab-icon" viewBox="0 0 16 16" fill="none" aria-hidden="true">
             <circle cx="8" cy="8" r="6.5" stroke="currentColor" stroke-width="1.5"/>
@@ -677,42 +668,7 @@
     </div>
 
     <!-- ═══ Shortcuts Tab ═══ -->
-    <div class="cx-tabpanel" role="tabpanel" data-tabpanel="shortcuts" hidden>
-
-      <section class="cx-section">
-        <div class="cx-section-header">
-          <div>
-            <h2 class="cx-section-title">Keyboard Shortcuts</h2>
-            <p class="cx-section-subtitle">Quick actions that work on any Salesforce tab</p>
-          </div>
-        </div>
-
-        <div class="cx-card cx-card-pad">
-          <div class="shortcuts-list">
-            <div class="shortcut-row">
-              <div class="shortcut-info">
-                <div class="shortcut-desc-label">Cycle to next theme</div>
-                <div class="shortcut-desc-sub">Walks through all themes in order. Resumes where you left off.</div>
-              </div>
-              <kbd class="shortcut-key">Alt + Shift + T</kbd>
-            </div>
-            <div class="shortcut-row">
-              <div class="shortcut-info">
-                <div class="shortcut-desc-label">Toggle dark / light mode</div>
-                <div class="shortcut-desc-sub">Switches between your last-used light and dark themes.</div>
-              </div>
-              <kbd class="shortcut-key">Alt + Shift + D</kbd>
-            </div>
-          </div>
-          <p class="shortcut-note">
-            Shortcuts only work while viewing a Salesforce org tab. Custom key bindings can be set via <code>chrome://extensions/shortcuts</code>.
-          </p>
-        </div>
-      </section>
-
-    </div>
-
-    <!-- ═══ About Tab ═══ -->
+    <!-- ═══ About Tab (includes shortcuts) ═══ -->
     <div class="cx-tabpanel" role="tabpanel" data-tabpanel="about" hidden>
 
       <section class="cx-section">
@@ -759,6 +715,38 @@
             <div class="about-link-title">Other Connectry Apps</div>
             <div class="about-link-desc">VAT Checker, LEI Lookup, and more</div>
           </a>
+        </div>
+
+        <!-- Keyboard shortcuts (merged from former Shortcuts tab) -->
+        <div class="cx-card cx-card-pad about-shortcuts-card">
+          <h4 class="about-shortcuts-title">
+            <svg width="15" height="15" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+              <rect x="2" y="5" width="12" height="7" rx="1.5" stroke="currentColor" stroke-width="1.5"/>
+              <circle cx="5" cy="8.5" r="0.7" fill="currentColor"/>
+              <circle cx="8" cy="8.5" r="0.7" fill="currentColor"/>
+              <circle cx="11" cy="8.5" r="0.7" fill="currentColor"/>
+            </svg>
+            Keyboard Shortcuts
+          </h4>
+          <div class="shortcuts-list">
+            <div class="shortcut-row">
+              <div class="shortcut-info">
+                <div class="shortcut-desc-label">Cycle to next theme</div>
+                <div class="shortcut-desc-sub">Walks through all themes in order</div>
+              </div>
+              <kbd class="shortcut-key">Alt + Shift + T</kbd>
+            </div>
+            <div class="shortcut-row">
+              <div class="shortcut-info">
+                <div class="shortcut-desc-label">Toggle dark / light mode</div>
+                <div class="shortcut-desc-sub">Switches between last-used light and dark themes</div>
+              </div>
+              <kbd class="shortcut-key">Alt + Shift + D</kbd>
+            </div>
+          </div>
+          <p class="shortcut-note">
+            Only works on Salesforce tabs. Customize via <code>chrome://extensions/shortcuts</code>.
+          </p>
         </div>
 
         <!-- Dev panel: hidden until the user clicks the version 7 times -->
@@ -1423,7 +1411,7 @@
                 </svg>
               </div>
               <p class="builder-chat-drawer-placeholder-text">"Make it warmer." "Darker accents." "Remove the glow." — a persistent conversation with AI that iteratively refines your theme in real time.</p>
-              <span class="builder-chat-drawer-placeholder-badge">Premium · Coming Soon</span>
+              <span class="builder-chat-drawer-placeholder-badge">Premium · Soon</span>
             </div>
           </div>
           <div class="builder-chat-drawer-input">

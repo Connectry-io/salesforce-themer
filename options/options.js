@@ -874,12 +874,17 @@
     if (!meta) return;
     const theme = getThemeById(activeThemeId) || (syncState.customThemes || []).find(t => t.id === activeThemeId);
     const name = theme ? theme.name : activeThemeId;
-    // Compact DEV badge — placed AFTER the active theme so it doesn't push
-    // the tabs out of view. Just "DEV" instead of "DEV · Premium unlocked".
     const devBadge = _localPremiumOverride
       ? `<span class="dev-mode-badge" title="DEV mode: Premium override is active. Disable in About tab.">DEV</span>`
       : '';
-    meta.innerHTML = `<span class="header-meta-active">Active: <strong>${Connectry.Settings.escape(name)}</strong></span>${devBadge}`;
+    // Mini 4-color swatch (same pattern as Builder theme switcher)
+    let swatchHtml = '';
+    const c = theme?.colors;
+    if (c) {
+      const four = [c.background, c.surface, c.accent, c.textPrimary].map(v => v || '#ddd');
+      swatchHtml = `<span class="header-meta-swatch">${four.map(v => `<span style="background:${v}"></span>`).join('')}</span>`;
+    }
+    meta.innerHTML = `<span class="header-meta-active">${swatchHtml}<strong>${Connectry.Settings.escape(name)}</strong></span>${devBadge}`;
   }
 
   // ─── Version ──────────────────────────────────────────────────────────────
