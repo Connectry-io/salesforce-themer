@@ -1838,10 +1838,9 @@
   background: var(--cx-surface);
 }
 
-/* Editor layout: two cards side-by-side. Editor card has a fixed-ish
-   width because its content (color pickers, effect rows) doesn't need
-   to scale; preview card takes ALL the remaining space because that's
-   where the visual feedback lives. */
+/* Editor layout: editor card + (optional chat) + preview. When the
+   chat panel is hidden the grid is 2-col; when visible it becomes 3.
+   The .is-chat-open class on the layout toggles the template. */
 .editor-layout {
   display: grid;
   grid-template-columns: minmax(360px, 400px) 1fr;
@@ -1849,10 +1848,72 @@
   align-items: start;
 }
 
+.editor-layout.is-chat-open {
+  grid-template-columns: minmax(340px, 380px) minmax(300px, 1fr) minmax(400px, 1.2fr);
+}
+
 @media (max-width: 1100px) {
-  .editor-layout {
+  .editor-layout,
+  .editor-layout.is-chat-open {
     grid-template-columns: 1fr;
   }
+}
+
+/* AI chat placeholder panel — lives between editor card and preview.
+   display:none when hidden so it doesn't take a grid column. */
+.builder-chat-panel[hidden] { display: none !important; }
+
+.builder-chat-panel {
+  background: var(--cx-surface);
+  border: 1px solid var(--cx-border);
+  border-radius: var(--cx-radius-lg);
+  box-shadow: var(--cx-shadow-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+}
+
+.builder-chat-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: var(--cx-space-6);
+  max-width: 280px;
+  gap: var(--cx-space-3);
+}
+
+.builder-chat-placeholder-icon {
+  color: var(--cx-text-subtle);
+  opacity: 0.6;
+}
+
+.builder-chat-placeholder-title {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--cx-text);
+}
+
+.builder-chat-placeholder-body {
+  margin: 0;
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--cx-text-muted);
+}
+
+.builder-chat-placeholder-badge {
+  display: inline-block;
+  font-size: 9px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 3px 10px;
+  background: linear-gradient(135deg, #f3e8ff 0%, #e0e7ff 100%);
+  color: #5b21b6;
+  border: 1px solid #c4b5fd;
+  border-radius: var(--cx-radius-full);
 }
 
 /* The editor card itself — wraps banner / header / tabs / body. The
@@ -2055,42 +2116,83 @@ body:has(.cx-tabpanel[data-tabpanel="builder"]:not([hidden])) .cx-main {
   max-width: 1480px;
 }
 
-.builder-layout {
-  display: grid;
-  grid-template-columns: 220px 1fr;
-  gap: var(--cx-space-5);
-  align-items: start;
-}
-
-.builder-sidebar {
+/* ─── Builder top bar ─────────────────────────────────────────────────
+   Horizontal strip: theme pills (scroll if many) + "+ New ▾" popover
+   + "Build with AI" button. Replaces the sidebar — gives full width
+   to the editor + preview below. */
+.builder-topbar {
+  display: flex;
+  align-items: center;
+  gap: var(--cx-space-3);
+  padding: var(--cx-space-3) var(--cx-space-4);
   background: var(--cx-surface);
   border: 1px solid var(--cx-border);
   border-radius: var(--cx-radius-lg);
   box-shadow: var(--cx-shadow-sm);
-  padding: var(--cx-space-5);
-  position: sticky;
-  top: var(--cx-space-4);
-  max-height: calc(100vh - 140px);
-  display: flex;
-  flex-direction: column;
+  margin-bottom: var(--cx-space-4);
 }
 
-.builder-sidebar-header {
+.builder-topbar-themes {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: var(--cx-space-2);
-  margin-bottom: 4px;
+  gap: 6px;
+  overflow-x: auto;
+  flex: 1 1 auto;
+  min-width: 0;
+  scrollbar-width: thin;
 }
 
-.builder-sidebar-title {
-  font-size: 14px;
-  font-weight: 700;
+/* Individual theme pill in the top bar — compact, one-click to switch
+   editor target. Active theme gets accent highlight. */
+.builder-topbar-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px;
+  background: var(--cx-surface-alt);
+  border: 1px solid var(--cx-border);
+  border-radius: var(--cx-radius-full);
+  font-family: var(--cx-font);
+  font-size: 12px;
+  font-weight: 600;
   color: var(--cx-text);
-  margin: 0;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: border-color var(--cx-transition), background-color var(--cx-transition);
+  flex-shrink: 0;
 }
 
-.builder-sidebar-create-btn {
+.builder-topbar-pill:hover {
+  border-color: var(--cx-accent);
+  background: color-mix(in srgb, var(--cx-accent) 8%, var(--cx-surface));
+}
+
+.builder-topbar-pill.is-active {
+  background: var(--cx-accent);
+  color: #ffffff;
+  border-color: var(--cx-accent);
+}
+
+.builder-topbar-pill-swatch {
+  display: inline-grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1px;
+  width: 14px;
+  height: 14px;
+  border-radius: 3px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.builder-topbar-pill-swatch span {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* The + New ▾ button — sits right after the theme pills */
+.builder-topbar-new-btn {
   display: inline-flex;
   align-items: center;
   gap: 5px;
@@ -2104,310 +2206,25 @@ body:has(.cx-tabpanel[data-tabpanel="builder"]:not([hidden])) .cx-main {
   border-radius: var(--cx-radius-full);
   cursor: pointer;
   transition: filter var(--cx-transition), transform var(--cx-transition);
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
-.builder-sidebar-create-btn:hover {
+.builder-topbar-new-btn:hover {
   filter: brightness(1.08);
   transform: translateY(-1px);
 }
 
-/* Create-menu popover ─────────────────────────────────────────────────
-   Anchored under the "+ New ▾" button. Holds all 4 ways to start a
-   new theme (manual = enabled, AI / brand / URL = locked Soon). */
-.builder-create-menu-wrap {
-  position: relative;
-}
-
-.builder-create-menu {
-  position: absolute;
-  top: calc(100% + 6px);
-  right: 0;
-  z-index: 30;
-  width: 280px;
-  background: var(--cx-surface);
-  border: 1px solid var(--cx-border);
-  border-radius: var(--cx-radius-md);
-  box-shadow:
-    0 8px 24px rgba(0, 0, 0, 0.12),
-    0 2px 6px rgba(0, 0, 0, 0.06);
-  padding: 6px;
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.builder-create-menu[hidden] {
-  display: none;
-}
-
-.builder-create-menu-label {
-  font-size: 10px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  color: var(--cx-text-subtle);
-  padding: 6px 10px 4px;
-}
-
-.builder-create-menu-divider {
-  height: 1px;
-  background: var(--cx-border);
-  margin: 4px 4px;
-}
-
-.builder-create-menu-item {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 8px 10px;
-  background: transparent;
-  border: 1px solid transparent;
-  border-radius: var(--cx-radius-sm);
-  font-family: var(--cx-font);
-  text-align: left;
-  width: 100%;
-  cursor: pointer;
-  transition: background-color var(--cx-transition);
-}
-
-.builder-create-menu-item:hover:not(.is-locked) {
-  background: var(--cx-surface-alt);
-  border-color: var(--cx-border);
-}
-
-.builder-create-menu-item.is-locked {
-  cursor: not-allowed;
-  opacity: 0.62;
-}
-
-.builder-create-menu-item.is-locked:hover {
-  opacity: 0.85;
-  background: var(--cx-surface-alt);
-}
-
-.builder-create-menu-item .builder-startfrom-icon {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 22px;
-  height: 22px;
-  color: var(--cx-text-muted);
+/* Build with AI — pushed to far right via auto margin */
+.builder-topbar .editor-build-ai-btn {
+  margin-left: auto;
   flex-shrink: 0;
 }
 
-.builder-create-menu-item:hover:not(.is-locked) .builder-startfrom-icon {
-  color: var(--cx-accent);
-}
-
-.builder-create-menu-item .builder-startfrom-body {
-  flex: 1 1 auto;
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 1px;
-}
-
-.builder-create-menu-item .builder-startfrom-name {
-  display: block;
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--cx-text);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.builder-create-menu-item .builder-startfrom-desc {
-  display: block;
-  font-size: 10.5px;
-  color: var(--cx-text-subtle);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.builder-create-menu-item .builder-startfrom-badge {
-  font-size: 8.5px;
-  font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  padding: 2px 6px;
-  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
-  color: #8f6413;
-  border: 1px solid #d4a22a;
-  border-radius: var(--cx-radius-full);
-  flex-shrink: 0;
-}
-
-.builder-create-menu-foot {
-  margin: 4px 0 0 0;
-  padding: 6px 10px 0;
-  border-top: 1px solid var(--cx-border);
-  font-size: 10px;
-  color: var(--cx-text-subtle);
-  text-align: center;
-  font-style: italic;
-}
-
-.builder-sidebar-sub {
-  font-size: 11px;
-  color: var(--cx-text-subtle);
-  margin: 0 0 var(--cx-space-3) 0;
-  line-height: 1.4;
-}
-
-.builder-sidebar-list {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  overflow-y: auto;
-  flex: 1 1 auto;
-  min-height: 0;
-  margin: 0 calc(-1 * var(--cx-space-2));
-  padding: 0 var(--cx-space-2);
-}
-
-/* Compact edit-only row: small swatch + name + (active dot). No apply
-   affordance, no description preview. Click = edit. Apply happens via
-   Save (which auto-applies) or via the popup. */
-.builder-sidebar-item {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 5px 8px;
-  background: transparent;
-  border: 1px solid transparent;
-  border-radius: var(--cx-radius-sm);
-  cursor: pointer;
-  text-align: left;
-  transition: border-color var(--cx-transition), background-color var(--cx-transition);
-}
-
-.builder-sidebar-item:hover {
-  background: var(--cx-surface-alt);
-  border-color: var(--cx-border);
-}
-
-/* Active theme: heavy left bar + accent tint + bold name. The user
-   should glance at the sidebar and instantly know which one they're
-   looking at in Salesforce. */
-.builder-sidebar-item.is-active {
-  background: color-mix(in srgb, var(--cx-accent) 12%, var(--cx-surface));
-  border-color: color-mix(in srgb, var(--cx-accent) 35%, transparent);
-  position: relative;
-}
-.builder-sidebar-item.is-active::before {
-  content: '';
-  position: absolute;
-  left: -1px;
-  top: 4px;
-  bottom: 4px;
-  width: 3px;
-  background: var(--cx-accent);
-  border-radius: 0 2px 2px 0;
-}
-.builder-sidebar-item.is-active .builder-sidebar-item-name {
-  font-weight: 700;
-  color: var(--cx-accent);
-}
-
-.builder-sidebar-item-swatch {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 1px;
-  width: 18px;
-  height: 18px;
-  border-radius: 3px;
-  border: 1px solid var(--cx-border);
-  overflow: hidden;
-  flex-shrink: 0;
-}
-
-.builder-sidebar-item-swatch span {
-  display: block;
-  width: 100%;
-  height: 100%;
-}
-
-.builder-sidebar-item-body {
-  flex: 1 1 auto;
-  min-width: 0;
-}
-
-.builder-sidebar-item-name {
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--cx-text);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  display: block;
-  line-height: 1.3;
-}
-
-/* Meta line is hidden in the compact list — name only. The base/desc
-   info still lives in the editor toolbar when you click into a theme. */
-.builder-sidebar-item-meta {
-  display: none;
-}
-
-.builder-sidebar-item-active-dot {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: var(--cx-accent);
-  flex-shrink: 0;
-}
-
-.builder-sidebar-empty {
-  text-align: center;
-  padding: var(--cx-space-4) var(--cx-space-2);
-  color: var(--cx-text-subtle);
-}
-
-.builder-sidebar-empty-icon {
-  font-size: 24px;
-  margin-bottom: var(--cx-space-2);
-}
-
-.builder-sidebar-empty-title {
-  font-size: 12px;
-  font-weight: 700;
-  color: var(--cx-text-muted);
-  margin-bottom: 4px;
-}
-
-.builder-sidebar-empty-body {
-  font-size: 11px;
-  line-height: 1.45;
-}
-
-.builder-main {
-  min-width: 0;
-}
-
-/* (Sidebar Start from… section removed — replaced by the create-menu
-   popover anchored under the "+ New ▾" button. See .builder-create-menu
-   styles above. The classes .builder-startfrom-icon / -name / -desc /
-   -badge are now scoped under .builder-create-menu-item and styled
-   there.) */
-
-@media (max-width: 900px) {
-  .builder-layout {
-    grid-template-columns: 1fr;
-  }
-  .builder-sidebar {
-    position: static;
-    max-height: none;
-  }
-  .editor-layout {
-    grid-template-columns: 1fr;
-  }
-  .editor-subtab-rail {
-    flex-direction: row;
-    position: static;
-  }
-}
+/* (Sidebar removed — replaced by .builder-topbar horizontal strip.
+   Dead sidebar CSS cleaned up.) */
+/* (Builder sidebar removed — replaced by .builder-topbar horizontal
+   strip. All .builder-sidebar-* CSS deleted.) */
 
 .editor-panel {
   background: var(--cx-surface);

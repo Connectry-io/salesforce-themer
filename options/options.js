@@ -363,28 +363,17 @@
     }
   }
 
-  // ─── Builder sidebar list ────────────────────────────────────────────────
-  // The Builder tab uses a sidebar layout: custom themes live in the left
-  // rail, the right pane shows create-method cards. This is a parallel render
-  // to renderCustomThemeGrid (which still renders the legacy hidden host).
+  // ─── Builder top bar: theme pills ────────────────────────────────────────
+  // The Builder tab uses a horizontal top strip instead of a sidebar.
+  // Custom themes render as compact pills; clicking a pill loads that
+  // theme into the editor. The active theme pill is highlighted.
 
   function renderBuilderSidebar(activeThemeId) {
-    const list = document.getElementById('builderSidebarList');
-    const empty = document.getElementById('builderSidebarEmpty');
-    if (!list || !empty) return;
+    const strip = document.getElementById('builderTopbarThemes');
+    if (!strip) return;
 
     const customs = syncState.customThemes || [];
-
-    if (!customs.length) {
-      list.innerHTML = '';
-      list.hidden = true;
-      empty.hidden = false;
-      return;
-    }
-
-    list.hidden = false;
-    empty.hidden = true;
-    list.innerHTML = '';
+    strip.innerHTML = '';
 
     for (const ct of customs) {
       const isActive = ct.id === activeThemeId;
@@ -398,35 +387,24 @@
       ];
       const swatchHtml = swatchColors.map(col => `<span style="background:${col};"></span>`).join('');
 
-      const item = document.createElement('button');
-      item.type = 'button';
-      item.className = `builder-sidebar-item${isActive ? ' is-active' : ''}`;
-      item.dataset.theme = ct.id;
-      item.setAttribute('role', 'option');
-      item.setAttribute('aria-selected', String(isActive));
+      const pill = document.createElement('button');
+      pill.type = 'button';
+      pill.className = `builder-topbar-pill${isActive ? ' is-active' : ''}`;
+      pill.dataset.theme = ct.id;
+      pill.setAttribute('role', 'option');
+      pill.setAttribute('aria-selected', String(isActive));
+      pill.title = ct.name;
 
-      const baseLabel = base ? base.name : ct.basedOn;
-      const subline = ct.description
-        ? Connectry.Settings.escape(ct.description)
-        : `Based on ${Connectry.Settings.escape(baseLabel)}`;
-
-      item.innerHTML = `
-        <div class="builder-sidebar-item-swatch">${swatchHtml}</div>
-        <div class="builder-sidebar-item-body">
-          <span class="builder-sidebar-item-name">${Connectry.Settings.escape(ct.name)}</span>
-          <span class="builder-sidebar-item-meta">${subline}</span>
-        </div>
-        ${isActive ? '<span class="builder-sidebar-item-active-dot" title="Active theme"></span>' : ''}
+      pill.innerHTML = `
+        <span class="builder-topbar-pill-swatch">${swatchHtml}</span>
+        <span>${Connectry.Settings.escape(ct.name)}</span>
       `;
 
-      item.addEventListener('click', () => {
-        // Single-click in the sidebar opens the editor for that theme.
-        // (Applying without editing is still possible from the popup or
-        // the Themes tab.)
+      pill.addEventListener('click', () => {
         openEditor(ct.basedOn, ct);
       });
 
-      list.appendChild(item);
+      strip.appendChild(pill);
     }
   }
 
@@ -1093,10 +1071,17 @@
     // brand-guide / URL = locked Premium · Coming Soon).
     _bindBuilderCreateMenu();
 
-    // "Build with AI" button in the editor toolbar — the persistent
-    // alternate creation surface. V1: opens the upgrade dialog.
+    // "Build with AI" button in the top bar — toggles the AI chat
+    // placeholder panel visible between editor and preview. For V1
+    // this just shows a coming-soon placeholder; the actual chat UI
+    // ships post-backend.
     document.getElementById('editorBuildWithAiBtn')?.addEventListener('click', () => {
-      openUpgradeDialog();
+      const chatPanel = document.getElementById('builderChatPanel');
+      const layout = document.querySelector('.editor-layout');
+      if (!chatPanel || !layout) return;
+      const opening = chatPanel.hidden;
+      chatPanel.hidden = !opening;
+      layout.classList.toggle('is-chat-open', opening);
     });
   }
 

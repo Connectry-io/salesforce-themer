@@ -298,93 +298,82 @@
     <!-- ═══ Builder Tab ═══ -->
     <div class="cx-tabpanel" role="tabpanel" data-tabpanel="builder" hidden>
 
-      <div class="builder-layout">
-
-        <!-- Left sidebar: My Themes. The "+ New ▾" button opens a popover
-             that surfaces all 4 ways to start a theme (manual = enabled,
-             AI / brand / URL = locked Premium · Coming Soon). Keeps the
-             3 alternative input methods discoverable without dedicating
-             permanent screen real estate to disabled placeholders. -->
-        <aside class="builder-sidebar">
-          <div class="builder-sidebar-header">
-            <h2 class="builder-sidebar-title">My Themes</h2>
-            <div class="builder-create-menu-wrap">
-              <button class="builder-sidebar-create-btn" id="builderSidebarCreateBtn" type="button" title="Start a new theme" aria-haspopup="true" aria-expanded="false">
-                <svg width="12" height="12" viewBox="0 0 14 14" fill="none" aria-hidden="true">
-                  <path d="M7 2v10M2 7h10" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                </svg>
-                New
-                <svg width="9" height="9" viewBox="0 0 12 12" fill="none" aria-hidden="true">
-                  <path d="M3 4.5L6 7.5L9 4.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
-                </svg>
-              </button>
-              <div class="builder-create-menu" id="builderCreateMenu" hidden role="menu" aria-label="Start a new theme">
-                <div class="builder-create-menu-label">Start from…</div>
-                <button type="button" class="builder-create-menu-item" data-startfrom="manual" role="menuitem">
-                  <span class="builder-startfrom-icon">
-                    <svg width="14" height="14" viewBox="0 0 22 22" fill="none" aria-hidden="true">
-                      <path d="M14 2l6 6-12 12H2v-6L14 2z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>
-                      <path d="M11 5l6 6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
-                    </svg>
-                  </span>
-                  <span class="builder-startfrom-body">
-                    <span class="builder-startfrom-name">From scratch</span>
-                    <span class="builder-startfrom-desc">Tweak any of the 23 core colors</span>
-                  </span>
-                </button>
-                <div class="builder-create-menu-divider"></div>
-                <button type="button" class="builder-create-menu-item is-locked" data-startfrom="brand-guide" disabled role="menuitem">
-                  <span class="builder-startfrom-icon">
-                    <svg width="14" height="14" viewBox="0 0 22 22" fill="none" aria-hidden="true">
-                      <rect x="3" y="2" width="14" height="18" rx="1.5" stroke="currentColor" stroke-width="1.6"/>
-                      <path d="M6 7h8M6 11h8M6 15h5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
-                    </svg>
-                  </span>
-                  <span class="builder-startfrom-body">
-                    <span class="builder-startfrom-name">Upload brand guide</span>
-                    <span class="builder-startfrom-desc">PDF or image · Claude Vision extracts</span>
-                  </span>
-                  <span class="builder-startfrom-badge">Soon</span>
-                </button>
-                <button type="button" class="builder-create-menu-item is-locked" data-startfrom="url" disabled role="menuitem">
-                  <span class="builder-startfrom-icon">
-                    <svg width="14" height="14" viewBox="0 0 22 22" fill="none" aria-hidden="true">
-                      <circle cx="11" cy="11" r="8.5" stroke="currentColor" stroke-width="1.6"/>
-                      <path d="M2.5 11h17M11 2.5c2.5 2.5 4 5 4 8.5s-1.5 6-4 8.5M11 2.5c-2.5 2.5-4 5-4 8.5s1.5 6 4 8.5" stroke="currentColor" stroke-width="1.4"/>
-                    </svg>
-                  </span>
-                  <span class="builder-startfrom-body">
-                    <span class="builder-startfrom-name">Match a website</span>
-                    <span class="builder-startfrom-desc">Stripe, Notion, your marketing site</span>
-                  </span>
-                  <span class="builder-startfrom-badge">Soon</span>
-                </button>
-                <p class="builder-create-menu-foot">Locked options are Premium · Coming Soon</p>
-              </div>
-            </div>
-          </div>
-          <p class="builder-sidebar-sub">Click any theme to edit it. Saved themes apply automatically.</p>
-
-          <div class="builder-sidebar-list" id="builderSidebarList" role="listbox" aria-label="Custom themes">
-            <!-- populated by JS — mirrors customThemes -->
-          </div>
-
-          <div class="builder-sidebar-empty" id="builderSidebarEmpty" hidden>
-            <div class="builder-sidebar-empty-icon">✨</div>
-            <div class="builder-sidebar-empty-title">No saved themes yet</div>
-            <div class="builder-sidebar-empty-body">You're editing the active theme on the right. Click Save to keep it.</div>
-          </div>
-        </aside>
-
-        <!-- Right main pane: the editor is mounted here at init time by
-             options.js (the markup itself lives at the root for legacy
-             reasons — see _embedEditorInBuilder). On first land, the
-             editor is auto-loaded with the user's currently active theme. -->
-        <div class="builder-main" id="builderMain">
-          <!-- editor view is appended here at init -->
+      <!-- Top strip: theme pills (horizontal scroll) + New ▾ popover + Build with AI.
+           Replaces the sidebar — gives the full width to the editor + preview. -->
+      <div class="builder-topbar">
+        <div class="builder-topbar-themes" id="builderTopbarThemes" role="listbox" aria-label="Custom themes">
+          <!-- populated by JS — horizontal pill per custom theme -->
         </div>
 
-      </div><!-- /.builder-layout -->
+        <div class="builder-create-menu-wrap">
+          <button class="builder-topbar-new-btn" id="builderSidebarCreateBtn" type="button" title="Start a new theme" aria-haspopup="true" aria-expanded="false">
+            <svg width="12" height="12" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+              <path d="M7 2v10M2 7h10" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+            New
+            <svg width="9" height="9" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+              <path d="M3 4.5L6 7.5L9 4.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
+          <div class="builder-create-menu" id="builderCreateMenu" hidden role="menu" aria-label="Start a new theme">
+            <div class="builder-create-menu-label">Start from…</div>
+            <button type="button" class="builder-create-menu-item" data-startfrom="manual" role="menuitem">
+              <span class="builder-startfrom-icon">
+                <svg width="14" height="14" viewBox="0 0 22 22" fill="none" aria-hidden="true">
+                  <path d="M14 2l6 6-12 12H2v-6L14 2z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>
+                  <path d="M11 5l6 6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+                </svg>
+              </span>
+              <span class="builder-startfrom-body">
+                <span class="builder-startfrom-name">From scratch</span>
+                <span class="builder-startfrom-desc">Tweak any of the 23 core colors</span>
+              </span>
+            </button>
+            <div class="builder-create-menu-divider"></div>
+            <button type="button" class="builder-create-menu-item is-locked" data-startfrom="brand-guide" disabled role="menuitem">
+              <span class="builder-startfrom-icon">
+                <svg width="14" height="14" viewBox="0 0 22 22" fill="none" aria-hidden="true">
+                  <rect x="3" y="2" width="14" height="18" rx="1.5" stroke="currentColor" stroke-width="1.6"/>
+                  <path d="M6 7h8M6 11h8M6 15h5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+                </svg>
+              </span>
+              <span class="builder-startfrom-body">
+                <span class="builder-startfrom-name">Upload brand guide</span>
+              </span>
+              <span class="builder-startfrom-badge">Soon</span>
+            </button>
+            <button type="button" class="builder-create-menu-item is-locked" data-startfrom="url" disabled role="menuitem">
+              <span class="builder-startfrom-icon">
+                <svg width="14" height="14" viewBox="0 0 22 22" fill="none" aria-hidden="true">
+                  <circle cx="11" cy="11" r="8.5" stroke="currentColor" stroke-width="1.6"/>
+                  <path d="M2.5 11h17M11 2.5c2.5 2.5 4 5 4 8.5s-1.5 6-4 8.5M11 2.5c-2.5 2.5-4 5-4 8.5s1.5 6 4 8.5" stroke="currentColor" stroke-width="1.4"/>
+                </svg>
+              </span>
+              <span class="builder-startfrom-body">
+                <span class="builder-startfrom-name">Match a website</span>
+              </span>
+              <span class="builder-startfrom-badge">Soon</span>
+            </button>
+            <p class="builder-create-menu-foot">Locked options are Premium · Coming Soon</p>
+          </div>
+        </div>
+
+        <button class="editor-build-ai-btn" id="editorBuildWithAiBtn" type="button" title="Build with AI — coming soon">
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+            <path d="M8 1.5l1.4 3.1 3.4.4-2.6 2.4.7 3.4L8 9.1 5.1 10.8l.7-3.4L3.2 5l3.4-.4L8 1.5z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round" fill="currentColor" fill-opacity="0.18"/>
+          </svg>
+          <span>Build with AI</span>
+          <span class="editor-build-ai-badge">Soon</span>
+        </button>
+      </div>
+
+      <!-- Main content: editor view is mounted here by JS at init time.
+           Full width — no sidebar competing for space. The AI chat panel
+           placeholder lives inside the editor-layout as a toggleable
+           column between the editor card and the preview. -->
+      <div id="builderMain">
+        <!-- editor view is appended here at init -->
+      </div>
 
       <!-- Hidden hosts kept for legacy code paths (event bindings still target these IDs).
            The sidebar list above is the visible source of truth. -->
@@ -1043,18 +1032,6 @@
             </div>
 
             <div class="editor-toolbar-right">
-              <!-- Persistent "Build with AI" entry point. This is the alternate
-                   creation surface — eventually it'll toggle a chat panel that
-                   stays on screen so users can iteratively converse with AI
-                   to refine their theme. For V1 it's a Premium · Coming Soon
-                   placeholder that opens the upgrade dialog. -->
-              <button class="editor-build-ai-btn" id="editorBuildWithAiBtn" type="button" title="Build with AI — coming soon">
-                <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-                  <path d="M8 1.5l1.4 3.1 3.4.4-2.6 2.4.7 3.4L8 9.1 5.1 10.8l.7-3.4L3.2 5l3.4-.4L8 1.5z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round" fill="currentColor" fill-opacity="0.18"/>
-                </svg>
-                <span>Build with AI</span>
-                <span class="editor-build-ai-badge">Soon</span>
-              </button>
               <button class="cx-btn cx-btn-primary" id="editorSaveBtn">Save Theme</button>
             </div>
           </div>
@@ -1326,7 +1303,28 @@
           </div><!-- /.editor-card-body -->
         </div><!-- /.editor-card -->
 
-        <!-- RIGHT: Live Preview card (sibling of .editor-card) -->
+        <!-- CENTER: AI Chat placeholder — toggleable column between editor
+             and preview. When visible the layout switches to 3-column; when
+             hidden it's display:none and the 2-column layout stays. V1 shows
+             a static placeholder; post-V1 this becomes a real chat UI. -->
+        <div class="builder-chat-panel" id="builderChatPanel" hidden>
+          <div class="builder-chat-placeholder">
+            <div class="builder-chat-placeholder-icon">
+              <svg width="32" height="32" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+                <rect x="3" y="4" width="26" height="19" rx="3" stroke="currentColor" stroke-width="1.8"/>
+                <path d="M10 28l4-5h-4" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
+                <circle cx="11" cy="14" r="1.5" fill="currentColor" opacity="0.5"/>
+                <circle cx="16" cy="14" r="1.5" fill="currentColor" opacity="0.5"/>
+                <circle cx="21" cy="14" r="1.5" fill="currentColor" opacity="0.5"/>
+              </svg>
+            </div>
+            <h3 class="builder-chat-placeholder-title">AI Theme Chat</h3>
+            <p class="builder-chat-placeholder-body">"Make it warmer." "Now darker accents." "Remove the glow." — a persistent conversation with AI that iteratively refines your theme in real time.</p>
+            <span class="builder-chat-placeholder-badge">Premium · Coming Soon</span>
+          </div>
+        </div>
+
+        <!-- RIGHT: Live Preview card -->
         <div class="editor-panel editor-preview">
           <div class="editor-preview-frame" id="editorPreview">
 
