@@ -2869,6 +2869,8 @@
     renderGuideAnatomyDiagram();
     renderGuideColorsMock();
     renderGuideEffectsGrid();
+    _bindGuideTypeDemo();
+    _bindGuideFaviconDemo();
   }
 
   /**
@@ -3330,6 +3332,172 @@
     // Reflow then re-add so the animation replays on every click
     void card.offsetWidth;
     card.classList.add('is-highlight');
+  }
+
+  // ─── Guide: Interactive Typography demo ──────────────────────────────────
+
+  let _guideTypeBound = false;
+  function _bindGuideTypeDemo() {
+    if (_guideTypeBound) return;
+    _guideTypeBound = true;
+
+    const fontSelect = document.getElementById('guideTypeFont');
+    const headingWeightSelect = document.getElementById('guideTypeHeadingWeight');
+    const bodyWeightSelect = document.getElementById('guideTypeBodyWeight');
+    if (!fontSelect) return;
+
+    function updateTypePreview() {
+      const fontKey = fontSelect.value;
+      const stack = FONT_STACKS[fontKey] || FONT_STACKS['system-ui'];
+      const headingWeight = headingWeightSelect?.value || '700';
+      const bodyWeight = bodyWeightSelect?.value || '400';
+
+      const activeBtn = document.querySelector('#guideTypeSizeBtns .guide-type-size-btn.is-active');
+      const scale = activeBtn ? parseFloat(activeBtn.dataset.scale) : 1;
+
+      const heading = document.getElementById('guideTypeHeading');
+      const meta = document.getElementById('guideTypeMeta');
+      const body = document.getElementById('guideTypeBody');
+      const tableHead = document.getElementById('guideTypeTableHead');
+
+      if (heading) { heading.style.fontFamily = stack; heading.style.fontSize = `${20 * scale}px`; heading.style.fontWeight = headingWeight; }
+      if (meta) { meta.style.fontFamily = stack; meta.style.fontSize = `${13 * scale}px`; }
+      if (body) { body.style.fontFamily = stack; body.style.fontSize = `${13 * scale}px`; body.style.fontWeight = bodyWeight; }
+      if (tableHead) { tableHead.style.fontFamily = stack; tableHead.style.fontSize = `${11 * scale}px`; tableHead.style.fontWeight = headingWeight; }
+    }
+
+    fontSelect.addEventListener('change', updateTypePreview);
+    headingWeightSelect?.addEventListener('change', updateTypePreview);
+    bodyWeightSelect?.addEventListener('change', updateTypePreview);
+
+    document.querySelectorAll('#guideTypeSizeBtns .guide-type-size-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('#guideTypeSizeBtns .guide-type-size-btn').forEach(b => b.classList.remove('is-active'));
+        btn.classList.add('is-active');
+        updateTypePreview();
+      });
+    });
+  }
+
+  // ─── Guide: Interactive Favicon demo ────────────────────────────────────
+
+  const FAVICON_ICONS = [
+    { id: 'connectry', label: 'Connectry', svg: '<circle cx="8" cy="16" r="4" fill="white"/><line x1="12" y1="16" x2="20" y2="16" stroke="white" stroke-width="2" stroke-linecap="round"/><circle cx="24" cy="16" r="4" fill="white" opacity="0.7"/>' },
+    { id: 'snowflake', label: 'Snowflake', svg: '<path d="M16 4v24M4 16h24M8 8l16 16M24 8L8 24" stroke="white" stroke-width="2" stroke-linecap="round"/><circle cx="16" cy="16" r="2" fill="white"/>' },
+    { id: 'flame', label: 'Flame', svg: '<path d="M16 4c0 6-6 8-6 14a6 6 0 0012 0c0-6-6-8-6-14z" fill="white" opacity="0.9"/><path d="M16 12c0 3-3 4-3 7a3 3 0 006 0c0-3-3-4-3-7z" fill="white" opacity="0.5"/>' },
+    { id: 'moon', label: 'Moon', svg: '<path d="M20 6a10 10 0 11-8 20 12 12 0 008-20z" fill="white" opacity="0.9"/>' },
+    { id: 'bolt', label: 'Bolt', svg: '<path d="M18 4L8 18h7l-3 10 10-14h-7l3-10z" fill="white" opacity="0.9"/>' },
+    { id: 'leaf', label: 'Leaf', svg: '<path d="M8 24C8 12 16 4 28 4c0 12-8 20-20 20z" fill="white" opacity="0.85"/><path d="M8 24c4-4 10-8 16-12" stroke="white" stroke-width="1.5" opacity="0.5"/>' },
+    { id: 'star', label: 'Star', svg: '<path d="M16 4l3.5 8 8.5 1-6.5 6 2 8.5L16 23l-7.5 4.5 2-8.5L4 13l8.5-1z" fill="white" opacity="0.9"/>' },
+    { id: 'diamond', label: 'Diamond', svg: '<path d="M16 3l11 13-11 13L5 16z" fill="white" opacity="0.85"/>' },
+    { id: 'shield', label: 'Shield', svg: '<path d="M16 3L5 8v7c0 7 5 12 11 14 6-2 11-7 11-14V8L16 3z" fill="white" opacity="0.85"/>' },
+    { id: 'heart', label: 'Heart', svg: '<path d="M16 28s-10-6-10-14a5.5 5.5 0 0111 0 5.5 5.5 0 0111 0c0 8-12 14-12 14z" fill="white" opacity="0.9" transform="translate(0,-2)"/>' },
+    { id: 'circle', label: 'Circle', svg: '<circle cx="16" cy="16" r="8" fill="white" opacity="0.85"/>' },
+    { id: 'waves', label: 'Waves', svg: '<path d="M4 12c4-3 8 3 12 0s8 3 12 0M4 18c4-3 8 3 12 0s8 3 12 0" stroke="white" stroke-width="2.5" stroke-linecap="round" fill="none" opacity="0.85"/>' },
+  ];
+
+  // Theme-specific default icons
+  const THEME_FAVICON_MAP = {
+    'connectry': 'connectry', 'connectry-dark': 'connectry',
+    'arctic': 'snowflake', 'midnight': 'moon', 'ember': 'flame',
+    'forest': 'leaf', 'ocean': 'waves', 'sunset': 'star',
+    'lavender': 'diamond', 'rose': 'heart', 'slate': 'shield',
+    'tron': 'bolt', 'terminal': 'bolt', 'solarized': 'circle',
+    'nord': 'snowflake',
+  };
+
+  let _guideFaviconState = { shape: 'circle', color: '#4A6FA5', icon: 'connectry' };
+  let _guideFaviconBound = false;
+
+  function _renderFaviconSVG(shape, color, iconId, size) {
+    const icon = FAVICON_ICONS.find(i => i.id === iconId) || FAVICON_ICONS[0];
+    let bg = '';
+    if (shape === 'circle') bg = `<circle cx="16" cy="16" r="15" fill="${color}"/>`;
+    else if (shape === 'rounded') bg = `<rect x="1" y="1" width="30" height="30" rx="6" fill="${color}"/>`;
+    else if (shape === 'square') bg = `<rect x="1" y="1" width="30" height="30" rx="1" fill="${color}"/>`;
+    // 'none' = no background
+    return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="${size}" height="${size}">${bg}${shape === 'none' ? icon.svg.replace(/white/g, color) : icon.svg}</svg>`;
+  }
+
+  function _updateGuideFaviconPreview() {
+    const { shape, color, icon } = _guideFaviconState;
+    const main = document.getElementById('guideFaviconLivePreview');
+    if (main) main.innerHTML = _renderFaviconSVG(shape, color, icon, 64);
+    const dark = document.getElementById('guideFaviconCtxDarkIcon');
+    if (dark) dark.innerHTML = _renderFaviconSVG(shape, color, icon, 14);
+    const light = document.getElementById('guideFaviconCtxLightIcon');
+    if (light) light.innerHTML = _renderFaviconSVG(shape, color, icon, 14);
+  }
+
+  function _bindGuideFaviconDemo() {
+    if (_guideFaviconBound) return;
+    _guideFaviconBound = true;
+
+    // Populate the pre-built favicon grid (one per theme)
+    const grid = document.getElementById('guideFaviconGrid');
+    if (grid && !grid.children.length) {
+      for (const theme of THEMES) {
+        const iconId = THEME_FAVICON_MAP[theme.id] || 'connectry';
+        const accentColor = theme.colors.accent || '#4A6FA5';
+        const item = document.createElement('div');
+        item.className = 'guide-favicon-item';
+        item.title = theme.name;
+        item.innerHTML = _renderFaviconSVG('circle', accentColor, iconId, 32) +
+          `<span class="guide-favicon-item-label">${theme.name.split(' ')[0]}</span>`;
+        item.addEventListener('click', () => {
+          _guideFaviconState.color = accentColor;
+          _guideFaviconState.icon = iconId;
+          document.getElementById('guideFaviconColor').value = accentColor;
+          // Update active states
+          grid.querySelectorAll('.guide-favicon-item').forEach(i => i.classList.remove('is-active'));
+          item.classList.add('is-active');
+          document.querySelectorAll('#guideFaviconIconGrid .guide-favicon-icon-btn').forEach(b =>
+            b.classList.toggle('is-active', b.dataset.icon === iconId)
+          );
+          _updateGuideFaviconPreview();
+        });
+        grid.appendChild(item);
+      }
+    }
+
+    // Populate icon picker
+    const iconGrid = document.getElementById('guideFaviconIconGrid');
+    if (iconGrid && !iconGrid.children.length) {
+      for (const icon of FAVICON_ICONS) {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = `guide-favicon-icon-btn${icon.id === 'connectry' ? ' is-active' : ''}`;
+        btn.dataset.icon = icon.id;
+        btn.title = icon.label;
+        btn.innerHTML = _renderFaviconSVG('circle', '#4A6FA5', icon.id, 22);
+        btn.addEventListener('click', () => {
+          _guideFaviconState.icon = icon.id;
+          iconGrid.querySelectorAll('.guide-favicon-icon-btn').forEach(b => b.classList.remove('is-active'));
+          btn.classList.add('is-active');
+          _updateGuideFaviconPreview();
+        });
+        iconGrid.appendChild(btn);
+      }
+    }
+
+    // Shape buttons
+    document.querySelectorAll('#guideFaviconShapeBtns .guide-favicon-shape-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        _guideFaviconState.shape = btn.dataset.shape;
+        document.querySelectorAll('#guideFaviconShapeBtns .guide-favicon-shape-btn').forEach(b => b.classList.remove('is-active'));
+        btn.classList.add('is-active');
+        _updateGuideFaviconPreview();
+      });
+    });
+
+    // Color picker
+    document.getElementById('guideFaviconColor')?.addEventListener('input', (e) => {
+      _guideFaviconState.color = e.target.value;
+      _updateGuideFaviconPreview();
+    });
+
+    // Initial render
+    _updateGuideFaviconPreview();
   }
 
   function renderPresetGrid(config) {

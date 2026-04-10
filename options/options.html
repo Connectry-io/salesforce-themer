@@ -647,41 +647,134 @@
         </p>
       </section>
 
-      <!-- Section 3: Typography -->
+      <!-- Section 3: Typography — interactive demo -->
       <section class="cx-section">
         <div class="cx-section-header">
           <div>
             <h2 class="cx-section-title">Typography</h2>
-            <p class="cx-section-subtitle">Customize how text looks across your Salesforce org.</p>
+            <p class="cx-section-subtitle">Change how text looks across your Salesforce org. Try it below.</p>
           </div>
         </div>
-        <div class="guide-placeholder-card">
-          <p>The <strong>Type</strong> tab in the Theme Builder lets you change how text renders across your Salesforce org. Salesforce switched from their custom "Salesforce Sans" to the system default font (<code>system-ui</code>) in Spring '23, so what you see depends on your OS — San Francisco on Mac, Segoe UI on Windows, Roboto on Android.</p>
-          <p style="margin-top:8px"><strong>Font Family</strong> — pick from 5 curated system font stacks. These use fonts already on your computer, so they load instantly with zero network overhead:</p>
-          <ul style="margin:6px 0 6px 18px; font-size:12.5px; line-height:1.6">
-            <li><strong>System Default</strong> — your OS native font (San Francisco, Segoe UI)</li>
-            <li><strong>Neo-Grotesque</strong> — Inter, Roboto, Helvetica Neue (clean, modern)</li>
-            <li><strong>Humanist</strong> — Gill Sans, Ubuntu, Calibri (friendly, warm)</li>
-            <li><strong>Geometric</strong> — Avenir, Montserrat, Corbel (polished, minimal)</li>
-            <li><strong>Classic Serif</strong> — Charter, Cambria (traditional, high readability)</li>
-          </ul>
-          <p style="margin-top:8px"><strong>Size</strong> — four presets that scale all text proportionally: Compact (90%), Normal (100%), Comfortable (110%), Large (120%). Great for accessibility or information density preferences.</p>
-          <p style="margin-top:8px"><strong>Weight &amp; Spacing</strong> — fine-tune heading and body font weight (Light through Bold), line height, and letter spacing. The engine overrides both SLDS 1 (<code>--lwc-*</code>) and SLDS 2 (<code>--slds-g-*</code>) tokens so it works on any Salesforce org.</p>
+        <div class="guide-type-demo" id="guideTypeDemo">
+          <div class="guide-type-controls">
+            <div class="guide-type-control">
+              <label>Font</label>
+              <select class="editor-select" id="guideTypeFont">
+                <option value="system-ui">System Default</option>
+                <option value="neo-grotesque">Neo-Grotesque</option>
+                <option value="humanist">Humanist</option>
+                <option value="geometric">Geometric</option>
+                <option value="classic-serif">Classic Serif</option>
+              </select>
+            </div>
+            <div class="guide-type-control">
+              <label>Size</label>
+              <div class="guide-type-size-btns" id="guideTypeSizeBtns">
+                <button type="button" class="guide-type-size-btn" data-scale="0.9">S</button>
+                <button type="button" class="guide-type-size-btn is-active" data-scale="1">M</button>
+                <button type="button" class="guide-type-size-btn" data-scale="1.1">L</button>
+                <button type="button" class="guide-type-size-btn" data-scale="1.2">XL</button>
+              </div>
+            </div>
+            <div class="guide-type-control">
+              <label>Heading Weight</label>
+              <select class="editor-select" id="guideTypeHeadingWeight">
+                <option value="400">Regular</option>
+                <option value="500">Medium</option>
+                <option value="600">Semi-bold</option>
+                <option value="700" selected>Bold</option>
+              </select>
+            </div>
+            <div class="guide-type-control">
+              <label>Body Weight</label>
+              <select class="editor-select" id="guideTypeBodyWeight">
+                <option value="300">Light</option>
+                <option value="400" selected>Regular</option>
+                <option value="500">Medium</option>
+              </select>
+            </div>
+          </div>
+          <div class="guide-type-preview" id="guideTypePreview">
+            <div class="guide-type-preview-section">
+              <span class="guide-type-preview-label">Record Header</span>
+              <div class="guide-type-preview-heading" id="guideTypeHeading">Lead: John Smith</div>
+              <div class="guide-type-preview-meta" id="guideTypeMeta">Senior Account Executive · Acme Corp</div>
+            </div>
+            <div class="guide-type-preview-divider"></div>
+            <div class="guide-type-preview-section">
+              <span class="guide-type-preview-label">Body Text</span>
+              <div class="guide-type-preview-body" id="guideTypeBody">Record details, field values, list views, and related lists all use the body font. Labels like "Phone", "Email", and "Company" appear alongside their values in the compact layout.</div>
+            </div>
+            <div class="guide-type-preview-divider"></div>
+            <div class="guide-type-preview-section">
+              <span class="guide-type-preview-label">Table Header</span>
+              <div class="guide-type-preview-table-head" id="guideTypeTableHead">Name &nbsp;&nbsp;&nbsp; Email &nbsp;&nbsp;&nbsp; Status &nbsp;&nbsp;&nbsp; Last Modified</div>
+            </div>
+          </div>
         </div>
+        <p class="guide-type-hint">These same controls are in the <strong>Type</strong> tab of the Theme Builder. Uses system fonts — zero loading, works offline.</p>
       </section>
 
-      <!-- Section 4: Favicons -->
+      <!-- Section 4: Favicons — interactive grid + customizer -->
       <section class="cx-section">
         <div class="cx-section-header">
           <div>
             <h2 class="cx-section-title">Favicons</h2>
-            <p class="cx-section-subtitle">The browser tab icon you see when Salesforce is open.</p>
+            <p class="cx-section-subtitle">Replace the Salesforce cloud icon in your browser tab. Pick one or design your own.</p>
           </div>
         </div>
-        <div class="guide-placeholder-card">
-          <p>When active, Salesforce Themer replaces the default Salesforce cloud favicon with the <strong>Connectry logo</strong> — the two-dots-connected-by-line icon. This appears in your browser tab whenever you're on a Salesforce page.</p>
-          <p style="margin-top:8px">You can toggle the favicon on or off in the Theme Builder toolbar (the small icon next to your theme name). The setting applies globally to all Salesforce tabs and persists across sessions.</p>
-          <p style="margin-top:8px"><strong>Premium (coming soon)</strong> — upload your own custom favicon to replace the Connectry logo with your company's icon or any image you like.</p>
+        <div class="guide-favicon-demo" id="guideFaviconDemo">
+          <!-- Pre-built favicon grid -->
+          <div class="guide-favicon-grid" id="guideFaviconGrid">
+            <!-- Populated by JS — one per theme + Connectry default -->
+          </div>
+          <!-- Favicon customizer -->
+          <div class="guide-favicon-customizer">
+            <div class="guide-favicon-customizer-left">
+              <div class="guide-favicon-control">
+                <label>Background</label>
+                <div class="guide-favicon-shape-btns" id="guideFaviconShapeBtns">
+                  <button type="button" class="guide-favicon-shape-btn is-active" data-shape="circle" title="Circle">
+                    <svg width="16" height="16" viewBox="0 0 20 20"><circle cx="10" cy="10" r="8" fill="currentColor"/></svg>
+                  </button>
+                  <button type="button" class="guide-favicon-shape-btn" data-shape="rounded" title="Rounded square">
+                    <svg width="16" height="16" viewBox="0 0 20 20"><rect x="2" y="2" width="16" height="16" rx="4" fill="currentColor"/></svg>
+                  </button>
+                  <button type="button" class="guide-favicon-shape-btn" data-shape="square" title="Square">
+                    <svg width="16" height="16" viewBox="0 0 20 20"><rect x="2" y="2" width="16" height="16" rx="1" fill="currentColor"/></svg>
+                  </button>
+                  <button type="button" class="guide-favicon-shape-btn" data-shape="none" title="No background">
+                    <svg width="16" height="16" viewBox="0 0 20 20"><circle cx="10" cy="10" r="8" stroke="currentColor" stroke-width="1.5" fill="none" stroke-dasharray="3,2"/></svg>
+                  </button>
+                </div>
+              </div>
+              <div class="guide-favicon-control">
+                <label>Color</label>
+                <input type="color" class="guide-favicon-color-input" id="guideFaviconColor" value="#4A6FA5" />
+              </div>
+              <div class="guide-favicon-control">
+                <label>Icon</label>
+                <div class="guide-favicon-icon-grid" id="guideFaviconIconGrid">
+                  <!-- Populated by JS — icon options -->
+                </div>
+              </div>
+            </div>
+            <div class="guide-favicon-customizer-right">
+              <div class="guide-favicon-live-preview" id="guideFaviconLivePreview">
+                <!-- Live SVG preview rendered by JS -->
+              </div>
+              <div class="guide-favicon-live-contexts">
+                <div class="guide-favicon-context guide-favicon-context-dark" id="guideFaviconCtxDark">
+                  <span class="guide-favicon-ctx-icon" id="guideFaviconCtxDarkIcon"></span>
+                  <span>Dark tab</span>
+                </div>
+                <div class="guide-favicon-context guide-favicon-context-light" id="guideFaviconCtxLight">
+                  <span class="guide-favicon-ctx-icon" id="guideFaviconCtxLightIcon"></span>
+                  <span>Light tab</span>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 

@@ -192,7 +192,36 @@
     });
   }
 
-  function applyFavicon(enabled) {
+  // Favicon icon SVG paths (must match options.js FAVICON_ICONS)
+  const _FAVICON_ICON_PATHS = {
+    connectry: '<circle cx="8" cy="16" r="4" fill="white"/><line x1="12" y1="16" x2="20" y2="16" stroke="white" stroke-width="2" stroke-linecap="round"/><circle cx="24" cy="16" r="4" fill="white" opacity="0.7"/>',
+    snowflake: '<path d="M16 4v24M4 16h24M8 8l16 16M24 8L8 24" stroke="white" stroke-width="2" stroke-linecap="round"/><circle cx="16" cy="16" r="2" fill="white"/>',
+    flame: '<path d="M16 4c0 6-6 8-6 14a6 6 0 0012 0c0-6-6-8-6-14z" fill="white" opacity="0.9"/><path d="M16 12c0 3-3 4-3 7a3 3 0 006 0c0-3-3-4-3-7z" fill="white" opacity="0.5"/>',
+    moon: '<path d="M20 6a10 10 0 11-8 20 12 12 0 008-20z" fill="white" opacity="0.9"/>',
+    bolt: '<path d="M18 4L8 18h7l-3 10 10-14h-7l3-10z" fill="white" opacity="0.9"/>',
+    leaf: '<path d="M8 24C8 12 16 4 28 4c0 12-8 20-20 20z" fill="white" opacity="0.85"/><path d="M8 24c4-4 10-8 16-12" stroke="white" stroke-width="1.5" opacity="0.5"/>',
+    star: '<path d="M16 4l3.5 8 8.5 1-6.5 6 2 8.5L16 23l-7.5 4.5 2-8.5L4 13l8.5-1z" fill="white" opacity="0.9"/>',
+    diamond: '<path d="M16 3l11 13-11 13L5 16z" fill="white" opacity="0.85"/>',
+    shield: '<path d="M16 3L5 8v7c0 7 5 12 11 14 6-2 11-7 11-14V8L16 3z" fill="white" opacity="0.85"/>',
+    heart: '<path d="M16 28s-10-6-10-14a5.5 5.5 0 0111 0 5.5 5.5 0 0111 0c0 8-12 14-12 14z" fill="white" opacity="0.9" transform="translate(0,-2)"/>',
+    circle: '<circle cx="16" cy="16" r="8" fill="white" opacity="0.85"/>',
+    waves: '<path d="M4 12c4-3 8 3 12 0s8 3 12 0M4 18c4-3 8 3 12 0s8 3 12 0" stroke="white" stroke-width="2.5" stroke-linecap="round" fill="none" opacity="0.85"/>',
+  };
+
+  function _buildFaviconSVG(config) {
+    const shape = config.shape || 'circle';
+    const color = config.color || '#4A6FA5';
+    const iconId = config.icon || 'connectry';
+    const iconSvg = _FAVICON_ICON_PATHS[iconId] || _FAVICON_ICON_PATHS.connectry;
+    let bg = '';
+    if (shape === 'circle') bg = `<circle cx="16" cy="16" r="15" fill="${color}"/>`;
+    else if (shape === 'rounded') bg = `<rect x="1" y="1" width="30" height="30" rx="6" fill="${color}"/>`;
+    else if (shape === 'square') bg = `<rect x="1" y="1" width="30" height="30" rx="1" fill="${color}"/>`;
+    const iconFinal = shape === 'none' ? iconSvg.replace(/white/g, color) : iconSvg;
+    return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32">${bg}${iconFinal}</svg>`;
+  }
+
+  function applyFavicon(enabled, config) {
     if (!enabled) {
       removeFavicon();
       return;
@@ -210,7 +239,13 @@
       link.type = 'image/svg+xml';
       (document.head || document.documentElement).appendChild(link);
     }
-    link.href = chrome.runtime.getURL('favicons/connectry.svg');
+    // Use custom config if provided, otherwise static Connectry SVG
+    if (config && config.icon) {
+      const svg = _buildFaviconSVG(config);
+      link.href = 'data:image/svg+xml,' + encodeURIComponent(svg);
+    } else {
+      link.href = chrome.runtime.getURL('favicons/connectry.svg');
+    }
   }
 
   function removeFavicon() {
@@ -505,7 +540,7 @@
     }
 
     if (message.action === 'setFavicon') {
-      applyFavicon(!!message.enabled);
+      applyFavicon(!!message.enabled, message.config || null);
       sendResponse({ success: true });
       return false;
     }
@@ -563,6 +598,7 @@
         orgThemes: {},
         themeScope: 'lightning',
         faviconEnabled: true,
+        faviconConfig: null,
       });
 
       if (!shouldApplyToPage(syncResult.themeScope)) {
@@ -586,8 +622,8 @@
       // Load effects layer after theme is applied
       loadAndApplyEffects(themeName);
 
-      // Favicon — Connectry branding on free themes, toggleable
-      applyFavicon(syncResult.faviconEnabled);
+      // Favicon — Connectry branding on free themes, toggleable + customizable
+      applyFavicon(syncResult.faviconEnabled, syncResult.faviconConfig);
     } catch (err) {
       if (isExtensionContextDead(err)) {
         handleDeadContext();
