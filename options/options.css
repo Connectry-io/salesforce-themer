@@ -2097,6 +2097,55 @@
 .editor-mini-favicon .editor-favicon-toggle input {
   width: 10px; height: 10px;
 }
+.editor-mini-favicon-btn {
+  display: inline-flex; background: none; border: 1px solid var(--cx-border);
+  border-radius: var(--cx-radius-sm); padding: 2px; cursor: pointer;
+  transition: border-color var(--cx-transition);
+}
+.editor-mini-favicon-btn:hover { border-color: var(--cx-accent); }
+
+/* Favicon customizer popout */
+.editor-favicon-popout {
+  position: absolute; bottom: calc(100% + 8px); right: 0; z-index: 40;
+  width: 240px; background: var(--cx-surface); border: 1px solid var(--cx-border);
+  border-radius: var(--cx-radius-md);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.14), 0 2px 6px rgba(0,0,0,0.06);
+  padding: 10px; display: flex; flex-direction: column; gap: 8px;
+}
+.editor-favicon-popout[hidden] { display: none; }
+.editor-favicon-popout-section { display: flex; flex-direction: column; gap: 4px; }
+.editor-favicon-popout-label {
+  font-size: 9px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.06em; color: var(--cx-text-subtle);
+}
+.editor-favicon-popout-shapes { display: flex; gap: 4px; }
+.editor-favicon-shape-btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 28px; height: 28px; background: var(--cx-surface); border: 1px solid var(--cx-border);
+  border-radius: var(--cx-radius-sm); color: var(--cx-text-muted); cursor: pointer;
+  transition: all var(--cx-transition);
+}
+.editor-favicon-shape-btn:hover { border-color: var(--cx-accent); color: var(--cx-text); }
+.editor-favicon-shape-btn.is-active { border-color: var(--cx-accent); color: var(--cx-accent); }
+.editor-favicon-popout-color {
+  width: 100%; height: 26px; border: 1px solid var(--cx-border);
+  border-radius: var(--cx-radius-sm); cursor: pointer; padding: 2px;
+}
+.editor-favicon-popout-icons {
+  display: grid; grid-template-columns: repeat(6, 1fr); gap: 3px;
+}
+.editor-favicon-popout-icons button {
+  display: flex; align-items: center; justify-content: center;
+  aspect-ratio: 1; border: 1px solid var(--cx-border); border-radius: var(--cx-radius-sm);
+  background: transparent; cursor: pointer; transition: all var(--cx-transition); padding: 0;
+}
+.editor-favicon-popout-icons button:hover { border-color: var(--cx-accent); }
+.editor-favicon-popout-icons button.is-active { border-color: var(--cx-accent); background: rgba(74,111,165,0.08); }
+.editor-favicon-popout-preview {
+  display: flex; align-items: center; justify-content: center;
+  padding: 6px; border-top: 1px solid var(--cx-border);
+}
+.editor-favicon-popout-preview svg { width: 48px; height: 48px; }
 
 .editor-card-body {
   flex: 1 1 auto;

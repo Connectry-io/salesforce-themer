@@ -1204,8 +1204,9 @@
     // Typography controls (font picker, size presets, fine-tune sliders)
     _bindTypographyControls();
 
-    // Favicon toggle
+    // Favicon toggle + popout builder
     _bindFaviconToggle();
+    _bindEditorFaviconPopout();
 
     // (Top bar Save is wired in bindEditorEvents via builderTopbarSave)
 
@@ -1665,6 +1666,9 @@
       if (descEl) descEl.value = base?.description ? base.description : '';
       editorState.typography = defaultTypography();
     }
+
+    // Load favicon state from custom theme or base theme defaults
+    _loadEditorFaviconState(customTheme);
 
     // The editor is permanently embedded in the Builder layout — no
     // show/hide needed. Just make sure the Builder tab is the visible
@@ -2156,6 +2160,89 @@
     }
   }
 
+  // ─── Favicon builder popout (in editor mini card) ──────────────────────────
+
+  let _editorFaviconState = { shape: 'circle', color: '#4A6FA5', icon: 'connectry' };
+  let _editorFaviconBound = false;
+
+  function _bindEditorFaviconPopout() {
+    if (_editorFaviconBound) return;
+    _editorFaviconBound = true;
+
+    const btn = document.getElementById('editorFaviconBtn');
+    const popout = document.getElementById('editorFaviconPopout');
+    if (!btn || !popout) return;
+
+    btn.addEventListener('click', (e) => { e.stopPropagation(); popout.hidden = !popout.hidden; });
+    document.addEventListener('click', (e) => {
+      if (!popout.hidden && !popout.contains(e.target) && !btn.contains(e.target)) popout.hidden = true;
+    });
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !popout.hidden) popout.hidden = true; });
+
+    // Populate icon grid
+    const iconGrid = document.getElementById('editorFaviconIconGrid');
+    if (iconGrid && !iconGrid.children.length) {
+      for (const icon of FAVICON_ICONS) {
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.className = icon.id === 'connectry' ? 'is-active' : '';
+        b.dataset.icon = icon.id;
+        b.title = icon.label;
+        b.innerHTML = _renderFaviconSVG('circle', '#4A6FA5', icon.id, 18);
+        b.addEventListener('click', () => {
+          _editorFaviconState.icon = icon.id;
+          iconGrid.querySelectorAll('button').forEach(x => x.classList.toggle('is-active', x.dataset.icon === icon.id));
+          _updateEditorFaviconPreview();
+        });
+        iconGrid.appendChild(b);
+      }
+    }
+
+    // Shape buttons
+    document.querySelectorAll('#editorFaviconShapes .editor-favicon-shape-btn').forEach(sb => {
+      sb.addEventListener('click', () => {
+        _editorFaviconState.shape = sb.dataset.shape;
+        document.querySelectorAll('#editorFaviconShapes .editor-favicon-shape-btn').forEach(x => x.classList.toggle('is-active', x === sb));
+        _updateEditorFaviconPreview();
+      });
+    });
+
+    // Color picker
+    document.getElementById('editorFaviconColor')?.addEventListener('input', (e) => {
+      _editorFaviconState.color = e.target.value;
+      _updateEditorFaviconPreview();
+    });
+
+    _updateEditorFaviconPreview();
+  }
+
+  function _updateEditorFaviconPreview() {
+    const { shape, color, icon } = _editorFaviconState;
+    const miniIcon = document.getElementById('editorFaviconPreview');
+    if (miniIcon) miniIcon.innerHTML = _renderFaviconSVG(shape, color, icon, 16);
+    const popPreview = document.getElementById('editorFaviconPopoutPreview');
+    if (popPreview) popPreview.innerHTML = _renderFaviconSVG(shape, color, icon, 48);
+    const tabFav = document.getElementById('previewBrowserTabFav');
+    if (tabFav) tabFav.innerHTML = _renderFaviconSVG(shape, color, icon, 10);
+  }
+
+  function _loadEditorFaviconState(customTheme) {
+    if (customTheme?.favicon) {
+      _editorFaviconState = { shape: 'circle', color: '#4A6FA5', icon: 'connectry', ...customTheme.favicon };
+    } else {
+      const baseId = customTheme?.basedOn || editorState.basedOn || 'connectry';
+      const themeObj = getThemeById(baseId);
+      _editorFaviconState = {
+        shape: 'circle',
+        color: themeObj?.colors?.accent || '#4A6FA5',
+        icon: THEME_FAVICON_MAP[baseId] || 'connectry',
+      };
+    }
+    const colorInput = document.getElementById('editorFaviconColor');
+    if (colorInput) colorInput.value = _editorFaviconState.color;
+    _updateEditorFaviconPreview();
+  }
+
   // ─── Typography controls ───────────────────────────────────────────────────
 
   let _typographyBound = false;
@@ -2481,6 +2568,7 @@
       advancedOverrides: { ...editorState.advancedOverrides },
       effects,
       ...(hasTypography ? { typography: { ...typo } } : {}),
+      favicon: { ..._editorFaviconState },
     };
 
     const idx = customThemes.findIndex(t => t.id === id);
