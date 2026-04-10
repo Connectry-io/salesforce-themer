@@ -429,13 +429,9 @@
         </div>
       </div>
 
-      <!-- Hidden hosts kept for legacy code paths (event bindings still target these IDs).
-           The sidebar list above is the visible source of truth. -->
-      <div class="theme-grid theme-grid-custom" id="customThemeGrid" hidden></div>
-      <div id="customThemeEmpty" hidden></div>
-      <button id="createThemeBtn" hidden>Create</button>
-      <button id="createThemeBtnEmpty" hidden>Create from scratch</button>
-      <button id="cloneFirstBtn" hidden>Clone</button>
+      <!-- Legacy hidden hosts removed — the top bar theme dropdown is the
+           source of truth. renderCustomThemeGrid is a no-op (early-returns
+           when the host element doesn't exist). -->
 
     </div>
 
@@ -1114,17 +1110,10 @@
             <span>Effects</span>
           </button>
           <button class="editor-subtab is-disabled" disabled title="Typography — coming soon">
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-              <path d="M2 4h12M5 4v9M8 4v9M11 4v9" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
-            </svg>
             <span>Type</span>
             <em class="editor-subtab-soon">soon</em>
           </button>
           <button class="editor-subtab is-disabled" disabled title="Favicon / icon — coming soon">
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-              <circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.4"/>
-              <circle cx="8" cy="8" r="2.5" fill="currentColor" opacity="0.6"/>
-            </svg>
             <span>Icon</span>
             <em class="editor-subtab-soon">soon</em>
           </button>
