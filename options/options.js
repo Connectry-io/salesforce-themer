@@ -1814,6 +1814,22 @@
    * writes back to it. Free users can interact freely; the gate fires
    * on Save, not on individual edits.
    */
+  /**
+   * Preview HTML for each effect — small CSS-animated box that shows
+   * what the effect looks like. Adapted from the Guide tab's proven
+   * live previews at a smaller scale (~60×44px).
+   */
+  const EFFECT_PREVIEW_HTML = {
+    hoverLift:       '<div class="fx-prev-card fx-prev-lift">Aa</div>',
+    ambientGlow:     '<div class="fx-prev-card fx-prev-glow">Aa</div>',
+    borderShimmer:   '<div class="fx-prev-card fx-prev-shimmer">Aa</div>',
+    gradientBorders: '<div class="fx-prev-card fx-prev-gradient">Aa</div>',
+    aurora:          '<div class="fx-prev-aurora"></div><div class="fx-prev-card">Aa</div>',
+    neonFlicker:     '<div class="fx-prev-neon">NEON</div>',
+    particles:       '<div class="fx-prev-dot"></div><div class="fx-prev-dot"></div><div class="fx-prev-dot"></div><div class="fx-prev-card">Aa</div>',
+    cursorTrail:     '<div class="fx-prev-trail"></div><div class="fx-prev-trail fx-prev-trail-2"></div>',
+  };
+
   function renderEditorEffectsGrid() {
     const grid = document.getElementById('editorEffectsGrid');
     if (!grid) return;
@@ -1850,21 +1866,24 @@
                 data-level="${level}">${_capitalize(level)}</button>
       `).join('');
 
+      // Preview always visible (dimmed when OFF). Controls only visible when ON.
+      const previewHtml = EFFECT_PREVIEW_HTML[effect.id] || '';
+
       card.innerHTML = `
-        <div class="effect-card-header">
+        <div class="effect-card-row">
+          <div class="effect-preview-mini" data-effect="${effect.id}">
+            ${previewHtml}
+          </div>
           <div class="effect-info">
-            <div class="effect-name">
-              ${effect.name}
-              <span class="effect-card-status">${isOn ? 'On' : 'Off'}</span>
-            </div>
-            <div class="effect-short">${effect.short}</div>
+            <span class="effect-name">${effect.name}</span>
+            <span class="effect-short">${effect.short}</span>
           </div>
           <label class="cx-toggle">
             <input type="checkbox" data-effect-toggle="${effect.id}" ${isOn ? 'checked' : ''} />
             <span class="cx-toggle-track"><span class="cx-toggle-thumb"></span></span>
           </label>
         </div>
-        <div class="effect-controls">
+        ${isOn ? `<div class="effect-controls">
           <div class="effect-slider-row">
             <span class="effect-slider-label">Intensity</span>
             <div class="intensity-segmented" role="group" aria-label="Effect intensity for ${effect.name}">
@@ -1872,7 +1891,7 @@
             </div>
           </div>
           ${particleSelectRow}
-        </div>
+        </div>` : ''}
       `;
 
       // Toggle wiring

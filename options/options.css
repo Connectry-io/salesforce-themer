@@ -1050,11 +1050,16 @@
   gap: var(--cx-space-4);
 }
 
+/* ─── Effect cards with live mini-previews ───────────────────────────
+   Each effect is a compact row: small animated preview box on the left,
+   name + description in the middle, toggle on the right. When ON, an
+   expandable controls section appears below with intensity + style.
+   OFF effects stay as a single tight row (~52px). */
 .effect-card {
   background: var(--cx-surface);
   border: 1.5px solid var(--cx-border);
   border-radius: var(--cx-radius-md);
-  padding: var(--cx-space-4) var(--cx-space-4) var(--cx-space-4);
+  padding: var(--cx-space-3);
   display: flex;
   flex-direction: column;
   gap: var(--cx-space-3);
@@ -1155,29 +1160,185 @@
   flex-shrink: 0;
 }
 
-.effect-card-header {
+/* Main row: preview | info | toggle */
+.effect-card-row {
   display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
+  align-items: center;
   gap: var(--cx-space-3);
+}
+
+/* Mini preview box — 60×44, always animated so the user sees what
+   the effect does even before enabling it. Dimmed when OFF. */
+.effect-preview-mini {
+  width: 60px;
+  height: 44px;
+  border-radius: var(--cx-radius-sm);
+  background: var(--cx-surface-alt);
+  border: 1px solid var(--cx-border);
+  overflow: hidden;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: opacity var(--cx-transition);
+}
+.effect-card:not(.is-enabled) .effect-preview-mini {
+  opacity: 0.45;
 }
 
 .effect-info {
   flex: 1;
   min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
 }
 
 .effect-name {
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 600;
   color: var(--cx-text);
-  margin-bottom: 2px;
 }
 
 .effect-short {
-  font-size: 12px;
+  font-size: 11px;
   color: var(--cx-text-muted);
-  line-height: 1.5;
+  line-height: 1.4;
+}
+
+/* ─── Mini preview animations (adapted from Guide, smaller scale) ──── */
+.fx-prev-card {
+  width: 36px;
+  height: 22px;
+  background: var(--cx-surface);
+  border: 1px solid var(--cx-border);
+  border-radius: 3px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 9px;
+  font-weight: 700;
+  color: var(--cx-text);
+  position: relative;
+  z-index: 1;
+}
+
+/* Hover Lift: card floats up */
+.fx-prev-lift {
+  animation: fx-prev-float 2s ease-in-out infinite;
+}
+@keyframes fx-prev-float {
+  0%, 100% { transform: translateY(0); box-shadow: 0 1px 2px rgba(0,0,0,0.08); }
+  50%      { transform: translateY(-3px); box-shadow: 0 4px 8px rgba(0,0,0,0.15); }
+}
+
+/* Ambient Glow: pulsing box-shadow */
+.fx-prev-glow {
+  animation: fx-prev-pulse 2.5s ease-in-out infinite;
+}
+@keyframes fx-prev-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(74,111,165,0); }
+  50%      { box-shadow: 0 0 6px 2px rgba(74,111,165,0.5); }
+}
+
+/* Border Shimmer: light sweep across top */
+.fx-prev-shimmer::before {
+  content: '';
+  position: absolute;
+  top: 0; left: -100%;
+  width: 100%; height: 2px;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.8), transparent);
+  animation: fx-prev-sweep 2.5s ease-in-out infinite;
+}
+@keyframes fx-prev-sweep {
+  0%   { left: -100%; }
+  100% { left: 200%; }
+}
+
+/* Gradient Borders: rotating colored border */
+.fx-prev-gradient {
+  border-image: conic-gradient(from var(--fx-angle, 0deg), #4a6fa5, #d4a22a, #4a6fa5) 1;
+  border-width: 2px;
+  animation: fx-prev-rotate 4s linear infinite;
+}
+@keyframes fx-prev-rotate {
+  to { --fx-angle: 360deg; }
+}
+/* Fallback for browsers without @property */
+@property --fx-angle {
+  syntax: '<angle>';
+  initial-value: 0deg;
+  inherits: false;
+}
+
+/* Aurora: gradient blob behind card */
+.fx-prev-aurora {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at 40% 50%, rgba(74,111,165,0.3) 0%, transparent 70%);
+  animation: fx-prev-drift 4s ease-in-out infinite alternate;
+}
+@keyframes fx-prev-drift {
+  0%   { opacity: 0.4; transform: translateX(-5px); }
+  100% { opacity: 0.8; transform: translateX(5px); }
+}
+
+/* Neon Flicker: glowing text */
+.fx-prev-neon {
+  font-size: 11px;
+  font-weight: 800;
+  color: var(--cx-accent);
+  text-shadow: 0 0 4px rgba(74,111,165,0.6), 0 0 8px rgba(74,111,165,0.3);
+  animation: fx-prev-flicker 3s ease-in-out infinite;
+}
+@keyframes fx-prev-flicker {
+  0%, 100% { opacity: 1; }
+  50%      { opacity: 0.7; }
+  52%      { opacity: 1; }
+  54%      { opacity: 0.8; }
+}
+
+/* Particles: falling dots */
+.fx-prev-dot {
+  position: absolute;
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: var(--cx-text-subtle);
+  opacity: 0.5;
+  animation: fx-prev-fall 2.5s linear infinite;
+}
+.fx-prev-dot:nth-child(1) { left: 20%; animation-delay: 0s; }
+.fx-prev-dot:nth-child(2) { left: 50%; animation-delay: 0.8s; }
+.fx-prev-dot:nth-child(3) { left: 75%; animation-delay: 1.6s; }
+@keyframes fx-prev-fall {
+  0%   { top: -4px; opacity: 0.6; }
+  100% { top: 100%; opacity: 0; }
+}
+
+/* Cursor Trail: two glowing dots moving */
+.fx-prev-trail {
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--cx-accent);
+  opacity: 0.6;
+  animation: fx-prev-trail-move 3s ease-in-out infinite;
+}
+.fx-prev-trail-2 {
+  width: 4px;
+  height: 4px;
+  opacity: 0.3;
+  animation-delay: 0.3s;
+}
+@keyframes fx-prev-trail-move {
+  0%   { left: 15%; top: 60%; }
+  25%  { left: 60%; top: 25%; }
+  50%  { left: 75%; top: 55%; }
+  75%  { left: 35%; top: 70%; }
+  100% { left: 15%; top: 60%; }
 }
 
 .effect-long {
