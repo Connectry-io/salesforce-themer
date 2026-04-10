@@ -688,10 +688,8 @@
 
   function bindOptionsButton() {
     document.getElementById('openOptionsBtn')?.addEventListener('click', () => {
-      // Land on the Guide tab — the onboarding/education hub. Users new to
-      // the product benefit from seeing the interactive demos first; power
-      // users will jump to Builder or Themes on their own.
-      openOptionsOnTab('guide');
+      // Land on the Guide tab (data-tab="effects" internally).
+      openOptionsOnTab('effects');
     });
   }
 

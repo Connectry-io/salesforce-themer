@@ -5665,21 +5665,7 @@ body.is-premium .theme-card-clone-badge {
 }
 .header-meta-swatch span { display: block; width: 100%; height: 100%; }
 
-/* Auto-mode: show both light + dark themes */
-.header-meta-auto {
-  gap: 4px;
-}
-.header-meta-pair {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-}
-.header-meta-divider {
-  color: var(--cx-text-subtle);
-  opacity: 0.4;
-  font-size: 12px;
-  margin: 0 1px;
-}
+/* Auto-mode badge next to theme name */
 .header-meta-auto-badge {
   font-size: 8px;
   font-weight: 800;

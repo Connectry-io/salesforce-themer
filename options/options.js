@@ -920,24 +920,18 @@
       ? `<span class="dev-mode-badge" title="DEV mode: Premium override is active. Disable in About tab.">DEV</span>`
       : '';
 
-    // When auto-mode is on, show both light and dark themes
+    // When auto-mode is on, show current theme + compact auto badge
     if (syncState.autoMode) {
-      const lightId = syncState.lastLightTheme || 'connectry';
-      const darkId = syncState.lastDarkTheme || 'connectry-dark';
-      const lightTheme = _resolveThemeForMeta(lightId);
-      const darkTheme = _resolveThemeForMeta(darkId);
-      const lightName = lightTheme ? lightTheme.name : lightId;
-      const darkName = darkTheme ? darkTheme.name : darkId;
+      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      const currentId = prefersDark
+        ? (syncState.lastDarkTheme || 'connectry-dark')
+        : (syncState.lastLightTheme || 'connectry');
+      const currentTheme = _resolveThemeForMeta(currentId);
+      const currentName = currentTheme ? currentTheme.name : currentId;
       meta.innerHTML = `
-        <span class="header-meta-active header-meta-auto">
-          <span class="header-meta-pair">
-            ${_buildMiniSwatch(lightTheme)}<strong>${Connectry.Settings.escape(lightName)}</strong>
-          </span>
-          <span class="header-meta-divider">/</span>
-          <span class="header-meta-pair">
-            ${_buildMiniSwatch(darkTheme)}<strong>${Connectry.Settings.escape(darkName)}</strong>
-          </span>
-          <span class="header-meta-auto-badge">Auto</span>
+        <span class="header-meta-active">
+          ${_buildMiniSwatch(currentTheme)}<strong>${Connectry.Settings.escape(currentName)}</strong>
+          <span class="header-meta-auto-badge" title="System auto-mode: switches between light and dark themes with your OS">Auto</span>
         </span>${devBadge}`;
       return;
     }
