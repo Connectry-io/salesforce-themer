@@ -1510,6 +1510,10 @@
     populateEditorFields();
     renderAdvancedPanel();
     updatePreview();
+
+    // Sync the top bar theme switcher trigger — the swatch + name need
+    // to reflect whatever we just loaded into the editor.
+    _updateThemeSwitcherTrigger();
   }
 
   /**
