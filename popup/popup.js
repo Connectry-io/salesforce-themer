@@ -924,7 +924,10 @@
       if (
         host.endsWith('.lightning.force.com') ||
         host.endsWith('.my.salesforce.com') ||
-        host.endsWith('.salesforce.com')
+        host.endsWith('.visualforce.com') ||
+        host.endsWith('.salesforce-setup.com') ||
+        host.endsWith('.cloudforce.com') ||
+        host.endsWith('.force.com')
       ) {
         return host;
       }

@@ -1,18 +1,44 @@
 (() => {
   'use strict';
 
-  // Only theme Salesforce-origin frames (all_frames=true catches all iframes,
-  // including legacy Visualforce iframes and the salesforce-setup.com /
-  // cloudforce.com subdomains used by various Setup pages).
+  // Only theme actual Salesforce org pages — NOT the broader Salesforce
+  // ecosystem (AppExchange, Trailhead, Help, Developer docs, etc.).
+  // The manifest's broad *.salesforce.com match is required because org
+  // hostnames vary, but we filter here to only org-like patterns.
   const hostname = window.location.hostname;
-  const isSfHost = (
-    hostname.includes('salesforce.com') ||
-    hostname.includes('force.com') ||
-    hostname.includes('visualforce.com') ||
-    hostname.includes('salesforce-setup.com') ||
-    hostname.includes('cloudforce.com')
+
+  // Non-org Salesforce subdomains that should NEVER be themed.
+  const NON_ORG_HOSTS = [
+    'appexchange.salesforce.com',
+    'developer.salesforce.com',
+    'help.salesforce.com',
+    'trailhead.salesforce.com',
+    'trailblazer.salesforce.com',
+    'admin.salesforce.com',
+    'partners.salesforce.com',
+    'www.salesforce.com',
+    'login.salesforce.com',
+    'test.salesforce.com',
+    'status.salesforce.com',
+    'trust.salesforce.com',
+    'ideas.salesforce.com',
+    'success.salesforce.com',
+    'certification.salesforce.com',
+    'medium.salesforce.com',
+  ];
+  if (NON_ORG_HOSTS.includes(hostname)) return;
+
+  // Positive check: must look like an org instance, Setup host, or VF host.
+  const isOrgHost = (
+    hostname.endsWith('.my.salesforce.com') ||         // org: *.my.salesforce.com
+    hostname.endsWith('.lightning.force.com') ||        // org: *.lightning.force.com
+    hostname.endsWith('.my.salesforce-setup.com') ||    // setup: *.my.salesforce-setup.com
+    hostname.endsWith('.salesforce-setup.com') ||       // setup fallback
+    hostname.endsWith('.visualforce.com') ||            // VF pages
+    hostname.endsWith('.cloudforce.com') ||             // legacy org host
+    hostname.endsWith('.force.com')                     // catch-all force.com subdomains
   );
-  if (!isSfHost) return;
+  if (!isOrgHost) return;
 
   // Skip login, verification, and other pre-auth pages — don't theme them
   const skipPatterns = [
