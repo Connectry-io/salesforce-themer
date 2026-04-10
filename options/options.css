@@ -3161,6 +3161,56 @@ body:has(.cx-tabpanel[data-tabpanel="builder"]:not([hidden])) .cx-main {
   transform: translate(-50%, -50%);
 }
 
+/* Global header — white bar with logo, search, admin icons */
+.preview-global-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 14px;
+  border-bottom: 1px solid;
+}
+.preview-global-header-left {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+.preview-global-logo { display: inline-flex; opacity: 0.8; }
+.preview-global-brand {
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+}
+.preview-global-search {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border: 1px solid;
+  border-radius: 4px;
+  font-size: 10px;
+}
+.preview-global-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+  opacity: 0.6;
+}
+.preview-global-avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  font-size: 9px;
+  font-weight: 700;
+  opacity: 1;
+}
+
+/* App nav bar */
 .preview-nav {
   display: flex;
   align-items: center;
@@ -3177,10 +3227,14 @@ body:has(.cx-tabpanel[data-tabpanel="builder"]:not([hidden])) .cx-main {
 .preview-header-title { font-size: 16px; font-weight: 700; }
 .preview-header-meta { font-size: 12px; margin-top: 2px; }
 
-/* Salesforce-style path chevrons — clip-path gives the pointed arrow
-   shape. First item has a flat left edge, middle items have the notch
-   on both sides, last item has a flat right edge. */
-.preview-path-wrap { padding: 8px 16px; }
+/* Salesforce-style path chevrons — its own floating card, separate from
+   the highlights panel. clip-path gives the pointed arrow shape. */
+.preview-path-wrap {
+  margin: 8px 16px;
+  padding: 10px 14px;
+  border-radius: 8px;
+  border: 1px solid;
+}
 .preview-path {
   display: flex;
   gap: 0;
@@ -3338,7 +3392,7 @@ body:has(.cx-tabpanel[data-tabpanel="builder"]:not([hidden])) .cx-main {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 0;
-  margin: 0 16px;
+  margin: 8px 16px 0;
   border: 1px solid;
   border-radius: 8px;
   overflow: hidden;

@@ -1751,6 +1751,8 @@
     const tiers = [
       { sel: '.preview-header-title', base: 16 },
       { sel: '.preview-header-meta', base: 12 },
+      { sel: '.preview-global-brand', base: 9 },
+      { sel: '.preview-global-search span', base: 10 },
       { sel: '.preview-nav-app', base: 13 },
       { sel: '.preview-nav-item', base: 12 },
       { sel: '.preview-highlights-label', base: 10 },
