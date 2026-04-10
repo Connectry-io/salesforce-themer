@@ -4850,7 +4850,7 @@ td.upgrade-compare-col-premium,
 /* ─── Guide: Shared live-panel layout (Typography + Favicon) ───────── */
 .guide-live-panel {
   display: grid;
-  grid-template-columns: minmax(260px, 340px) 1fr;
+  grid-template-columns: minmax(200px, 260px) 1fr;
   background: var(--cx-surface);
   border: 1px solid var(--cx-border);
   border-radius: var(--cx-radius-lg);
@@ -4865,31 +4865,39 @@ td.upgrade-compare-col-premium,
   .guide-live-panel.guide-favicon-panel { grid-template-columns: 1fr; }
 }
 .guide-live-editor {
-  padding: var(--cx-space-4) var(--cx-space-5);
+  padding: var(--cx-space-3) var(--cx-space-4);
   background: var(--cx-surface-alt);
   border-right: 1px solid var(--cx-border);
 }
+.guide-live-editor .editor-group { margin-bottom: 0; }
+.guide-live-editor .editor-group-title { font-size: 9px; margin-bottom: 4px; }
+.guide-live-editor .editor-field { padding: 2px 0; }
+.guide-live-editor .editor-field > label { font-size: 11px; min-width: 0; }
+.guide-live-editor .editor-select { font-size: 11px; padding: 3px 6px; }
+.guide-live-editor .editor-type-presets { gap: 3px; }
+.guide-live-editor .editor-type-preset { padding: 6px 2px 5px; font-size: 9px; }
+.guide-live-editor .editor-type-slider { height: 4px; }
 .guide-live-preview {
-  padding: var(--cx-space-5);
+  padding: var(--cx-space-4) var(--cx-space-5);
   display: flex;
   flex-direction: column;
-  gap: var(--cx-space-3);
+  gap: var(--cx-space-2);
 }
 
 /* Typography preview blocks */
-.guide-live-preview-label {
-  font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em;
-  color: var(--cx-accent); margin-bottom: 2px; display: block;
+.guide-live-preview-block { display: flex; flex-direction: column; gap: 1px; }
+.guide-live-preview-where {
+  font-size: 9px; color: var(--cx-text-subtle); margin-top: 1px; font-style: italic;
 }
 .guide-live-preview-heading { font-size: 20px; font-weight: 700; color: var(--cx-text); line-height: 1.3; }
-.guide-live-preview-meta { font-size: 13px; color: var(--cx-text-muted); margin-top: 2px; }
-.guide-live-preview-body { font-size: 13px; color: var(--cx-text-muted); line-height: 1.6; }
+.guide-live-preview-meta { font-size: 12px; color: var(--cx-text-muted); }
+.guide-live-preview-body { font-size: 13px; color: var(--cx-text-muted); line-height: 1.55; }
 .guide-live-preview-table {
   font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em;
   color: var(--cx-text-subtle);
 }
 .guide-live-preview-nav { font-size: 12px; font-weight: 500; color: var(--cx-text-muted); }
-.guide-live-preview-sep { height: 1px; background: var(--cx-border); }
+.guide-live-preview-sep { height: 1px; background: var(--cx-border); margin: 2px 0; }
 
 /* ─── Guide: Favicon demo ──────────────────────────────────────────── */
 .guide-favicon-grid {
