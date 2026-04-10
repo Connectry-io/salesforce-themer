@@ -3213,7 +3213,7 @@ body.is-premium .builder-overflow-premium-badge { display: none !important; }
 
 .editor-preview {
   grid-column: 2;
-  grid-row: 1 / -1;
+  grid-row: 1 / span 10;
   position: sticky;
   top: calc(var(--cx-header-height) + 16px);
   padding: 0;
