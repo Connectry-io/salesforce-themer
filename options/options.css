@@ -1763,6 +1763,12 @@
   /* Reuses .editor-panel base styles for layout/scroll */
 }
 
+/* Effects panel padding — matches .editor-group in the Colors panel
+   so both panels have consistent alignment within the editor card. */
+.editor-card-body > .editor-effects {
+  padding: var(--cx-space-4) var(--cx-space-5);
+}
+
 .editor-effects-intro {
   margin-bottom: var(--cx-space-5);
 }
