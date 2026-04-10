@@ -1785,7 +1785,6 @@
     const tiers = [
       { sel: '.preview-header-title', base: 16 },
       { sel: '.preview-header-meta', base: 12 },
-      { sel: '.preview-global-brand', base: 9 },
       { sel: '.preview-global-search span', base: 10 },
       { sel: '.preview-nav-app', base: 13 },
       { sel: '.preview-nav-item', base: 12 },
@@ -2070,9 +2069,9 @@
   }
 
   function _updatePreviewFavicon(enabled) {
-    const faviconEl = document.getElementById('previewNavFavicon');
-    if (faviconEl) {
-      faviconEl.style.opacity = enabled ? '' : '0.15';
+    const tabFav = document.getElementById('previewBrowserTabFav');
+    if (tabFav) {
+      tabFav.style.opacity = enabled ? '' : '0.3';
     }
   }
 
@@ -3397,6 +3396,15 @@
         nav: document.getElementById('guideTypeNav'),
       };
 
+      const lhSlider = document.getElementById('guideTypeLineHeight');
+      const lsSlider = document.getElementById('guideTypeLetterSpacing');
+      const lineHeight = lhSlider ? lhSlider.value : '1.375';
+      const letterSpacing = lsSlider ? parseFloat(lsSlider.value) : 0;
+      const lsStyle = letterSpacing ? letterSpacing + 'em' : '';
+
+      const preview = document.getElementById('guideTypePreview');
+      if (preview) { preview.style.lineHeight = lineHeight; preview.style.letterSpacing = lsStyle; }
+
       if (els.heading) { els.heading.style.fontFamily = headingStack; els.heading.style.fontSize = `${20 * scale}px`; els.heading.style.fontWeight = headingWeight; }
       if (els.meta) { els.meta.style.fontFamily = bodyStack; els.meta.style.fontSize = `${13 * scale}px`; }
       if (els.body) { els.body.style.fontFamily = bodyStack; els.body.style.fontSize = `${13 * scale}px`; els.body.style.fontWeight = bodyWeight; }
@@ -3415,6 +3423,18 @@
         btn.classList.add('is-active');
         updateTypePreview();
       });
+    });
+
+    // Spacing sliders
+    const guideLineHeight = document.getElementById('guideTypeLineHeight');
+    const guideLetterSpacing = document.getElementById('guideTypeLetterSpacing');
+    guideLineHeight?.addEventListener('input', (e) => {
+      document.getElementById('guideTypeLineHeightValue').textContent = e.target.value;
+      updateTypePreview();
+    });
+    guideLetterSpacing?.addEventListener('input', (e) => {
+      document.getElementById('guideTypeLetterSpacingValue').textContent = parseFloat(e.target.value) + 'em';
+      updateTypePreview();
     });
   }
 
