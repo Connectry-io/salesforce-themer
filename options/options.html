@@ -334,6 +334,25 @@
                 <span class="builder-startfrom-desc">Tweak any of the 23 core colors</span>
               </span>
             </button>
+            <button type="button" class="builder-create-menu-item" data-startfrom="clone" role="menuitem">
+              <span class="builder-startfrom-icon">
+                <svg width="14" height="14" viewBox="0 0 22 22" fill="none" aria-hidden="true">
+                  <rect x="6" y="2" width="12" height="14" rx="1.5" stroke="currentColor" stroke-width="1.6"/>
+                  <path d="M4 6H3.5A1.5 1.5 0 002 7.5v11A1.5 1.5 0 003.5 20H14a1.5 1.5 0 001.5-1.5V18" stroke="currentColor" stroke-width="1.6"/>
+                </svg>
+              </span>
+              <span class="builder-startfrom-body">
+                <span class="builder-startfrom-name">Clone a built-in theme</span>
+                <span class="builder-startfrom-desc">Start from any of the 15 pre-built themes</span>
+              </span>
+            </button>
+            <!-- Clone-picker sub-panel — slides open when "Clone a built-in theme" is clicked -->
+            <div class="builder-clone-picker" id="builderClonePicker" hidden>
+              <div class="builder-clone-picker-label">Pick a theme to clone</div>
+              <div class="builder-clone-picker-grid" id="builderClonePickerGrid">
+                <!-- Populated by JS — one mini badge per built-in theme -->
+              </div>
+            </div>
             <div class="builder-create-menu-divider"></div>
             <button type="button" class="builder-create-menu-item is-locked" data-startfrom="brand-guide" disabled role="menuitem">
               <span class="builder-startfrom-icon">
@@ -1031,6 +1050,17 @@
           </div>
 
           <div class="editor-toolbar editor-card-header">
+            <!-- Favicon slot — shows the theme's tab icon; clickable to upload (Premium · Soon) -->
+            <div class="editor-favicon-slot" id="editorFaviconSlot" title="Favicon — coming soon">
+              <div class="editor-favicon-preview" id="editorFaviconPreview">
+                <!-- Default: Connectry dot icon, replaced per-theme by JS -->
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+                  <circle cx="10" cy="10" r="7" stroke="currentColor" stroke-width="1.4" opacity="0.3"/>
+                  <circle cx="10" cy="10" r="3" fill="currentColor" opacity="0.25"/>
+                </svg>
+              </div>
+              <span class="editor-favicon-soon">soon</span>
+            </div>
             <div class="editor-toolbar-name-wrap">
               <div class="editor-input-row">
                 <svg class="editor-input-icon" width="12" height="12" viewBox="0 0 14 14" fill="none" aria-hidden="true">
@@ -1047,8 +1077,9 @@
             </div>
           </div>
 
-          <!-- Horizontal sub-tab bar: Colors · Effects · Type (soon) · Icon (soon).
-               Card sub-header — sits between the toolbar and the form. -->
+          <!-- Horizontal sub-tab bar: Colors · Effects · Type (soon).
+               Card sub-header — sits between the toolbar and the form.
+               Icon/Favicon moved to the toolbar favicon slot. -->
         <nav class="editor-subtab-bar" role="tablist" aria-label="Editor sections">
           <button class="editor-subtab is-active" data-editor-subtab="colors" role="tab" aria-selected="true">
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
@@ -1064,12 +1095,11 @@
             </svg>
             <span>Effects</span>
           </button>
-          <button class="editor-subtab is-disabled" disabled title="Typography — coming soon">
+          <button class="editor-subtab" data-editor-subtab="type" role="tab" aria-selected="false">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+              <path d="M3 3h10M8 3v10M5 13h6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+            </svg>
             <span>Type</span>
-            <em class="editor-subtab-soon">soon</em>
-          </button>
-          <button class="editor-subtab is-disabled" disabled title="Favicon / icon — coming soon">
-            <span>Icon</span>
             <em class="editor-subtab-soon">soon</em>
           </button>
         </nav>
@@ -1304,6 +1334,82 @@
           </div>
         </div>
 
+        <!-- Typography panel — greyed-out preview of upcoming Premium feature -->
+        <div class="editor-panel editor-type" id="editorTypePanel" hidden>
+          <div class="editor-type-overlay">
+            <div class="editor-type-overlay-badge">Premium · Soon</div>
+            <p class="editor-type-overlay-text">Custom typography is coming to Premium. Preview the controls below.</p>
+          </div>
+          <div class="editor-type-fields">
+            <div class="editor-group">
+              <h3 class="editor-group-title">Font Family</h3>
+              <div class="editor-field">
+                <label>Heading Font</label>
+                <select class="editor-select" disabled>
+                  <option>Salesforce Sans (default)</option>
+                  <option>Inter</option>
+                  <option>System UI</option>
+                  <option>Georgia (serif)</option>
+                  <option>JetBrains Mono</option>
+                </select>
+              </div>
+              <div class="editor-field">
+                <label>Body Font</label>
+                <select class="editor-select" disabled>
+                  <option>Salesforce Sans (default)</option>
+                  <option>Inter</option>
+                  <option>System UI</option>
+                  <option>Georgia (serif)</option>
+                  <option>JetBrains Mono</option>
+                </select>
+              </div>
+            </div>
+            <div class="editor-group">
+              <h3 class="editor-group-title">Scale</h3>
+              <div class="editor-field">
+                <label>Base Size</label>
+                <div class="editor-type-slider-row">
+                  <input type="range" class="editor-type-slider" min="12" max="18" value="14" disabled />
+                  <span class="editor-type-slider-value">14px</span>
+                </div>
+              </div>
+              <div class="editor-field">
+                <label>Heading Scale</label>
+                <div class="editor-type-slider-row">
+                  <input type="range" class="editor-type-slider" min="1.1" max="1.5" step="0.05" value="1.25" disabled />
+                  <span class="editor-type-slider-value">1.25</span>
+                </div>
+              </div>
+              <div class="editor-field">
+                <label>Line Height</label>
+                <div class="editor-type-slider-row">
+                  <input type="range" class="editor-type-slider" min="1.2" max="2.0" step="0.05" value="1.5" disabled />
+                  <span class="editor-type-slider-value">1.5</span>
+                </div>
+              </div>
+            </div>
+            <div class="editor-group">
+              <h3 class="editor-group-title">Weight</h3>
+              <div class="editor-field">
+                <label>Heading Weight</label>
+                <select class="editor-select" disabled>
+                  <option>Bold (700)</option>
+                  <option>Semi-bold (600)</option>
+                  <option>Medium (500)</option>
+                </select>
+              </div>
+              <div class="editor-field">
+                <label>Body Weight</label>
+                <select class="editor-select" disabled>
+                  <option>Regular (400)</option>
+                  <option>Medium (500)</option>
+                  <option>Light (300)</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        </div>
+
           </div><!-- /.editor-card-body -->
         </div><!-- /.editor-card -->
 
@@ -1326,6 +1432,12 @@
             <div class="preview-cursor-trail" id="previewCursorTrail"></div>
 
             <div class="preview-nav" data-bind="nav">
+              <span class="preview-nav-favicon" id="previewNavFavicon" data-bind-border="accent">
+                <svg width="10" height="10" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+                  <circle cx="10" cy="10" r="7" stroke="currentColor" stroke-width="2" opacity="0.4"/>
+                  <circle cx="10" cy="10" r="3" fill="currentColor" opacity="0.35"/>
+                </svg>
+              </span>
               <span class="preview-nav-app" data-bind-color="navText">Connectry Hub</span>
               <span class="preview-nav-item" data-bind-color="navText">Home</span>
               <span class="preview-nav-item preview-nav-active" data-bind-color="navActiveText" data-bind-border="accent">Leads</span>

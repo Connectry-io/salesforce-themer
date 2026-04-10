@@ -1213,11 +1213,49 @@
       if (e.key === 'Escape' && !menu.hidden) closeMenu();
     });
 
+    // Clone picker sub-panel
+    const clonePicker = document.getElementById('builderClonePicker');
+    const cloneGrid = document.getElementById('builderClonePickerGrid');
+
+    function populateClonePicker() {
+      if (!cloneGrid || cloneGrid.children.length > 0) return;
+      for (const theme of THEMES) {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'builder-clone-badge';
+        btn.dataset.cloneTheme = theme.id;
+        const c = theme.colors;
+        const swatchColors = [c.background, c.accent, c.textPrimary];
+        btn.innerHTML = `
+          <span class="builder-clone-badge-swatch">${swatchColors.map(col => `<span style="background:${col}"></span>`).join('')}</span>
+          <span>${theme.name}</span>
+        `;
+        btn.addEventListener('click', () => {
+          closeMenu();
+          if (clonePicker) clonePicker.hidden = true;
+          _pendingCreateEffects = getSuggestedEffectsFor(theme.id);
+          openEditor(theme.id, null);
+        });
+        cloneGrid.appendChild(btn);
+      }
+    }
+
     // Menu items
     menu.querySelectorAll('.builder-create-menu-item[data-startfrom]').forEach(item => {
-      item.addEventListener('click', () => {
+      item.addEventListener('click', (e) => {
         const which = item.dataset.startfrom;
+
+        if (which === 'clone') {
+          // Toggle the clone picker sub-panel instead of closing the menu
+          e.stopPropagation();
+          populateClonePicker();
+          if (clonePicker) clonePicker.hidden = !clonePicker.hidden;
+          return;
+        }
+
         closeMenu();
+        if (clonePicker) clonePicker.hidden = true;
+
         if (which === 'manual') {
           // Manual = open the editor with a fresh theme based on connectry
           _pendingCreateEffects = getSuggestedEffectsFor('connectry');
@@ -1801,7 +1839,7 @@
       openEditor('connectry', null);
     });
 
-    // Editor sub-tabs (Colors / Effects / Type-soon / Icon-soon) —
+    // Editor sub-tabs (Colors / Effects / Type) —
     // horizontal bar at the top of the editor content area
     document.querySelectorAll('.editor-subtab[data-editor-subtab]').forEach(btn => {
       btn.addEventListener('click', () => {
@@ -1825,11 +1863,12 @@
   function switchEditorSubtab(target) {
     const colorsPanel = document.querySelector('.editor-colors');
     const effectsPanel = document.getElementById('editorEffectsPanel');
+    const typePanel = document.getElementById('editorTypePanel');
     if (!colorsPanel || !effectsPanel) return;
 
-    const isEffects = target === 'effects';
-    colorsPanel.hidden = isEffects;
-    effectsPanel.hidden = !isEffects;
+    colorsPanel.hidden = target !== 'colors';
+    effectsPanel.hidden = target !== 'effects';
+    if (typePanel) typePanel.hidden = target !== 'type';
 
     document.querySelectorAll('.editor-subtab[data-editor-subtab]').forEach(b => {
       const active = b.dataset.editorSubtab === target;
@@ -1837,7 +1876,7 @@
       b.setAttribute('aria-selected', String(active));
     });
 
-    if (isEffects) {
+    if (target === 'effects') {
       renderEditorEffectsGrid();
     }
   }
