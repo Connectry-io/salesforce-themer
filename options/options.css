@@ -152,51 +152,20 @@
   margin-left: auto;
 }
 
+/* Light/Dark category — subtle text label, not a loud pill. Blends
+   into the card so the theme name + swatch stay the focal point. */
 .theme-category-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  font-size: 9px;
-  font-weight: 800;
-  padding: 2px 8px;
-  border-radius: var(--cx-radius-full);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.03em;
   text-transform: uppercase;
-  letter-spacing: 0.06em;
   flex-shrink: 0;
-  border: 1px solid transparent;
 }
-
-/* Light = bright sun pill (saturated amber, NOT a soft tint — visually
-   distinct from the soft accent effect pills below it) */
 .theme-category-badge.light {
-  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
-  color: #92400e;
-  border-color: #fbbf24;
+  color: var(--cx-text-subtle);
 }
-.theme-category-badge.light::before {
-  content: '';
-  display: inline-block;
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: radial-gradient(circle at center, #fbbf24 0%, #f59e0b 70%);
-  box-shadow: 0 0 0 1.5px rgba(251, 191, 36, 0.35);
-}
-
-/* Dark = solid charcoal pill with a moon dot */
 .theme-category-badge.dark {
-  background: linear-gradient(135deg, #1f2937 0%, #374151 100%);
-  color: #e5e7eb;
-  border-color: #4b5563;
-}
-.theme-category-badge.dark::before {
-  content: '';
-  display: inline-block;
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: radial-gradient(circle at 30% 30%, #f1f5f9 0%, #cbd5e1 60%, #94a3b8 100%);
-  box-shadow: inset -1px -1px 0 rgba(0, 0, 0, 0.2);
+  color: var(--cx-text-subtle);
 }
 
 .theme-description {
