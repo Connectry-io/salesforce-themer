@@ -385,6 +385,30 @@
         <!-- Spacer pushes Save + AI to the right -->
         <div class="builder-topbar-spacer"></div>
 
+        <!-- Overflow menu: Reset / Export / Import -->
+        <div class="builder-overflow-wrap">
+          <button class="builder-topbar-btn builder-overflow-btn" id="builderOverflowBtn" type="button" title="More actions" aria-haspopup="true" aria-expanded="false">
+            <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+              <circle cx="3" cy="8" r="1.5" fill="currentColor"/>
+              <circle cx="8" cy="8" r="1.5" fill="currentColor"/>
+              <circle cx="13" cy="8" r="1.5" fill="currentColor"/>
+            </svg>
+          </button>
+          <div class="builder-overflow-menu" id="builderOverflowMenu" hidden role="menu">
+            <button type="button" class="builder-overflow-item" id="topbarResetBtn" role="menuitem">Reset to Base</button>
+            <div class="builder-overflow-divider"></div>
+            <button type="button" class="builder-overflow-item" id="topbarExportBtn" role="menuitem">
+              Export JSON
+              <span class="builder-overflow-premium-badge cx-tab-badge--premium">Premium</span>
+            </button>
+            <button type="button" class="builder-overflow-item" id="topbarImportBtn" role="menuitem">
+              Import JSON
+              <span class="builder-overflow-premium-badge cx-tab-badge--premium">Premium</span>
+            </button>
+          </div>
+          <input type="file" id="editorImportFile" accept=".json" hidden />
+        </div>
+
         <!-- Save (always visible in top bar) -->
         <button class="cx-btn cx-btn-primary builder-topbar-save" id="builderTopbarSave" type="button">Save Theme</button>
 
@@ -1507,12 +1531,7 @@
             <div class="editor-advanced-body" id="advancedBody"></div>
           </details>
 
-          <div class="editor-actions">
-            <button class="cx-btn cx-btn-secondary" id="editorResetBtn">Reset to Base</button>
-            <button class="cx-btn cx-btn-secondary" id="editorExportBtn">Export JSON</button>
-            <button class="cx-btn cx-btn-secondary" id="editorImportBtn">Import JSON</button>
-            <input type="file" id="editorImportFile" accept=".json" hidden />
-          </div>
+          <!-- Reset/Export/Import moved to top bar overflow menu -->
 
         </div>
 

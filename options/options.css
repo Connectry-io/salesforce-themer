@@ -2290,6 +2290,37 @@ body:has(.cx-tabpanel[data-tabpanel="builder"]:not([hidden])) .cx-main {
 }
 
 .builder-topbar-spacer { flex: 1 1 auto; }
+
+/* Overflow menu (Reset / Export / Import) */
+.builder-overflow-wrap { position: relative; }
+.builder-overflow-btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 32px; height: 32px; background: transparent; border: 1px solid var(--cx-border);
+  border-radius: var(--cx-radius-sm); color: var(--cx-text-muted); cursor: pointer;
+  transition: all var(--cx-transition);
+}
+.builder-overflow-btn:hover { background: var(--cx-surface-alt); color: var(--cx-text); border-color: var(--cx-accent); }
+.builder-overflow-menu {
+  position: absolute; top: calc(100% + 6px); right: 0; z-index: 30;
+  width: 200px; background: var(--cx-surface); border: 1px solid var(--cx-border);
+  border-radius: var(--cx-radius-md);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.12), 0 2px 6px rgba(0,0,0,0.06);
+  padding: 4px; display: flex; flex-direction: column; gap: 1px;
+}
+.builder-overflow-menu[hidden] { display: none; }
+.builder-overflow-item {
+  display: flex; align-items: center; justify-content: space-between; gap: 8px;
+  padding: 7px 10px; background: transparent; border: none; border-radius: var(--cx-radius-sm);
+  font-family: var(--cx-font); font-size: 12px; font-weight: 500; color: var(--cx-text);
+  cursor: pointer; text-align: left; width: 100%; transition: background-color var(--cx-transition);
+}
+.builder-overflow-item:hover { background: var(--cx-surface-alt); }
+.builder-overflow-divider { height: 1px; background: var(--cx-border); margin: 2px 4px; }
+.builder-overflow-premium-badge {
+  font-size: 8px; padding: 1px 5px;
+}
+body.is-premium .builder-overflow-premium-badge { display: none !important; }
+
 .builder-topbar-save { flex-shrink: 0; }
 
 /* Theme switcher dropdown ─────────────────────────────────────────── */

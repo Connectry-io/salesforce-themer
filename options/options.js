@@ -1273,6 +1273,43 @@
    * an outside click or Escape closes it; selecting an option closes it
    * and dispatches the create action.
    */
+  function _bindOverflowMenu() {
+    const trigger = document.getElementById('builderOverflowBtn');
+    const menu = document.getElementById('builderOverflowMenu');
+    if (!trigger || !menu) return;
+
+    const close = () => { menu.hidden = true; trigger.setAttribute('aria-expanded', 'false'); };
+    const open = () => { menu.hidden = false; trigger.setAttribute('aria-expanded', 'true'); };
+
+    trigger.addEventListener('click', (e) => { e.stopPropagation(); menu.hidden ? open() : close(); });
+    document.addEventListener('click', (e) => { if (!menu.hidden && !menu.contains(e.target) && !trigger.contains(e.target)) close(); });
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !menu.hidden) close(); });
+
+    // Reset — free
+    document.getElementById('topbarResetBtn')?.addEventListener('click', () => {
+      close();
+      editorState.coreOverrides = {};
+      editorState.advancedOverrides = {};
+      populateEditorFields();
+      renderAdvancedPanel();
+      updatePreview();
+    });
+
+    // Export — premium
+    document.getElementById('topbarExportBtn')?.addEventListener('click', () => {
+      close();
+      if (!isPremium()) { openUpgradeDialog(); return; }
+      exportThemeJSON();
+    });
+
+    // Import — premium
+    document.getElementById('topbarImportBtn')?.addEventListener('click', () => {
+      close();
+      if (!isPremium()) { openUpgradeDialog(); return; }
+      document.getElementById('editorImportFile')?.click();
+    });
+  }
+
   function _bindBuilderCreateMenu() {
     const trigger = document.getElementById('builderSidebarCreateBtn');
     const menu = document.getElementById('builderCreateMenu');
@@ -1967,22 +2004,9 @@
     document.getElementById('editorSaveBtn')?.addEventListener('click', saveCustomTheme);
     document.getElementById('builderTopbarSave')?.addEventListener('click', saveCustomTheme);
 
-    // Reset button
-    document.getElementById('editorResetBtn')?.addEventListener('click', () => {
-      editorState.coreOverrides = {};
-      editorState.advancedOverrides = {};
-      populateEditorFields();
-      renderAdvancedPanel();
-      updatePreview();
-    });
+    // Overflow menu (... button) — Reset / Export / Import
+    _bindOverflowMenu();
 
-    // Export button
-    document.getElementById('editorExportBtn')?.addEventListener('click', exportThemeJSON);
-
-    // Import button
-    document.getElementById('editorImportBtn')?.addEventListener('click', () => {
-      document.getElementById('editorImportFile')?.click();
-    });
     document.getElementById('editorImportFile')?.addEventListener('change', importThemeJSON);
 
     // Create theme button (legacy hidden host)
