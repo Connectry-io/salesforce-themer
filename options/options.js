@@ -3342,13 +3342,16 @@
     _guideTypeBound = true;
 
     const fontSelect = document.getElementById('guideTypeFont');
+    const headingFontSelect = document.getElementById('guideTypeHeadingFont');
     const headingWeightSelect = document.getElementById('guideTypeHeadingWeight');
     const bodyWeightSelect = document.getElementById('guideTypeBodyWeight');
     if (!fontSelect) return;
 
     function updateTypePreview() {
-      const fontKey = fontSelect.value;
-      const stack = FONT_STACKS[fontKey] || FONT_STACKS['system-ui'];
+      const bodyKey = fontSelect.value;
+      const headingKey = headingFontSelect?.value || '';
+      const bodyStack = FONT_STACKS[bodyKey] || FONT_STACKS['system-ui'];
+      const headingStack = headingKey ? (FONT_STACKS[headingKey] || bodyStack) : bodyStack;
       const headingWeight = headingWeightSelect?.value || '700';
       const bodyWeight = bodyWeightSelect?.value || '400';
 
@@ -3363,14 +3366,15 @@
         nav: document.getElementById('guideTypeNav'),
       };
 
-      if (els.heading) { els.heading.style.fontFamily = stack; els.heading.style.fontSize = `${20 * scale}px`; els.heading.style.fontWeight = headingWeight; }
-      if (els.meta) { els.meta.style.fontFamily = stack; els.meta.style.fontSize = `${13 * scale}px`; }
-      if (els.body) { els.body.style.fontFamily = stack; els.body.style.fontSize = `${13 * scale}px`; els.body.style.fontWeight = bodyWeight; }
-      if (els.tableHead) { els.tableHead.style.fontFamily = stack; els.tableHead.style.fontSize = `${11 * scale}px`; els.tableHead.style.fontWeight = headingWeight; }
-      if (els.nav) { els.nav.style.fontFamily = stack; els.nav.style.fontSize = `${12 * scale}px`; }
+      if (els.heading) { els.heading.style.fontFamily = headingStack; els.heading.style.fontSize = `${20 * scale}px`; els.heading.style.fontWeight = headingWeight; }
+      if (els.meta) { els.meta.style.fontFamily = bodyStack; els.meta.style.fontSize = `${13 * scale}px`; }
+      if (els.body) { els.body.style.fontFamily = bodyStack; els.body.style.fontSize = `${13 * scale}px`; els.body.style.fontWeight = bodyWeight; }
+      if (els.tableHead) { els.tableHead.style.fontFamily = bodyStack; els.tableHead.style.fontSize = `${11 * scale}px`; els.tableHead.style.fontWeight = headingWeight; }
+      if (els.nav) { els.nav.style.fontFamily = bodyStack; els.nav.style.fontSize = `${12 * scale}px`; }
     }
 
     fontSelect.addEventListener('change', updateTypePreview);
+    headingFontSelect?.addEventListener('change', updateTypePreview);
     headingWeightSelect?.addEventListener('change', updateTypePreview);
     bodyWeightSelect?.addEventListener('change', updateTypePreview);
 
@@ -3446,8 +3450,10 @@
         const item = document.createElement('div');
         item.className = 'guide-favicon-item';
         item.title = theme.name;
-        item.innerHTML = _renderFaviconSVG('circle', accentColor, iconId, 32) +
-          `<span class="guide-favicon-item-label">${theme.name.split(' ')[0]}</span>`;
+        const shortName = theme.name.replace(' Light', '').replace(' Dark', '');
+        item.innerHTML = `
+          <div class="guide-favicon-item-icon">${_renderFaviconSVG('circle', accentColor, iconId, 28)}</div>
+          <span class="guide-favicon-item-label">${shortName}</span>`;
         item.addEventListener('click', () => {
           _guideFaviconState.color = accentColor;
           _guideFaviconState.icon = iconId;
