@@ -3187,18 +3187,31 @@ td.upgrade-compare-col-premium,
 }
 
 /* Make sure the card itself doesn't clip the markers that escape its
-   left/right edges. */
+   left edge. .theme-swatch keeps its own overflow:hidden (it needs to clip
+   the rounded color bars), so the swatch's marker lives in a sibling
+   wrapper — see .anatomy-swatch-wrap below. */
 .guide-anatomy-card-wrap .theme-card,
 .guide-anatomy-card-wrap .theme-card-body {
   overflow: visible;
 }
 
+/* Wrapper around the color swatch that acts as the data-part="1" anchor.
+   The marker is a child of this wrapper (NOT inside .theme-swatch) so it
+   isn't clipped by the swatch's overflow:hidden. */
+.anatomy-swatch-wrap {
+  position: relative;
+}
+
 /* Sample card parts get a glow ring when their corresponding marker /
    callout is highlighted. Each part also serves as the positioning anchor
-   for its child .anatomy-marker button. */
+   for its child .anatomy-marker button. The sample card uses
+   pointer-events:none (it's not really clickable) — we re-enable it on
+   the data-part rows so hovering them can highlight the matching callout. */
 .guide-anatomy-card-wrap [data-part] {
   position: relative;
   border-radius: 6px;
+  pointer-events: auto;
+  cursor: pointer;
   transition:
     box-shadow 220ms ease,
     background-color 220ms ease;
@@ -3211,11 +3224,20 @@ td.upgrade-compare-col-premium,
   z-index: 3;
 }
 
-/* Favicon dot — small Connectry icon next to the theme name */
+/* Title + favicon group — keeps the favicon dot snug against the theme
+   name on its right side, while the category badge floats to the far
+   right of the header row via space-between. */
+.anatomy-title-group {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+/* Favicon dot — small Connectry icon, sits to the right of the theme name */
 .anatomy-favicon-dot {
   display: inline-flex;
   align-items: center;
-  margin-right: 6px;
   flex-shrink: 0;
 }
 
@@ -3266,15 +3288,10 @@ td.upgrade-compare-col-premium,
   pointer-events: none;
 }
 
-/* Alternate sides — odd markers on the left edge of the card, even on
-   the right edge. The number is the same as the data-part / marker. */
-[data-part="1"] > .anatomy-marker,
-[data-part="3"] > .anatomy-marker,
-[data-part="5"] > .anatomy-marker { left: -36px; }
-
-[data-part="2"] > .anatomy-marker,
-[data-part="4"] > .anatomy-marker,
-[data-part="6"] > .anatomy-marker { right: -36px; }
+/* All markers on the LEFT edge of the card. Consistent reading direction
+   top-to-bottom — alternating sides looked busy and the right-edge markers
+   fought the LIGHT/Dark badge and Clone button for space. */
+.guide-anatomy-card-wrap [data-part] > .anatomy-marker { left: -36px; }
 
 /* Stagger the pulse so they don't all fire in unison */
 .anatomy-marker[data-marker="1"] { animation-delay: 0s; }
@@ -3441,6 +3458,16 @@ td.upgrade-compare-col-premium,
   font-weight: 700;
   font-size: 13px;
   margin-bottom: 2px;
+}
+
+/* Title rows that need to right-align an inline badge (e.g. the "soon"
+   tag on the Typography row). Flex with space-between pulls the badge to
+   the far right of the row instead of dangling inline after the title. */
+.guide-anatomy-callouts .anatomy-callout-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
 }
 
 .guide-anatomy-callouts span {

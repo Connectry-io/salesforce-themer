@@ -2314,22 +2314,39 @@
     const theme = getThemeById(activeId) || getThemeById('connectry');
     if (!theme) return;
 
-    // Each data-part wraps its content with an .anatomy-marker child. The
-    // marker is absolute-positioned by CSS at the vertical center of its
-    // own data-part, so alignment is structural — no JS measuring needed.
-    // Sides alternate (odd left, even right) via CSS data-marker selectors.
+    // Each data-part wraps its content and holds an .anatomy-marker as a
+    // child. CSS absolute-positions the marker at the vertical center of
+    // its data-part row, all on the LEFT edge of the card. Pure CSS so
+    // there's no JS measuring (see feedback_themer_anatomy_pattern.md).
+    //
+    // NOTE: part #1 (color swatch) uses a wrapper around .theme-swatch
+    // because .theme-swatch itself has overflow:hidden to clip the rounded
+    // color bars — the marker would otherwise get clipped and vanish.
+    //
+    // Effect pills are hard-coded (not pulled from the active theme) so
+    // the anatomy always shows a realistic multi-effect sample rather than
+    // depending on whatever theme the user has selected.
+    const anatomyPills = `
+      <div class="theme-effects-indicators">
+        <span class="theme-effect-pill">Hover lift</span>
+        <span class="theme-effect-pill">Aurora</span>
+        <span class="theme-effect-pill">Particles</span>
+      </div>
+    `;
     target.innerHTML = `
       <div class="guide-anatomy-card-wrap">
         <div class="theme-card is-active" style="width: 300px; cursor: default; pointer-events: none;">
-          <div class="theme-swatch" data-part="1">
+          <div class="anatomy-swatch-wrap" data-part="1">
             <button type="button" class="anatomy-marker" data-marker="1" aria-label="Color swatch explainer">1</button>
-            ${buildSwatch(theme)}
+            <div class="theme-swatch">${buildSwatch(theme)}</div>
           </div>
           <div class="theme-card-body">
             <div class="theme-card-header" data-part="2">
               <button type="button" class="anatomy-marker" data-marker="2" aria-label="Name, category, favicon explainer">2</button>
-              <span class="anatomy-favicon-dot" title="Theme favicon (defaults to Connectry icon)">${_connectryDotSvg(theme.colors.accent)}</span>
-              <span class="theme-name">${Connectry.Settings.escape(theme.name)}</span>
+              <span class="anatomy-title-group">
+                <span class="theme-name">${Connectry.Settings.escape(theme.name)}</span>
+                <span class="anatomy-favicon-dot" title="Theme favicon (defaults to Connectry icon)">${_connectryDotSvg(theme.colors.accent)}</span>
+              </span>
               <span class="theme-category-badge ${theme.category}">${theme.category === 'light' ? 'Light' : 'Dark'}</span>
             </div>
             <div class="theme-description" data-part="3">
@@ -2338,7 +2355,7 @@
             </div>
             <div class="anatomy-effects-row" data-part="4">
               <button type="button" class="anatomy-marker" data-marker="4" aria-label="Effect pills explainer">4</button>
-              ${buildEffectIndicators(theme.id)}
+              ${anatomyPills}
             </div>
             <!-- Typography placeholder row (V1.1) -->
             <div class="guide-anatomy-placeholder-row" data-part="5">
@@ -2351,7 +2368,7 @@
             <button type="button" class="anatomy-marker" data-marker="6" aria-label="Apply / Clone explainer">6</button>
             <div class="theme-card-status">
               <span class="theme-card-status-dot"></span>
-              <span>Apply</span>
+              <span>Active</span>
             </div>
             <button class="theme-card-clone-btn" type="button" title="Clone preview" disabled>
               <svg width="10" height="10" viewBox="0 0 12 12" fill="none" aria-hidden="true">
@@ -2422,6 +2439,14 @@
       callout.addEventListener('mouseenter', () => highlight(callout.dataset.callout));
       callout.addEventListener('mouseleave', clear);
       callout.addEventListener('click', () => highlight(callout.dataset.callout));
+    });
+
+    // Parts — hovering the actual card section also highlights the marker
+    // and the matching callout. The sample card has pointer-events:none on
+    // the card itself but data-part rows override it below.
+    parts.forEach(part => {
+      part.addEventListener('mouseenter', () => highlight(part.dataset.part));
+      part.addEventListener('mouseleave', clear);
     });
   }
 
