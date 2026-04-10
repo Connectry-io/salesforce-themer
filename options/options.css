@@ -3003,16 +3003,36 @@ body:has(.cx-tabpanel[data-tabpanel="builder"]:not([hidden])) .cx-main {
 .preview-header-title { font-size: 16px; font-weight: 700; }
 .preview-header-meta { font-size: 12px; margin-top: 2px; }
 
+/* Salesforce-style path chevrons — clip-path gives the pointed arrow
+   shape. First item has a flat left edge, middle items have the notch
+   on both sides, last item has a flat right edge. */
 .preview-path-wrap { padding: 8px 16px; }
-.preview-path { display: flex; gap: 3px; }
+.preview-path {
+  display: flex;
+  gap: 0;
+  position: relative;
+}
 
 .preview-path-item {
   flex: 1;
   text-align: center;
-  padding: 6px 10px;
+  padding: 6px 14px 6px 18px;
   font-size: 11px;
   font-weight: 600;
-  border-radius: 4px;
+  position: relative;
+  clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 50%, calc(100% - 10px) 100%, 0 100%, 10px 50%);
+  margin-left: -4px;
+}
+.preview-path-item:first-child {
+  clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 50%, calc(100% - 10px) 100%, 0 100%);
+  margin-left: 0;
+  padding-left: 12px;
+  border-radius: 4px 0 0 4px;
+}
+.preview-path-item:last-child {
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%, 10px 50%);
+  border-radius: 0 4px 4px 0;
+  padding-right: 12px;
 }
 
 .preview-card {
