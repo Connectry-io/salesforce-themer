@@ -1110,10 +1110,7 @@
     // Builder top bar: theme switcher dropdown
     _bindThemeSwitcher();
 
-    // Builder top bar: Save button (mirrors the editor's Save action)
-    document.getElementById('builderTopbarSave')?.addEventListener('click', () => {
-      document.getElementById('editorSaveBtn')?.click();
-    });
+    // (Top bar Save is wired in bindEditorEvents via builderTopbarSave)
 
     // Builder top bar: Build with AI → toggles the right-side chat drawer
     _bindChatDrawer();
@@ -1743,11 +1740,12 @@
       }
     });
 
-    // Save button
-    document.getElementById('editorSaveBtn').addEventListener('click', saveCustomTheme);
+    // Save button (may live in editor card OR top bar — wire both)
+    document.getElementById('editorSaveBtn')?.addEventListener('click', saveCustomTheme);
+    document.getElementById('builderTopbarSave')?.addEventListener('click', saveCustomTheme);
 
     // Reset button
-    document.getElementById('editorResetBtn').addEventListener('click', () => {
+    document.getElementById('editorResetBtn')?.addEventListener('click', () => {
       editorState.coreOverrides = {};
       editorState.advancedOverrides = {};
       populateEditorFields();
@@ -1756,16 +1754,16 @@
     });
 
     // Export button
-    document.getElementById('editorExportBtn').addEventListener('click', exportThemeJSON);
+    document.getElementById('editorExportBtn')?.addEventListener('click', exportThemeJSON);
 
     // Import button
-    document.getElementById('editorImportBtn').addEventListener('click', () => {
-      document.getElementById('editorImportFile').click();
+    document.getElementById('editorImportBtn')?.addEventListener('click', () => {
+      document.getElementById('editorImportFile')?.click();
     });
-    document.getElementById('editorImportFile').addEventListener('change', importThemeJSON);
+    document.getElementById('editorImportFile')?.addEventListener('change', importThemeJSON);
 
-    // Create theme button
-    document.getElementById('createThemeBtn').addEventListener('click', () => {
+    // Create theme button (legacy hidden host)
+    document.getElementById('createThemeBtn')?.addEventListener('click', () => {
       openEditor('connectry', null);
     });
 

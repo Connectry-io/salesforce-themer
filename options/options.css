@@ -1880,7 +1880,8 @@
 }
 
 /* Horizontal sub-tab bar — full-width row inside the editor card,
-   sitting between the toolbar header and the form body. */
+   sitting between the toolbar header and the form body. Scrollable
+   so it doesn't overflow the card on narrow widths. */
 .editor-subtab-bar {
   display: flex;
   align-items: center;
@@ -1888,18 +1889,23 @@
   background: var(--cx-surface);
   border-bottom: 1px solid var(--cx-border);
   padding: 6px var(--cx-space-3);
+  overflow-x: auto;
+  scrollbar-width: none;
 }
+.editor-subtab-bar::-webkit-scrollbar { display: none; }
 
 .editor-subtab {
   display: inline-flex;
   flex-direction: row;
   align-items: center;
-  gap: 8px;
-  padding: 8px 16px;
+  gap: 6px;
+  padding: 7px 12px;
   background: transparent;
   border: 1px solid transparent;
   border-radius: var(--cx-radius-sm);
   font-family: var(--cx-font);
+  white-space: nowrap;
+  flex-shrink: 0;
   font-size: 11px;
   font-weight: 600;
   color: var(--cx-text-subtle);
