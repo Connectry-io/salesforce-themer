@@ -1438,6 +1438,68 @@
       const key = el.dataset.bindBorder;
       if (full[key]) el.style.borderBottomColor = full[key];
     });
+
+    // Apply effects (CSS-driven, sandboxed to the preview frame)
+    applyEditorPreviewEffects();
+  }
+
+  /**
+   * Push the editor's effect state into CSS custom properties + data
+   * attributes on the preview frame. Sandboxed CSS rules under
+   * `.editor-preview-frame[data-fx-X]` then animate the preview live
+   * without touching the real engine or storage.
+   *
+   * Only the visually-clean effects are mirrored here (hoverLift,
+   * ambientGlow, borderShimmer, gradientBorders, neonFlicker, aurora).
+   * Particles + cursor trail + background patterns stay engine-only —
+   * they're either canvas-based or full-page.
+   */
+  function applyEditorPreviewEffects() {
+    const frame = document.getElementById('editorPreview');
+    if (!frame) return;
+    const effects = editorState.effects || {};
+    const full = getFullEditorTheme();
+
+    // Theme accent feeds the same vars the Guide cards use
+    const accent = full.accent || '#4a6fa5';
+    const rgb = _hexToRgbCsv(accent);
+    frame.style.setProperty('--fx-accent', accent);
+    frame.style.setProperty('--fx-accent-rgb', rgb);
+
+    const LADDER = {
+      subtle: { mult: 0.5, speed: 1.6 },
+      medium: { mult: 1.0, speed: 1.0 },
+      strong: { mult: 1.6, speed: 0.65 },
+    };
+
+    const FX_KEYS = ['hoverLift', 'ambientGlow', 'borderShimmer', 'gradientBorders', 'neonFlicker', 'aurora'];
+    for (const key of FX_KEYS) {
+      const on = !!effects[key];
+      const attr = 'fx' + key.charAt(0).toUpperCase() + key.slice(1);
+      if (on) {
+        frame.dataset[attr] = 'on';
+        const level = effects[key + 'Intensity'] || 'medium';
+        const v = LADDER[level] || LADDER.medium;
+        frame.style.setProperty(`--fx-${key}-mult`, String(v.mult));
+        frame.style.setProperty(`--fx-${key}-speed`, String(v.speed));
+      } else {
+        delete frame.dataset[attr];
+      }
+    }
+
+    // The preview frame is shared by all effects, so use the maximum
+    // intensity of any "always-on" effect for the master --fx-mult vars.
+    // Hover lift is per-element so we let it use its own.
+    const activeMults = FX_KEYS
+      .filter(k => effects[k])
+      .map(k => (LADDER[effects[k + 'Intensity']] || LADDER.medium).mult);
+    const masterMult = activeMults.length ? Math.max(...activeMults) : 1;
+    const masterSpeed = activeMults.length
+      ? Math.min(...FX_KEYS.filter(k => effects[k])
+          .map(k => (LADDER[effects[k + 'Intensity']] || LADDER.medium).speed))
+      : 1;
+    frame.style.setProperty('--fx-mult', String(masterMult));
+    frame.style.setProperty('--fx-speed-mult', String(masterSpeed));
   }
 
   // ─── Event Binding ────────────────────────────────────────────────────────
@@ -1623,6 +1685,7 @@
           editorState.effects[effect.id] = toggle.checked;
         }
         renderEditorEffectsGrid();
+        applyEditorPreviewEffects();
       });
 
       // Intensity buttons
@@ -1630,6 +1693,7 @@
         btn.addEventListener('click', () => {
           editorState.effects[effect.id + 'Intensity'] = btn.dataset.level;
           renderEditorEffectsGrid();
+          applyEditorPreviewEffects();
         });
       });
 
@@ -2327,6 +2391,14 @@
         <div class="guide-effect-body">
           <div class="guide-effect-name">${eff.name}</div>
           <div class="guide-effect-desc">${eff.desc}</div>
+          <div class="guide-effect-playground" data-playground="${eff.id}">
+            <span class="guide-effect-playground-label">Try it:</span>
+            <div class="guide-effect-playground-pills" role="radiogroup" aria-label="${eff.name} intensity">
+              <button type="button" class="guide-effect-playground-pill" data-intensity="subtle">Subtle</button>
+              <button type="button" class="guide-effect-playground-pill is-active" data-intensity="medium">Medium</button>
+              <button type="button" class="guide-effect-playground-pill" data-intensity="strong">Strong</button>
+            </div>
+          </div>
           <div class="guide-effect-themes">${themeBlurb}</div>
         </div>
       `;
@@ -2337,14 +2409,46 @@
         card.style.setProperty('--fx-accent', theme.colors.accent);
         card.style.setProperty('--fx-accent-rgb', _hexToRgbCsv(theme.colors.accent));
       }
+      // Default playground state: medium
+      _applyGuidePlaygroundIntensity(card, 'medium');
 
-      // Click → open Builder on the active theme so user can customize
-      card.addEventListener('click', () => {
+      // Intensity pills — sandbox mode: just tweak the live preview, don't
+      // touch storage. Stop propagation so the card click doesn't fire.
+      card.querySelectorAll('.guide-effect-playground-pill').forEach(pill => {
+        pill.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const level = pill.dataset.intensity;
+          card.querySelectorAll('.guide-effect-playground-pill').forEach(p => {
+            p.classList.toggle('is-active', p === pill);
+          });
+          _applyGuidePlaygroundIntensity(card, level);
+        });
+      });
+
+      // Click on the body (not the pills) → open Builder on the active theme
+      card.addEventListener('click', (e) => {
+        if (e.target.closest('.guide-effect-playground')) return;
         if (_tabsInstance) _tabsInstance.activate('builder');
       });
 
       grid.appendChild(card);
     }
+  }
+
+  /**
+   * Apply an intensity level to a Guide effect card by setting its CSS
+   * custom properties. Mirrors the engine's intensity ladder so the
+   * playground previews behave like the real thing.
+   */
+  function _applyGuidePlaygroundIntensity(card, level) {
+    const LADDER = {
+      subtle: { mult: 0.5, speed: 1.6 },
+      medium: { mult: 1.0, speed: 1.0 },
+      strong: { mult: 1.6, speed: 0.65 },
+    };
+    const v = LADDER[level] || LADDER.medium;
+    card.style.setProperty('--fx-mult', String(v.mult));
+    card.style.setProperty('--fx-speed-mult', String(v.speed));
   }
 
   /**
