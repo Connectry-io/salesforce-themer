@@ -1732,25 +1732,26 @@
     const frame = document.getElementById('editorPreview');
     if (!frame) return;
     const t = editorState.typography;
+    const defaultT = defaultTypography();
     const bodyStack = FONT_STACKS[t.fontFamily] || FONT_STACKS['system-ui'];
     const headingStack = t.fontFamilyHeading ? (FONT_STACKS[t.fontFamilyHeading] || bodyStack) : bodyStack;
 
-    frame.style.fontFamily = bodyStack;
+    // Body: font-family, weight, letter-spacing, line-height
+    frame.style.fontFamily = t.fontFamily !== 'system-ui' ? bodyStack : '';
     frame.style.letterSpacing = t.letterSpacing ? t.letterSpacing + 'em' : '';
-    frame.style.lineHeight = t.lineHeight || '';
+    frame.style.lineHeight = t.lineHeight !== defaultT.lineHeight ? t.lineHeight : '';
+    frame.style.fontWeight = t.weightBody !== 400 ? t.weightBody : '';
 
-    // Scale font sizes
+    // Scale font sizes via the base font-size on the frame
     const scale = t.sizeScale || 1.0;
     frame.style.fontSize = scale !== 1.0 ? `calc(12px * ${scale})` : '';
 
-    // Headings
-    frame.querySelectorAll('.preview-header-title, .preview-card-title, .preview-section-title').forEach(el => {
-      el.style.fontFamily = headingStack;
-      el.style.fontWeight = t.weightHeading || '';
-    });
-
-    // Body weight
-    frame.style.fontWeight = t.weightBody || '';
+    // Headings (record title in the preview)
+    const title = frame.querySelector('.preview-header-title');
+    if (title) {
+      title.style.fontFamily = t.fontFamilyHeading ? headingStack : '';
+      title.style.fontWeight = t.weightHeading !== 700 ? t.weightHeading : '';
+    }
   }
 
   /**
@@ -1965,9 +1966,7 @@
       btn.classList.toggle('is-active', btn.dataset.preset === t.sizePreset);
     });
 
-    // Fine-tune sliders/selects
-    const scale = el('editorTypeSizeScale');
-    if (scale) { scale.value = t.sizeScale; el('editorTypeSizeScaleValue').textContent = t.sizeScale + '×'; }
+    // Weight/spacing controls
     const wb = el('editorTypeWeightBody');
     if (wb) wb.value = String(t.weightBody);
     const wh = el('editorTypeWeightHeading');
@@ -2001,12 +2000,6 @@
         const preset = btn.dataset.preset;
         editorState.typography.sizePreset = preset;
         editorState.typography.sizeScale = TYPE_SIZE_PRESETS[preset] || 1.0;
-        // Sync the fine-tune slider
-        const slider = el('editorTypeSizeScale');
-        if (slider) {
-          slider.value = editorState.typography.sizeScale;
-          el('editorTypeSizeScaleValue').textContent = editorState.typography.sizeScale + '×';
-        }
         document.querySelectorAll('#editorTypeSizePresets .editor-type-preset').forEach(b =>
           b.classList.toggle('is-active', b.dataset.preset === preset)
         );
@@ -2014,21 +2007,7 @@
       });
     });
 
-    // Fine-tune: size scale slider
-    el('editorTypeSizeScale')?.addEventListener('input', (e) => {
-      const v = parseFloat(e.target.value);
-      editorState.typography.sizeScale = v;
-      el('editorTypeSizeScaleValue').textContent = v + '×';
-      // Deselect presets if value doesn't match any
-      const matchingPreset = Object.entries(TYPE_SIZE_PRESETS).find(([, s]) => Math.abs(s - v) < 0.01);
-      editorState.typography.sizePreset = matchingPreset ? matchingPreset[0] : 'custom';
-      document.querySelectorAll('#editorTypeSizePresets .editor-type-preset').forEach(b =>
-        b.classList.toggle('is-active', matchingPreset && b.dataset.preset === matchingPreset[0])
-      );
-      updatePreview();
-    });
-
-    // Fine-tune: weight selects
+    // Weight selects
     el('editorTypeWeightBody')?.addEventListener('change', (e) => {
       editorState.typography.weightBody = parseInt(e.target.value, 10);
       updatePreview();

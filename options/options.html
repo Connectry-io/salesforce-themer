@@ -1088,9 +1088,9 @@
             </div>
           </div>
 
-          <!-- Horizontal sub-tab bar: Colors · Effects · Type (soon).
+          <!-- Horizontal sub-tab bar: Colors · Effects · Type.
                Card sub-header — sits between the toolbar and the form.
-               Icon/Favicon moved to the toolbar favicon slot. -->
+               Favicon moved to the toolbar favicon slot. -->
         <nav class="editor-subtab-bar" role="tablist" aria-label="Editor sections">
           <button class="editor-subtab is-active" data-editor-subtab="colors" role="tab" aria-selected="true">
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
@@ -1111,7 +1111,6 @@
               <path d="M3 3h10M8 3v10M5 13h6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
             </svg>
             <span>Type</span>
-            <em class="editor-subtab-soon">soon</em>
           </button>
         </nav>
 
@@ -1345,7 +1344,7 @@
           </div>
         </div>
 
-        <!-- Typography panel — real controls, wired to editorState.typography -->
+        <!-- Typography panel — flat layout, wired to editorState.typography -->
         <div class="editor-panel editor-type" id="editorTypePanel" hidden>
 
           <!-- Font Family -->
@@ -1374,7 +1373,7 @@
             </div>
           </div>
 
-          <!-- Size Presets -->
+          <!-- Size -->
           <div class="editor-group">
             <h3 class="editor-group-title">Size</h3>
             <div class="editor-type-presets" id="editorTypeSizePresets">
@@ -1397,55 +1396,46 @@
             </div>
           </div>
 
-          <!-- Fine-tune (collapsible) -->
-          <details class="editor-type-details" id="editorTypeDetails">
-            <summary class="editor-type-details-summary">
-              <svg width="10" height="10" viewBox="0 0 12 12" fill="none" aria-hidden="true">
-                <path d="M4 2l4 4-4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
-              </svg>
-              Fine-tune
-            </summary>
-            <div class="editor-type-details-body">
-              <div class="editor-field">
-                <label>Size Scale</label>
-                <div class="editor-type-slider-row">
-                  <input type="range" class="editor-type-slider" id="editorTypeSizeScale" min="0.8" max="1.4" step="0.05" value="1.0" />
-                  <span class="editor-type-slider-value" id="editorTypeSizeScaleValue">1.0×</span>
-                </div>
-              </div>
-              <div class="editor-field">
-                <label>Body Weight</label>
-                <select class="editor-select" id="editorTypeWeightBody">
-                  <option value="300">Light (300)</option>
-                  <option value="400" selected>Regular (400)</option>
-                  <option value="500">Medium (500)</option>
-                </select>
-              </div>
-              <div class="editor-field">
-                <label>Heading Weight</label>
-                <select class="editor-select" id="editorTypeWeightHeading">
-                  <option value="400">Regular (400)</option>
-                  <option value="500">Medium (500)</option>
-                  <option value="600">Semi-bold (600)</option>
-                  <option value="700" selected>Bold (700)</option>
-                </select>
-              </div>
-              <div class="editor-field">
-                <label>Line Height</label>
-                <div class="editor-type-slider-row">
-                  <input type="range" class="editor-type-slider" id="editorTypeLineHeight" min="1.1" max="1.8" step="0.025" value="1.375" />
-                  <span class="editor-type-slider-value" id="editorTypeLineHeightValue">1.375</span>
-                </div>
-              </div>
-              <div class="editor-field">
-                <label>Letter Spacing</label>
-                <div class="editor-type-slider-row">
-                  <input type="range" class="editor-type-slider" id="editorTypeLetterSpacing" min="-0.03" max="0.08" step="0.005" value="0" />
-                  <span class="editor-type-slider-value" id="editorTypeLetterSpacingValue">0em</span>
-                </div>
+          <!-- Weight -->
+          <div class="editor-group">
+            <h3 class="editor-group-title">Weight</h3>
+            <div class="editor-field">
+              <label>Body Weight</label>
+              <select class="editor-select" id="editorTypeWeightBody">
+                <option value="300">Light (300)</option>
+                <option value="400" selected>Regular (400)</option>
+                <option value="500">Medium (500)</option>
+              </select>
+            </div>
+            <div class="editor-field">
+              <label>Heading Weight</label>
+              <select class="editor-select" id="editorTypeWeightHeading">
+                <option value="400">Regular (400)</option>
+                <option value="500">Medium (500)</option>
+                <option value="600">Semi-bold (600)</option>
+                <option value="700" selected>Bold (700)</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Spacing -->
+          <div class="editor-group">
+            <h3 class="editor-group-title">Spacing</h3>
+            <div class="editor-field">
+              <label>Line Height</label>
+              <div class="editor-type-slider-row">
+                <input type="range" class="editor-type-slider" id="editorTypeLineHeight" min="1.1" max="1.8" step="0.025" value="1.375" />
+                <span class="editor-type-slider-value" id="editorTypeLineHeightValue">1.375</span>
               </div>
             </div>
-          </details>
+            <div class="editor-field">
+              <label>Letter Spacing</label>
+              <div class="editor-type-slider-row">
+                <input type="range" class="editor-type-slider" id="editorTypeLetterSpacing" min="-0.03" max="0.08" step="0.005" value="0" />
+                <span class="editor-type-slider-value" id="editorTypeLetterSpacingValue">0em</span>
+              </div>
+            </div>
+          </div>
         </div>
 
           </div><!-- /.editor-card-body -->

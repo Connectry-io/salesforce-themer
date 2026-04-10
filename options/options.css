@@ -2934,41 +2934,6 @@ body:has(.cx-tabpanel[data-tabpanel="builder"]:not([hidden])) .cx-main {
   line-height: 1;
 }
 
-/* Fine-tune collapsible */
-.editor-type-details {
-  margin-top: var(--cx-space-3);
-  border: 1px solid var(--cx-border);
-  border-radius: var(--cx-radius-md);
-  overflow: hidden;
-}
-.editor-type-details-summary {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 8px 12px;
-  font-size: 11px;
-  font-weight: 700;
-  color: var(--cx-text-muted);
-  cursor: pointer;
-  background: var(--cx-surface-alt);
-  user-select: none;
-  list-style: none;
-}
-.editor-type-details-summary::-webkit-details-marker { display: none; }
-.editor-type-details[open] .editor-type-details-summary svg {
-  transform: rotate(90deg);
-}
-.editor-type-details-summary svg {
-  transition: transform 150ms ease;
-  flex-shrink: 0;
-}
-.editor-type-details-body {
-  padding: var(--cx-space-3) var(--cx-space-4) var(--cx-space-4);
-  display: flex;
-  flex-direction: column;
-  gap: var(--cx-space-3);
-}
-
 /* Shared slider row */
 .editor-type-slider-row {
   display: flex;
