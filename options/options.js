@@ -664,6 +664,9 @@
         : (syncState.lastLightTheme || 'connectry');
       pushThemeToAllSfTabs(next);
     }
+
+    // Update header to show both themes or single theme
+    updateHeaderMeta(syncState.theme);
   }
 
   // ─── Theme Application tooltips ──────────────────────────────────────────
@@ -899,22 +902,49 @@
 
   // ─── Header meta ─────────────────────────────────────────────────────────
 
+  function _buildMiniSwatch(themeObj) {
+    if (!themeObj?.colors) return '';
+    const c = themeObj.colors;
+    const four = [c.background, c.surface, c.accent, c.textPrimary].map(v => v || '#ddd');
+    return `<span class="header-meta-swatch">${four.map(v => `<span style="background:${v}"></span>`).join('')}</span>`;
+  }
+
+  function _resolveThemeForMeta(id) {
+    return getThemeById(id) || (syncState.customThemes || []).find(t => t.id === id);
+  }
+
   function updateHeaderMeta(activeThemeId) {
     const meta = document.getElementById('headerMeta');
     if (!meta) return;
-    const theme = getThemeById(activeThemeId) || (syncState.customThemes || []).find(t => t.id === activeThemeId);
-    const name = theme ? theme.name : activeThemeId;
     const devBadge = _localPremiumOverride
       ? `<span class="dev-mode-badge" title="DEV mode: Premium override is active. Disable in About tab.">DEV</span>`
       : '';
-    // Mini 4-color swatch (same pattern as Builder theme switcher)
-    let swatchHtml = '';
-    const c = theme?.colors;
-    if (c) {
-      const four = [c.background, c.surface, c.accent, c.textPrimary].map(v => v || '#ddd');
-      swatchHtml = `<span class="header-meta-swatch">${four.map(v => `<span style="background:${v}"></span>`).join('')}</span>`;
+
+    // When auto-mode is on, show both light and dark themes
+    if (syncState.autoMode) {
+      const lightId = syncState.lastLightTheme || 'connectry';
+      const darkId = syncState.lastDarkTheme || 'connectry-dark';
+      const lightTheme = _resolveThemeForMeta(lightId);
+      const darkTheme = _resolveThemeForMeta(darkId);
+      const lightName = lightTheme ? lightTheme.name : lightId;
+      const darkName = darkTheme ? darkTheme.name : darkId;
+      meta.innerHTML = `
+        <span class="header-meta-active header-meta-auto">
+          <span class="header-meta-pair">
+            ${_buildMiniSwatch(lightTheme)}<strong>${Connectry.Settings.escape(lightName)}</strong>
+          </span>
+          <span class="header-meta-divider">/</span>
+          <span class="header-meta-pair">
+            ${_buildMiniSwatch(darkTheme)}<strong>${Connectry.Settings.escape(darkName)}</strong>
+          </span>
+          <span class="header-meta-auto-badge">Auto</span>
+        </span>${devBadge}`;
+      return;
     }
-    meta.innerHTML = `<span class="header-meta-active">${swatchHtml}<strong>${Connectry.Settings.escape(name)}</strong></span>${devBadge}`;
+
+    const theme = _resolveThemeForMeta(activeThemeId);
+    const name = theme ? theme.name : activeThemeId;
+    meta.innerHTML = `<span class="header-meta-active">${_buildMiniSwatch(theme)}<strong>${Connectry.Settings.escape(name)}</strong></span>${devBadge}`;
   }
 
   // ─── Version ──────────────────────────────────────────────────────────────
@@ -1023,6 +1053,7 @@
       if (changes.autoMode) {
         syncState.autoMode = changes.autoMode.newValue;
         autoToggle.checked = changes.autoMode.newValue;
+        updateHeaderMeta(syncState.theme);
       }
       if (changes.orgThemes) {
         syncState.orgThemes = changes.orgThemes.newValue;

@@ -688,10 +688,10 @@
 
   function bindOptionsButton() {
     document.getElementById('openOptionsBtn')?.addEventListener('click', () => {
-      // Always land on the Themes tab from the More Settings button —
-      // the popup is theme-centric, so the user expects the theme gallery
-      // first. Effects has its own dedicated entry via the effects tooltip.
-      openOptionsOnTab('themes');
+      // Land on the Guide tab — the onboarding/education hub. Users new to
+      // the product benefit from seeing the interactive demos first; power
+      // users will jump to Builder or Themes on their own.
+      openOptionsOnTab('guide');
     });
   }
 
