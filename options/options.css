@@ -2044,6 +2044,7 @@
    input mode. */
 .editor-card {
   grid-column: 1;
+  min-width: 0;
   background: var(--cx-surface);
   border: 1px solid var(--cx-border);
   border-radius: var(--cx-radius-lg);
