@@ -1088,18 +1088,61 @@
       openCreationDialog('connectry');
     });
 
-    // Builder sidebar: "+ New" button → opens the editor with a fresh theme
-    document.getElementById('builderSidebarCreateBtn')?.addEventListener('click', () => {
-      _pendingCreateEffects = getSuggestedEffectsFor('connectry');
-      openEditor('connectry', null);
+    // Builder sidebar: "+ New ▾" button toggles the create popover.
+    // The popover holds all 4 ways to start a new theme (manual = enabled,
+    // AI / brand / URL = locked Premium · Coming Soon).
+    _bindBuilderCreateMenu();
+  }
+
+  /**
+   * Wire up the "+ New ▾" sidebar popover. The trigger toggles the menu;
+   * an outside click or Escape closes it; selecting an option closes it
+   * and dispatches the create action.
+   */
+  function _bindBuilderCreateMenu() {
+    const trigger = document.getElementById('builderSidebarCreateBtn');
+    const menu = document.getElementById('builderCreateMenu');
+    if (!trigger || !menu) return;
+
+    const closeMenu = () => {
+      menu.hidden = true;
+      trigger.setAttribute('aria-expanded', 'false');
+    };
+    const openMenu = () => {
+      menu.hidden = false;
+      trigger.setAttribute('aria-expanded', 'true');
+    };
+
+    trigger.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (menu.hidden) openMenu();
+      else closeMenu();
     });
 
-    // Builder sidebar: "Start from…" alternative input methods (AI, brand,
-    // URL). All Premium AND coming soon — clicking shows the upgrade
-    // dialog. The buttons are disabled but we still bind click on the
-    // wrapper for keyboard / accessibility paths that might fire it.
-    document.querySelectorAll('.builder-startfrom-item[data-startfrom]').forEach(item => {
+    // Click outside the menu (or its trigger) closes it
+    document.addEventListener('click', (e) => {
+      if (menu.hidden) return;
+      if (menu.contains(e.target) || trigger.contains(e.target)) return;
+      closeMenu();
+    });
+
+    // Escape closes the menu
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && !menu.hidden) closeMenu();
+    });
+
+    // Menu items
+    menu.querySelectorAll('.builder-create-menu-item[data-startfrom]').forEach(item => {
       item.addEventListener('click', () => {
+        const which = item.dataset.startfrom;
+        closeMenu();
+        if (which === 'manual') {
+          // Manual = open the editor with a fresh theme based on connectry
+          _pendingCreateEffects = getSuggestedEffectsFor('connectry');
+          openEditor('connectry', null);
+          return;
+        }
+        // AI / brand-guide / URL — all Premium · Coming Soon
         openUpgradeDialog();
       });
     });

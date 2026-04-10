@@ -1838,12 +1838,13 @@
   background: var(--cx-surface);
 }
 
-/* Editor layout: two cards side-by-side. Left card is the editor
-   workshop (free banner + name/save header + sub-tab bar + form panel
-   all stacked inside one container). Right card is the preview. */
+/* Editor layout: two cards side-by-side. Editor card has a fixed-ish
+   width because its content (color pickers, effect rows) doesn't need
+   to scale; preview card takes ALL the remaining space because that's
+   where the visual feedback lives. */
 .editor-layout {
   display: grid;
-  grid-template-columns: minmax(440px, 1fr) minmax(540px, 1.3fr);
+  grid-template-columns: minmax(360px, 400px) 1fr;
   gap: var(--cx-space-4);
   align-items: start;
 }
@@ -2060,6 +2061,144 @@ body:has(.cx-tabpanel[data-tabpanel="builder"]:not([hidden])) .cx-main {
   transform: translateY(-1px);
 }
 
+/* Create-menu popover ─────────────────────────────────────────────────
+   Anchored under the "+ New ▾" button. Holds all 4 ways to start a
+   new theme (manual = enabled, AI / brand / URL = locked Soon). */
+.builder-create-menu-wrap {
+  position: relative;
+}
+
+.builder-create-menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  z-index: 30;
+  width: 280px;
+  background: var(--cx-surface);
+  border: 1px solid var(--cx-border);
+  border-radius: var(--cx-radius-md);
+  box-shadow:
+    0 8px 24px rgba(0, 0, 0, 0.12),
+    0 2px 6px rgba(0, 0, 0, 0.06);
+  padding: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.builder-create-menu[hidden] {
+  display: none;
+}
+
+.builder-create-menu-label {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--cx-text-subtle);
+  padding: 6px 10px 4px;
+}
+
+.builder-create-menu-divider {
+  height: 1px;
+  background: var(--cx-border);
+  margin: 4px 4px;
+}
+
+.builder-create-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: var(--cx-radius-sm);
+  font-family: var(--cx-font);
+  text-align: left;
+  width: 100%;
+  cursor: pointer;
+  transition: background-color var(--cx-transition);
+}
+
+.builder-create-menu-item:hover:not(.is-locked) {
+  background: var(--cx-surface-alt);
+  border-color: var(--cx-border);
+}
+
+.builder-create-menu-item.is-locked {
+  cursor: not-allowed;
+  opacity: 0.62;
+}
+
+.builder-create-menu-item.is-locked:hover {
+  opacity: 0.85;
+  background: var(--cx-surface-alt);
+}
+
+.builder-create-menu-item .builder-startfrom-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  color: var(--cx-text-muted);
+  flex-shrink: 0;
+}
+
+.builder-create-menu-item:hover:not(.is-locked) .builder-startfrom-icon {
+  color: var(--cx-accent);
+}
+
+.builder-create-menu-item .builder-startfrom-body {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.builder-create-menu-item .builder-startfrom-name {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--cx-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.builder-create-menu-item .builder-startfrom-desc {
+  display: block;
+  font-size: 10.5px;
+  color: var(--cx-text-subtle);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.builder-create-menu-item .builder-startfrom-badge {
+  font-size: 8.5px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 2px 6px;
+  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+  color: #8f6413;
+  border: 1px solid #d4a22a;
+  border-radius: var(--cx-radius-full);
+  flex-shrink: 0;
+}
+
+.builder-create-menu-foot {
+  margin: 4px 0 0 0;
+  padding: 6px 10px 0;
+  border-top: 1px solid var(--cx-border);
+  font-size: 10px;
+  color: var(--cx-text-subtle);
+  text-align: center;
+  font-style: italic;
+}
+
 .builder-sidebar-sub {
   font-size: 11px;
   color: var(--cx-text-subtle);
@@ -2197,111 +2336,11 @@ body:has(.cx-tabpanel[data-tabpanel="builder"]:not([hidden])) .cx-main {
   min-width: 0;
 }
 
-/* ─── Sidebar: Start from… section (locked alternatives) ──────────────── */
-.builder-sidebar-divider {
-  height: 1px;
-  background: var(--cx-border);
-  margin: var(--cx-space-4) calc(-1 * var(--cx-space-5));
-}
-
-.builder-sidebar-section-header {
-  margin-bottom: var(--cx-space-2);
-}
-
-.builder-sidebar-section-title {
-  margin: 0;
-  font-size: 11px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  color: var(--cx-text-muted);
-}
-
-.builder-sidebar-section-sub {
-  display: block;
-  font-size: 10.5px;
-  color: var(--cx-text-subtle);
-  margin-top: 2px;
-}
-
-.builder-sidebar-startfrom {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.builder-startfrom-item {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 6px 8px;
-  background: var(--cx-surface-alt);
-  border: 1px dashed var(--cx-border);
-  border-radius: var(--cx-radius-sm);
-  font-family: var(--cx-font);
-  cursor: not-allowed;
-  text-align: left;
-  width: 100%;
-  opacity: 0.78;
-  transition: opacity var(--cx-transition);
-}
-
-.builder-startfrom-item:hover {
-  opacity: 1;
-}
-
-.builder-startfrom-icon {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 18px;
-  height: 18px;
-  border-radius: 4px;
-  color: var(--cx-text-muted);
-  flex-shrink: 0;
-}
-
-.builder-startfrom-body {
-  flex: 1 1 auto;
-  min-width: 0;
-}
-
-.builder-startfrom-name {
-  display: block;
-  font-size: 11px;
-  font-weight: 600;
-  color: var(--cx-text);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-/* Description hidden in the compact sidebar — name + Soon badge is
-   enough for the V1 placeholder. Hover-tip carries the longer copy. */
-.builder-startfrom-desc {
-  display: none;
-}
-
-.builder-startfrom-badge {
-  font-size: 8.5px;
-  font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  padding: 2px 6px;
-  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
-  color: #8f6413;
-  border: 1px solid #d4a22a;
-  border-radius: var(--cx-radius-full);
-  flex-shrink: 0;
-}
-
-.builder-sidebar-startfrom-foot {
-  margin: var(--cx-space-3) 0 0 0;
-  font-size: 10px;
-  color: var(--cx-text-subtle);
-  text-align: center;
-  font-style: italic;
-}
+/* (Sidebar Start from… section removed — replaced by the create-menu
+   popover anchored under the "+ New ▾" button. See .builder-create-menu
+   styles above. The classes .builder-startfrom-icon / -name / -desc /
+   -badge are now scoped under .builder-create-menu-item and styled
+   there.) */
 
 @media (max-width: 900px) {
   .builder-layout {
