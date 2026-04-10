@@ -3320,30 +3320,29 @@ td.upgrade-compare-col-premium,
   flex: 1;
 }
 
-/* Callout list — compact rows, one per part. Hover-to-highlight syncs with
-   the matching marker on the diagram. */
+/* Callout list — each row is absolutely positioned by JS so its vertical
+   center aligns with the matching data-part on the card. The list itself
+   gets minHeight = diagram height so the parent grid still reserves space.
+   Hover-to-highlight syncs with the matching marker on the diagram. */
 .guide-anatomy-callouts {
   list-style: none;
   padding: 0;
   margin: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
+  position: relative;
 }
 
 .guide-anatomy-callouts li {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   gap: var(--cx-space-3);
-  padding: var(--cx-space-3) var(--cx-space-4);
+  padding: 10px var(--cx-space-4);
   background: var(--cx-surface);
   border: 1px solid var(--cx-border);
   border-radius: var(--cx-radius-md);
   font-size: 12.5px;
-  line-height: 1.5;
+  line-height: 1.45;
   color: var(--cx-text-muted);
   cursor: pointer;
-  position: relative;
   overflow: hidden;
   transition:
     border-color 200ms ease,

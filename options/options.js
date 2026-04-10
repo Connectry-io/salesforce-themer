@@ -2349,18 +2349,124 @@
             </button>
           </div>
         </div>
-        <!-- Numbered marker badges, positioned absolutely over the card. Now buttons. -->
-        <button type="button" class="guide-anatomy-marker" data-marker="1" aria-label="Show explainer for color swatch" style="top: 8px; left: -14px;">1</button>
-        <button type="button" class="guide-anatomy-marker" data-marker="2" aria-label="Show explainer for name + category" style="top: 56px; right: -14px;">2</button>
-        <button type="button" class="guide-anatomy-marker" data-marker="3" aria-label="Show explainer for description" style="top: 92px; left: -14px;">3</button>
-        <button type="button" class="guide-anatomy-marker" data-marker="4" aria-label="Show explainer for effect pills" style="top: 128px; right: -14px;">4</button>
-        <button type="button" class="guide-anatomy-marker" data-marker="5" aria-label="Show explainer for typography placeholder" style="top: 170px; left: -14px;">5</button>
-        <button type="button" class="guide-anatomy-marker" data-marker="6" aria-label="Show explainer for favicon placeholder" style="top: 206px; right: -14px;">6</button>
-        <button type="button" class="guide-anatomy-marker" data-marker="7" aria-label="Show explainer for apply / clone" style="bottom: 14px; left: -14px;">7</button>
+        <!-- Numbered marker badges. Positions are computed dynamically by
+             _positionAnatomyMarkers() based on each data-part element's
+             actual Y coordinate, so they always sit on the correct row
+             regardless of description length, pill wrap, font load, etc. -->
+        <button type="button" class="guide-anatomy-marker" data-marker="1" aria-label="Show explainer for color swatch">1</button>
+        <button type="button" class="guide-anatomy-marker" data-marker="2" aria-label="Show explainer for name + category">2</button>
+        <button type="button" class="guide-anatomy-marker" data-marker="3" aria-label="Show explainer for description">3</button>
+        <button type="button" class="guide-anatomy-marker" data-marker="4" aria-label="Show explainer for effect pills">4</button>
+        <button type="button" class="guide-anatomy-marker" data-marker="5" aria-label="Show explainer for typography placeholder">5</button>
+        <button type="button" class="guide-anatomy-marker" data-marker="6" aria-label="Show explainer for favicon placeholder">6</button>
+        <button type="button" class="guide-anatomy-marker" data-marker="7" aria-label="Show explainer for apply / clone">7</button>
       </div>
     `;
 
     _bindGuideAnatomyInteractions();
+    // Place markers + align callouts AFTER the layout has settled. Two
+    // rAFs gives the browser one frame to lay out the card and one more
+    // for any font swap to land before we measure.
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        _positionAnatomyMarkers();
+        _alignAnatomyCallouts();
+      });
+    });
+  }
+
+  /**
+   * Compute each marker's vertical position from the actual Y coordinate
+   * of its corresponding data-part element. Markers alternate left/right
+   * around the card so they don't pile on top of each other.
+   *
+   * Re-runs on window resize via _bindGuideAnatomyResize().
+   */
+  function _positionAnatomyMarkers() {
+    const wrap = document.querySelector('.guide-anatomy-card-wrap');
+    if (!wrap) return;
+    const wrapRect = wrap.getBoundingClientRect();
+
+    for (let i = 1; i <= 7; i++) {
+      const part = wrap.querySelector(`[data-part="${i}"]`);
+      const marker = wrap.querySelector(`.guide-anatomy-marker[data-marker="${i}"]`);
+      if (!part || !marker) continue;
+
+      const partRect = part.getBoundingClientRect();
+      const centerY = (partRect.top + partRect.bottom) / 2 - wrapRect.top;
+
+      marker.style.top = `${Math.round(centerY)}px`;
+      marker.style.bottom = 'auto';
+      marker.style.transform = 'translateY(-50%)';
+
+      // Alternate sides — odd on the left, even on the right — so they
+      // don't overlap and the eye can sweep down naturally.
+      if (i % 2 === 1) {
+        marker.style.left = '-14px';
+        marker.style.right = 'auto';
+      } else {
+        marker.style.right = '-14px';
+        marker.style.left = 'auto';
+      }
+    }
+  }
+
+  /**
+   * Vertically align each callout on the right with the corresponding card
+   * part on the left. We give the callout list explicit row heights via
+   * grid-template-rows so each row starts at the same Y as its data-part.
+   *
+   * This is what makes the section feel "perfectly aligned" — hovering
+   * row 4 highlights the effect pills at the same height as the row.
+   */
+  function _alignAnatomyCallouts() {
+    const wrap = document.querySelector('.guide-anatomy-card-wrap');
+    const list = document.getElementById('guideAnatomyCallouts');
+    if (!wrap || !list) return;
+
+    const wrapRect = wrap.getBoundingClientRect();
+    const positions = [];
+    for (let i = 1; i <= 7; i++) {
+      const part = wrap.querySelector(`[data-part="${i}"]`);
+      if (!part) {
+        positions.push(null);
+        continue;
+      }
+      const r = part.getBoundingClientRect();
+      const centerY = (r.top + r.bottom) / 2 - wrapRect.top;
+      positions.push(centerY);
+    }
+
+    // Switch the list to absolute-position layout so we can place each row
+    // at its exact Y. The container is already height-bound by the diagram
+    // (via the grid in .guide-anatomy).
+    list.style.position = 'relative';
+    list.style.minHeight = `${wrap.offsetHeight}px`;
+
+    const items = list.querySelectorAll('li[data-callout]');
+    items.forEach((li, idx) => {
+      const targetY = positions[idx];
+      if (targetY == null) return;
+      li.style.position = 'absolute';
+      li.style.left = '0';
+      li.style.right = '0';
+      li.style.top = `${Math.round(targetY)}px`;
+      li.style.transform = 'translateY(-50%)';
+    });
+  }
+
+  /**
+   * Re-run the dynamic positioning whenever the layout might have changed.
+   * Bound once on first render via a private flag.
+   */
+  let _anatomyResizeBound = false;
+  function _bindGuideAnatomyResize() {
+    if (_anatomyResizeBound) return;
+    _anatomyResizeBound = true;
+    window.addEventListener('resize', () => {
+      _positionAnatomyMarkers();
+      _alignAnatomyCallouts();
+    });
   }
 
   /**
@@ -2371,6 +2477,8 @@
   function _bindGuideAnatomyInteractions() {
     const root = document.getElementById('guideAnatomy');
     if (!root) return;
+
+    _bindGuideAnatomyResize();
 
     const markers = root.querySelectorAll('.guide-anatomy-marker[data-marker]');
     const callouts = root.querySelectorAll('.guide-anatomy-callouts li[data-callout]');
