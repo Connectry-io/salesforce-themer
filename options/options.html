@@ -818,24 +818,47 @@
               <div class="guide-live-preview-nav" id="guideTypeNav">Home &nbsp; Leads &nbsp; Contacts &nbsp; Opportunities</div>
               <span class="guide-live-preview-where">Navigation — app tabs at the top of every page</span>
             </div>
+
+            <!-- Stencil card: wireframe with live typography row -->
+            <div class="guide-type-stencil-wrap">
+            <div class="guide-type-stencil-label">On every theme card</div>
+            <div class="guide-type-stencil-row">
+              <div class="guide-type-stencil">
+                <!-- Abstract swatch -->
+                <div class="stencil-swatch"><span></span><span></span><span></span><span></span></div>
+                <!-- Abstract name + badge -->
+                <div class="stencil-line-row">
+                  <span class="stencil-line" style="width:55%"></span>
+                  <span class="stencil-badge"></span>
+                </div>
+                <!-- Abstract description -->
+                <span class="stencil-line" style="width:80%"></span>
+                <!-- Abstract effect pills -->
+                <div class="stencil-line-row">
+                  <span class="stencil-pill"></span>
+                  <span class="stencil-pill"></span>
+                </div>
+                <!-- REAL typography row — highlighted -->
+                <div class="stencil-type-row" id="guideStencilTypeRow">
+                  <span class="stencil-type-aa" id="guideTypeExampleAa">Aa</span>
+                  <span class="stencil-type-text" id="guideTypeExampleLabel">System Default · Normal · 1.375/0</span>
+                </div>
+                <!-- Abstract actions -->
+                <div class="stencil-line-row stencil-actions">
+                  <span class="stencil-line" style="width:35%"></span>
+                  <span class="stencil-line" style="width:25%"></span>
+                </div>
+              </div>
+              <ol class="guide-type-stencil-legend">
+                <li><strong>Aa</strong> rendered in the actual font</li>
+                <li><strong>Body font</strong> family name</li>
+                <li><strong>Size</strong> scale preset</li>
+                <li><strong>Spacing</strong> — line-height / letter-spacing</li>
+              </ol>
+            </div>
+            <p class="guide-type-stencil-note">Weight and heading font are in the Builder but not shown on cards — they're less visible at a glance.</p>
           </div>
         </div>
-
-        <!-- How to read the typography row on theme cards -->
-        <div class="guide-type-card-explainer">
-          <h3 class="guide-type-card-explainer-title">Reading the card</h3>
-          <p class="guide-type-card-explainer-desc">Not every setting fits on a theme card, so we surface the three that change how Salesforce <em>feels</em> most: the font family, the size scale, and the spacing.</p>
-          <div class="guide-type-card-example">
-            <span class="guide-type-card-example-aa" id="guideTypeExampleAa">Aa</span>
-            <span class="guide-type-card-example-label" id="guideTypeExampleLabel">System Default · Normal · 1.375/0</span>
-          </div>
-          <ol class="guide-type-card-legend">
-            <li><strong>Aa</strong> — rendered in the theme's actual font so you can see it at a glance</li>
-            <li><strong>Font name</strong> — the <em>body</em> font family (e.g. Neo-Grotesque, Geometric)</li>
-            <li><strong>Size</strong> — the scale preset: Compact, Normal, Comfortable, or Large</li>
-            <li><strong>Spacing</strong> — line-height / letter-spacing (e.g. 1.5/0.02em)</li>
-          </ol>
-          <p class="guide-type-card-explainer-note">Weight and heading font are configured in the Builder but omitted from the card — they're less visible at a glance.</p>
         </div>
       </section>
 
