@@ -3186,14 +3186,21 @@ td.upgrade-compare-col-premium,
   display: inline-block;
 }
 
+/* Make sure the card itself doesn't clip the markers that escape its
+   left/right edges. */
+.guide-anatomy-card-wrap .theme-card,
+.guide-anatomy-card-wrap .theme-card-body {
+  overflow: visible;
+}
+
 /* Sample card parts get a glow ring when their corresponding marker /
-   callout is highlighted. data-part is set in JS on the rendered card. */
+   callout is highlighted. Each part also serves as the positioning anchor
+   for its child .anatomy-marker button. */
 .guide-anatomy-card-wrap [data-part] {
   position: relative;
   border-radius: 6px;
   transition:
     box-shadow 220ms ease,
-    transform 220ms cubic-bezier(0.34, 1.56, 0.64, 1),
     background-color 220ms ease;
 }
 .guide-anatomy-card-wrap [data-part].is-highlight {
@@ -3204,10 +3211,27 @@ td.upgrade-compare-col-premium,
   z-index: 3;
 }
 
-/* Numbered marker badges — now CLICKABLE buttons that pulse to invite
-   interaction. Hover/click syncs with the callout list on the right. */
-.guide-anatomy-marker {
+/* Favicon dot — small Connectry icon next to the theme name */
+.anatomy-favicon-dot {
+  display: inline-flex;
+  align-items: center;
+  margin-right: 6px;
+  flex-shrink: 0;
+}
+
+/* Effects row wrapper — gives effect indicators a positioning anchor for
+   the marker without changing how the indicators themselves render. */
+.guide-anatomy-card-wrap .anatomy-effects-row {
+  padding: 4px 0;
+}
+
+/* ─── Anchored markers ─────────────────────────────────────────────────
+   Each marker is a child of its data-part. CSS centers it vertically on
+   that row and pushes it to the correct side of the card. Pure CSS = no
+   JS measuring, no race conditions, no NaN positions. */
+.anatomy-marker {
   position: absolute;
+  top: 50%;
   width: 28px;
   height: 28px;
   background: var(--cx-accent);
@@ -3220,17 +3244,18 @@ td.upgrade-compare-col-premium,
   font-family: var(--cx-font);
   font-size: 12px;
   font-weight: 800;
+  padding: 0;
+  cursor: pointer;
+  z-index: 4;
+  transform: translateY(-50%);
   box-shadow:
     0 2px 8px rgba(0, 0, 0, 0.18),
     0 0 0 3px var(--cx-surface-alt);
-  z-index: 4;
-  cursor: pointer;
-  padding: 0;
   transition: transform 200ms cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 200ms ease;
   animation: anatomy-marker-breathe 3.6s ease-in-out infinite;
 }
 
-.guide-anatomy-marker::after {
+.anatomy-marker::after {
   content: '';
   position: absolute;
   inset: -2px;
@@ -3241,21 +3266,29 @@ td.upgrade-compare-col-premium,
   pointer-events: none;
 }
 
+/* Alternate sides — odd markers on the left edge of the card, even on
+   the right edge. The number is the same as the data-part / marker. */
+[data-part="1"] > .anatomy-marker,
+[data-part="3"] > .anatomy-marker,
+[data-part="5"] > .anatomy-marker { left: -36px; }
+
+[data-part="2"] > .anatomy-marker,
+[data-part="4"] > .anatomy-marker,
+[data-part="6"] > .anatomy-marker { right: -36px; }
+
 /* Stagger the pulse so they don't all fire in unison */
-.guide-anatomy-marker[data-marker="1"] { animation-delay: 0s; }
-.guide-anatomy-marker[data-marker="1"]::after { animation-delay: 0s; }
-.guide-anatomy-marker[data-marker="2"] { animation-delay: 0.45s; }
-.guide-anatomy-marker[data-marker="2"]::after { animation-delay: 0.45s; }
-.guide-anatomy-marker[data-marker="3"] { animation-delay: 0.9s; }
-.guide-anatomy-marker[data-marker="3"]::after { animation-delay: 0.9s; }
-.guide-anatomy-marker[data-marker="4"] { animation-delay: 1.35s; }
-.guide-anatomy-marker[data-marker="4"]::after { animation-delay: 1.35s; }
-.guide-anatomy-marker[data-marker="5"] { animation-delay: 1.8s; }
-.guide-anatomy-marker[data-marker="5"]::after { animation-delay: 1.8s; }
-.guide-anatomy-marker[data-marker="6"] { animation-delay: 2.25s; }
-.guide-anatomy-marker[data-marker="6"]::after { animation-delay: 2.25s; }
-.guide-anatomy-marker[data-marker="7"] { animation-delay: 2.7s; }
-.guide-anatomy-marker[data-marker="7"]::after { animation-delay: 2.7s; }
+.anatomy-marker[data-marker="1"] { animation-delay: 0s; }
+.anatomy-marker[data-marker="1"]::after { animation-delay: 0s; }
+.anatomy-marker[data-marker="2"] { animation-delay: 0.5s; }
+.anatomy-marker[data-marker="2"]::after { animation-delay: 0.5s; }
+.anatomy-marker[data-marker="3"] { animation-delay: 1s; }
+.anatomy-marker[data-marker="3"]::after { animation-delay: 1s; }
+.anatomy-marker[data-marker="4"] { animation-delay: 1.5s; }
+.anatomy-marker[data-marker="4"]::after { animation-delay: 1.5s; }
+.anatomy-marker[data-marker="5"] { animation-delay: 2s; }
+.anatomy-marker[data-marker="5"]::after { animation-delay: 2s; }
+.anatomy-marker[data-marker="6"] { animation-delay: 2.5s; }
+.anatomy-marker[data-marker="6"]::after { animation-delay: 2.5s; }
 
 @keyframes anatomy-marker-breathe {
   0%, 100% { box-shadow: 0 2px 8px rgba(0, 0, 0, 0.18), 0 0 0 3px var(--cx-surface-alt); }
@@ -3268,9 +3301,9 @@ td.upgrade-compare-col-premium,
   100% { opacity: 0; transform: scale(1.55); }
 }
 
-.guide-anatomy-marker:hover,
-.guide-anatomy-marker.is-highlight {
-  transform: scale(1.18);
+.anatomy-marker:hover,
+.anatomy-marker.is-highlight {
+  transform: translateY(-50%) scale(1.18);
   box-shadow:
     0 4px 14px rgba(74, 111, 165, 0.5),
     0 0 0 3px var(--cx-surface-alt),
@@ -3278,7 +3311,7 @@ td.upgrade-compare-col-premium,
   animation-play-state: paused;
 }
 
-.guide-anatomy-marker:focus-visible {
+.anatomy-marker:focus-visible {
   outline: 2px solid var(--cx-accent);
   outline-offset: 4px;
 }
@@ -3320,20 +3353,23 @@ td.upgrade-compare-col-premium,
   flex: 1;
 }
 
-/* Callout list — each row is absolutely positioned by JS so its vertical
-   center aligns with the matching data-part on the card. The list itself
-   gets minHeight = diagram height so the parent grid still reserves space.
-   Hover-to-highlight syncs with the matching marker on the diagram. */
+/* Callout list — clean flex column. Hover-to-highlight syncs with the
+   matching marker on the diagram via the .is-highlight class. We don't
+   try to align each row to its data-part vertically anymore (that needed
+   JS measuring + absolute positioning, which kept breaking on layout
+   timing). The hover ring + numbered badge make the link obvious. */
 .guide-anatomy-callouts {
   list-style: none;
   padding: 0;
   margin: 0;
-  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
 }
 
 .guide-anatomy-callouts li {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: var(--cx-space-3);
   padding: 10px var(--cx-space-4);
   background: var(--cx-surface);
@@ -3343,6 +3379,7 @@ td.upgrade-compare-col-premium,
   line-height: 1.45;
   color: var(--cx-text-muted);
   cursor: pointer;
+  position: relative;
   overflow: hidden;
   transition:
     border-color 200ms ease,
