@@ -176,6 +176,7 @@
             </div>
             <div class="theme-desc-popup">${theme.description || ''}</div>
             ${buildPopupEffectPills(theme.id)}
+            ${_popupTypeRow(null)}
           </div>
           <div class="theme-clone-row">
             <span class="theme-clone-btn" data-clone="${theme.id}" title="Clone & customize this theme">
@@ -384,6 +385,35 @@
     `;
   }
 
+  // ─── Typography row helper ──────────────────────────────────────────────
+  const POPUP_FONT_STACKS = {
+    'system-ui':      'system-ui, sans-serif',
+    'neo-grotesque':  "Inter, Roboto, 'Helvetica Neue', 'Arial Nova', 'Nimbus Sans', Arial, sans-serif",
+    'humanist':       "Seravek, 'Gill Sans Nova', Ubuntu, Calibri, 'DejaVu Sans', source-sans-pro, sans-serif",
+    'geometric':      "Avenir, Montserrat, Corbel, 'URW Gothic', source-sans-pro, sans-serif",
+    'classic-serif':  "Charter, 'Bitstream Charter', 'Sitka Text', Cambria, serif",
+  };
+  const POPUP_FONT_LABELS = {
+    'system-ui': 'System Default', 'neo-grotesque': 'Neo-Grotesque',
+    'humanist': 'Humanist', 'geometric': 'Geometric', 'classic-serif': 'Classic Serif',
+  };
+
+  function _popupTypeRow(typo) {
+    const key = typo?.fontFamily || 'system-ui';
+    const stack = POPUP_FONT_STACKS[key] || POPUP_FONT_STACKS['system-ui'];
+    const label = POPUP_FONT_LABELS[key] || 'System Default';
+    const size = (typo?.sizePreset || 'normal');
+    const sizeLabel = size.charAt(0).toUpperCase() + size.slice(1);
+    const lh = typo?.lineHeight || 1.375;
+    const ls = typo?.letterSpacing || 0;
+    const lsStr = ls === 0 ? '0' : ls + 'em';
+    return `
+      <div class="theme-card-type-row">
+        <span class="theme-card-type-sample" style="font-family:${stack}">Aa</span>
+        <span class="theme-card-type-label">${label} · ${sizeLabel} · ${lh}/${lsStr}</span>
+      </div>`;
+  }
+
   /**
    * Build a compact theme card for a custom theme. Custom themes carry
    * coreOverrides + advancedOverrides on top of their base theme's colors,
@@ -422,6 +452,7 @@
         </div>
         <div class="theme-desc-popup">${subline}</div>
         <div class="theme-effects-pills is-empty">Custom effects</div>
+        ${_popupTypeRow(ct.typography)}
       </div>
       <div class="theme-clone-row">
         <span class="theme-clone-btn" data-edit="${ct.id}" title="Edit in Builder">

@@ -1030,6 +1030,30 @@ body {
   align-items: center;
 }
 
+/* Typography row — Aa rendered in the theme's actual font */
+.theme-card-type-row {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding-top: 4px;
+  border-top: 1px dashed var(--color-border);
+  margin-top: 3px;
+}
+.theme-card-type-sample {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--color-text-muted);
+  flex-shrink: 0;
+  line-height: 1;
+}
+.theme-card-type-label {
+  font-size: 9px;
+  color: var(--color-text-subtle);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 .theme-effect-pill {
   display: inline-block;
   padding: 1px 6px;

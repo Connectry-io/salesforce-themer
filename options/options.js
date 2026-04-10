@@ -172,7 +172,7 @@
           ${buildEffectIndicators(theme.id)}
           <div class="theme-card-type-row">
             <span class="theme-card-type-icon">Aa</span>
-            <span class="theme-card-type-text">System Default · Normal · 1.375</span>
+            <span class="theme-card-type-text">System Default · Normal · 1.375/0</span>
           </div>
         </div>
         <div class="theme-card-actions">
@@ -1903,14 +1903,21 @@
     if (faviconDot && full) {
       faviconDot.innerHTML = _connectryDotSvg(full.accent);
     }
-    // Typography hint (matches anatomy pattern: "System Default · Normal · 1.375")
+    // Typography hint — Aa rendered in actual font + "FontName · Size · LH/LS"
+    const typeIcon = document.querySelector('#editorMiniCard .theme-card-type-icon');
     const typeHint = document.getElementById('editorMiniTypeHint');
     if (typeHint) {
       const t = editorState.typography || {};
       const fontLabel = { 'system-ui': 'System Default', 'neo-grotesque': 'Neo-Grotesque', 'humanist': 'Humanist', 'geometric': 'Geometric', 'classic-serif': 'Classic Serif' }[t.fontFamily] || 'System Default';
       const sizeLabel = (t.sizePreset || 'normal').charAt(0).toUpperCase() + (t.sizePreset || 'normal').slice(1);
       const lh = t.lineHeight || 1.375;
-      typeHint.textContent = `${fontLabel} · ${sizeLabel} · ${lh}`;
+      const ls = t.letterSpacing || 0;
+      const lsStr = ls === 0 ? '0' : ls + 'em';
+      typeHint.textContent = `${fontLabel} · ${sizeLabel} · ${lh}/${lsStr}`;
+      if (typeIcon) {
+        const stack = FONT_STACKS[t.fontFamily] || FONT_STACKS['system-ui'];
+        typeIcon.style.fontFamily = t.fontFamily !== 'system-ui' ? stack : '';
+      }
     }
   }
 
@@ -3196,7 +3203,7 @@
             <div class="guide-anatomy-placeholder-row" data-part="5">
               <button type="button" class="anatomy-marker" data-marker="5" aria-label="Typography explainer">5</button>
               <span class="guide-anatomy-placeholder-label">Aa</span>
-              <span class="guide-anatomy-placeholder-text">System Default · Normal · 1.375</span>
+              <span class="guide-anatomy-placeholder-text">System Default · Normal · 1.375/0</span>
             </div>
           </div>
           <div class="theme-card-actions" data-part="6">
