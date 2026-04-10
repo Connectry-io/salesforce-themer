@@ -1354,7 +1354,7 @@
           openEditor('connectry', null);
           return;
         }
-        // AI / brand-guide / URL — all Premium · Coming Soon
+        // AI / brand-guide / URL — all Premium
         openUpgradeDialog();
       });
     });
@@ -2646,16 +2646,16 @@
   function _showSaveUpgradePrompt() {
     const body = document.createElement('div');
     body.innerHTML = `
-      <p style="margin-bottom:12px;">Saving custom themes is a <strong>Premium</strong> feature, and Premium is launching soon.</p>
+      <p style="margin-bottom:12px;">Saving custom themes is a <strong>Premium</strong> feature.</p>
       <p style="margin-bottom:16px; font-size:13px; color: var(--cx-text-muted); line-height:1.6;">
-        Your changes are still here in the editor — feel free to keep tweaking. We're shipping the
-        free tier first; Premium (with the Builder's Save, AI generation, brand-guide upload, and the
-        marketplace) follows right after. No action needed today.
+        Your changes are still here in the editor — feel free to keep tweaking.
+        Upgrade to Premium to save custom themes, use AI generation, brand-guide
+        upload, and access the marketplace.
       </p>
     `;
 
     const dialog = new Connectry.Settings.Dialog({
-      title: 'Saving themes is coming soon',
+      title: 'Saving themes requires Premium',
       body,
       actions: [
         { label: 'Keep editing', variant: 'secondary' },
@@ -2688,7 +2688,7 @@
 
   /**
    * Bind the plan CTAs on the Upgrade tab. V1 ships with the buttons
-   * disabled and labeled "Coming soon" — there's nothing to bind. When
+   * disabled and labeled "Premium" — there's nothing to bind. When
    * Premium ships, restore the [data-plan] attributes in HTML and have
    * this function POST to the backend to create a Stripe Checkout
    * session.

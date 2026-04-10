@@ -3973,30 +3973,7 @@ td.upgrade-compare-col-premium,
   max-width: 720px;
 }
 
-/* "coming soon" inline badge — gold to distinguish from premium-blue */
-.guide-coming-soon {
-  display: inline-block;
-  font-size: 9px;
-  font-weight: 800;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  padding: 2px 8px;
-  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
-  color: #8f6413 !important;
-  border: 1px solid #d4a22a;
-  border-radius: var(--cx-radius-full);
-  vertical-align: middle;
-  margin-left: 6px;
-  white-space: nowrap;
-  line-height: 1.4;
-}
-
-/* Inside callouts, the "soon" badge is smaller */
-.guide-anatomy-callouts .guide-coming-soon {
-  font-size: 8px;
-  padding: 1px 6px;
-  margin-left: 4px;
-}
+/* (Removed: .guide-coming-soon badges — all replaced with Premium badges) */
 
 /* ─── Anatomy section: side-by-side, interactive ─────────────────────────
    Sample card on the LEFT (sticky stage), compact callout list on the RIGHT.

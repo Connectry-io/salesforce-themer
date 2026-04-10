@@ -354,7 +354,7 @@
           </div>
           <div>
             <h3 class="custom-themes-upsell-title">Make it yours</h3>
-            <p class="custom-themes-upsell-sub">Custom themes are a Premium feature, coming soon.</p>
+            <p class="custom-themes-upsell-sub">Custom themes are a Premium feature.</p>
           </div>
         </div>
         <div class="custom-themes-upsell-features">
@@ -378,7 +378,7 @@
           </div>
         </div>
         <button type="button" class="custom-themes-upsell-cta">
-          Premium · Coming Soon
+          Premium
         </button>
       </div>
     `;
