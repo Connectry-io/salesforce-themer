@@ -1708,11 +1708,8 @@
   // ─── Event Binding ────────────────────────────────────────────────────────
 
   function bindEditorEvents() {
-    // (Back button removed — the editor is now permanently embedded
-    // in the Builder tab. To leave the editor, switch tabs.)
-
     // Color scheme dropdown
-    document.getElementById('editorColorScheme').addEventListener('change', (e) => {
+    document.getElementById('editorColorScheme')?.addEventListener('change', (e) => {
       editorState.coreOverrides.colorScheme = e.target.value;
       onEditorChange();
     });
@@ -3320,14 +3317,13 @@
   // Boot
   // ═══════════════════════════════════════════════════════════════════════════
 
-  init().catch(err => console.error('[Themer options] Init error:', err));
-
-  // Bind editor after DOM is ready
-  setTimeout(() => {
+  init().then(() => {
+    // Bind editor events AFTER init completes (not in a fragile
+    // setTimeout) so the editor is definitely embedded in the DOM
+    // and all storage reads have resolved.
     bindEditorEvents();
     document.getElementById('createThemeBtn')?.addEventListener('click', () => {
-      // V3: builder open to all — Save is the gate
       openCreationDialog('connectry');
     });
-  }, 100);
+  }).catch(err => console.error('[Themer options] Init error:', err));
 })();
