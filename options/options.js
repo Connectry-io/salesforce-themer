@@ -262,24 +262,29 @@
     return s.charAt(0).toUpperCase() + s.slice(1);
   }
 
-  // ─── Custom theme grid ───────────────────────────────────────────────────
+  // ─── Custom theme grid (LEGACY HIDDEN HOST) ──────────────────────────────
+  // V3.2: this used to render visible custom-theme cards in the Builder tab.
+  // The Builder sidebar list is now the source of truth — this function still
+  // populates the legacy #customThemeGrid host so older event-binding paths
+  // (delete, edit, active-state updates) keep working, but the host itself
+  // stays HIDDEN unconditionally. Don't bring back grid.hidden = false here
+  // unless you're tearing the sidebar list out and reverting to the grid.
 
   function renderCustomThemeGrid(activeThemeId) {
     const grid = document.getElementById('customThemeGrid');
     const empty = document.getElementById('customThemeEmpty');
     if (!grid || !empty) return;
 
-    const customs = syncState.customThemes || [];
+    // Always hidden — the sidebar in the Builder tab is the visible source.
+    grid.hidden = true;
+    empty.hidden = true;
 
+    const customs = syncState.customThemes || [];
     if (!customs.length) {
       grid.innerHTML = '';
-      grid.hidden = true;
-      empty.hidden = false;
       return;
     }
 
-    grid.hidden = false;
-    empty.hidden = true;
     grid.innerHTML = '';
 
     for (const ct of customs) {
@@ -1322,7 +1327,14 @@
       if (descEl) descEl.value = base?.description ? base.description : '';
     }
 
-    document.getElementById('galleryView').hidden = true;
+    // Make sure the Builder tab is the active tab in the background. The
+    // editor view is a fixed overlay so this isn't strictly required for
+    // visibility, but it keeps the right tab pill highlighted in the nav
+    // and ensures Back returns the user to a coherent context.
+    if (_tabsInstance) {
+      _tabsInstance.activate('builder');
+    }
+
     document.getElementById('editorView').hidden = false;
 
     // Show the free preview banner only when not premium
@@ -1339,7 +1351,6 @@
 
   function closeEditor() {
     editorState.active = false;
-    document.getElementById('galleryView').hidden = false;
     document.getElementById('editorView').hidden = true;
   }
 

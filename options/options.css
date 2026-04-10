@@ -1653,6 +1653,22 @@
 
 /* ─── Editor view (full-page overlay) ────────────────────────────────────── */
 
+/* Editor view: full-screen overlay below the tab nav. Lives outside the
+   tab panels in the DOM, so it covers whatever tab is active when
+   openEditor() is called. Tabs auto-close the editor on switch (see
+   Tabs onChange in options.js), so the user can't end up with a stale
+   overlay over an unrelated tab. */
+.editor-view {
+  position: fixed;
+  top: var(--cx-header-height);
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: var(--cx-bg);
+  z-index: 50;
+  overflow-y: auto;
+  padding: var(--cx-space-6) var(--cx-space-8);
+}
 .editor-view[hidden] { display: none !important; }
 
 /* Free preview banner — only visible to non-premium users in the editor */
