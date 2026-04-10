@@ -3247,10 +3247,26 @@ td.upgrade-compare-col-premium,
   flex-shrink: 0;
 }
 
-/* Effects row wrapper — gives effect indicators a positioning anchor for
-   the marker without changing how the indicators themselves render. */
+/* Effects row wrapper — gives effect indicators a positioning anchor
+   for the marker. CRITICAL: zero padding + zero margin-top on the
+   indicators inside, so the data-part bounding box matches the visible
+   pill row EXACTLY. The base .theme-effects-indicators has a 12px
+   margin-top (correct for real theme cards where it follows the
+   description) that would otherwise push the pills down inside the
+   wrapper, leaving the marker centered above them. */
 .guide-anatomy-card-wrap .anatomy-effects-row {
-  padding: 4px 0;
+  padding: 0;
+}
+.guide-anatomy-card-wrap .anatomy-effects-row .theme-effects-indicators {
+  margin-top: 0;
+}
+
+/* Actions row inside the anatomy card: the base .theme-card-actions has
+   padding-top:12 + padding-bottom:0, so the geometric center of the box
+   sits 6px above the visible "Active / Clone" content. Add matching
+   padding-bottom so the marker centers on the actual content. */
+.guide-anatomy-card-wrap .theme-card-actions {
+  padding-bottom: var(--cx-space-3);
 }
 
 /* ─── Anchored markers with leader lines ───────────────────────────────
@@ -3294,25 +3310,22 @@ td.upgrade-compare-col-premium,
   animation: anatomy-marker-breathe 3.6s ease-in-out infinite;
 }
 
-/* Leader line: thin horizontal stroke from marker right edge to the
+/* Leader line: solid horizontal stroke from marker right edge to the
    card's visible border (16px gap, matching the card's internal padding).
-   Gradient fade so the line feels lighter the closer it gets to the card —
-   like a pen stroke pointing inward. */
+   Solid accent so the connection reads at any zoom — earlier gradient
+   version was too subtle to spot at normal resting opacity. */
 .anatomy-marker::before {
   content: '';
   position: absolute;
   left: 100%;
   top: 50%;
   width: 16px;
-  height: 2px;
-  background: linear-gradient(
-    90deg,
-    var(--cx-accent) 0%,
-    color-mix(in srgb, var(--cx-accent) 35%, transparent) 100%
-  );
+  height: 2.5px;
+  background: var(--cx-accent);
   border-radius: 1px;
   transform: translateY(-50%);
   pointer-events: none;
+  opacity: 0.7;
 }
 
 /* Resting pulse ring — the ::after sits underneath the marker and fades
@@ -3363,12 +3376,12 @@ td.upgrade-compare-col-premium,
   animation-play-state: paused;
 }
 
-/* On hover/highlight the leader line goes solid accent — no fade — so
-   the connection to the labeled row is stronger. */
+/* On hover/highlight the leader line goes full opacity + slightly
+   thicker so the connection to the labeled row is stronger. */
 .anatomy-marker:hover::before,
 .anatomy-marker.is-highlight::before {
-  background: var(--cx-accent);
-  height: 2.5px;
+  opacity: 1;
+  height: 3px;
 }
 
 .anatomy-marker:focus-visible {
