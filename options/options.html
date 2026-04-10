@@ -193,6 +193,14 @@
               <button class="opt-scope-pill" data-effect-volume="default">Default</button>
               <button class="opt-scope-pill" data-effect-volume="immersive">Immersive</button>
             </div>
+            <!-- Alt: shown instead of the volume pills when a custom theme is active.
+                 Custom themes own their per-effect intensities. -->
+            <div class="opt-effects-managed-hint" id="optEffectsManagedHint" hidden>
+              <svg width="13" height="13" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+                <path d="M9 2l3 3-7 7H2v-3l7-7z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/>
+              </svg>
+              <span>This is a custom theme — effects are managed in the <a href="#" id="optEffectsManagedHintLink">Builder</a>.</span>
+            </div>
           </div>
 
           <!-- Row 4: Per-org themes -->

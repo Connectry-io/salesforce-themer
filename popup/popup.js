@@ -257,6 +257,27 @@
     if (themeToggle) themeToggle.checked = !!isOn;
 
     if (isOn) _lastEnabledTheme = activeTheme;
+
+    // Custom themes own per-effect intensity, so swap the volume pills
+    // for a "Managed in Builder" hint when one is active.
+    syncEffectsVolumeVisibility(activeTheme);
+  }
+
+  /**
+   * Toggle the Effects volume row between the volume pills (OOTB themes)
+   * and a "Managed in Builder" hint (custom themes). Mirrors the helper
+   * on the options page — see options.js syncEffectsVolumeVisibility.
+   */
+  function syncEffectsVolumeVisibility(activeTheme) {
+    const pills = document.getElementById('effectsPills');
+    const hint = document.getElementById('effectsManagedHint');
+    if (!pills || !hint) return;
+    // THEMES holds only OOTB themes. A custom theme ID won't be in here.
+    const isCustom = activeTheme
+      && activeTheme !== 'none'
+      && !THEMES.some(t => t.id === activeTheme);
+    pills.hidden = isCustom;
+    hint.hidden = !isCustom;
   }
 
   function setAutoModeUI(autoMode) {
@@ -469,6 +490,13 @@
       // the popup is theme-centric, so the user expects the theme gallery
       // first. Effects has its own dedicated entry via the effects tooltip.
       openOptionsOnTab('themes');
+    });
+
+    // "Managed in Builder" hint link (shown when a custom theme is active)
+    // → jump to the Builder tab on the options page.
+    document.getElementById('effectsManagedHintLink')?.addEventListener('click', (e) => {
+      e.preventDefault();
+      openOptionsOnTab('builder');
     });
   }
 

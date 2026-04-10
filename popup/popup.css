@@ -571,6 +571,32 @@ body {
   display: none;
 }
 
+/* "Managed in Builder" hint — shown instead of the volume pills when the
+   active theme is a custom theme (custom themes own their per-effect intensity). */
+.effects-managed-hint {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 10px;
+  background: var(--color-bg);
+  border: 1px dashed var(--color-border-hover);
+  border-radius: var(--radius-sm);
+  font-size: 11px;
+  color: var(--color-text-muted);
+  font-style: italic;
+}
+
+.effects-managed-hint a {
+  color: var(--color-accent);
+  font-weight: 700;
+  text-decoration: none;
+  font-style: normal;
+}
+
+.effects-managed-hint a:hover {
+  text-decoration: underline;
+}
+
 /* ─── Theme Section (groups + grid) ─────────────────────────────────────── */
 
 .themes-section {
