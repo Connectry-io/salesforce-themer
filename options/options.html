@@ -1351,8 +1351,9 @@
           <div class="editor-group">
             <h3 class="editor-group-title">Font Family</h3>
             <div class="editor-field">
-              <label>Body Font</label>
-              <select class="editor-select" id="editorTypeFontFamily">
+              <label>Heading Font</label>
+              <select class="editor-select" id="editorTypeFontFamilyHeading">
+                <option value="">Same as body</option>
                 <option value="system-ui">System Default</option>
                 <option value="neo-grotesque">Neo-Grotesque</option>
                 <option value="humanist">Humanist</option>
@@ -1361,9 +1362,8 @@
               </select>
             </div>
             <div class="editor-field">
-              <label>Heading Font</label>
-              <select class="editor-select" id="editorTypeFontFamilyHeading">
-                <option value="">Same as body</option>
+              <label>Body Font</label>
+              <select class="editor-select" id="editorTypeFontFamily">
                 <option value="system-ui">System Default</option>
                 <option value="neo-grotesque">Neo-Grotesque</option>
                 <option value="humanist">Humanist</option>
@@ -1400,20 +1400,20 @@
           <div class="editor-group">
             <h3 class="editor-group-title">Weight</h3>
             <div class="editor-field">
-              <label>Body Weight</label>
-              <select class="editor-select" id="editorTypeWeightBody">
-                <option value="300">Light (300)</option>
-                <option value="400" selected>Regular (400)</option>
-                <option value="500">Medium (500)</option>
-              </select>
-            </div>
-            <div class="editor-field">
               <label>Heading Weight</label>
               <select class="editor-select" id="editorTypeWeightHeading">
                 <option value="400">Regular (400)</option>
                 <option value="500">Medium (500)</option>
                 <option value="600">Semi-bold (600)</option>
                 <option value="700" selected>Bold (700)</option>
+              </select>
+            </div>
+            <div class="editor-field">
+              <label>Body Weight</label>
+              <select class="editor-select" id="editorTypeWeightBody">
+                <option value="300">Light (300)</option>
+                <option value="400" selected>Regular (400)</option>
+                <option value="500">Medium (500)</option>
               </select>
             </div>
           </div>

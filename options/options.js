@@ -1732,19 +1732,42 @@
     const frame = document.getElementById('editorPreview');
     if (!frame) return;
     const t = editorState.typography;
-    const defaultT = defaultTypography();
     const bodyStack = FONT_STACKS[t.fontFamily] || FONT_STACKS['system-ui'];
     const headingStack = t.fontFamilyHeading ? (FONT_STACKS[t.fontFamilyHeading] || bodyStack) : bodyStack;
+    const scale = t.sizeScale || 1.0;
 
-    // Body: font-family, weight, letter-spacing, line-height
+    // Body styles on the frame container
     frame.style.fontFamily = t.fontFamily !== 'system-ui' ? bodyStack : '';
     frame.style.letterSpacing = t.letterSpacing ? t.letterSpacing + 'em' : '';
-    frame.style.lineHeight = t.lineHeight !== defaultT.lineHeight ? t.lineHeight : '';
+    frame.style.lineHeight = t.lineHeight !== 1.375 ? t.lineHeight : '';
     frame.style.fontWeight = t.weightBody !== 400 ? t.weightBody : '';
 
-    // Scale font sizes via the base font-size on the frame
-    const scale = t.sizeScale || 1.0;
-    frame.style.fontSize = scale !== 1.0 ? `calc(12px * ${scale})` : '';
+    // Size scaling — preview uses hardcoded px values so we need to
+    // set a CSS custom property and override each text tier individually.
+    // Using CSS zoom on the frame's inner content is the cleanest way
+    // to scale all text proportionally without breaking layout.
+    frame.style.setProperty('--typo-scale', scale);
+    // Apply scaled font-sizes to the key text tiers
+    const tiers = [
+      { sel: '.preview-header-title', base: 16 },
+      { sel: '.preview-header-meta', base: 12 },
+      { sel: '.preview-nav-app', base: 13 },
+      { sel: '.preview-nav-item', base: 12 },
+      { sel: '.preview-highlights-label', base: 10 },
+      { sel: '.preview-highlights-value', base: 12 },
+      { sel: '.preview-tab', base: 12 },
+      { sel: '.preview-detail-label', base: 11 },
+      { sel: '.preview-detail-value', base: 12 },
+      { sel: '.preview-btn', base: 12 },
+      { sel: '.preview-table-header', base: 11 },
+      { sel: '.preview-search input', base: 12 },
+      { sel: '.preview-toast-text', base: 12 },
+    ];
+    for (const { sel, base } of tiers) {
+      frame.querySelectorAll(sel).forEach(el => {
+        el.style.fontSize = scale !== 1.0 ? `${(base * scale).toFixed(1)}px` : '';
+      });
+    }
 
     // Headings (record title in the preview)
     const title = frame.querySelector('.preview-header-title');

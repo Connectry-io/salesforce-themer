@@ -2897,6 +2897,10 @@ body:has(.cx-tabpanel[data-tabpanel="builder"]:not([hidden])) .cx-main {
   padding: var(--cx-space-4) var(--cx-space-5);
 }
 .editor-type[hidden] { display: none; }
+.editor-type .editor-select {
+  min-width: 160px;
+  text-align-last: right;
+}
 
 /* Size preset buttons — horizontal pill strip */
 .editor-type-presets {
