@@ -5101,16 +5101,22 @@ td.upgrade-compare-col-premium,
   background: var(--cx-surface-alt);
   border-right: 1px solid var(--cx-border);
 }
-.guide-live-editor .editor-group { margin-bottom: 0; }
-.guide-live-editor .editor-group-title { font-size: 9px; margin-bottom: 4px; }
-.guide-live-editor .editor-field { padding: 2px 0; }
-.guide-live-editor .editor-field > label { font-size: 11px; min-width: 0; flex-shrink: 0; }
+.guide-live-editor .editor-group {
+  margin-bottom: 0;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--cx-border);
+}
+.guide-live-editor .editor-group:first-child { padding-top: 0; }
+.guide-live-editor .editor-group:last-child { border-bottom: none; padding-bottom: 0; }
+.guide-live-editor .editor-group-title { font-size: 9px; margin-bottom: 6px; }
+.guide-live-editor .editor-field { padding: 3px 0; }
+.guide-live-editor .editor-field > label { font-size: 11px; min-width: 80px; flex-shrink: 0; }
 .guide-live-editor .editor-select { font-size: 11px; padding: 3px 6px; width: 130px; }
 .guide-live-editor .editor-type-presets { gap: 3px; }
 .guide-live-editor .editor-type-preset { padding: 6px 2px 5px; font-size: 9px; }
 .guide-live-editor .editor-type-slider { height: 4px; }
-.guide-live-editor .editor-type-slider-row { min-width: 0; overflow: hidden; }
-.guide-live-editor .editor-type-slider-value { min-width: 28px; font-size: 10px; }
+.guide-live-editor .editor-type-slider-row { min-width: 0; overflow: hidden; flex: 1; }
+.guide-live-editor .editor-type-slider-value { min-width: 32px; font-size: 10px; }
 .guide-live-preview {
   padding: var(--cx-space-4) var(--cx-space-5);
   display: flex;
@@ -5141,13 +5147,13 @@ td.upgrade-compare-col-premium,
 }
 .guide-type-stencil-header { margin-bottom: 10px; }
 .guide-type-stencil-label {
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 700;
   color: var(--cx-text);
   margin-bottom: 2px;
 }
 .guide-type-stencil-desc {
-  font-size: 11px;
+  font-size: 12px;
   color: var(--cx-text-muted);
   line-height: 1.45;
   margin: 0;
@@ -5160,8 +5166,8 @@ td.upgrade-compare-col-premium,
 /* The wireframe card — subtle anatomy-card coloring */
 .guide-type-stencil {
   flex-shrink: 0;
-  width: 200px;
-  padding: 10px;
+  width: 220px;
+  padding: 12px;
   border: 1.5px solid var(--cx-border);
   border-radius: var(--cx-radius-sm);
   display: flex;
@@ -5173,7 +5179,7 @@ td.upgrade-compare-col-premium,
 /* Abstract swatch bar — subtle theme colors */
 .stencil-swatch {
   display: flex;
-  height: 16px;
+  height: 18px;
   border-radius: 3px;
   overflow: hidden;
 }
@@ -5226,7 +5232,7 @@ td.upgrade-compare-col-premium,
   transition: background 200ms, box-shadow 200ms;
 }
 .stencil-type-aa {
-  font-size: 14px;
+  font-size: 16px;
   font-weight: 700;
   color: var(--cx-text);
   line-height: 1;
@@ -5235,7 +5241,7 @@ td.upgrade-compare-col-premium,
   cursor: default;
 }
 .stencil-type-text {
-  font-size: 9px;
+  font-size: 10px;
   color: var(--cx-text-muted);
   white-space: nowrap;
   display: flex;
@@ -5270,7 +5276,7 @@ td.upgrade-compare-col-premium,
   min-width: 0;
 }
 .guide-type-stencil-legend li {
-  font-size: 11px;
+  font-size: 12px;
   color: var(--cx-text-muted);
   line-height: 1.5;
   padding: 3px 6px;
@@ -5313,14 +5319,14 @@ td.upgrade-compare-col-premium,
   opacity: 1;
   background: rgba(74,111,165,0.08);
 }
-/* Highlight the config panel group */
-.guide-live-editor .editor-group[data-type-seg] {
+/* Highlight the config panel group or field */
+.guide-live-editor [data-type-seg] {
   padding: 4px 6px;
   margin: -4px -6px;
   border-radius: var(--cx-radius-sm);
   transition: background 200ms, box-shadow 200ms;
 }
-.guide-live-editor .editor-group.is-type-highlight {
+.guide-live-editor [data-type-seg].is-type-highlight {
   background: rgba(74,111,165,0.06);
   box-shadow: inset 0 0 0 1.5px rgba(74,111,165,0.2);
 }

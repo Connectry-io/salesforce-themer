@@ -714,7 +714,7 @@
         </div>
         <div class="guide-live-panel">
           <div class="guide-live-editor" id="guideTypeEditor">
-            <div class="editor-group" data-type-seg="font">
+            <div class="editor-group">
               <h3 class="editor-group-title">Font Family</h3>
               <div class="editor-field">
                 <label>Heading Font</label>
@@ -727,7 +727,7 @@
                   <option value="classic-serif">Classic Serif</option>
                 </select>
               </div>
-              <div class="editor-field">
+              <div class="editor-field" data-type-seg="font">
                 <label>Body Font</label>
                 <select class="editor-select" id="guideTypeFont">
                   <option value="system-ui">System Default</option>
@@ -842,7 +842,7 @@
                     <span class="stencil-type-text" id="guideTypeExampleLabel">
                       <span data-type-seg="font">System Default</span>
                       <span class="stencil-type-sep"> · </span>
-                      <span data-type-seg="size">Normal</span>
+                      <span data-type-seg="size">Md</span>
                       <span class="stencil-type-sep"> · </span>
                       <span data-type-seg="spacing">1.375/0</span>
                     </span>
@@ -856,7 +856,7 @@
                 <ol class="guide-type-stencil-legend">
                   <li data-type-seg="aa"><span class="stencil-legend-marker">Aa</span> rendered in the actual font</li>
                   <li data-type-seg="font"><span class="stencil-legend-marker">Body font</span> family name</li>
-                  <li data-type-seg="size"><span class="stencil-legend-marker">Size</span> scale preset</li>
+                  <li data-type-seg="size"><span class="stencil-legend-marker">Size</span> Sm / Md / Lg / XL</li>
                   <li data-type-seg="spacing"><span class="stencil-legend-marker">Spacing</span> line-height / letter-spacing</li>
                 </ol>
               </div>
@@ -1406,7 +1406,7 @@
               </div>
               <div class="theme-card-type-row" id="editorMiniTypeRow">
                 <span class="theme-card-type-icon">Aa</span>
-                <span class="theme-card-type-text" id="editorMiniTypeHint">System Default · Normal · 1.375/0</span>
+                <span class="theme-card-type-text" id="editorMiniTypeHint">System Default · Md · 1.375/0</span>
               </div>
             </div>
             <!-- No actions row — favicon is in header, apply/clone not needed in editor -->

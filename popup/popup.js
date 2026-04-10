@@ -402,11 +402,11 @@
     const key = typo?.fontFamily || 'system-ui';
     const stack = POPUP_FONT_STACKS[key] || POPUP_FONT_STACKS['system-ui'];
     const label = POPUP_FONT_LABELS[key] || 'System Default';
-    const size = (typo?.sizePreset || 'normal');
-    const sizeLabel = size.charAt(0).toUpperCase() + size.slice(1);
+    const sizeLabels = { compact: 'Sm', normal: 'Md', comfortable: 'Lg', large: 'XL' };
+    const sizeLabel = sizeLabels[typo?.sizePreset || 'normal'] || 'Md';
     const lh = typo?.lineHeight || 1.375;
     const ls = typo?.letterSpacing || 0;
-    const lsStr = ls === 0 ? '0' : ls + 'em';
+    const lsStr = ls === 0 ? '0' : String(ls);
     return `
       <div class="theme-card-type-row">
         <span class="theme-card-type-sample" style="font-family:${stack}">Aa</span>

@@ -172,7 +172,7 @@
           ${buildEffectIndicators(theme.id)}
           <div class="theme-card-type-row">
             <span class="theme-card-type-icon">Aa</span>
-            <span class="theme-card-type-text">System Default · Normal · 1.375/0</span>
+            <span class="theme-card-type-text">System Default · Md · 1.375/0</span>
           </div>
         </div>
         <div class="theme-card-actions">
@@ -1909,10 +1909,11 @@
     if (typeHint) {
       const t = editorState.typography || {};
       const fontLabel = { 'system-ui': 'System Default', 'neo-grotesque': 'Neo-Grotesque', 'humanist': 'Humanist', 'geometric': 'Geometric', 'classic-serif': 'Classic Serif' }[t.fontFamily] || 'System Default';
-      const sizeLabel = (t.sizePreset || 'normal').charAt(0).toUpperCase() + (t.sizePreset || 'normal').slice(1);
+      const sizeLabels = { compact: 'Sm', normal: 'Md', comfortable: 'Lg', large: 'XL' };
+      const sizeLabel = sizeLabels[t.sizePreset || 'normal'] || 'Md';
       const lh = t.lineHeight || 1.375;
       const ls = t.letterSpacing || 0;
-      const lsStr = ls === 0 ? '0' : ls + 'em';
+      const lsStr = ls === 0 ? '0' : String(ls);
       typeHint.textContent = `${fontLabel} · ${sizeLabel} · ${lh}/${lsStr}`;
       if (typeIcon) {
         const stack = FONT_STACKS[t.fontFamily] || FONT_STACKS['system-ui'];
@@ -3203,7 +3204,7 @@
             <div class="guide-anatomy-placeholder-row" data-part="5">
               <button type="button" class="anatomy-marker" data-marker="5" aria-label="Typography explainer">5</button>
               <span class="guide-anatomy-placeholder-label">Aa</span>
-              <span class="guide-anatomy-placeholder-text">System Default · Normal · 1.375/0</span>
+              <span class="guide-anatomy-placeholder-text">System Default · Md · 1.375/0</span>
             </div>
           </div>
           <div class="theme-card-actions" data-part="6">
@@ -3653,12 +3654,12 @@
       const stencilRow = document.getElementById('guideTypeExampleLabel');
       if (exAa && stencilRow) {
         const fontLabels = { 'system-ui': 'System Default', 'neo-grotesque': 'Neo-Grotesque', 'humanist': 'Humanist', 'geometric': 'Geometric', 'classic-serif': 'Classic Serif' };
-        const sizePresets = { '0.9': 'Compact', '1': 'Normal', '1.1': 'Comfortable', '1.2': 'Large' };
+        const sizePresets = { '0.9': 'Sm', '1': 'Md', '1.1': 'Lg', '1.2': 'XL' };
         const label = fontLabels[bodyKey] || 'System Default';
-        const sizeLabel = sizePresets[String(scale)] || 'Normal';
+        const sizeLabel = sizePresets[String(scale)] || 'Md';
         const lh = parseFloat(lineHeight);
         const ls = letterSpacing;
-        const lsStr = ls === 0 ? '0' : ls + 'em';
+        const lsStr = ls === 0 ? '0' : String(ls);
         exAa.style.fontFamily = bodyKey !== 'system-ui' ? bodyStack : '';
         const fontSpan = stencilRow.querySelector('[data-type-seg="font"]');
         const sizeSpan = stencilRow.querySelector('[data-type-seg="size"]');
@@ -3700,7 +3701,7 @@
     if (stencilWrap && editorPanel) {
       function setHighlight(seg) {
         stencilWrap.dataset.highlight = seg;
-        editorPanel.querySelectorAll('.editor-group[data-type-seg]').forEach(g => {
+        editorPanel.querySelectorAll('[data-type-seg]').forEach(g => {
           g.classList.toggle('is-type-highlight', g.dataset.typeSeg === seg);
         });
       }
@@ -3714,7 +3715,7 @@
         el.addEventListener('mouseleave', clearHighlight);
       });
       // Also bind config panel groups → highlight matching stencil/legend
-      editorPanel.querySelectorAll('.editor-group[data-type-seg]').forEach(g => {
+      editorPanel.querySelectorAll('[data-type-seg]').forEach(g => {
         g.addEventListener('mouseenter', () => setHighlight(g.dataset.typeSeg));
         g.addEventListener('mouseleave', clearHighlight);
       });
