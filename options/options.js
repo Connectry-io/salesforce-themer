@@ -166,10 +166,15 @@
         <div class="theme-card-body">
           <div class="theme-card-header">
             <span class="theme-name">${theme.name}</span>
+            <span class="theme-card-favicon-dot">${_connectryDotSvg(theme.colors.accent)}</span>
             <span class="theme-category-badge ${theme.category}">${theme.category === 'light' ? 'Light' : 'Dark'}</span>
           </div>
           <div class="theme-description">${theme.description}</div>
           ${buildEffectIndicators(theme.id)}
+          <div class="theme-card-type-row">
+            <span class="theme-card-type-icon">Aa</span>
+            <span class="theme-card-type-text">System Default · Normal · 1.375</span>
+          </div>
         </div>
         <div class="theme-card-actions">
           <div class="theme-card-status">
@@ -1893,13 +1898,19 @@
     if (effectsEl) {
       effectsEl.innerHTML = buildEffectIndicators(editorState.effects || {});
     }
-    // Typography hint
+    // Favicon dot next to name
+    const faviconDot = document.getElementById('editorCardFaviconDot');
+    if (faviconDot && full) {
+      faviconDot.innerHTML = _connectryDotSvg(full.accent);
+    }
+    // Typography hint (matches anatomy pattern: "System Default · Normal · 1.375")
     const typeHint = document.getElementById('editorMiniTypeHint');
     if (typeHint) {
       const t = editorState.typography || {};
-      const fontLabel = { 'system-ui': 'System', 'neo-grotesque': 'Neo-Grotesk', 'humanist': 'Humanist', 'geometric': 'Geometric', 'classic-serif': 'Serif' }[t.fontFamily] || 'System';
-      const sizeLabel = t.sizePreset || 'Normal';
-      typeHint.textContent = `${fontLabel} · ${sizeLabel.charAt(0).toUpperCase() + sizeLabel.slice(1)}`;
+      const fontLabel = { 'system-ui': 'System Default', 'neo-grotesque': 'Neo-Grotesque', 'humanist': 'Humanist', 'geometric': 'Geometric', 'classic-serif': 'Classic Serif' }[t.fontFamily] || 'System Default';
+      const sizeLabel = (t.sizePreset || 'normal').charAt(0).toUpperCase() + (t.sizePreset || 'normal').slice(1);
+      const lh = t.lineHeight || 1.375;
+      typeHint.textContent = `${fontLabel} · ${sizeLabel} · ${lh}`;
     }
   }
 
@@ -2441,6 +2452,7 @@
         }
         renderEditorEffectsGrid();
         applyEditorPreviewEffects();
+        updateMiniCard(getFullEditorTheme());
       });
 
       // Intensity buttons

@@ -1295,6 +1295,9 @@
                   </svg>
                   <input type="text" class="editor-name-input" id="editorName" value="My Custom Theme" spellcheck="false" maxlength="50" />
                 </div>
+                <span class="theme-card-favicon-dot" id="editorCardFaviconDot">
+                  <!-- populated by updateMiniCard -->
+                </span>
                 <span class="theme-category-badge" id="editorCategoryBadge">Light</span>
               </div>
               <div class="editor-live-desc-wrap">
@@ -1306,9 +1309,12 @@
               <div id="editorMiniEffects">
                 <!-- effect pills populated by updateMiniCard() -->
               </div>
+              <div class="theme-card-type-row" id="editorMiniTypeRow">
+                <span class="theme-card-type-icon">Aa</span>
+                <span class="theme-card-type-text" id="editorMiniTypeHint">System Default · Normal · 1.375</span>
+              </div>
             </div>
             <div class="theme-card-actions">
-              <span class="editor-live-type-hint" id="editorMiniTypeHint">System · Normal</span>
               <div class="editor-live-favicon" id="editorFaviconSlot" style="position:relative;">
                 <button type="button" class="editor-live-favicon-btn" id="editorFaviconBtn" title="Customize favicon">
                   <span id="editorFaviconPreview">
