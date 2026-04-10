@@ -27,7 +27,14 @@
       </div>
 
       <nav class="cx-tabs" role="tablist" aria-label="Settings sections">
-        <button class="cx-tab is-active" role="tab" data-tab="themes" aria-selected="true">
+        <button class="cx-tab is-active" role="tab" data-tab="effects" aria-selected="true">
+          <svg class="cx-tab-icon" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+            <circle cx="8" cy="8" r="6.5" stroke="currentColor" stroke-width="1.5"/>
+            <path d="M8 4.5v3.5l2 1.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          Guide
+        </button>
+        <button class="cx-tab" role="tab" data-tab="themes" aria-selected="false">
           <svg class="cx-tab-icon" viewBox="0 0 16 16" fill="none" aria-hidden="true">
             <rect x="2" y="2" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.5"/>
             <rect x="9" y="2" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.5"/>
@@ -35,13 +42,6 @@
             <rect x="9" y="9" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.5"/>
           </svg>
           Themes
-        </button>
-        <button class="cx-tab" role="tab" data-tab="effects" aria-selected="false">
-          <svg class="cx-tab-icon" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-            <circle cx="8" cy="8" r="6.5" stroke="currentColor" stroke-width="1.5"/>
-            <path d="M8 5v3.5l2 1.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-          Guide
         </button>
         <button class="cx-tab" role="tab" data-tab="builder" aria-selected="false">
           <svg class="cx-tab-icon" viewBox="0 0 16 16" fill="none" aria-hidden="true">
@@ -90,7 +90,7 @@
   <main class="cx-main">
 
     <!-- ═══ Themes Tab ═══ -->
-    <div class="cx-tabpanel" role="tabpanel" data-tabpanel="themes" id="galleryView">
+    <div class="cx-tabpanel" role="tabpanel" data-tabpanel="themes" id="galleryView" hidden>
 
       <!-- Theme application settings — mirrors the popup settings card design,
            with the same collapsible header pattern (default collapsed) -->
@@ -104,7 +104,7 @@
               <span id="optStatusText">Theme on</span>
             </span>
             <span class="opt-settings-card-spacer"></span>
-            <span class="opt-settings-card-label">Theme Application</span>
+            <span class="opt-settings-card-label">Settings</span>
             <svg class="opt-settings-card-chevron" width="14" height="14" viewBox="0 0 12 12" fill="none" aria-hidden="true">
               <path d="M3 4.5L6 7.5L9 4.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
             </svg>
@@ -449,8 +449,8 @@
 
     </div>
 
-    <!-- ═══ Guide Tab (formerly Effects) ═══ -->
-    <div class="cx-tabpanel" role="tabpanel" data-tabpanel="effects" hidden>
+    <!-- ═══ Guide Tab (formerly Effects) — landing tab on first install ═══ -->
+    <div class="cx-tabpanel" role="tabpanel" data-tabpanel="effects">
 
       <!-- Hero intro -->
       <section class="cx-section guide-hero-section">

@@ -104,23 +104,50 @@
 }
 
 .theme-category-badge {
-  font-size: 10px;
-  font-weight: 600;
-  padding: 2px 7px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 9px;
+  font-weight: 800;
+  padding: 2px 8px;
   border-radius: var(--cx-radius-full);
   text-transform: uppercase;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.06em;
   flex-shrink: 0;
+  border: 1px solid transparent;
 }
 
+/* Light = bright sun pill (saturated amber, NOT a soft tint — visually
+   distinct from the soft accent effect pills below it) */
 .theme-category-badge.light {
-  background: rgba(217, 119, 6, 0.1);
-  color: var(--cx-warning);
+  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+  color: #92400e;
+  border-color: #fbbf24;
+}
+.theme-category-badge.light::before {
+  content: '';
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: radial-gradient(circle at center, #fbbf24 0%, #f59e0b 70%);
+  box-shadow: 0 0 0 1.5px rgba(251, 191, 36, 0.35);
 }
 
+/* Dark = solid charcoal pill with a moon dot */
 .theme-category-badge.dark {
-  background: rgba(61, 122, 122, 0.1);
-  color: var(--cx-muted-teal);
+  background: linear-gradient(135deg, #1f2937 0%, #374151 100%);
+  color: #e5e7eb;
+  border-color: #4b5563;
+}
+.theme-category-badge.dark::before {
+  content: '';
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 30% 30%, #f1f5f9 0%, #cbd5e1 60%, #94a3b8 100%);
+  box-shadow: inset -1px -1px 0 rgba(0, 0, 0, 0.2);
 }
 
 .theme-description {
@@ -3232,17 +3259,18 @@ td.upgrade-compare-col-premium,
 }
 
 .guide-effect-preview-card {
-  width: 70%;
-  height: 50px;
+  width: 78%;
+  height: 56px;
   background: var(--cx-surface);
   border: 1px solid var(--cx-border);
   border-radius: var(--cx-radius-sm);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 11px;
-  font-weight: 600;
-  color: var(--cx-text-muted);
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--cx-text);
+  letter-spacing: 0.02em;
   transition: transform 220ms cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 220ms ease;
   position: relative;
 }
@@ -3486,23 +3514,32 @@ td.upgrade-compare-col-premium,
   animation: guide-fx-rotate 4s linear infinite;
 }
 
-/* Aurora */
+/* Aurora — uses TWO distinct hues (theme accent + a complementary cyan/violet)
+   so the gradient reads as a real aurora rather than a single-color blob. */
 .guide-effect-card[data-effect="aurora"] .guide-effect-preview {
-  background: var(--cx-surface);
+  background: #0b1020;
+  /* Local color-2 derived complement; falls back to a cool purple */
+  --fx-accent2-rgb: 168, 85, 247;
 }
 .guide-effect-card[data-effect="aurora"] .guide-effect-preview::before {
   content: '';
   position: absolute;
   inset: -30%;
   background:
-    radial-gradient(ellipse at 20% 50%, rgba(var(--fx-accent-rgb), 0.6) 0%, transparent 50%),
-    radial-gradient(ellipse at 80% 20%, rgba(var(--fx-accent-rgb), 0.45) 0%, transparent 50%),
-    radial-gradient(ellipse at 50% 80%, rgba(var(--fx-accent-rgb), 0.5) 0%, transparent 50%);
+    radial-gradient(ellipse at 18% 60%, rgba(var(--fx-accent-rgb), 0.85) 0%, transparent 55%),
+    radial-gradient(ellipse at 82% 30%, rgba(var(--fx-accent2-rgb), 0.75) 0%, transparent 55%),
+    radial-gradient(ellipse at 50% 90%, rgba(var(--fx-accent-rgb), 0.55) 0%, transparent 55%);
   background-size: 200% 200%;
-  filter: blur(30px);
-  opacity: 0.6;
-  animation: guide-fx-aurora 12s ease-in-out infinite;
+  filter: blur(28px);
+  opacity: 0.85;
+  animation: guide-fx-aurora 10s ease-in-out infinite;
   pointer-events: none;
+}
+.guide-effect-card[data-effect="aurora"] .guide-effect-preview-card {
+  background: rgba(11, 16, 32, 0.4);
+  border-color: rgba(255, 255, 255, 0.18);
+  color: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(2px);
 }
 @keyframes guide-fx-aurora {
   0%   { background-position: 0% 50%; }
@@ -3510,21 +3547,22 @@ td.upgrade-compare-col-premium,
   100% { background-position: 0% 50%; }
 }
 
-/* Neon flicker */
+/* Neon flicker — bigger, bolder text so the glow is the star of the card */
 .guide-effect-card[data-effect="neonFlicker"] .guide-effect-preview-card {
   background: #0a0f1a;
   color: var(--fx-accent);
-  border-color: rgba(var(--fx-accent-rgb), 0.3);
-  font-weight: 700;
-  letter-spacing: 0.08em;
+  border-color: rgba(var(--fx-accent-rgb), 0.4);
+  font-size: 22px;
+  font-weight: 900;
+  letter-spacing: 0.12em;
   animation: guide-fx-neon 4s ease-in-out infinite;
 }
 @keyframes guide-fx-neon {
   0%, 19%, 21%, 23%, 25%, 54%, 56%, 100% {
     text-shadow:
-      0 0 4px rgba(var(--fx-accent-rgb), 0.9),
-      0 0 11px rgba(var(--fx-accent-rgb), 0.6),
-      0 0 19px rgba(var(--fx-accent-rgb), 0.4);
+      0 0 6px rgba(var(--fx-accent-rgb), 0.95),
+      0 0 14px rgba(var(--fx-accent-rgb), 0.75),
+      0 0 26px rgba(var(--fx-accent-rgb), 0.5);
   }
   20%, 24%, 55% { text-shadow: none; }
 }

@@ -1134,6 +1134,26 @@
     const c = v => Math.max(0,Math.min(255,Math.round(v))).toString(16).padStart(2,'0');
     return '#'+c(r)+c(g)+c(b);
   }
+
+  /**
+   * Auto-classify a theme as 'light' or 'dark' based on the WCAG relative
+   * luminance of its background color. Returns null if the input can't be
+   * parsed (caller should fall back to the user's colorScheme dropdown).
+   *
+   * Threshold of 0.5 is the standard split — anything brighter is "light",
+   * anything darker is "dark". This is the same heuristic OS dark-mode
+   * detection uses.
+   */
+  function _detectThemeCategory(bgColor) {
+    const c = _pc(bgColor);
+    if (!c) return null;
+    const srgb = (v) => {
+      v = v / 255;
+      return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4);
+    };
+    const L = 0.2126 * srgb(c.r) + 0.7152 * srgb(c.g) + 0.0722 * srgb(c.b);
+    return L < 0.5 ? 'dark' : 'light';
+  }
   function _toHsl(r,g,b) {
     r/=255;g/=255;b/=255;const mx=Math.max(r,g,b),mn=Math.min(r,g,b),l=(mx+mn)/2;let h=0,s=0;
     if(mx!==mn){const d=mx-mn;s=l>0.5?d/(2-mx-mn):d/(mx+mn);if(mx===r)h=((g-b)/d+(g<b?6:0))/6;else if(mx===g)h=((b-r)/d+2)/6;else h=((r-g)/d+4)/6;}
@@ -1829,12 +1849,22 @@
       effects = getSuggestedEffectsFor(editorState.basedOn);
     }
 
+    // Auto-derive light/dark from the resolved background color's luminance.
+    // Users shouldn't have to manually classify their custom theme — the
+    // computer can read the colors and figure it out. Falls back to the
+    // colorScheme dropdown if luminance can't be parsed.
+    const fullEditorTheme = getFullEditorTheme();
+    const autoCategory = _detectThemeCategory(fullEditorTheme.background)
+      || editorState.coreOverrides.colorScheme
+      || base?.colors?.colorScheme
+      || 'light';
+
     const custom = {
       id,
       name,
       description,
       basedOn: editorState.basedOn,
-      category: (editorState.coreOverrides.colorScheme || base?.colors?.colorScheme) || 'light',
+      category: autoCategory,
       author: 'User',
       createdVia: 'manual',
       coreOverrides: { ...editorState.coreOverrides },
