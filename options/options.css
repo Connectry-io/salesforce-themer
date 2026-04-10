@@ -3474,6 +3474,322 @@ td.upgrade-compare-col-premium,
   display: block;
 }
 
+/* ─── How a theme is built: 4 cardinal colors + the engine card ──────────
+   Same side-by-side pattern as Anatomy: sticky mock LEFT, callout list
+   RIGHT. The mock takes the active theme's 4 colors via inline CSS vars.
+   Hover any callout (or any region in the mock) → all matching regions
+   ring up via box-shadow, all non-matching regions dim to 0.22 opacity. */
+.guide-colors {
+  display: grid;
+  grid-template-columns: minmax(300px, 1fr) minmax(300px, 1.05fr);
+  gap: var(--cx-space-6);
+  align-items: start;
+}
+@media (max-width: 900px) {
+  .guide-colors { grid-template-columns: 1fr; }
+}
+
+.guide-colors-stage {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--cx-space-3);
+  position: sticky;
+  top: calc(var(--cx-header-height) + 24px);
+}
+
+.guide-colors-mock {
+  /* Defaults — overridden inline by JS from the active theme */
+  --gcm-bg: #f6f6f8;
+  --gcm-surface: #ffffff;
+  --gcm-accent: #4a6fa5;
+  --gcm-text: #1c1f26;
+
+  width: 100%;
+  max-width: 360px;
+  aspect-ratio: 16 / 10;
+  background: var(--gcm-bg);
+  border: 1px solid var(--cx-border);
+  border-radius: var(--cx-radius-md);
+  box-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.04),
+    0 8px 24px rgba(0, 0, 0, 0.10);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.guide-colors-hint {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  color: var(--cx-text-subtle);
+  margin: 0;
+  font-style: italic;
+}
+
+/* Mock pieces — header strip ─────────────────────────────────────────── */
+.gcm-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 12px;
+  background: var(--gcm-surface);
+  border-bottom: 1px solid color-mix(in srgb, var(--gcm-text) 10%, transparent);
+  flex-shrink: 0;
+}
+.gcm-logo {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  border-radius: 4px;
+  background: var(--gcm-accent);
+  flex-shrink: 0;
+}
+.gcm-tabs {
+  display: inline-flex;
+  gap: 6px;
+  margin-left: auto;
+}
+.gcm-tab {
+  display: inline-block;
+  width: 28px;
+  height: 5px;
+  border-radius: 3px;
+  background: color-mix(in srgb, var(--gcm-text) 20%, transparent);
+}
+.gcm-tab.is-active {
+  background: var(--gcm-accent);
+}
+
+/* Mock pieces — body row (sidebar + main canvas) ─────────────────────── */
+.gcm-body {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+}
+.gcm-sidebar {
+  width: 56px;
+  background: var(--gcm-surface);
+  border-right: 1px solid color-mix(in srgb, var(--gcm-text) 10%, transparent);
+  padding: 12px 9px;
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  flex-shrink: 0;
+}
+.gcm-sidebar-item {
+  display: block;
+  height: 5px;
+  border-radius: 3px;
+  background: color-mix(in srgb, var(--gcm-text) 20%, transparent);
+}
+.gcm-main {
+  flex: 1;
+  padding: 14px;
+  background: var(--gcm-bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.gcm-card {
+  background: var(--gcm-surface);
+  border: 1px solid color-mix(in srgb, var(--gcm-text) 10%, transparent);
+  border-radius: 6px;
+  padding: 11px 13px;
+  width: 100%;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+}
+.gcm-card-title {
+  color: var(--gcm-text);
+  font-size: 11px;
+  font-weight: 700;
+  margin-bottom: 7px;
+  font-family: var(--cx-font);
+  line-height: 1;
+}
+.gcm-card-line {
+  height: 4px;
+  border-radius: 2px;
+  background: color-mix(in srgb, var(--gcm-text) 16%, transparent);
+  margin-bottom: 5px;
+}
+.gcm-card-line.short { width: 60%; }
+.gcm-button {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 12px;
+  background: var(--gcm-accent);
+  color: #ffffff;
+  border: none;
+  border-radius: 4px;
+  font-size: 9px;
+  font-weight: 700;
+  margin-top: 7px;
+  cursor: default;
+  font-family: var(--cx-font);
+  pointer-events: none;
+}
+
+/* Highlight choreography — applied via .is-focusing on the mock root +
+   .is-highlight on the matching data-color elements. Pure CSS dim/ring. */
+.guide-colors-mock [data-color] {
+  position: relative;
+  transition: opacity 220ms ease, box-shadow 220ms ease;
+  cursor: pointer;
+}
+.guide-colors-mock.is-focusing [data-color]:not(.is-highlight) {
+  opacity: 0.20;
+}
+.guide-colors-mock.is-focusing [data-color].is-highlight {
+  box-shadow:
+    0 0 0 2px var(--cx-accent),
+    0 0 0 5px rgba(74, 111, 165, 0.28);
+  z-index: 2;
+}
+
+/* Right-side callout list — same look as the Anatomy callouts but each
+   row has a big colored swatch tile on the left so the color reads at
+   a glance. */
+.guide-colors-callouts {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.guide-colors-callouts li {
+  display: flex;
+  align-items: center;
+  gap: var(--cx-space-3);
+  padding: 12px var(--cx-space-4);
+  background: var(--cx-surface);
+  border: 1px solid var(--cx-border);
+  border-radius: var(--cx-radius-md);
+  cursor: pointer;
+  transition:
+    border-color 200ms ease,
+    background-color 200ms ease,
+    transform 200ms ease,
+    box-shadow 200ms ease;
+}
+.guide-colors-callouts li:hover,
+.guide-colors-callouts li.is-highlight {
+  border-color: var(--cx-accent);
+  background: color-mix(in srgb, var(--cx-accent) 5%, var(--cx-surface));
+  transform: translateX(2px);
+  box-shadow: 0 4px 14px rgba(74, 111, 165, 0.18);
+}
+
+.guide-color-swatch {
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  border: 1px solid var(--cx-border);
+  flex-shrink: 0;
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.45),
+    0 1px 3px rgba(0, 0, 0, 0.10);
+}
+
+.guide-color-text {
+  flex: 1;
+  min-width: 0;
+}
+.guide-color-text strong {
+  display: block;
+  color: var(--cx-text);
+  font-weight: 700;
+  font-size: 13px;
+  margin-bottom: 3px;
+}
+.guide-color-text span {
+  display: block;
+  color: var(--cx-text-muted);
+  font-size: 12.5px;
+  line-height: 1.45;
+}
+
+/* ─── Engine explainer card: 23 → engine → 150+ ──────────────────────────
+   Sits below the colors grid. Tells the multiplier story so users see
+   the value of the derivation engine — pick a few, get a complete theme. */
+.guide-engine-card {
+  margin-top: var(--cx-space-6);
+  background: linear-gradient(
+    135deg,
+    var(--cx-surface) 0%,
+    color-mix(in srgb, var(--cx-accent) 5%, var(--cx-surface)) 100%
+  );
+  border: 1px solid var(--cx-border);
+  border-radius: var(--cx-radius-lg);
+  padding: var(--cx-space-6);
+}
+
+.guide-engine-flow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--cx-space-5);
+  flex-wrap: wrap;
+  margin-bottom: var(--cx-space-4);
+}
+
+.guide-engine-stat,
+.guide-engine-engine {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  min-width: 110px;
+}
+
+.guide-engine-num {
+  font-size: 38px;
+  font-weight: 800;
+  color: var(--cx-accent);
+  line-height: 1;
+  margin-bottom: 8px;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+}
+
+.guide-engine-icon {
+  width: 38px;
+  height: 38px;
+  color: var(--cx-accent);
+  margin-bottom: 8px;
+  animation: guide-engine-spin 14s linear infinite;
+}
+
+@keyframes guide-engine-spin {
+  to { transform: rotate(360deg); }
+}
+
+.guide-engine-label {
+  font-size: 11px;
+  color: var(--cx-text-muted);
+  line-height: 1.35;
+  font-weight: 500;
+}
+
+.guide-engine-arrow {
+  width: 22px;
+  height: 22px;
+  color: var(--cx-text-subtle);
+  flex-shrink: 0;
+}
+
+.guide-engine-caption {
+  margin: 0 auto;
+  font-size: 12.5px;
+  line-height: 1.55;
+  color: var(--cx-text-muted);
+  text-align: center;
+  max-width: 600px;
+}
+
 /* Effects gallery — 9 cards in a responsive grid */
 .guide-effects-grid {
   display: grid;

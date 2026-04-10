@@ -539,7 +539,94 @@
         </div>
       </section>
 
-      <!-- Section 2: Effects, illustrated (the live previews live here) -->
+      <!-- Section 2: How a theme is built — colors + the engine -->
+      <section class="cx-section">
+        <div class="cx-section-header">
+          <div>
+            <h2 class="cx-section-title">How a theme is built</h2>
+            <p class="cx-section-subtitle">Four cardinal colors set the foundation. Hover any to see where it lives in Salesforce.</p>
+          </div>
+        </div>
+
+        <div class="guide-colors" id="guideColors">
+          <!-- LEFT: tiny SF mock that takes the active theme's colors -->
+          <div class="guide-colors-stage">
+            <div class="guide-colors-mock" id="guideColorsMock">
+              <!-- populated by JS — pulls colors from the active theme -->
+            </div>
+            <p class="guide-colors-hint">
+              <svg width="11" height="11" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                <path d="M8 1.5v3M8 11.5v3M1.5 8h3M11.5 8h3M3.5 3.5l2.1 2.1M10.4 10.4l2.1 2.1M3.5 12.5l2.1-2.1M10.4 5.6l2.1-2.1" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+              </svg>
+              Showing your active theme's colors
+            </p>
+          </div>
+
+          <!-- RIGHT: 4 callouts, one per cardinal color -->
+          <ul class="guide-colors-callouts" id="guideColorsCallouts">
+            <li data-color-callout="background">
+              <span class="guide-color-swatch" data-color-key="background"></span>
+              <div class="guide-color-text">
+                <strong>Background</strong>
+                <span>The page canvas — the color behind all cards and panels.</span>
+              </div>
+            </li>
+            <li data-color-callout="surface">
+              <span class="guide-color-swatch" data-color-key="surface"></span>
+              <div class="guide-color-text">
+                <strong>Surface</strong>
+                <span>Lifted chrome — cards, modals, the global header, the sidebar.</span>
+              </div>
+            </li>
+            <li data-color-callout="accent">
+              <span class="guide-color-swatch" data-color-key="accent"></span>
+              <div class="guide-color-text">
+                <strong>Accent</strong>
+                <span>Brand color — primary buttons, active tabs, links, focus rings.</span>
+              </div>
+            </li>
+            <li data-color-callout="text">
+              <span class="guide-color-swatch" data-color-key="text"></span>
+              <div class="guide-color-text">
+                <strong>Text</strong>
+                <span>Body copy and headings throughout the page.</span>
+              </div>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Engine explainer — the multiplier story -->
+        <div class="guide-engine-card">
+          <div class="guide-engine-flow">
+            <div class="guide-engine-stat">
+              <div class="guide-engine-num">23</div>
+              <div class="guide-engine-label">core colors<br>you set</div>
+            </div>
+            <svg class="guide-engine-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M5 12h14M13 5l7 7-7 7"/>
+            </svg>
+            <div class="guide-engine-engine">
+              <svg class="guide-engine-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <circle cx="12" cy="12" r="3"/>
+                <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+              </svg>
+              <div class="guide-engine-label">Theme engine<br>derives the rest</div>
+            </div>
+            <svg class="guide-engine-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M5 12h14M13 5l7 7-7 7"/>
+            </svg>
+            <div class="guide-engine-stat">
+              <div class="guide-engine-num">150+</div>
+              <div class="guide-engine-label">CSS values<br>painted across Salesforce</div>
+            </div>
+          </div>
+          <p class="guide-engine-caption">
+            Hover states, focus rings, modal backdrops, scrollbar tints, link colors, borders — all derived from those 23 inputs. Without the engine you'd be tuning every value by hand. With it, you pick what matters and we fill in the rest.
+          </p>
+        </div>
+      </section>
+
+      <!-- Section 3: Effects, illustrated (the live previews live here) -->
       <section class="cx-section">
         <div class="cx-section-header">
           <div>

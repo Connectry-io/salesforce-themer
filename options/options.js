@@ -2296,6 +2296,7 @@
 
   function renderGuideTab() {
     renderGuideAnatomyDiagram();
+    renderGuideColorsMock();
     renderGuideEffectsGrid();
   }
 
@@ -2447,6 +2448,110 @@
     parts.forEach(part => {
       part.addEventListener('mouseenter', () => highlight(part.dataset.part));
       part.addEventListener('mouseleave', clear);
+    });
+  }
+
+  /**
+   * Render the tiny SF mock for the "How a theme is built" section. Pulls
+   * the active theme's 4 cardinal colors and applies them as inline CSS
+   * vars on the mock root, then paints the swatch dots in the right-hand
+   * callout list with the same values.
+   *
+   * The mock is a minimal SF chrome sketch: header strip + sidebar +
+   * canvas with one card. Each visible region carries a `data-color`
+   * attribute. Hover sync is wired in `_bindGuideColorsInteractions`.
+   */
+  function renderGuideColorsMock() {
+    const target = document.getElementById('guideColorsMock');
+    if (!target) return;
+    const activeId = syncState.theme && syncState.theme !== 'none' ? syncState.theme : 'connectry';
+    const theme = getThemeById(activeId) || getThemeById('connectry');
+    if (!theme) return;
+
+    const c = theme.colors;
+    target.style.setProperty('--gcm-bg', c.background);
+    target.style.setProperty('--gcm-surface', c.surface);
+    target.style.setProperty('--gcm-accent', c.accent);
+    target.style.setProperty('--gcm-text', c.textPrimary);
+
+    target.innerHTML = `
+      <div class="gcm-header" data-color="surface">
+        <span class="gcm-logo" data-color="accent"></span>
+        <span class="gcm-tabs">
+          <span class="gcm-tab is-active" data-color="accent"></span>
+          <span class="gcm-tab"></span>
+          <span class="gcm-tab"></span>
+        </span>
+      </div>
+      <div class="gcm-body">
+        <div class="gcm-sidebar" data-color="surface">
+          <span class="gcm-sidebar-item"></span>
+          <span class="gcm-sidebar-item"></span>
+          <span class="gcm-sidebar-item"></span>
+          <span class="gcm-sidebar-item"></span>
+        </div>
+        <div class="gcm-main" data-color="background">
+          <div class="gcm-card" data-color="surface">
+            <div class="gcm-card-title" data-color="text">Account name</div>
+            <div class="gcm-card-line"></div>
+            <div class="gcm-card-line short"></div>
+            <button class="gcm-button" data-color="accent" type="button">Save</button>
+          </div>
+        </div>
+      </div>
+    `;
+
+    // Paint the swatch dots in the right-hand callout list with the
+    // active theme's colors so they match the mock 1:1.
+    const callouts = document.getElementById('guideColorsCallouts');
+    if (callouts) {
+      const setSwatch = (key, color) => {
+        const el = callouts.querySelector(`[data-color-key="${key}"]`);
+        if (el) el.style.backgroundColor = color;
+      };
+      setSwatch('background', c.background);
+      setSwatch('surface',    c.surface);
+      setSwatch('accent',     c.accent);
+      setSwatch('text',       c.textPrimary);
+    }
+
+    _bindGuideColorsInteractions();
+  }
+
+  /**
+   * Bidirectional hover sync between the colors mock and the callout list.
+   * Hover a callout (or any data-color region in the mock) → all matching
+   * regions ring up, all non-matching regions dim.
+   */
+  function _bindGuideColorsInteractions() {
+    const root = document.getElementById('guideColors');
+    if (!root) return;
+    const mock = document.getElementById('guideColorsMock');
+    if (!mock) return;
+
+    const callouts = root.querySelectorAll('[data-color-callout]');
+    const targets = mock.querySelectorAll('[data-color]');
+
+    function highlight(colorName) {
+      mock.classList.add('is-focusing');
+      callouts.forEach(c => c.classList.toggle('is-highlight', c.dataset.colorCallout === colorName));
+      targets.forEach(t => t.classList.toggle('is-highlight', t.dataset.color === colorName));
+    }
+
+    function clear() {
+      mock.classList.remove('is-focusing');
+      callouts.forEach(c => c.classList.remove('is-highlight'));
+      targets.forEach(t => t.classList.remove('is-highlight'));
+    }
+
+    callouts.forEach(callout => {
+      callout.addEventListener('mouseenter', () => highlight(callout.dataset.colorCallout));
+      callout.addEventListener('mouseleave', clear);
+    });
+
+    targets.forEach(target => {
+      target.addEventListener('mouseenter', () => highlight(target.dataset.color));
+      target.addEventListener('mouseleave', clear);
     });
   }
 
