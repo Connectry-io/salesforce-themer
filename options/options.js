@@ -2137,38 +2137,34 @@
   }
 
   /**
-   * Save-time upgrade prompt for free users in the Theme Builder. The
-   * builder is open to everyone so users can preview the full editor; the
-   * Save button is the Premium gate. Shows a focused dialog that explains
-   * what they're about to unlock and lets them either upgrade or stay in
-   * preview mode (their work is preserved).
+   * Save-time prompt for free users in the Theme Builder. V1 ships with
+   * free features only — Premium (and the backend that powers Save) is
+   * coming after launch. The Builder is open to everyone for preview;
+   * the Save button shows this dialog explaining the situation.
+   *
+   * When Premium ships, this dialog will switch to a real checkout flow.
    */
   function _showSaveUpgradePrompt() {
     const body = document.createElement('div');
     body.innerHTML = `
-      <p style="margin-bottom:12px;">Saving custom themes is a <strong>Premium</strong> feature.</p>
+      <p style="margin-bottom:12px;">Saving custom themes is a <strong>Premium</strong> feature, and Premium is launching soon.</p>
       <p style="margin-bottom:16px; font-size:13px; color: var(--cx-text-muted); line-height:1.6;">
-        Your changes are still here in the editor — feel free to keep tweaking. When you're ready,
-        upgrade to save this theme to your library, switch to it from any popup, and unlock all
-        the per-effect personalization options.
-      </p>
-      <p style="font-size:12px; color: var(--cx-text-subtle); margin-bottom:0;">
-        Premium starts at <strong>$5/month</strong>. Yearly is $45 (save 25%) and Lifetime is
-        $200 while the Early Supporter window is open.
+        Your changes are still here in the editor — feel free to keep tweaking. We're shipping the
+        free tier first; Premium (with the Builder's Save, AI generation, brand-guide upload, and the
+        marketplace) follows right after. No action needed today.
       </p>
     `;
 
     const dialog = new Connectry.Settings.Dialog({
-      title: 'Upgrade to save your themes',
+      title: 'Saving themes is coming soon',
       body,
       actions: [
         { label: 'Keep editing', variant: 'secondary' },
         {
-          label: 'See plans',
+          label: 'Learn more',
           variant: 'primary',
           onClick: () => {
-            // Close the editor and jump to the Upgrade tab
-            closeEditor();
+            // Jump to the Upgrade tab so the user can read about what's coming
             if (_tabsInstance) _tabsInstance.activate('upgrade');
           },
         },
@@ -2192,18 +2188,14 @@
   }
 
   /**
-   * Bind the "Choose X" buttons on the Upgrade tab. Stub for now — when
-   * Stripe is wired up this will kick off a checkout session.
-   * TODO: when auth ships, POST to the backend to create a Stripe Checkout
-   * session and redirect to the returned URL.
+   * Bind the plan CTAs on the Upgrade tab. V1 ships with the buttons
+   * disabled and labeled "Coming soon" — there's nothing to bind. When
+   * Premium ships, restore the [data-plan] attributes in HTML and have
+   * this function POST to the backend to create a Stripe Checkout
+   * session.
    */
   function bindUpgradePlanCtas() {
-    document.querySelectorAll('.upgrade-plan-cta[data-plan], .upgrade-footer-cta-actions [data-plan]').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const plan = btn.dataset.plan;
-        _showCheckoutPlaceholder(plan);
-      });
-    });
+    // No-op for V1. Plan buttons are disabled in HTML.
   }
 
   /**

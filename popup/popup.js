@@ -354,7 +354,7 @@
           </div>
           <div>
             <h3 class="custom-themes-upsell-title">Make it yours</h3>
-            <p class="custom-themes-upsell-sub">Custom themes are a Premium feature.</p>
+            <p class="custom-themes-upsell-sub">Custom themes are a Premium feature, coming soon.</p>
           </div>
         </div>
         <div class="custom-themes-upsell-features">
@@ -374,11 +374,11 @@
             <svg width="11" height="11" viewBox="0 0 14 14" fill="none" aria-hidden="true">
               <path d="M2.5 7L5.5 10L11.5 4" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
             </svg>
-            <span>AI generation, brand-guide upload (soon)</span>
+            <span>AI generation, brand-guide upload</span>
           </div>
         </div>
         <button type="button" class="custom-themes-upsell-cta">
-          Unlock Premium →
+          Premium · Coming Soon
         </button>
       </div>
     `;
