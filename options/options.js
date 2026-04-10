@@ -358,6 +358,73 @@
     }
   }
 
+  // ─── Builder sidebar list ────────────────────────────────────────────────
+  // The Builder tab uses a sidebar layout: custom themes live in the left
+  // rail, the right pane shows create-method cards. This is a parallel render
+  // to renderCustomThemeGrid (which still renders the legacy hidden host).
+
+  function renderBuilderSidebar(activeThemeId) {
+    const list = document.getElementById('builderSidebarList');
+    const empty = document.getElementById('builderSidebarEmpty');
+    if (!list || !empty) return;
+
+    const customs = syncState.customThemes || [];
+
+    if (!customs.length) {
+      list.innerHTML = '';
+      list.hidden = true;
+      empty.hidden = false;
+      return;
+    }
+
+    list.hidden = false;
+    empty.hidden = true;
+    list.innerHTML = '';
+
+    for (const ct of customs) {
+      const isActive = ct.id === activeThemeId;
+      const base = getThemeById(ct.basedOn);
+      const resolvedColors = { ...(base?.colors || {}), ...(ct.coreOverrides || {}), ...(ct.advancedOverrides || {}) };
+      const swatchColors = [
+        resolvedColors.background,
+        resolvedColors.surface,
+        resolvedColors.accent,
+        resolvedColors.textPrimary,
+      ];
+      const swatchHtml = swatchColors.map(col => `<span style="background:${col};"></span>`).join('');
+
+      const item = document.createElement('button');
+      item.type = 'button';
+      item.className = `builder-sidebar-item${isActive ? ' is-active' : ''}`;
+      item.dataset.theme = ct.id;
+      item.setAttribute('role', 'option');
+      item.setAttribute('aria-selected', String(isActive));
+
+      const baseLabel = base ? base.name : ct.basedOn;
+      const subline = ct.description
+        ? Connectry.Settings.escape(ct.description)
+        : `Based on ${Connectry.Settings.escape(baseLabel)}`;
+
+      item.innerHTML = `
+        <div class="builder-sidebar-item-swatch">${swatchHtml}</div>
+        <div class="builder-sidebar-item-body">
+          <span class="builder-sidebar-item-name">${Connectry.Settings.escape(ct.name)}</span>
+          <span class="builder-sidebar-item-meta">${subline}</span>
+        </div>
+        ${isActive ? '<span class="builder-sidebar-item-active-dot" title="Active theme"></span>' : ''}
+      `;
+
+      item.addEventListener('click', () => {
+        // Single-click in the sidebar opens the editor for that theme.
+        // (Applying without editing is still possible from the popup or
+        // the Themes tab.)
+        openEditor(ct.basedOn, ct);
+      });
+
+      list.appendChild(item);
+    }
+  }
+
   async function deleteCustomTheme(customId) {
     const customs = syncState.customThemes || [];
     const ct = customs.find(t => t.id === customId);
@@ -374,6 +441,7 @@
     } else {
       renderCustomThemeGrid(syncState.theme);
     }
+    renderBuilderSidebar(syncState.theme);
   }
 
   // ─── Filter pills ─────────────────────────────────────────────────────────
@@ -407,6 +475,8 @@
     updateHeaderMeta(themeId);
     updateEffectsContextBanner();
     renderEffectsTabForActiveTheme();
+    // Reflect active state in the Builder sidebar list (cheap re-render)
+    renderBuilderSidebar(themeId);
 
     // Push the theme to all open Salesforce tabs across all windows.
     // (We can't use {active: true, currentWindow: true} from the options page
@@ -832,6 +902,7 @@
     // Themes tab
     renderThemeGrid(activeTheme);
     renderCustomThemeGrid(activeTheme);
+    renderBuilderSidebar(activeTheme);
     bindFilterPills();
     bindThemeGroupCollapse();
     updateHeaderMeta(activeTheme);
@@ -950,12 +1021,28 @@
       }
     }
 
-    // Handoff from popup: if popup set openOptionsTab, honour it and clear the flag
+    // Handoff from popup: if popup set openOptionsTab, honour it and clear
+    // the flag. openBuilderClone is a follow-up flag that the popup's Clone
+    // button sets to pre-load the editor with a specific theme as the base.
     try {
-      const handoff = await chrome.storage.local.get({ openOptionsTab: null });
+      const handoff = await chrome.storage.local.get({
+        openOptionsTab: null,
+        openBuilderClone: null,
+      });
       if (handoff.openOptionsTab && _tabsInstance) {
         _tabsInstance.activate(handoff.openOptionsTab);
         await chrome.storage.local.remove('openOptionsTab');
+      }
+      if (handoff.openBuilderClone) {
+        const targetThemeId = handoff.openBuilderClone;
+        await chrome.storage.local.remove('openBuilderClone');
+        // Defer one tick so the Builder tab has rendered before the editor
+        // overlay opens on top of it.
+        setTimeout(() => {
+          if (getThemeById(targetThemeId)) {
+            openCreationDialog(targetThemeId);
+          }
+        }, 0);
       }
     } catch (_) {}
 
@@ -981,6 +1068,12 @@
     });
     document.getElementById('cloneFirstBtn')?.addEventListener('click', () => {
       openCreationDialog('connectry');
+    });
+
+    // Builder sidebar: "+ New" button → opens the editor with a fresh theme
+    document.getElementById('builderSidebarCreateBtn')?.addEventListener('click', () => {
+      _pendingCreateEffects = getSuggestedEffectsFor('connectry');
+      openEditor('connectry', null);
     });
 
     // Builder tab: create-method cards.
@@ -1192,6 +1285,8 @@
         ? { ...customTheme.effects }
         : getSuggestedEffectsFor(customTheme.basedOn || baseThemeId);
       document.getElementById('editorName').value = customTheme.name;
+      const descEl = document.getElementById('editorDescription');
+      if (descEl) descEl.value = customTheme.description || '';
     } else {
       editorState.customId = null;
       editorState.coreOverrides = {};
@@ -1203,6 +1298,8 @@
         : getSuggestedEffectsFor(baseThemeId);
       const base = getThemeById(baseThemeId);
       document.getElementById('editorName').value = base ? `My ${base.name}` : 'My Custom Theme';
+      const descEl = document.getElementById('editorDescription');
+      if (descEl) descEl.value = base?.description ? base.description : '';
     }
 
     document.getElementById('galleryView').hidden = true;
@@ -1410,9 +1507,10 @@
       openEditor('connectry', null);
     });
 
-    // Editor sub-tabs (Colors / Effects)
-    document.querySelectorAll('.editor-subtab[data-editor-subtab]').forEach(btn => {
+    // Editor sub-tabs (Colors / Effects) — vertical rail in editor layout
+    document.querySelectorAll('.editor-subtab-vert[data-editor-subtab]').forEach(btn => {
       btn.addEventListener('click', () => {
+        if (btn.disabled || btn.classList.contains('is-disabled')) return;
         const target = btn.dataset.editorSubtab;
         switchEditorSubtab(target);
       });
@@ -1438,7 +1536,7 @@
     colorsPanel.hidden = isEffects;
     effectsPanel.hidden = !isEffects;
 
-    document.querySelectorAll('.editor-subtab[data-editor-subtab]').forEach(b => {
+    document.querySelectorAll('.editor-subtab-vert[data-editor-subtab]').forEach(b => {
       const active = b.dataset.editorSubtab === target;
       b.classList.toggle('is-active', active);
       b.setAttribute('aria-selected', String(active));
@@ -1601,6 +1699,33 @@
 
   // ─── Save / Export / Import ───────────────────────────────────────────────
 
+  // Inline profanity filter — small wordlist + simple normalization. Catches
+  // the obvious cases without bundling a 5KB library. Production hardening
+  // (leetspeak, multilingual) can come from a backend moderation pass later.
+  const PROFANITY_LIST = [
+    'fuck','shit','bitch','cunt','asshole','dick','pussy','cock','bastard',
+    'slut','whore','fag','faggot','nigger','nigga','retard','retarded',
+    'twat','wank','wanker','jackass','douchebag','motherfucker','mf',
+  ];
+  function _containsProfanity(text) {
+    if (!text) return false;
+    const norm = String(text)
+      .toLowerCase()
+      .replace(/[^a-z\s]/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim();
+    if (!norm) return false;
+    const words = norm.split(' ');
+    for (const w of words) {
+      if (PROFANITY_LIST.includes(w)) return true;
+    }
+    // Catch substring inside compound tokens (e.g. "fuckface" with no space)
+    for (const bad of PROFANITY_LIST) {
+      if (norm.includes(bad)) return true;
+    }
+    return false;
+  }
+
   async function saveCustomTheme() {
     // V3: builder is open to all but Save is the Premium gate.
     // Show the upgrade dialog and bail without losing any in-progress edits.
@@ -1610,6 +1735,15 @@
     }
 
     const name = document.getElementById('editorName').value.trim() || 'My Custom Theme';
+    const description = (document.getElementById('editorDescription')?.value || '').trim();
+
+    // Profanity guard — names and descriptions are user-facing and may be
+    // shared via marketplace later. Reject before any storage write.
+    if (_containsProfanity(name) || _containsProfanity(description)) {
+      _flashToast('Please pick a name and description without profanity.');
+      return;
+    }
+
     const id = editorState.customId || `custom-${Date.now()}`;
     const base = getThemeById(editorState.basedOn);
 
@@ -1634,6 +1768,7 @@
     const custom = {
       id,
       name,
+      description,
       basedOn: editorState.basedOn,
       category: (editorState.coreOverrides.colorScheme || base?.colors?.colorScheme) || 'light',
       author: 'User',
@@ -1651,8 +1786,10 @@
     syncState.customThemes = customThemes;
     editorState.customId = id;
 
-    // Apply the theme
+    // Apply the theme + refresh both the gallery grid and the builder sidebar
     await selectTheme(id);
+    renderCustomThemeGrid(id);
+    renderBuilderSidebar(id);
 
     // Visual feedback
     const btn = document.getElementById('editorSaveBtn');
