@@ -2966,6 +2966,58 @@ body:has(.cx-tabpanel[data-tabpanel="builder"]:not([hidden])) .cx-main {
   50%      { transform: translate(8px, -6px) scale(1.05); }
 }
 
+/* Particles — CSS-only falling dots overlay */
+.editor-preview-frame[data-fx-particles="on"] .preview-particles {
+  display: block;
+}
+.preview-particles {
+  display: none;
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 50;
+}
+.preview-particle {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--fx-accent, #4a6fa5);
+  opacity: calc(0.35 * var(--fx-mult, 1));
+  animation: editor-fx-particle-fall calc(4s * var(--fx-speed-mult, 1)) linear infinite;
+}
+.preview-particle:nth-child(1)  { left: 8%;  animation-delay: 0s;    animation-duration: calc(3.5s * var(--fx-speed-mult, 1)); }
+.preview-particle:nth-child(2)  { left: 18%; animation-delay: 0.7s;  animation-duration: calc(4.2s * var(--fx-speed-mult, 1)); }
+.preview-particle:nth-child(3)  { left: 30%; animation-delay: 1.4s;  animation-duration: calc(3.8s * var(--fx-speed-mult, 1)); }
+.preview-particle:nth-child(4)  { left: 42%; animation-delay: 0.3s;  animation-duration: calc(4.5s * var(--fx-speed-mult, 1)); }
+.preview-particle:nth-child(5)  { left: 55%; animation-delay: 2.1s;  animation-duration: calc(3.6s * var(--fx-speed-mult, 1)); }
+.preview-particle:nth-child(6)  { left: 65%; animation-delay: 1.0s;  animation-duration: calc(4.0s * var(--fx-speed-mult, 1)); }
+.preview-particle:nth-child(7)  { left: 78%; animation-delay: 0.5s;  animation-duration: calc(3.9s * var(--fx-speed-mult, 1)); }
+.preview-particle:nth-child(8)  { left: 88%; animation-delay: 1.8s;  animation-duration: calc(4.3s * var(--fx-speed-mult, 1)); }
+@keyframes editor-fx-particle-fall {
+  0%   { top: -6px; opacity: calc(0.5 * var(--fx-mult, 1)); }
+  100% { top: 110%; opacity: 0; }
+}
+
+/* Cursor Trail — radial glow that follows mouse (JS wires mousemove) */
+.editor-preview-frame[data-fx-cursor-trail="on"] .preview-cursor-trail {
+  display: block;
+}
+.preview-cursor-trail {
+  display: none;
+  position: absolute;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(var(--fx-accent-rgb, 74,111,165), 0.5) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: 50;
+  transition: left 80ms ease-out, top 80ms ease-out;
+  opacity: calc(0.6 * var(--fx-mult, 1));
+  transform: translate(-50%, -50%);
+}
+
 .preview-nav {
   display: flex;
   align-items: center;

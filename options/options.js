@@ -1692,6 +1692,24 @@
       }
     }
 
+    // Particles (CSS falling dots overlay)
+    if (effects.particles) {
+      frame.dataset.fxParticles = 'on';
+      const level = effects.particlesIntensity || 'medium';
+      const v = LADDER[level] || LADDER.medium;
+      frame.style.setProperty('--fx-mult', String(v.mult));
+      frame.style.setProperty('--fx-speed-mult', String(v.speed));
+    } else {
+      delete frame.dataset.fxParticles;
+    }
+
+    // Cursor trail (radial glow follows mouse)
+    if (effects.cursorTrail) {
+      frame.dataset.fxCursorTrail = 'on';
+    } else {
+      delete frame.dataset.fxCursorTrail;
+    }
+
     // The preview frame is shared by all effects, so use the maximum
     // intensity of any "always-on" effect for the master --fx-mult vars.
     // Hover lift is per-element so we let it use its own.
@@ -1710,6 +1728,17 @@
   // ─── Event Binding ────────────────────────────────────────────────────────
 
   function bindEditorEvents() {
+    // Cursor trail: move the glow dot to follow the mouse inside the preview
+    const previewFrame = document.getElementById('editorPreview');
+    const trailDot = document.getElementById('previewCursorTrail');
+    if (previewFrame && trailDot) {
+      previewFrame.addEventListener('mousemove', (e) => {
+        const rect = previewFrame.getBoundingClientRect();
+        trailDot.style.left = (e.clientX - rect.left) + 'px';
+        trailDot.style.top = (e.clientY - rect.top) + 'px';
+      });
+    }
+
     // Color scheme dropdown
     document.getElementById('editorColorScheme')?.addEventListener('change', (e) => {
       editorState.coreOverrides.colorScheme = e.target.value;
