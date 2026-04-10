@@ -3134,7 +3134,7 @@ td.upgrade-compare-col-premium,
    Hover/click a marker → matching callout highlights. */
 .guide-anatomy {
   display: grid;
-  grid-template-columns: minmax(360px, 1fr) minmax(360px, 1.3fr);
+  grid-template-columns: minmax(420px, 1fr) minmax(340px, 1.1fr);
   gap: var(--cx-space-6);
   align-items: start;
 }
@@ -3153,6 +3153,9 @@ td.upgrade-compare-col-premium,
   top: calc(var(--cx-header-height) + 24px);
 }
 
+/* Diagram box — column flex so the card sits on top and the hint
+   tucks in beneath it INSIDE the same box, keeping the box's bottom
+   edge aligned with the bottom of the callout list on the right. */
 .guide-anatomy-diagram {
   position: relative;
   background:
@@ -3160,10 +3163,12 @@ td.upgrade-compare-col-premium,
     var(--cx-surface-alt);
   border: 1px solid var(--cx-border);
   border-radius: var(--cx-radius-lg);
-  padding: var(--cx-space-8) var(--cx-space-6);
+  padding: var(--cx-space-7) var(--cx-space-4) var(--cx-space-5);
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
+  gap: var(--cx-space-4);
   min-height: 380px;
   overflow: visible;
 }
@@ -3171,12 +3176,13 @@ td.upgrade-compare-col-premium,
 .guide-anatomy-hint {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 6px;
   font-size: 11px;
   color: var(--cx-text-subtle);
   margin: 0;
-  padding: 0 var(--cx-space-2);
   font-style: italic;
+  text-align: center;
 }
 
 /* Wrapper that holds the sample card + numbered markers in a relative
@@ -3247,15 +3253,26 @@ td.upgrade-compare-col-premium,
   padding: 4px 0;
 }
 
-/* ─── Anchored markers ─────────────────────────────────────────────────
-   Each marker is a child of its data-part. CSS centers it vertically on
-   that row and pushes it to the correct side of the card. Pure CSS = no
-   JS measuring, no race conditions, no NaN positions. */
+/* ─── Anchored markers with leader lines ───────────────────────────────
+   Canonical "encyclopedia diagram" / "IKEA assembly" callout pattern: a
+   small numbered marker sits in the gutter to the left of the card, and
+   a thin horizontal leader line connects the marker to the row it labels.
+   The line is what makes the connection legible — without it the markers
+   feel like floating numbers. With it, each marker visually points to
+   its row.
+
+   Layout math (for a 300px-wide card in a 420px column with 16px diagram
+   side padding): card has 16px internal padding, so the data-part rows
+   start at 16px inside the card border. Marker is positioned at left:-56
+   from the data-part edge (= 40px outside the card border), and the
+   ::before leader fills the 16px gap from marker right to card edge.
+   Pure CSS, no JS measuring. */
 .anatomy-marker {
   position: absolute;
   top: 50%;
-  width: 28px;
-  height: 28px;
+  left: -56px;
+  width: 24px;
+  height: 24px;
   background: var(--cx-accent);
   color: #ffffff;
   border: none;
@@ -3264,7 +3281,7 @@ td.upgrade-compare-col-premium,
   align-items: center;
   justify-content: center;
   font-family: var(--cx-font);
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 800;
   padding: 0;
   cursor: pointer;
@@ -3277,6 +3294,29 @@ td.upgrade-compare-col-premium,
   animation: anatomy-marker-breathe 3.6s ease-in-out infinite;
 }
 
+/* Leader line: thin horizontal stroke from marker right edge to the
+   card's visible border (16px gap, matching the card's internal padding).
+   Gradient fade so the line feels lighter the closer it gets to the card —
+   like a pen stroke pointing inward. */
+.anatomy-marker::before {
+  content: '';
+  position: absolute;
+  left: 100%;
+  top: 50%;
+  width: 16px;
+  height: 2px;
+  background: linear-gradient(
+    90deg,
+    var(--cx-accent) 0%,
+    color-mix(in srgb, var(--cx-accent) 35%, transparent) 100%
+  );
+  border-radius: 1px;
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+
+/* Resting pulse ring — the ::after sits underneath the marker and fades
+   outward to draw the eye on first load. */
 .anatomy-marker::after {
   content: '';
   position: absolute;
@@ -3287,11 +3327,6 @@ td.upgrade-compare-col-premium,
   animation: anatomy-marker-ping 3.6s ease-out infinite;
   pointer-events: none;
 }
-
-/* All markers on the LEFT edge of the card. Consistent reading direction
-   top-to-bottom — alternating sides looked busy and the right-edge markers
-   fought the LIGHT/Dark badge and Clone button for space. */
-.guide-anatomy-card-wrap [data-part] > .anatomy-marker { left: -36px; }
 
 /* Stagger the pulse so they don't all fire in unison */
 .anatomy-marker[data-marker="1"] { animation-delay: 0s; }
@@ -3326,6 +3361,14 @@ td.upgrade-compare-col-premium,
     0 0 0 3px var(--cx-surface-alt),
     0 0 0 6px rgba(74, 111, 165, 0.35);
   animation-play-state: paused;
+}
+
+/* On hover/highlight the leader line goes solid accent — no fade — so
+   the connection to the labeled row is stronger. */
+.anatomy-marker:hover::before,
+.anatomy-marker.is-highlight::before {
+  background: var(--cx-accent);
+  height: 2.5px;
 }
 
 .anatomy-marker:focus-visible {

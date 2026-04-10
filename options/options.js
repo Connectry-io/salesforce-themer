@@ -2381,6 +2381,12 @@
           </div>
         </div>
       </div>
+      <p class="guide-anatomy-hint">
+        <svg width="12" height="12" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+          <path d="M8 1.5v3M8 11.5v3M1.5 8h3M11.5 8h3M3.5 3.5l2.1 2.1M10.4 10.4l2.1 2.1M3.5 12.5l2.1-2.1M10.4 5.6l2.1-2.1" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+        </svg>
+        Hover any number, row, or callout to highlight what it points to
+      </p>
     `;
 
     _bindGuideAnatomyInteractions();
