@@ -4838,13 +4838,20 @@ td.upgrade-compare-col-premium,
 /* ─── Guide: Shared live-panel layout (Typography + Favicon) ───────── */
 .guide-live-panel {
   display: grid;
-  grid-template-columns: 1fr minmax(280px, 380px);
+  grid-template-columns: minmax(260px, 340px) 1fr;
   background: var(--cx-surface);
   border: 1px solid var(--cx-border);
   border-radius: var(--cx-radius-lg);
   overflow: hidden;
 }
-@media (max-width: 750px) { .guide-live-panel { grid-template-columns: 1fr; } }
+/* Favicon section needs more room on the left for the icon grid */
+.guide-live-panel.guide-favicon-panel {
+  grid-template-columns: 1fr minmax(240px, 320px);
+}
+@media (max-width: 750px) {
+  .guide-live-panel,
+  .guide-live-panel.guide-favicon-panel { grid-template-columns: 1fr; }
+}
 .guide-live-editor {
   padding: var(--cx-space-4) var(--cx-space-5);
   background: var(--cx-surface-alt);

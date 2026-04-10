@@ -246,10 +246,15 @@
     // Use custom config if provided, otherwise static Connectry SVG
     if (config && config.icon) {
       const svg = _buildFaviconSVG(config);
-      link.href = 'data:image/svg+xml,' + encodeURIComponent(svg);
+      // Use base64 encoding for reliable cross-browser favicon rendering
+      link.href = 'data:image/svg+xml;base64,' + btoa(svg);
     } else {
       link.href = chrome.runtime.getURL('favicons/connectry.svg');
     }
+    // Force Chrome to re-evaluate the favicon by toggling sizes
+    link.setAttribute('sizes', 'any');
+    // Also set as shortcut icon for older browser compat
+    link.rel = 'icon';
   }
 
   function removeFavicon() {
@@ -506,12 +511,6 @@
             needsEffectsReinjection = true;
           }
           if (node.id === FAVICON_LINK_ID) {
-            needsFaviconReinjection = true;
-          }
-        }
-        // Also catch Salesforce adding new favicon links that override ours
-        for (const node of mutation.addedNodes) {
-          if (node.nodeName === 'LINK' && node.rel && node.rel.includes('icon') && node.id !== FAVICON_LINK_ID && _currentFaviconEnabled) {
             needsFaviconReinjection = true;
           }
         }
