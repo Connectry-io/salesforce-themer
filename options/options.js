@@ -3630,7 +3630,6 @@
         heading: document.getElementById('guideTypeHeading'),
         meta: document.getElementById('guideTypeMeta'),
         body: document.getElementById('guideTypeBody'),
-        tableHead: document.getElementById('guideTypeTableHead'),
         nav: document.getElementById('guideTypeNav'),
       };
 
@@ -3646,13 +3645,13 @@
       if (els.heading) { els.heading.style.fontFamily = headingStack; els.heading.style.fontSize = `${20 * scale}px`; els.heading.style.fontWeight = headingWeight; }
       if (els.meta) { els.meta.style.fontFamily = bodyStack; els.meta.style.fontSize = `${13 * scale}px`; }
       if (els.body) { els.body.style.fontFamily = bodyStack; els.body.style.fontSize = `${13 * scale}px`; els.body.style.fontWeight = bodyWeight; }
-      if (els.tableHead) { els.tableHead.style.fontFamily = bodyStack; els.tableHead.style.fontSize = `${11 * scale}px`; els.tableHead.style.fontWeight = headingWeight; }
       if (els.nav) { els.nav.style.fontFamily = bodyStack; els.nav.style.fontSize = `${12 * scale}px`; }
 
       // Update the "Reading the card" example row below the demo
+      // Update stencil type row — individual spans for hover highlighting
       const exAa = document.getElementById('guideTypeExampleAa');
-      const exLabel = document.getElementById('guideTypeExampleLabel');
-      if (exAa && exLabel) {
+      const stencilRow = document.getElementById('guideTypeExampleLabel');
+      if (exAa && stencilRow) {
         const fontLabels = { 'system-ui': 'System Default', 'neo-grotesque': 'Neo-Grotesque', 'humanist': 'Humanist', 'geometric': 'Geometric', 'classic-serif': 'Classic Serif' };
         const sizePresets = { '0.9': 'Compact', '1': 'Normal', '1.1': 'Comfortable', '1.2': 'Large' };
         const label = fontLabels[bodyKey] || 'System Default';
@@ -3661,7 +3660,12 @@
         const ls = letterSpacing;
         const lsStr = ls === 0 ? '0' : ls + 'em';
         exAa.style.fontFamily = bodyKey !== 'system-ui' ? bodyStack : '';
-        exLabel.textContent = `${label} · ${sizeLabel} · ${lh}/${lsStr}`;
+        const fontSpan = stencilRow.querySelector('[data-type-seg="font"]');
+        const sizeSpan = stencilRow.querySelector('[data-type-seg="size"]');
+        const spacingSpan = stencilRow.querySelector('[data-type-seg="spacing"]');
+        if (fontSpan) fontSpan.textContent = label;
+        if (sizeSpan) sizeSpan.textContent = sizeLabel;
+        if (spacingSpan) spacingSpan.textContent = `${lh}/${lsStr}`;
       }
     }
 
@@ -3689,6 +3693,32 @@
       document.getElementById('guideTypeLetterSpacingValue').textContent = parseFloat(e.target.value) + 'em';
       updateTypePreview();
     });
+
+    // ─── Interactive hover highlighting across stencil / legend / config ───
+    const stencilWrap = document.getElementById('guideTypeStencilWrap');
+    const editorPanel = document.getElementById('guideTypeEditor');
+    if (stencilWrap && editorPanel) {
+      function setHighlight(seg) {
+        stencilWrap.dataset.highlight = seg;
+        editorPanel.querySelectorAll('.editor-group[data-type-seg]').forEach(g => {
+          g.classList.toggle('is-type-highlight', g.dataset.typeSeg === seg);
+        });
+      }
+      function clearHighlight() {
+        delete stencilWrap.dataset.highlight;
+        editorPanel.querySelectorAll('.is-type-highlight').forEach(g => g.classList.remove('is-type-highlight'));
+      }
+      // Bind all [data-type-seg] elements in stencil + legend
+      stencilWrap.querySelectorAll('[data-type-seg]').forEach(el => {
+        el.addEventListener('mouseenter', () => setHighlight(el.dataset.typeSeg));
+        el.addEventListener('mouseleave', clearHighlight);
+      });
+      // Also bind config panel groups → highlight matching stencil/legend
+      editorPanel.querySelectorAll('.editor-group[data-type-seg]').forEach(g => {
+        g.addEventListener('mouseenter', () => setHighlight(g.dataset.typeSeg));
+        g.addEventListener('mouseleave', clearHighlight);
+      });
+    }
   }
 
   // ─── Guide: Interactive Favicon demo ────────────────────────────────────

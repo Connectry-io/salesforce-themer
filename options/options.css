@@ -5104,11 +5104,13 @@ td.upgrade-compare-col-premium,
 .guide-live-editor .editor-group { margin-bottom: 0; }
 .guide-live-editor .editor-group-title { font-size: 9px; margin-bottom: 4px; }
 .guide-live-editor .editor-field { padding: 2px 0; }
-.guide-live-editor .editor-field > label { font-size: 11px; min-width: 0; }
-.guide-live-editor .editor-select { font-size: 11px; padding: 3px 6px; }
+.guide-live-editor .editor-field > label { font-size: 11px; min-width: 0; flex-shrink: 0; }
+.guide-live-editor .editor-select { font-size: 11px; padding: 3px 6px; width: 130px; }
 .guide-live-editor .editor-type-presets { gap: 3px; }
 .guide-live-editor .editor-type-preset { padding: 6px 2px 5px; font-size: 9px; }
 .guide-live-editor .editor-type-slider { height: 4px; }
+.guide-live-editor .editor-type-slider-row { min-width: 0; overflow: hidden; }
+.guide-live-editor .editor-type-slider-value { min-width: 28px; font-size: 10px; }
 .guide-live-preview {
   padding: var(--cx-space-4) var(--cx-space-5);
   display: flex;
@@ -5137,50 +5139,56 @@ td.upgrade-compare-col-premium,
   padding-top: var(--cx-space-3);
   border-top: 1px solid var(--cx-border);
 }
+.guide-type-stencil-header { margin-bottom: 10px; }
 .guide-type-stencil-label {
-  font-size: 9px;
+  font-size: 11px;
   font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  color: var(--cx-text-subtle);
-  margin-bottom: 8px;
+  color: var(--cx-text);
+  margin-bottom: 2px;
+}
+.guide-type-stencil-desc {
+  font-size: 11px;
+  color: var(--cx-text-muted);
+  line-height: 1.45;
+  margin: 0;
 }
 .guide-type-stencil-row {
   display: flex;
-  gap: 16px;
-  align-items: flex-start;
+  gap: 20px;
+  align-items: center;
 }
-/* The wireframe card */
+/* The wireframe card — subtle anatomy-card coloring */
 .guide-type-stencil {
   flex-shrink: 0;
-  width: 170px;
-  padding: 8px;
+  width: 200px;
+  padding: 10px;
   border: 1.5px solid var(--cx-border);
   border-radius: var(--cx-radius-sm);
   display: flex;
   flex-direction: column;
-  gap: 5px;
-  background: var(--cx-surface);
+  gap: 6px;
+  background: linear-gradient(135deg, rgba(250,251,253,1) 0%, rgba(245,248,255,0.5) 100%);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.04);
 }
-/* Abstract swatch bar */
+/* Abstract swatch bar — subtle theme colors */
 .stencil-swatch {
   display: flex;
-  height: 14px;
+  height: 16px;
   border-radius: 3px;
   overflow: hidden;
 }
 .stencil-swatch span {
   flex: 1;
-  background: var(--cx-border);
-  opacity: 0.5;
+  display: block;
 }
-.stencil-swatch span:nth-child(2) { opacity: 0.35; }
-.stencil-swatch span:nth-child(3) { opacity: 0.6; }
-.stencil-swatch span:nth-child(4) { opacity: 0.25; }
+.stencil-swatch span:nth-child(1) { background: rgba(74,111,165,0.12); }
+.stencil-swatch span:nth-child(2) { background: rgba(74,111,165,0.07); }
+.stencil-swatch span:nth-child(3) { background: rgba(74,111,165,0.18); }
+.stencil-swatch span:nth-child(4) { background: rgba(74,111,165,0.05); }
 /* Abstract lines */
 .stencil-line {
   display: block;
-  height: 5px;
+  height: 6px;
   background: var(--cx-border);
   border-radius: 3px;
   opacity: 0.45;
@@ -5188,81 +5196,133 @@ td.upgrade-compare-col-premium,
 .stencil-line-row {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 5px;
 }
 /* Abstract badge */
 .stencil-badge {
-  width: 24px;
-  height: 8px;
-  border-radius: 4px;
-  background: var(--cx-border);
-  opacity: 0.35;
+  width: 28px;
+  height: 9px;
+  border-radius: 5px;
+  background: rgba(74,111,165,0.12);
   margin-left: auto;
 }
 /* Abstract pills */
 .stencil-pill {
-  width: 32px;
-  height: 10px;
+  width: 36px;
+  height: 11px;
   border-radius: 10px;
-  background: var(--cx-border);
-  opacity: 0.3;
+  background: rgba(74,111,165,0.08);
 }
 /* Highlighted REAL type row */
 .stencil-type-row {
   display: flex;
   align-items: center;
-  gap: 5px;
-  padding: 3px 5px;
+  gap: 6px;
+  padding: 4px 6px;
   border: 1.5px solid var(--cx-accent);
-  border-radius: 4px;
+  border-radius: 5px;
   background: rgba(74, 111, 165, 0.06);
-  margin-top: 1px;
+  margin-top: 2px;
+  transition: background 200ms, box-shadow 200ms;
 }
 .stencil-type-aa {
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 700;
   color: var(--cx-text);
   line-height: 1;
   flex-shrink: 0;
+  transition: color 200ms;
+  cursor: default;
 }
 .stencil-type-text {
-  font-size: 8px;
+  font-size: 9px;
   color: var(--cx-text-muted);
   white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  display: flex;
+  align-items: baseline;
+  gap: 0;
+}
+.stencil-type-text [data-type-seg] {
+  cursor: default;
+  padding: 1px 2px;
+  border-radius: 3px;
+  transition: background 200ms, color 200ms;
+}
+.stencil-type-sep {
+  color: var(--cx-text-subtle);
+  font-size: 9px;
 }
 /* Abstract actions row */
 .stencil-actions {
-  margin-top: 1px;
-  padding-top: 4px;
-  border-top: 1px solid var(--cx-border);
+  margin-top: 2px;
+  padding-top: 5px;
+  border-top: 1px solid rgba(74,111,165,0.1);
   opacity: 0.3;
 }
 /* Legend beside the stencil card */
 .guide-type-stencil-legend {
   display: flex;
   flex-direction: column;
-  gap: 3px;
-  padding-left: 14px;
+  gap: 6px;
+  padding-left: 16px;
   margin: 0;
   flex: 1;
   min-width: 0;
 }
 .guide-type-stencil-legend li {
-  font-size: 10px;
+  font-size: 11px;
   color: var(--cx-text-muted);
   line-height: 1.5;
+  padding: 3px 6px;
+  border-radius: 4px;
+  cursor: default;
+  transition: background 200ms, color 200ms;
 }
-.guide-type-stencil-legend li strong {
+.stencil-legend-marker {
+  font-weight: 700;
   color: var(--cx-text);
-  font-weight: 600;
 }
 .guide-type-stencil-note {
   font-size: 9px;
   color: var(--cx-text-subtle);
   font-style: italic;
-  margin: 6px 0 0;
+  margin: 8px 0 0;
+}
+
+/* ─── Hover highlight system: data-type-seg ────────────────────────── */
+/* When a segment is highlighted, light up all matching elements */
+.guide-type-stencil-wrap[data-highlight="aa"] .stencil-type-aa,
+.guide-type-stencil-wrap[data-highlight="font"] [data-type-seg="font"],
+.guide-type-stencil-wrap[data-highlight="size"] [data-type-seg="size"],
+.guide-type-stencil-wrap[data-highlight="spacing"] [data-type-seg="spacing"] {
+  background: rgba(74,111,165,0.12);
+  color: var(--cx-accent);
+}
+.guide-type-stencil-wrap[data-highlight="aa"] .stencil-type-aa {
+  color: var(--cx-accent);
+}
+/* Highlight the matching legend row */
+.guide-type-stencil-wrap[data-highlight] .guide-type-stencil-legend li {
+  opacity: 0.4;
+  transition: opacity 200ms, background 200ms;
+}
+.guide-type-stencil-wrap[data-highlight="aa"] .guide-type-stencil-legend li[data-type-seg="aa"],
+.guide-type-stencil-wrap[data-highlight="font"] .guide-type-stencil-legend li[data-type-seg="font"],
+.guide-type-stencil-wrap[data-highlight="size"] .guide-type-stencil-legend li[data-type-seg="size"],
+.guide-type-stencil-wrap[data-highlight="spacing"] .guide-type-stencil-legend li[data-type-seg="spacing"] {
+  opacity: 1;
+  background: rgba(74,111,165,0.08);
+}
+/* Highlight the config panel group */
+.guide-live-editor .editor-group[data-type-seg] {
+  padding: 4px 6px;
+  margin: -4px -6px;
+  border-radius: var(--cx-radius-sm);
+  transition: background 200ms, box-shadow 200ms;
+}
+.guide-live-editor .editor-group.is-type-highlight {
+  background: rgba(74,111,165,0.06);
+  box-shadow: inset 0 0 0 1.5px rgba(74,111,165,0.2);
 }
 
 /* ─── Guide: Favicon demo ──────────────────────────────────────────── */

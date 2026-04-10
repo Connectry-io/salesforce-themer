@@ -713,8 +713,8 @@
           </div>
         </div>
         <div class="guide-live-panel">
-          <div class="guide-live-editor">
-            <div class="editor-group">
+          <div class="guide-live-editor" id="guideTypeEditor">
+            <div class="editor-group" data-type-seg="font">
               <h3 class="editor-group-title">Font Family</h3>
               <div class="editor-field">
                 <label>Heading Font</label>
@@ -738,7 +738,7 @@
                 </select>
               </div>
             </div>
-            <div class="editor-group">
+            <div class="editor-group" data-type-seg="size">
               <h3 class="editor-group-title">Size</h3>
               <div class="editor-type-presets" id="guideTypeSizeBtns">
                 <button type="button" class="editor-type-preset" data-scale="0.9">
@@ -779,7 +779,7 @@
                 </select>
               </div>
             </div>
-            <div class="editor-group">
+            <div class="editor-group" data-type-seg="spacing">
               <h3 class="editor-group-title">Spacing</h3>
               <div class="editor-field">
                 <label>Line Height</label>
@@ -810,54 +810,58 @@
             </div>
             <div class="guide-live-preview-sep"></div>
             <div class="guide-live-preview-block">
-              <div class="guide-live-preview-table" id="guideTypeTableHead">Name &nbsp;&nbsp; Email &nbsp;&nbsp; Status &nbsp;&nbsp; Last Modified</div>
-              <span class="guide-live-preview-where">Table headers — related lists, list views, reports</span>
-            </div>
-            <div class="guide-live-preview-sep"></div>
-            <div class="guide-live-preview-block">
               <div class="guide-live-preview-nav" id="guideTypeNav">Home &nbsp; Leads &nbsp; Contacts &nbsp; Opportunities</div>
               <span class="guide-live-preview-where">Navigation — app tabs at the top of every page</span>
             </div>
 
             <!-- Stencil card: wireframe with live typography row -->
-            <div class="guide-type-stencil-wrap">
-            <div class="guide-type-stencil-label">On every theme card</div>
-            <div class="guide-type-stencil-row">
-              <div class="guide-type-stencil">
-                <!-- Abstract swatch -->
-                <div class="stencil-swatch"><span></span><span></span><span></span><span></span></div>
-                <!-- Abstract name + badge -->
-                <div class="stencil-line-row">
-                  <span class="stencil-line" style="width:55%"></span>
-                  <span class="stencil-badge"></span>
-                </div>
-                <!-- Abstract description -->
-                <span class="stencil-line" style="width:80%"></span>
-                <!-- Abstract effect pills -->
-                <div class="stencil-line-row">
-                  <span class="stencil-pill"></span>
-                  <span class="stencil-pill"></span>
-                </div>
-                <!-- REAL typography row — highlighted -->
-                <div class="stencil-type-row" id="guideStencilTypeRow">
-                  <span class="stencil-type-aa" id="guideTypeExampleAa">Aa</span>
-                  <span class="stencil-type-text" id="guideTypeExampleLabel">System Default · Normal · 1.375/0</span>
-                </div>
-                <!-- Abstract actions -->
-                <div class="stencil-line-row stencil-actions">
-                  <span class="stencil-line" style="width:35%"></span>
-                  <span class="stencil-line" style="width:25%"></span>
-                </div>
+            <div class="guide-type-stencil-wrap" id="guideTypeStencilWrap">
+              <div class="guide-type-stencil-header">
+                <div class="guide-type-stencil-label">Reading the card</div>
+                <p class="guide-type-stencil-desc">Not every setting fits on a card, so we picked the three with the biggest impact on how Salesforce feels.</p>
               </div>
-              <ol class="guide-type-stencil-legend">
-                <li><strong>Aa</strong> rendered in the actual font</li>
-                <li><strong>Body font</strong> family name</li>
-                <li><strong>Size</strong> scale preset</li>
-                <li><strong>Spacing</strong> — line-height / letter-spacing</li>
-              </ol>
+              <div class="guide-type-stencil-row">
+                <div class="guide-type-stencil">
+                  <!-- Abstract swatch -->
+                  <div class="stencil-swatch"><span></span><span></span><span></span><span></span></div>
+                  <!-- Abstract name + badge -->
+                  <div class="stencil-line-row">
+                    <span class="stencil-line" style="width:55%"></span>
+                    <span class="stencil-badge"></span>
+                  </div>
+                  <!-- Abstract description -->
+                  <span class="stencil-line" style="width:80%"></span>
+                  <!-- Abstract effect pills -->
+                  <div class="stencil-line-row">
+                    <span class="stencil-pill"></span>
+                    <span class="stencil-pill"></span>
+                  </div>
+                  <!-- REAL typography row — highlighted, with hover targets -->
+                  <div class="stencil-type-row" id="guideStencilTypeRow">
+                    <span class="stencil-type-aa" id="guideTypeExampleAa" data-type-seg="aa">Aa</span>
+                    <span class="stencil-type-text" id="guideTypeExampleLabel">
+                      <span data-type-seg="font">System Default</span>
+                      <span class="stencil-type-sep"> · </span>
+                      <span data-type-seg="size">Normal</span>
+                      <span class="stencil-type-sep"> · </span>
+                      <span data-type-seg="spacing">1.375/0</span>
+                    </span>
+                  </div>
+                  <!-- Abstract actions -->
+                  <div class="stencil-line-row stencil-actions">
+                    <span class="stencil-line" style="width:35%"></span>
+                    <span class="stencil-line" style="width:25%"></span>
+                  </div>
+                </div>
+                <ol class="guide-type-stencil-legend">
+                  <li data-type-seg="aa"><span class="stencil-legend-marker">Aa</span> rendered in the actual font</li>
+                  <li data-type-seg="font"><span class="stencil-legend-marker">Body font</span> family name</li>
+                  <li data-type-seg="size"><span class="stencil-legend-marker">Size</span> scale preset</li>
+                  <li data-type-seg="spacing"><span class="stencil-legend-marker">Spacing</span> line-height / letter-spacing</li>
+                </ol>
+              </div>
+              <p class="guide-type-stencil-note">Weight and heading font are in the Builder but not on cards — less visible at a glance.</p>
             </div>
-            <p class="guide-type-stencil-note">Weight and heading font are in the Builder but not shown on cards — they're less visible at a glance.</p>
-          </div>
         </div>
         </div>
       </section>
