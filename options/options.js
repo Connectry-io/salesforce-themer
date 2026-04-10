@@ -3631,7 +3631,6 @@
         heading: document.getElementById('guideTypeHeading'),
         meta: document.getElementById('guideTypeMeta'),
         body: document.getElementById('guideTypeBody'),
-        nav: document.getElementById('guideTypeNav'),
       };
 
       const lhSlider = document.getElementById('guideTypeLineHeight');
@@ -3646,7 +3645,6 @@
       if (els.heading) { els.heading.style.fontFamily = headingStack; els.heading.style.fontSize = `${20 * scale}px`; els.heading.style.fontWeight = headingWeight; }
       if (els.meta) { els.meta.style.fontFamily = bodyStack; els.meta.style.fontSize = `${13 * scale}px`; }
       if (els.body) { els.body.style.fontFamily = bodyStack; els.body.style.fontSize = `${13 * scale}px`; els.body.style.fontWeight = bodyWeight; }
-      if (els.nav) { els.nav.style.fontFamily = bodyStack; els.nav.style.fontSize = `${12 * scale}px`; }
 
       // Update the "Reading the card" example row below the demo
       // Update stencil type row — individual spans for hover highlighting
