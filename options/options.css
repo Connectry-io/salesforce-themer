@@ -1839,37 +1839,56 @@
   background: var(--cx-surface);
 }
 
+/* Editor layout: a horizontal sub-tab bar across the top, then the
+   panel + preview side-by-side below. Both .editor-colors and
+   .editor-effects share the "panel" grid area — only one is visible
+   at a time (the other is [hidden]). */
 .editor-layout {
   display: grid;
-  grid-template-columns: 76px 360px 1fr;
-  gap: var(--cx-space-5);
+  grid-template-areas:
+    "tabs    tabs"
+    "panel   preview";
+  grid-template-columns: minmax(360px, 1fr) minmax(440px, 1.25fr);
+  grid-template-rows: auto 1fr;
+  gap: var(--cx-space-4);
   align-items: start;
 }
 
-/* Vertical sub-tab rail (replaces the horizontal toolbar pills) */
-.editor-subtab-rail {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  background: var(--cx-surface);
-  border: 1px solid var(--cx-border);
-  border-radius: var(--cx-radius-lg);
-  box-shadow: var(--cx-shadow-sm);
-  padding: 8px 6px;
-  position: sticky;
-  top: var(--cx-space-4);
+@media (max-width: 1100px) {
+  .editor-layout {
+    grid-template-areas:
+      "tabs"
+      "panel"
+      "preview";
+    grid-template-columns: 1fr;
+  }
 }
 
-.editor-subtab-vert {
-  display: flex;
-  flex-direction: column;
+/* Horizontal sub-tab bar — sits at the top of the editor content area
+   spanning both columns. Tabs are inline-flex so the bar doesn't stretch
+   to fill, leaving room for breathing space on the right. */
+.editor-subtab-bar {
+  grid-area: tabs;
+  display: inline-flex;
   align-items: center;
-  justify-content: center;
-  gap: 4px;
-  padding: 10px 4px;
+  gap: 2px;
+  background: var(--cx-surface);
+  border: 1px solid var(--cx-border);
+  border-radius: var(--cx-radius-md);
+  box-shadow: var(--cx-shadow-sm);
+  padding: 4px;
+  width: fit-content;
+}
+
+.editor-subtab {
+  display: inline-flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
   background: transparent;
   border: 1px solid transparent;
-  border-radius: var(--cx-radius-md);
+  border-radius: var(--cx-radius-sm);
   font-family: var(--cx-font);
   font-size: 11px;
   font-weight: 600;
@@ -1880,39 +1899,36 @@
   outline: none;
 }
 
-.editor-subtab-vert svg {
+.editor-subtab svg {
   opacity: 0.7;
   transition: opacity var(--cx-transition);
 }
 
-.editor-subtab-vert:hover:not(.is-disabled) {
+.editor-subtab:hover:not(.is-disabled) {
   background: var(--cx-surface-alt);
   color: var(--cx-text);
 }
 
-.editor-subtab-vert:hover:not(.is-disabled) svg {
+.editor-subtab:hover:not(.is-disabled) svg {
   opacity: 1;
 }
 
-.editor-subtab-vert.is-active {
+.editor-subtab.is-active {
   background: var(--cx-accent);
   color: #ffffff;
   border-color: var(--cx-accent);
 }
 
-.editor-subtab-vert.is-active svg {
+.editor-subtab.is-active svg {
   opacity: 1;
 }
 
-.editor-subtab-vert.is-disabled {
+.editor-subtab.is-disabled {
   cursor: not-allowed;
   opacity: 0.55;
 }
 
-.editor-subtab-vert-soon {
-  position: absolute;
-  top: 4px;
-  right: 4px;
+.editor-subtab-soon {
   font-style: normal;
   font-size: 8px;
   font-weight: 700;
@@ -1920,12 +1936,12 @@
   letter-spacing: 0.04em;
   background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
   color: #8a6510;
-  padding: 1px 4px;
-  border-radius: 6px;
+  padding: 1px 5px;
+  border-radius: var(--cx-radius-full);
   border: 1px solid #d4a22a;
 }
 
-.editor-subtab-vert:focus-visible {
+.editor-subtab:focus-visible {
   outline: 2px solid var(--cx-accent);
   outline-offset: 2px;
 }
@@ -1969,9 +1985,17 @@
 }
 
 /* ─── Builder tab: sidebar + main pane (Option 2 layout) ─────────────── */
+/* The Builder gets a wider canvas than the rest of the options page —
+   the editor needs the breathing room. Other tabs (Guide, About, etc.)
+   stay at the standard --cx-max-width. Uses :has() so the body widens
+   only when the Builder tabpanel is the visible one. */
+body:has(.cx-tabpanel[data-tabpanel="builder"]:not([hidden])) .cx-main {
+  max-width: 1480px;
+}
+
 .builder-layout {
   display: grid;
-  grid-template-columns: 280px 1fr;
+  grid-template-columns: 260px 1fr;
   gap: var(--cx-space-6);
   align-items: start;
 }
@@ -2297,7 +2321,9 @@
   overflow: hidden;
 }
 
-.editor-colors { padding: 0; }
+.editor-colors { padding: 0; grid-area: panel; }
+.editor-effects { grid-area: panel; }
+.editor-preview { grid-area: preview; }
 
 .editor-group {
   padding: var(--cx-space-4) var(--cx-space-5);

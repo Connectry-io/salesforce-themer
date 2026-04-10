@@ -1645,8 +1645,9 @@
       openEditor('connectry', null);
     });
 
-    // Editor sub-tabs (Colors / Effects) — vertical rail in editor layout
-    document.querySelectorAll('.editor-subtab-vert[data-editor-subtab]').forEach(btn => {
+    // Editor sub-tabs (Colors / Effects / Type-soon / Icon-soon) —
+    // horizontal bar at the top of the editor content area
+    document.querySelectorAll('.editor-subtab[data-editor-subtab]').forEach(btn => {
       btn.addEventListener('click', () => {
         if (btn.disabled || btn.classList.contains('is-disabled')) return;
         const target = btn.dataset.editorSubtab;
@@ -1674,7 +1675,7 @@
     colorsPanel.hidden = isEffects;
     effectsPanel.hidden = !isEffects;
 
-    document.querySelectorAll('.editor-subtab-vert[data-editor-subtab]').forEach(b => {
+    document.querySelectorAll('.editor-subtab[data-editor-subtab]').forEach(b => {
       const active = b.dataset.editorSubtab === target;
       b.classList.toggle('is-active', active);
       b.setAttribute('aria-selected', String(active));
