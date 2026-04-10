@@ -64,7 +64,8 @@
         "themes/themes.json",
         "content/themes/*.css",
         "effects/effects.js",
-        "effects/presets.js"
+        "effects/presets.js",
+        "favicons/*.svg"
       ],
       "matches": [
         "https://*.salesforce.com/*",

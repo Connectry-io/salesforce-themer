@@ -179,6 +179,57 @@
     return response.text();
   }
 
+  // ─── Favicon injection ────────────────────────────────────────────────────
+
+  const FAVICON_LINK_ID = 'sf-themer-favicon';
+  let _originalFavicons = null;
+
+  function _saveOriginalFavicons() {
+    if (_originalFavicons !== null) return;
+    _originalFavicons = [];
+    document.querySelectorAll('link[rel*="icon"]').forEach(link => {
+      _originalFavicons.push({ rel: link.rel, href: link.href, type: link.type, sizes: link.sizes?.value });
+    });
+  }
+
+  function applyFavicon(enabled) {
+    if (!enabled) {
+      removeFavicon();
+      return;
+    }
+    _saveOriginalFavicons();
+    // Remove all existing favicons so ours takes priority
+    document.querySelectorAll('link[rel*="icon"]').forEach(link => {
+      if (link.id !== FAVICON_LINK_ID) link.remove();
+    });
+    let link = document.getElementById(FAVICON_LINK_ID);
+    if (!link) {
+      link = document.createElement('link');
+      link.id = FAVICON_LINK_ID;
+      link.rel = 'icon';
+      link.type = 'image/svg+xml';
+      (document.head || document.documentElement).appendChild(link);
+    }
+    link.href = chrome.runtime.getURL('favicons/connectry.svg');
+  }
+
+  function removeFavicon() {
+    const ours = document.getElementById(FAVICON_LINK_ID);
+    if (ours) ours.remove();
+    // Restore original favicons
+    if (_originalFavicons && _originalFavicons.length) {
+      for (const f of _originalFavicons) {
+        const link = document.createElement('link');
+        link.rel = f.rel;
+        link.href = f.href;
+        if (f.type) link.type = f.type;
+        if (f.sizes) link.sizes = f.sizes;
+        (document.head || document.documentElement).appendChild(link);
+      }
+    }
+    _originalFavicons = null;
+  }
+
   // ─── Effects layer ────────────────────────────────────────────────────────
 
   function removeEffectsStyles() {
@@ -453,6 +504,12 @@
       return false;
     }
 
+    if (message.action === 'setFavicon') {
+      applyFavicon(!!message.enabled);
+      sendResponse({ success: true });
+      return false;
+    }
+
     if (message.action === 'setEffects') {
       // Direct effects config update (from popup/options)
       if (currentTheme && currentTheme !== 'none') {
@@ -505,6 +562,7 @@
         lastDarkTheme: 'connectry-dark',
         orgThemes: {},
         themeScope: 'lightning',
+        faviconEnabled: true,
       });
 
       if (!shouldApplyToPage(syncResult.themeScope)) {
@@ -527,6 +585,9 @@
 
       // Load effects layer after theme is applied
       loadAndApplyEffects(themeName);
+
+      // Favicon — Connectry branding on free themes, toggleable
+      applyFavicon(syncResult.faviconEnabled);
     } catch (err) {
       if (isExtensionContextDead(err)) {
         handleDeadContext();

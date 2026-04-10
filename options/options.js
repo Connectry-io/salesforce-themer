@@ -1148,6 +1148,9 @@
     // Typography controls (font picker, size presets, fine-tune sliders)
     _bindTypographyControls();
 
+    // Favicon toggle
+    _bindFaviconToggle();
+
     // (Top bar Save is wired in bindEditorEvents via builderTopbarSave)
 
     // Builder top bar: Build with AI → toggles the right-side chat drawer
@@ -2001,6 +2004,48 @@
     const ls = el('editorTypeLetterSpacing');
     if (ls) { ls.value = t.letterSpacing; el('editorTypeLetterSpacingValue').textContent = t.letterSpacing + 'em'; }
   }
+
+  // ─── Favicon toggle ─────────────────────────────────────────────────────
+
+  async function _bindFaviconToggle() {
+    const toggle = document.getElementById('editorFaviconToggle');
+    const slot = document.getElementById('editorFaviconSlot');
+    if (!toggle || !slot) return;
+
+    // Load stored state
+    const { faviconEnabled = true } = await chrome.storage.sync.get('faviconEnabled');
+    toggle.checked = faviconEnabled;
+    slot.classList.toggle('is-off', !faviconEnabled);
+
+    // Update preview favicon
+    _updatePreviewFavicon(faviconEnabled);
+
+    toggle.addEventListener('change', async () => {
+      const enabled = toggle.checked;
+      await chrome.storage.sync.set({ faviconEnabled: enabled });
+      slot.classList.toggle('is-off', !enabled);
+      _updatePreviewFavicon(enabled);
+
+      // Push to all active SF tabs
+      try {
+        const tabs = await chrome.tabs.query({
+          url: ['https://*.lightning.force.com/*', 'https://*.my.salesforce.com/*', 'https://*.salesforce.com/*'],
+        });
+        for (const tab of tabs) {
+          if (tab.id) chrome.tabs.sendMessage(tab.id, { action: 'setFavicon', enabled }).catch(() => {});
+        }
+      } catch (_) {}
+    });
+  }
+
+  function _updatePreviewFavicon(enabled) {
+    const faviconEl = document.getElementById('previewNavFavicon');
+    if (faviconEl) {
+      faviconEl.style.opacity = enabled ? '' : '0.15';
+    }
+  }
+
+  // ─── Typography controls ───────────────────────────────────────────────────
 
   let _typographyBound = false;
   function _bindTypographyControls() {
