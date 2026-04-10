@@ -37,7 +37,7 @@ body {
   font-family: var(--font);
   background: var(--color-bg);
   color: var(--color-text);
-  width: 320px;
+  width: 380px;
   min-height: 100px;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -579,15 +579,59 @@ body {
   gap: 6px;
 }
 
+.theme-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
 .theme-group-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
   font-size: 10px;
   font-weight: 700;
   letter-spacing: 0.06em;
   text-transform: uppercase;
   color: var(--color-text);
-  padding-bottom: 5px;
+  padding: 4px 0 5px;
   border-bottom: 1.5px solid var(--color-border-hover);
   margin-top: 6px;
+  background: transparent;
+  border-left: none;
+  border-right: none;
+  border-top: none;
+  width: 100%;
+  cursor: pointer;
+  user-select: none;
+  font-family: var(--font);
+}
+
+.theme-group-label:hover {
+  color: var(--color-accent);
+}
+
+.theme-group-label-chevron {
+  display: inline-flex;
+  width: 10px;
+  height: 10px;
+  transition: transform var(--transition);
+}
+
+.theme-group.is-collapsed .theme-group-label-chevron {
+  transform: rotate(-90deg);
+}
+
+.theme-group-label-count {
+  margin-left: auto;
+  font-size: 9px;
+  font-weight: 600;
+  color: var(--color-text-subtle);
+  letter-spacing: 0.02em;
+}
+
+.theme-group.is-collapsed .themes-grid {
+  display: none;
 }
 
 /* ─── Theme Grid ─────────────────────────────────────────────────────────── */
@@ -619,7 +663,14 @@ body {
   box-shadow: var(--shadow-sm);
   outline: none;
   -webkit-tap-highlight-color: transparent;
+  /* Uniform card height — every section in the card reserves a fixed
+     amount of vertical space so cards in the same row line up regardless
+     of description length or effect count. */
+  height: 100%;
 }
+
+.theme-card .theme-info { flex: 1 1 auto; }
+.theme-card .theme-clone-row { margin-top: auto; }
 
 .theme-card:hover {
   border-color: var(--color-border-hover);
@@ -684,25 +735,31 @@ body {
   letter-spacing: -0.1px;
 }
 
-/* Description in popup cards (mirrors options page) */
+/* Description in popup cards (mirrors options page).
+   min-height reserves the space for two lines even when the description is
+   only one line — this is what makes cards uniform-height across a row. */
 .theme-desc-popup {
   font-size: 10px;
   line-height: 1.45;
   color: var(--color-text-muted);
   margin-top: 1px;
-  /* Two-line clamp keeps cards from getting too tall on long descriptions */
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
+  min-height: calc(10px * 1.45 * 2); /* exactly 2 line-heights */
 }
 
-/* Effect pills in popup cards (mini version of options page pills) */
+/* Effect pills in popup cards. Forced to a single row + fixed height so
+   cards never grow vertically based on how many effects a theme has. */
 .theme-effects-pills {
   display: flex;
   gap: 3px;
-  margin-top: 3px;
-  flex-wrap: wrap;
+  margin-top: 4px;
+  flex-wrap: nowrap;
+  overflow: hidden;
+  height: 16px;
+  align-items: center;
 }
 
 .theme-effects-pills.is-empty {
@@ -711,7 +768,10 @@ body {
   color: var(--color-text-subtle);
   letter-spacing: 0.04em;
   text-transform: uppercase;
-  margin-top: 3px;
+  margin-top: 4px;
+  height: 16px;
+  display: flex;
+  align-items: center;
 }
 
 .theme-effect-pill {

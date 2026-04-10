@@ -66,15 +66,44 @@
     cursorTrail: 'Cursor trail',
   };
 
+  // ─── Theme group collapse persistence ─────────────────────────────────────
+  // Stored as a comma-separated list of collapsed group keys in localStorage.
+  // Light + Dark are tracked independently so the user can fold either one.
+  const POPUP_GROUP_COLLAPSE_KEY = 'sft-popup-collapsed-groups';
+
+  function _isGroupCollapsed(key) {
+    try {
+      const raw = localStorage.getItem(POPUP_GROUP_COLLAPSE_KEY) || '';
+      return raw.split(',').includes(key);
+    } catch (_) {
+      return false;
+    }
+  }
+
+  function _setGroupCollapsed(key, collapsed) {
+    try {
+      const raw = localStorage.getItem(POPUP_GROUP_COLLAPSE_KEY) || '';
+      const set = new Set(raw.split(',').filter(Boolean));
+      if (collapsed) set.add(key);
+      else set.delete(key);
+      localStorage.setItem(POPUP_GROUP_COLLAPSE_KEY, Array.from(set).join(','));
+    } catch (_) {}
+  }
+
   function buildPopupEffectPills(themeId) {
     const effects = POPUP_THEME_EFFECTS[themeId] || [];
     if (!effects.length) {
       return '<div class="theme-effects-pills is-empty">No effects</div>';
     }
-    const pills = effects.slice(0, 3).map(e =>
+    // 2 visible pills max — the row is a fixed height so a third pill would
+    // overflow. The "+N" badge always shows the remainder.
+    const VISIBLE = 2;
+    const pills = effects.slice(0, VISIBLE).map(e =>
       `<span class="theme-effect-pill" title="${POPUP_EFFECT_LABELS[e] || e}">${POPUP_EFFECT_LABELS[e] || e}</span>`
     ).join('');
-    const more = effects.length > 3 ? `<span class="theme-effect-pill-more">+${effects.length - 3}</span>` : '';
+    const more = effects.length > VISIBLE
+      ? `<span class="theme-effect-pill-more">+${effects.length - VISIBLE}</span>`
+      : '';
     return `<div class="theme-effects-pills">${pills}${more}</div>`;
   }
 
@@ -86,15 +115,38 @@
     const darkThemes = THEMES.filter(t => t.category === 'dark');
 
     const groups = [
-      { label: 'Light Themes', themes: lightThemes },
-      { label: 'Dark Themes', themes: darkThemes },
+      { key: 'light', label: 'Light Themes', themes: lightThemes },
+      { key: 'dark', label: 'Dark Themes', themes: darkThemes },
     ];
 
     for (const group of groups) {
-      const label = document.createElement('div');
+      // Each group is a collapsible container: clickable label header +
+      // grid body. Collapsed state persists in localStorage per group key.
+      const groupKey = group.key;
+      const collapsed = _isGroupCollapsed(groupKey);
+
+      const groupEl = document.createElement('div');
+      groupEl.className = `theme-group${collapsed ? ' is-collapsed' : ''}`;
+      groupEl.dataset.groupKey = groupKey;
+
+      const label = document.createElement('button');
+      label.type = 'button';
       label.className = 'theme-group-label';
-      label.textContent = group.label;
-      section.appendChild(label);
+      label.setAttribute('aria-expanded', String(!collapsed));
+      label.innerHTML = `
+        <svg class="theme-group-label-chevron" viewBox="0 0 10 10" fill="none" aria-hidden="true">
+          <path d="M2 3.5l3 3 3-3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <span>${group.label}</span>
+        <span class="theme-group-label-count">${group.themes.length}</span>
+      `;
+      label.addEventListener('click', () => {
+        const nowCollapsed = !groupEl.classList.contains('is-collapsed');
+        groupEl.classList.toggle('is-collapsed', nowCollapsed);
+        label.setAttribute('aria-expanded', String(!nowCollapsed));
+        _setGroupCollapsed(groupKey, nowCollapsed);
+      });
+      groupEl.appendChild(label);
 
       const grid = document.createElement('div');
       grid.className = 'themes-grid';
@@ -112,17 +164,15 @@
           .map(col => `<span style="background:${col};"></span>`)
           .join('');
 
-        const isDefault = theme.isDefault;
-        const descOrTag = isDefault
-          ? `<span class="theme-tag">Default</span>`
-          : `<span class="theme-desc">${theme.tags[0] || ''}</span>`;
+        // No more DEFAULT badge — the active-ring already conveys which
+        // theme is currently selected, and Connectry-as-default is implicit
+        // because it's the first card on first install.
 
         btn.innerHTML = `
           <div class="theme-swatch">${swatchHtml}</div>
           <div class="theme-info">
             <div class="theme-name-row">
               <span class="theme-name">${theme.name}</span>
-              ${descOrTag}
             </div>
             <div class="theme-desc-popup">${theme.description || ''}</div>
             ${buildPopupEffectPills(theme.id)}
@@ -147,7 +197,8 @@
         grid.appendChild(btn);
       }
 
-      section.appendChild(grid);
+      groupEl.appendChild(grid);
+      section.appendChild(groupEl);
     }
 
     // Bind off button
