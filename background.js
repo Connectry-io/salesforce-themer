@@ -1291,7 +1291,11 @@ async function cacheCustomThemeCSS(themeId) {
       custom.advancedOverrides || {}
     );
 
-    const css = generateThemeCSS({ id: themeId, colors: resolvedColors });
+    const css = generateThemeCSS({
+      id: themeId,
+      colors: resolvedColors,
+      typography: custom.typography || null,
+    });
     await chrome.storage.local.set({ [`themeCSS_${themeId}`]: css });
   } catch (err) {
     console.error('[Salesforce Themer] Failed to cache custom theme CSS:', themeId, err);

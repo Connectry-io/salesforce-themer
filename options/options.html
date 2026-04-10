@@ -784,6 +784,17 @@
               <span class="cx-toggle-track"><span class="cx-toggle-thumb"></span></span>
             </label>
           </div>
+          <div class="dev-panel-divider"></div>
+          <div class="dev-panel-row dev-panel-row-block">
+            <div class="dev-panel-info">
+              <div class="dev-panel-name">Theme Diagnostic</div>
+              <div class="dev-panel-desc">Check if CSS tokens are landing on an active Salesforce tab. Tests both SLDS 1 (<code>--lwc-*</code>) and SLDS 2 (<code>--slds-g-*</code>) tokens, plus typography overrides.</div>
+            </div>
+            <button class="cx-btn cx-btn-outline" id="devDiagnosticBtn" type="button">Run Diagnostic</button>
+            <div class="dev-diagnostic-results" id="devDiagnosticResults" hidden>
+              <!-- Populated by JS -->
+            </div>
+          </div>
         </div>
 
       </section>
@@ -1334,80 +1345,107 @@
           </div>
         </div>
 
-        <!-- Typography panel — greyed-out preview of upcoming Premium feature -->
+        <!-- Typography panel — real controls, wired to editorState.typography -->
         <div class="editor-panel editor-type" id="editorTypePanel" hidden>
-          <div class="editor-type-overlay">
-            <div class="editor-type-overlay-badge">Premium · Soon</div>
-            <p class="editor-type-overlay-text">Custom typography is coming to Premium. Preview the controls below.</p>
-          </div>
-          <div class="editor-type-fields">
-            <div class="editor-group">
-              <h3 class="editor-group-title">Font Family</h3>
-              <div class="editor-field">
-                <label>Heading Font</label>
-                <select class="editor-select" disabled>
-                  <option>Salesforce Sans (default)</option>
-                  <option>Inter</option>
-                  <option>System UI</option>
-                  <option>Georgia (serif)</option>
-                  <option>JetBrains Mono</option>
-                </select>
-              </div>
-              <div class="editor-field">
-                <label>Body Font</label>
-                <select class="editor-select" disabled>
-                  <option>Salesforce Sans (default)</option>
-                  <option>Inter</option>
-                  <option>System UI</option>
-                  <option>Georgia (serif)</option>
-                  <option>JetBrains Mono</option>
-                </select>
-              </div>
+
+          <!-- Font Family -->
+          <div class="editor-group">
+            <h3 class="editor-group-title">Font Family</h3>
+            <div class="editor-field">
+              <label>Body Font</label>
+              <select class="editor-select" id="editorTypeFontFamily">
+                <option value="system-ui">System Default</option>
+                <option value="neo-grotesque">Neo-Grotesque</option>
+                <option value="humanist">Humanist</option>
+                <option value="geometric">Geometric</option>
+                <option value="classic-serif">Classic Serif</option>
+              </select>
             </div>
-            <div class="editor-group">
-              <h3 class="editor-group-title">Scale</h3>
+            <div class="editor-field">
+              <label>Heading Font</label>
+              <select class="editor-select" id="editorTypeFontFamilyHeading">
+                <option value="">Same as body</option>
+                <option value="system-ui">System Default</option>
+                <option value="neo-grotesque">Neo-Grotesque</option>
+                <option value="humanist">Humanist</option>
+                <option value="geometric">Geometric</option>
+                <option value="classic-serif">Classic Serif</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Size Presets -->
+          <div class="editor-group">
+            <h3 class="editor-group-title">Size</h3>
+            <div class="editor-type-presets" id="editorTypeSizePresets">
+              <button type="button" class="editor-type-preset" data-preset="compact">
+                <span class="editor-type-preset-icon" style="font-size:10px">A</span>
+                <span>Compact</span>
+              </button>
+              <button type="button" class="editor-type-preset is-active" data-preset="normal">
+                <span class="editor-type-preset-icon" style="font-size:12px">A</span>
+                <span>Normal</span>
+              </button>
+              <button type="button" class="editor-type-preset" data-preset="comfortable">
+                <span class="editor-type-preset-icon" style="font-size:14px">A</span>
+                <span>Comfortable</span>
+              </button>
+              <button type="button" class="editor-type-preset" data-preset="large">
+                <span class="editor-type-preset-icon" style="font-size:16px">A</span>
+                <span>Large</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Fine-tune (collapsible) -->
+          <details class="editor-type-details" id="editorTypeDetails">
+            <summary class="editor-type-details-summary">
+              <svg width="10" height="10" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+                <path d="M4 2l4 4-4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              Fine-tune
+            </summary>
+            <div class="editor-type-details-body">
               <div class="editor-field">
-                <label>Base Size</label>
+                <label>Size Scale</label>
                 <div class="editor-type-slider-row">
-                  <input type="range" class="editor-type-slider" min="12" max="18" value="14" disabled />
-                  <span class="editor-type-slider-value">14px</span>
+                  <input type="range" class="editor-type-slider" id="editorTypeSizeScale" min="0.8" max="1.4" step="0.05" value="1.0" />
+                  <span class="editor-type-slider-value" id="editorTypeSizeScaleValue">1.0×</span>
                 </div>
               </div>
               <div class="editor-field">
-                <label>Heading Scale</label>
-                <div class="editor-type-slider-row">
-                  <input type="range" class="editor-type-slider" min="1.1" max="1.5" step="0.05" value="1.25" disabled />
-                  <span class="editor-type-slider-value">1.25</span>
-                </div>
+                <label>Body Weight</label>
+                <select class="editor-select" id="editorTypeWeightBody">
+                  <option value="300">Light (300)</option>
+                  <option value="400" selected>Regular (400)</option>
+                  <option value="500">Medium (500)</option>
+                </select>
+              </div>
+              <div class="editor-field">
+                <label>Heading Weight</label>
+                <select class="editor-select" id="editorTypeWeightHeading">
+                  <option value="400">Regular (400)</option>
+                  <option value="500">Medium (500)</option>
+                  <option value="600">Semi-bold (600)</option>
+                  <option value="700" selected>Bold (700)</option>
+                </select>
               </div>
               <div class="editor-field">
                 <label>Line Height</label>
                 <div class="editor-type-slider-row">
-                  <input type="range" class="editor-type-slider" min="1.2" max="2.0" step="0.05" value="1.5" disabled />
-                  <span class="editor-type-slider-value">1.5</span>
+                  <input type="range" class="editor-type-slider" id="editorTypeLineHeight" min="1.1" max="1.8" step="0.025" value="1.375" />
+                  <span class="editor-type-slider-value" id="editorTypeLineHeightValue">1.375</span>
+                </div>
+              </div>
+              <div class="editor-field">
+                <label>Letter Spacing</label>
+                <div class="editor-type-slider-row">
+                  <input type="range" class="editor-type-slider" id="editorTypeLetterSpacing" min="-0.03" max="0.08" step="0.005" value="0" />
+                  <span class="editor-type-slider-value" id="editorTypeLetterSpacingValue">0em</span>
                 </div>
               </div>
             </div>
-            <div class="editor-group">
-              <h3 class="editor-group-title">Weight</h3>
-              <div class="editor-field">
-                <label>Heading Weight</label>
-                <select class="editor-select" disabled>
-                  <option>Bold (700)</option>
-                  <option>Semi-bold (600)</option>
-                  <option>Medium (500)</option>
-                </select>
-              </div>
-              <div class="editor-field">
-                <label>Body Weight</label>
-                <select class="editor-select" disabled>
-                  <option>Regular (400)</option>
-                  <option>Medium (500)</option>
-                  <option>Light (300)</option>
-                </select>
-              </div>
-            </div>
-          </div>
+          </details>
         </div>
 
           </div><!-- /.editor-card-body -->

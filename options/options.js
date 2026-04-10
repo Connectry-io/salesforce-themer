@@ -70,6 +70,36 @@
     return colors.map(col => `<span style="background:${col};"></span>`).join('');
   }
 
+  // ─── Typography constants ──────────────────────────────────────────────────
+
+  const FONT_STACKS = {
+    'system-ui':      'system-ui, sans-serif',
+    'neo-grotesque':  "Inter, Roboto, 'Helvetica Neue', 'Arial Nova', 'Nimbus Sans', Arial, sans-serif",
+    'humanist':       "Seravek, 'Gill Sans Nova', Ubuntu, Calibri, 'DejaVu Sans', source-sans-pro, sans-serif",
+    'geometric':      "Avenir, Montserrat, Corbel, 'URW Gothic', source-sans-pro, sans-serif",
+    'classic-serif':  "Charter, 'Bitstream Charter', 'Sitka Text', Cambria, serif",
+  };
+
+  const TYPE_SIZE_PRESETS = {
+    compact:     0.9,
+    normal:      1.0,
+    comfortable: 1.1,
+    large:       1.2,
+  };
+
+  function defaultTypography() {
+    return {
+      fontFamily: 'system-ui',
+      fontFamilyHeading: '',
+      sizePreset: 'normal',
+      sizeScale: 1.0,
+      weightBody: 400,
+      weightHeading: 700,
+      lineHeight: 1.375,
+      letterSpacing: 0,
+    };
+  }
+
   // ─── Theme grid rendering ─────────────────────────────────────────────────
 
   // Effect display names — used by the theme card pills and the Guide tab.
@@ -1115,6 +1145,9 @@
     // Builder top bar: theme switcher dropdown
     _bindThemeSwitcher();
 
+    // Typography controls (font picker, size presets, fine-tune sliders)
+    _bindTypographyControls();
+
     // (Top bar Save is wired in bindEditorEvents via builderTopbarSave)
 
     // Builder top bar: Build with AI → toggles the right-side chat drawer
@@ -1444,6 +1477,7 @@
     customId: null,         // custom-TIMESTAMP or null (new)
     coreOverrides: {},
     advancedOverrides: {},
+    typography: defaultTypography(),
   };
 
   function getEditorCoreValues() {
@@ -1517,6 +1551,9 @@
       document.getElementById('editorName').value = customTheme.name;
       const descEl = document.getElementById('editorDescription');
       if (descEl) descEl.value = customTheme.description || '';
+      editorState.typography = customTheme.typography
+        ? { ...defaultTypography(), ...customTheme.typography }
+        : defaultTypography();
     } else {
       editorState.customId = null;
       editorState.coreOverrides = {};
@@ -1530,6 +1567,7 @@
       document.getElementById('editorName').value = base ? `My ${base.name}` : 'My Custom Theme';
       const descEl = document.getElementById('editorDescription');
       if (descEl) descEl.value = base?.description ? base.description : '';
+      editorState.typography = defaultTypography();
     }
 
     // The editor is permanently embedded in the Builder layout — no
@@ -1549,6 +1587,7 @@
 
     populateEditorFields();
     renderAdvancedPanel();
+    populateTypographyUI();
     updatePreview();
 
     // Sync the top bar theme switcher trigger — the swatch + name need
@@ -1682,8 +1721,36 @@
       if (full[key]) el.style.borderBottomColor = full[key];
     });
 
+    // Apply typography to preview
+    applyEditorPreviewTypography();
+
     // Apply effects (CSS-driven, sandboxed to the preview frame)
     applyEditorPreviewEffects();
+  }
+
+  function applyEditorPreviewTypography() {
+    const frame = document.getElementById('editorPreview');
+    if (!frame) return;
+    const t = editorState.typography;
+    const bodyStack = FONT_STACKS[t.fontFamily] || FONT_STACKS['system-ui'];
+    const headingStack = t.fontFamilyHeading ? (FONT_STACKS[t.fontFamilyHeading] || bodyStack) : bodyStack;
+
+    frame.style.fontFamily = bodyStack;
+    frame.style.letterSpacing = t.letterSpacing ? t.letterSpacing + 'em' : '';
+    frame.style.lineHeight = t.lineHeight || '';
+
+    // Scale font sizes
+    const scale = t.sizeScale || 1.0;
+    frame.style.fontSize = scale !== 1.0 ? `calc(12px * ${scale})` : '';
+
+    // Headings
+    frame.querySelectorAll('.preview-header-title, .preview-card-title, .preview-section-title').forEach(el => {
+      el.style.fontFamily = headingStack;
+      el.style.fontWeight = t.weightHeading || '';
+    });
+
+    // Body weight
+    frame.style.fontWeight = t.weightBody || '';
   }
 
   /**
@@ -1879,6 +1946,113 @@
     if (target === 'effects') {
       renderEditorEffectsGrid();
     }
+  }
+
+  // ─── Typography controls ───────────────────────────────────────────────────
+
+  function populateTypographyUI() {
+    const t = editorState.typography;
+    const el = (id) => document.getElementById(id);
+
+    // Font family dropdowns
+    const ff = el('editorTypeFontFamily');
+    if (ff) ff.value = t.fontFamily;
+    const ffh = el('editorTypeFontFamilyHeading');
+    if (ffh) ffh.value = t.fontFamilyHeading || '';
+
+    // Size presets
+    document.querySelectorAll('#editorTypeSizePresets .editor-type-preset').forEach(btn => {
+      btn.classList.toggle('is-active', btn.dataset.preset === t.sizePreset);
+    });
+
+    // Fine-tune sliders/selects
+    const scale = el('editorTypeSizeScale');
+    if (scale) { scale.value = t.sizeScale; el('editorTypeSizeScaleValue').textContent = t.sizeScale + '×'; }
+    const wb = el('editorTypeWeightBody');
+    if (wb) wb.value = String(t.weightBody);
+    const wh = el('editorTypeWeightHeading');
+    if (wh) wh.value = String(t.weightHeading);
+    const lh = el('editorTypeLineHeight');
+    if (lh) { lh.value = t.lineHeight; el('editorTypeLineHeightValue').textContent = t.lineHeight; }
+    const ls = el('editorTypeLetterSpacing');
+    if (ls) { ls.value = t.letterSpacing; el('editorTypeLetterSpacingValue').textContent = t.letterSpacing + 'em'; }
+  }
+
+  let _typographyBound = false;
+  function _bindTypographyControls() {
+    if (_typographyBound) return;
+    _typographyBound = true;
+
+    const el = (id) => document.getElementById(id);
+
+    // Font family
+    el('editorTypeFontFamily')?.addEventListener('change', (e) => {
+      editorState.typography.fontFamily = e.target.value;
+      updatePreview();
+    });
+    el('editorTypeFontFamilyHeading')?.addEventListener('change', (e) => {
+      editorState.typography.fontFamilyHeading = e.target.value;
+      updatePreview();
+    });
+
+    // Size presets
+    document.querySelectorAll('#editorTypeSizePresets .editor-type-preset').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const preset = btn.dataset.preset;
+        editorState.typography.sizePreset = preset;
+        editorState.typography.sizeScale = TYPE_SIZE_PRESETS[preset] || 1.0;
+        // Sync the fine-tune slider
+        const slider = el('editorTypeSizeScale');
+        if (slider) {
+          slider.value = editorState.typography.sizeScale;
+          el('editorTypeSizeScaleValue').textContent = editorState.typography.sizeScale + '×';
+        }
+        document.querySelectorAll('#editorTypeSizePresets .editor-type-preset').forEach(b =>
+          b.classList.toggle('is-active', b.dataset.preset === preset)
+        );
+        updatePreview();
+      });
+    });
+
+    // Fine-tune: size scale slider
+    el('editorTypeSizeScale')?.addEventListener('input', (e) => {
+      const v = parseFloat(e.target.value);
+      editorState.typography.sizeScale = v;
+      el('editorTypeSizeScaleValue').textContent = v + '×';
+      // Deselect presets if value doesn't match any
+      const matchingPreset = Object.entries(TYPE_SIZE_PRESETS).find(([, s]) => Math.abs(s - v) < 0.01);
+      editorState.typography.sizePreset = matchingPreset ? matchingPreset[0] : 'custom';
+      document.querySelectorAll('#editorTypeSizePresets .editor-type-preset').forEach(b =>
+        b.classList.toggle('is-active', matchingPreset && b.dataset.preset === matchingPreset[0])
+      );
+      updatePreview();
+    });
+
+    // Fine-tune: weight selects
+    el('editorTypeWeightBody')?.addEventListener('change', (e) => {
+      editorState.typography.weightBody = parseInt(e.target.value, 10);
+      updatePreview();
+    });
+    el('editorTypeWeightHeading')?.addEventListener('change', (e) => {
+      editorState.typography.weightHeading = parseInt(e.target.value, 10);
+      updatePreview();
+    });
+
+    // Fine-tune: line height slider
+    el('editorTypeLineHeight')?.addEventListener('input', (e) => {
+      const v = parseFloat(e.target.value);
+      editorState.typography.lineHeight = v;
+      el('editorTypeLineHeightValue').textContent = v;
+      updatePreview();
+    });
+
+    // Fine-tune: letter spacing slider
+    el('editorTypeLetterSpacing')?.addEventListener('input', (e) => {
+      const v = parseFloat(e.target.value);
+      editorState.typography.letterSpacing = v;
+      el('editorTypeLetterSpacingValue').textContent = v + 'em';
+      updatePreview();
+    });
   }
 
   /**
@@ -2130,6 +2304,11 @@
       || base?.colors?.colorScheme
       || 'light';
 
+    // Only persist typography if the user changed it from defaults
+    const typo = editorState.typography;
+    const typoDefault = defaultTypography();
+    const hasTypography = Object.keys(typo).some(k => typo[k] !== typoDefault[k]);
+
     const custom = {
       id,
       name,
@@ -2141,6 +2320,7 @@
       coreOverrides: { ...editorState.coreOverrides },
       advancedOverrides: { ...editorState.advancedOverrides },
       effects,
+      ...(hasTypography ? { typography: { ...typo } } : {}),
     };
 
     const idx = customThemes.findIndex(t => t.id === id);
@@ -2464,6 +2644,85 @@
       // Re-render theme grid so clone button gates update too
       renderThemeGrid(syncState.theme);
     });
+
+    // ── Theme Diagnostic ────────────────────────────────────────────────
+    const diagBtn = document.getElementById('devDiagnosticBtn');
+    const diagResults = document.getElementById('devDiagnosticResults');
+    if (diagBtn && diagResults) {
+      diagBtn.addEventListener('click', async () => {
+        diagBtn.disabled = true;
+        diagBtn.textContent = 'Scanning…';
+        diagResults.hidden = true;
+
+        // Tokens to check — color tokens (SLDS 1 + 2) + typography tokens
+        const colorTokens = [
+          '--lwc-colorBackground', '--lwc-colorBackgroundAlt',
+          '--lwc-colorTextDefault', '--lwc-colorTextLink',
+          '--lwc-colorBorder', '--lwc-brandPrimary',
+          '--lwc-headerColorBackground',
+          '--slds-g-color-surface-1', '--slds-g-color-surface-2',
+          '--slds-g-color-brand-1', '--slds-g-color-on-surface-1',
+          '--slds-g-color-border-1',
+        ];
+        const typoTokens = [
+          '--lwc-fontFamily', '--slds-g-font-family',
+          '--lwc-fontSizeSmall', '--lwc-fontSizeMedium', '--lwc-fontSizeLarge',
+          '--lwc-fontWeightRegular', '--lwc-fontWeightBold',
+          '--lwc-lineHeightText', '--lwc-lineHeightHeading',
+          '--slds-g-font-size-base', '--slds-g-font-weight-4', '--slds-g-font-weight-7',
+        ];
+        const allTokens = [...colorTokens, ...typoTokens];
+
+        try {
+          const tabs = await chrome.tabs.query({
+            url: ['https://*.lightning.force.com/*', 'https://*.my.salesforce.com/*', 'https://*.salesforce.com/*'],
+          });
+          if (!tabs.length) {
+            diagResults.innerHTML = '<div class="diag-summary has-issues">No Salesforce tabs found. Open a Salesforce org first.</div>';
+            diagResults.hidden = false;
+            diagBtn.disabled = false;
+            diagBtn.textContent = 'Run Diagnostic';
+            return;
+          }
+
+          const tab = tabs[0];
+          const response = await chrome.tabs.sendMessage(tab.id, { action: 'diagnose', tokens: allTokens });
+
+          // Build results HTML
+          let html = `<div style="margin-bottom:8px;"><strong>${response.url}</strong> — Theme: <code>${response.theme || 'none'}</code> — Style injected: ${response.styleInjected ? 'Yes' : 'No'} (${(response.styleLengthBytes / 1024).toFixed(1)} KB)</div>`;
+
+          const renderSection = (title, tokens) => {
+            let s = `<div class="diag-section"><div class="diag-section-title">${title}</div>`;
+            let pass = 0, fail = 0;
+            for (const t of tokens) {
+              const val = response.tokens[t];
+              const ok = val && val.length > 0;
+              if (ok) pass++; else fail++;
+              s += `<div class="diag-row"><span class="diag-status ${ok ? 'pass' : 'fail'}"></span><span class="diag-token">${t}</span><span class="diag-value">${val || '(empty)'}</span></div>`;
+            }
+            s += `</div>`;
+            return { html: s, pass, fail };
+          };
+
+          const colorResult = renderSection('Color Tokens', colorTokens);
+          const typoResult = renderSection('Typography Tokens', typoTokens);
+          html += colorResult.html + typoResult.html;
+
+          const totalPass = colorResult.pass + typoResult.pass;
+          const totalFail = colorResult.fail + typoResult.fail;
+          const allGood = totalFail === 0;
+          html += `<div class="diag-summary ${allGood ? 'all-pass' : 'has-issues'}">${totalPass}/${totalPass + totalFail} tokens active${totalFail ? ` — ${totalFail} not set (may be normal for SLDS 1-only or 2-only orgs)` : ' — all tokens landing'}</div>`;
+
+          diagResults.innerHTML = html;
+          diagResults.hidden = false;
+        } catch (err) {
+          diagResults.innerHTML = `<div class="diag-summary has-issues">Error: ${err.message}. Make sure the Salesforce tab is fully loaded.</div>`;
+          diagResults.hidden = false;
+        }
+        diagBtn.disabled = false;
+        diagBtn.textContent = 'Run Diagnostic';
+      });
+    }
   }
 
   function _showCheckoutPlaceholder(plan) {

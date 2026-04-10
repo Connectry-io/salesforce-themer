@@ -466,6 +466,28 @@
       sendResponse({ config: currentEffectsConfig });
       return false;
     }
+
+    if (message.action === 'diagnose') {
+      // Read computed CSS custom properties and report which tokens are active
+      const root = document.documentElement;
+      const cs = getComputedStyle(root);
+      const tokens = message.tokens || [];
+      const results = {};
+      for (const token of tokens) {
+        const val = cs.getPropertyValue(token).trim();
+        results[token] = val || null;
+      }
+      // Also report basic page info
+      const styleTag = document.getElementById(STYLE_ID);
+      sendResponse({
+        url: location.hostname,
+        theme: currentTheme,
+        styleInjected: !!styleTag,
+        styleLengthBytes: styleTag ? styleTag.textContent.length : 0,
+        tokens: results,
+      });
+      return false;
+    }
   });
 
   // ─── Initialisation ──────────────────────────────────────────────────────
