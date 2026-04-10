@@ -166,7 +166,6 @@
         <div class="theme-card-body">
           <div class="theme-card-header">
             <span class="theme-name">${theme.name}</span>
-            <span class="theme-card-favicon-dot">${_connectryDotSvg(theme.colors.accent)}</span>
             <span class="theme-category-badge ${theme.category}">${theme.category === 'light' ? 'Light' : 'Dark'}</span>
           </div>
           <div class="theme-description">${theme.description}</div>
@@ -1280,8 +1279,9 @@
    * and dispatches the create action.
    */
   function _bindTopbarActions() {
-    // Reset button
+    // Reset button (inside save dropdown)
     document.getElementById('topbarResetBtn')?.addEventListener('click', () => {
+      if (saveDropMenu) saveDropMenu.hidden = true;
       editorState.coreOverrides = {};
       editorState.advancedOverrides = {};
       populateEditorFields();
