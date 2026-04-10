@@ -234,6 +234,229 @@
     });
   }
 
+  // ─── Theme tab strip (Built-in vs My Themes) ─────────────────────────────
+  // Persists which tab is active in localStorage. Built-in is the default
+  // because the popup is theme-centric and most users live in the gallery.
+
+  const POPUP_THEME_TAB_KEY = 'sft-popup-theme-tab';
+
+  function _getActiveThemeTab() {
+    try {
+      const v = localStorage.getItem(POPUP_THEME_TAB_KEY);
+      return v === 'custom' ? 'custom' : 'builtin';
+    } catch (_) {
+      return 'builtin';
+    }
+  }
+
+  function _setActiveThemeTab(tab) {
+    try { localStorage.setItem(POPUP_THEME_TAB_KEY, tab); } catch (_) {}
+  }
+
+  function bindThemeTabs() {
+    const tabs = document.querySelectorAll('.theme-tab[data-theme-tab]');
+    if (!tabs.length) return;
+
+    // Restore last-used tab
+    const initial = _getActiveThemeTab();
+    activateThemeTab(initial);
+
+    tabs.forEach(tab => {
+      tab.addEventListener('click', () => activateThemeTab(tab.dataset.themeTab));
+    });
+  }
+
+  function activateThemeTab(tabName) {
+    document.querySelectorAll('.theme-tab[data-theme-tab]').forEach(t => {
+      const active = t.dataset.themeTab === tabName;
+      t.classList.toggle('is-active', active);
+      t.setAttribute('aria-selected', String(active));
+    });
+    document.querySelectorAll('.theme-tab-panel[data-theme-tab-panel]').forEach(p => {
+      p.hidden = p.dataset.themeTabPanel !== tabName;
+    });
+    _setActiveThemeTab(tabName);
+  }
+
+  /**
+   * Render the My Themes panel. Three states based on premium + custom count:
+   *   - Free user                       → Premium upsell card
+   *   - Premium user, no custom themes  → Empty state with Open Builder CTA
+   *   - Premium user with custom themes → Compact grid of custom theme cards
+   */
+  async function renderCustomThemesPanel() {
+    const panel = document.getElementById('customThemesPanel');
+    if (!panel) return;
+
+    // Detect premium (DEV override for now — real entitlement comes later)
+    const { premiumOverride = false } = await chrome.storage.local.get({ premiumOverride: false });
+    const isPremium = !!premiumOverride;
+
+    // Fetch any saved custom themes
+    const { customThemes = [] } = await chrome.storage.sync.get({ customThemes: [] });
+
+    // Update the tab badge count (shows the actual saved count for premium,
+    // hides entirely for free users since they can't have any yet)
+    const tabCount = document.getElementById('customTabCount');
+    if (tabCount) {
+      if (isPremium && customThemes.length > 0) {
+        tabCount.textContent = String(customThemes.length);
+        tabCount.hidden = false;
+      } else {
+        tabCount.hidden = true;
+      }
+    }
+
+    if (!isPremium) {
+      panel.innerHTML = _renderUpsellHtml();
+      panel.querySelector('.custom-themes-upsell-cta')?.addEventListener('click', () => {
+        openOptionsOnTab('upgrade');
+      });
+      return;
+    }
+
+    if (!customThemes.length) {
+      panel.innerHTML = `
+        <div class="custom-themes-empty">
+          <div class="custom-themes-empty-icon">✨</div>
+          <div class="custom-themes-empty-title">No custom themes yet</div>
+          <p class="custom-themes-empty-body">Clone any built-in theme to start, or create one from scratch in the Theme Builder.</p>
+          <button type="button" class="custom-themes-empty-cta" id="customThemesEmptyCta">
+            <svg width="11" height="11" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+              <path d="M7 2v10M2 7h10" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+            Open Theme Builder
+          </button>
+        </div>
+      `;
+      panel.querySelector('#customThemesEmptyCta')?.addEventListener('click', () => {
+        openOptionsOnTab('builder');
+      });
+      return;
+    }
+
+    // Premium user WITH custom themes — render compact card grid
+    panel.innerHTML = `<div class="themes-grid" id="customThemesGrid" role="radiogroup" aria-label="Select a custom theme"></div>`;
+    const grid = panel.querySelector('#customThemesGrid');
+    for (const ct of customThemes) {
+      grid.appendChild(_buildCustomThemeCard(ct));
+    }
+  }
+
+  function _renderUpsellHtml() {
+    return `
+      <div class="custom-themes-upsell">
+        <div class="custom-themes-upsell-header">
+          <div class="custom-themes-upsell-icon">
+            <svg width="18" height="18" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+              <path d="M8 1.5l1.9 4.2 4.6.5-3.5 3.2 1 4.6L8 11.8 3.9 14l1-4.6L1.5 6.2l4.6-.5L8 1.5z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" fill="currentColor" fill-opacity="0.25"/>
+            </svg>
+          </div>
+          <div>
+            <h3 class="custom-themes-upsell-title">Make it yours</h3>
+            <p class="custom-themes-upsell-sub">Custom themes are a Premium feature.</p>
+          </div>
+        </div>
+        <div class="custom-themes-upsell-features">
+          <div class="custom-themes-upsell-feature">
+            <svg width="11" height="11" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+              <path d="M2.5 7L5.5 10L11.5 4" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <span>Clone any built-in theme &amp; tweak it</span>
+          </div>
+          <div class="custom-themes-upsell-feature">
+            <svg width="11" height="11" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+              <path d="M2.5 7L5.5 10L11.5 4" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <span>Pick exact effects &amp; intensities</span>
+          </div>
+          <div class="custom-themes-upsell-feature">
+            <svg width="11" height="11" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+              <path d="M2.5 7L5.5 10L11.5 4" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <span>AI generation, brand-guide upload (soon)</span>
+          </div>
+        </div>
+        <button type="button" class="custom-themes-upsell-cta">
+          Unlock Premium →
+        </button>
+      </div>
+    `;
+  }
+
+  /**
+   * Build a compact theme card for a custom theme. Custom themes carry
+   * coreOverrides + advancedOverrides on top of their base theme's colors,
+   * so we resolve them inline here.
+   */
+  function _buildCustomThemeCard(ct) {
+    const base = THEMES.find(t => t.id === ct.basedOn) || THEMES[0];
+    const resolvedColors = {
+      ...(base?.colors || {}),
+      ...(ct.coreOverrides || {}),
+      ...(ct.advancedOverrides || {}),
+    };
+    const swatchHtml = [
+      resolvedColors.background,
+      resolvedColors.surface,
+      resolvedColors.accent,
+      resolvedColors.textPrimary,
+    ].map(col => `<span style="background:${col};"></span>`).join('');
+
+    const btn = document.createElement('button');
+    btn.className = 'theme-card';
+    btn.dataset.theme = ct.id;
+    btn.role = 'radio';
+    btn.setAttribute('aria-checked', 'false');
+    btn.title = `${ct.name} — ${ct.description || 'Custom theme'}`;
+
+    const subline = ct.description
+      ? ct.description
+      : `Based on ${base?.name || ct.basedOn}`;
+
+    btn.innerHTML = `
+      <div class="theme-swatch">${swatchHtml}</div>
+      <div class="theme-info">
+        <div class="theme-name-row">
+          <span class="theme-name">${ct.name}</span>
+        </div>
+        <div class="theme-desc-popup">${subline}</div>
+        <div class="theme-effects-pills is-empty">Custom effects</div>
+      </div>
+      <div class="theme-clone-row">
+        <span class="theme-clone-btn" data-edit="${ct.id}" title="Edit in Builder">
+          <svg width="10" height="10" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+            <path d="M8 1.5l2 2-7 7H1v-2l7-7z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/>
+          </svg>
+          Edit
+        </span>
+      </div>
+      <div class="theme-check" aria-hidden="true">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+          <path d="M2.5 7L5.5 10L11.5 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+    `;
+
+    btn.addEventListener('click', (e) => {
+      const editBtn = e.target.closest('[data-edit]');
+      if (editBtn) {
+        e.stopPropagation();
+        chrome.storage.local.set({
+          openOptionsTab: 'builder',
+          openBuilderClone: editBtn.dataset.edit,
+        }).then(() => {
+          chrome.runtime.openOptionsPage();
+          window.close();
+        });
+        return;
+      }
+      selectTheme(ct.id);
+    });
+
+    return btn;
+  }
+
   // ─── UI state helpers ────────────────────────────────────────────────────
 
   // Tracks the most recently picked non-'none' theme. Used by the Theme on/off
@@ -714,6 +937,13 @@
   async function init() {
     await loadThemes();
     renderThemesSection();
+    // Built-in tab badge count = total OOTB theme count
+    const builtinCount = document.getElementById('builtinTabCount');
+    if (builtinCount) builtinCount.textContent = String(THEMES.length);
+
+    bindThemeTabs();
+    renderCustomThemesPanel();
+
     bindOptionsButton();
     bindHelpTooltip();
     bindScopeSelector();

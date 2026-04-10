@@ -164,39 +164,60 @@
       </div>
     </section>
 
-    <!-- Effects volume strip — sits at the top of the pre-built themes section
-         because it only applies to those themes. Custom themes (when surfaced
-         via tab separation later) won't show this since they own per-effect
-         intensities chosen in the Builder. -->
-    <div class="themes-effects-strip" id="themesEffectsStrip">
-      <div class="themes-effects-strip-label">
+    <!-- Theme tab strip: Built-in vs My Themes (custom). Effects volume + the
+         theme gallery live inside Built-in. Custom themes (or the upsell for
+         free users) live inside My Themes. -->
+    <div class="theme-tabs" role="tablist" aria-label="Theme source">
+      <button class="theme-tab is-active" type="button" role="tab" data-theme-tab="builtin" aria-selected="true">
         <svg width="13" height="13" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-          <path d="M8 1l1.8 4.2L14 6l-3.2 2.8L12 13 8 10.6 4 13l1.2-4.2L2 6l4.2-0.8L8 1z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/>
+          <rect x="2" y="2" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.5"/>
+          <rect x="9" y="2" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.5"/>
+          <rect x="2" y="9" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.5"/>
+          <rect x="9" y="9" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.5"/>
         </svg>
-        <span>Effects</span>
-      </div>
-      <div class="effects-pills" id="effectsPills" role="radiogroup" aria-label="Effects volume">
-        <button class="effects-pill" data-volume="off" role="radio" aria-checked="false" title="Disable all effects">Off</button>
-        <button class="effects-pill" data-volume="subtle" role="radio" aria-checked="false" title="Theme effects clamped to subtle">Subtle</button>
-        <button class="effects-pill" data-volume="default" role="radio" aria-checked="false" title="Theme effects exactly as designed">Default</button>
-        <button class="effects-pill" data-volume="immersive" role="radio" aria-checked="false" title="Theme effects amplified to strong">Immersive</button>
-      </div>
+        <span>Built-in</span>
+        <span class="theme-tab-count" id="builtinTabCount"></span>
+      </button>
+      <button class="theme-tab" type="button" role="tab" data-theme-tab="custom" aria-selected="false">
+        <svg width="13" height="13" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+          <path d="M8 1.5l1.9 4.2 4.6.5-3.5 3.2 1 4.6L8 11.8 3.9 14l1-4.6L1.5 6.2l4.6-.5L8 1.5z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/>
+        </svg>
+        <span>My Themes</span>
+        <span class="theme-tab-count" id="customTabCount"></span>
+      </button>
     </div>
 
-    <!-- Theme grid — dynamic, populated by popup.js from themes.json -->
-    <main class="themes-section" id="themesSection" role="radiogroup" aria-label="Select a theme">
-      <!-- populated by popup.js -->
-    </main>
+    <!-- ── Built-in tab panel ── -->
+    <div class="theme-tab-panel" data-theme-tab-panel="builtin">
+      <!-- Effects volume strip — only applies to built-in themes -->
+      <div class="themes-effects-strip" id="themesEffectsStrip">
+        <div class="themes-effects-strip-label">
+          <svg width="13" height="13" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+            <path d="M8 1l1.8 4.2L14 6l-3.2 2.8L12 13 8 10.6 4 13l1.2-4.2L2 6l4.2-0.8L8 1z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/>
+          </svg>
+          <span>Effects</span>
+        </div>
+        <div class="effects-pills" id="effectsPills" role="radiogroup" aria-label="Effects volume">
+          <button class="effects-pill" data-volume="off" role="radio" aria-checked="false" title="Disable all effects">Off</button>
+          <button class="effects-pill" data-volume="subtle" role="radio" aria-checked="false" title="Theme effects clamped to subtle">Subtle</button>
+          <button class="effects-pill" data-volume="default" role="radio" aria-checked="false" title="Theme effects exactly as designed">Default</button>
+          <button class="effects-pill" data-volume="immersive" role="radio" aria-checked="false" title="Theme effects amplified to strong">Immersive</button>
+        </div>
+      </div>
 
-    <!-- Premium upgrade CTA -->
-    <button class="upgrade-cta" id="upgradeCta" type="button" aria-label="Unlock Premium features">
-      <span class="upgrade-cta-icon" aria-hidden="true">&#10022;</span>
-      <span class="upgrade-cta-text">
-        <span class="upgrade-cta-title">Unlock Premium</span>
-        <span class="upgrade-cta-sub">Custom themes, AI generation & more</span>
-      </span>
-      <span class="upgrade-cta-arrow" aria-hidden="true">&rsaquo;</span>
-    </button>
+      <!-- Theme grid — dynamic, populated by popup.js from themes.json -->
+      <main class="themes-section" id="themesSection" role="radiogroup" aria-label="Select a theme">
+        <!-- populated by popup.js -->
+      </main>
+    </div>
+
+    <!-- ── My Themes tab panel — populated by popup.js based on premium state ── -->
+    <div class="theme-tab-panel" data-theme-tab-panel="custom" hidden>
+      <div id="customThemesPanel">
+        <!-- populated by popup.js: free users see upsell, premium users see
+             their custom themes or an empty state -->
+      </div>
+    </div>
 
     <!-- Footer -->
     <footer class="footer">
