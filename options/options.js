@@ -1822,6 +1822,38 @@
 
     // Apply effects (CSS-driven, sandboxed to the preview frame)
     applyEditorPreviewEffects();
+
+    // Update the live mini theme card in the editor header
+    updateMiniCard(full);
+  }
+
+  function updateMiniCard(full) {
+    // Swatch — 4 color bars
+    const swatch = document.getElementById('editorMiniSwatch');
+    if (swatch && full) {
+      const four = [full.background, full.surface, full.accent, full.textPrimary];
+      swatch.innerHTML = four.map(c => `<span style="background:${c || '#ddd'}"></span>`).join('');
+    }
+    // Category badge
+    const badge = document.getElementById('editorCategoryBadge');
+    if (badge && full) {
+      const cat = _detectThemeCategory(full.background) || 'light';
+      badge.textContent = cat === 'dark' ? 'Dark' : 'Light';
+      badge.className = `theme-category-badge ${cat}`;
+    }
+    // Effect pills
+    const effectsEl = document.getElementById('editorMiniEffects');
+    if (effectsEl) {
+      effectsEl.innerHTML = buildEffectIndicators(editorState.effects || {});
+    }
+    // Typography hint
+    const typeHint = document.getElementById('editorMiniTypeHint');
+    if (typeHint) {
+      const t = editorState.typography || {};
+      const fontLabel = { 'system-ui': 'System', 'neo-grotesque': 'Neo-Grotesk', 'humanist': 'Humanist', 'geometric': 'Geometric', 'classic-serif': 'Serif' }[t.fontFamily] || 'System';
+      const sizeLabel = t.sizePreset || 'Normal';
+      typeHint.textContent = `${fontLabel} · ${sizeLabel.charAt(0).toUpperCase() + sizeLabel.slice(1)}`;
+    }
   }
 
   function applyEditorPreviewTypography() {

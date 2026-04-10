@@ -1267,33 +1267,30 @@
             <button type="button" class="editor-free-banner-cta" id="editorFreeBannerUpgrade">Learn more</button>
           </div>
 
-          <div class="editor-toolbar editor-card-header">
-            <!-- Favicon slot — Connectry logo with on/off toggle -->
-            <div class="editor-favicon-slot" id="editorFaviconSlot" title="Toggle Connectry favicon on browser tabs">
-              <div class="editor-favicon-preview" id="editorFaviconPreview">
-                <svg width="20" height="20" viewBox="0 0 32 32" fill="none" aria-hidden="true">
-                  <circle cx="8" cy="16" r="4" fill="#2D2D2D"/>
-                  <line x1="12" y1="16" x2="20" y2="16" stroke="#4A6FA5" stroke-width="2" stroke-linecap="round"/>
-                  <circle cx="24" cy="16" r="4" fill="#4A6FA5"/>
-                </svg>
-              </div>
-              <label class="editor-favicon-toggle" title="Show Connectry favicon on Salesforce browser tabs">
-                <input type="checkbox" id="editorFaviconToggle" checked />
-                <span class="editor-favicon-toggle-label">Favicon</span>
-              </label>
+          <!-- Live mini theme card — mirrors the gallery theme card, updates in real-time -->
+          <div class="editor-mini-card" id="editorMiniCard">
+            <div class="editor-mini-swatch" id="editorMiniSwatch">
+              <!-- 4 color spans populated by updateMiniCard() -->
             </div>
-            <div class="editor-toolbar-name-wrap">
-              <div class="editor-input-row">
-                <svg class="editor-input-icon" width="12" height="12" viewBox="0 0 14 14" fill="none" aria-hidden="true">
-                  <path d="M9.5 1.5l3 3-8 8H1.5v-3l8-8z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/>
-                </svg>
-                <input type="text" class="editor-name-input" id="editorName" value="My Custom Theme" spellcheck="false" maxlength="50" />
+            <div class="editor-mini-body">
+              <div class="editor-mini-name-row">
+                <input type="text" class="editor-name-input editor-mini-name" id="editorName" value="My Custom Theme" spellcheck="false" maxlength="50" />
+                <span class="theme-category-badge" id="editorCategoryBadge">Light</span>
               </div>
-              <div class="editor-input-row">
-                <svg class="editor-input-icon" width="11" height="11" viewBox="0 0 14 14" fill="none" aria-hidden="true">
-                  <path d="M9.5 1.5l3 3-8 8H1.5v-3l8-8z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/>
-                </svg>
-                <input type="text" class="editor-desc-input" id="editorDescription" placeholder="Add a short description (optional)" spellcheck="false" maxlength="100" />
+              <input type="text" class="editor-desc-input editor-mini-desc" id="editorDescription" placeholder="Add a description" spellcheck="false" maxlength="100" />
+              <div class="editor-mini-meta">
+                <div class="editor-mini-effects" id="editorMiniEffects">
+                  <!-- effect pills populated by updateMiniCard() -->
+                </div>
+                <span class="editor-mini-type-hint" id="editorMiniTypeHint">System Default · Normal</span>
+                <div class="editor-mini-favicon" id="editorFaviconSlot" title="Click to customize favicon">
+                  <span class="editor-mini-favicon-icon" id="editorFaviconPreview">
+                    <svg width="16" height="16" viewBox="0 0 32 32" fill="none"><circle cx="8" cy="16" r="4" fill="#2D2D2D"/><line x1="12" y1="16" x2="20" y2="16" stroke="#4A6FA5" stroke-width="2" stroke-linecap="round"/><circle cx="24" cy="16" r="4" fill="#4A6FA5"/></svg>
+                  </span>
+                  <label class="editor-favicon-toggle">
+                    <input type="checkbox" id="editorFaviconToggle" checked />
+                  </label>
+                </div>
               </div>
             </div>
           </div>

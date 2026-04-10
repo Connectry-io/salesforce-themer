@@ -2016,14 +2016,86 @@
   overflow: hidden;
 }
 
-.editor-card-header {
-  display: flex;
-  align-items: flex-start;
-  gap: var(--cx-space-3);
+/* ─── Live mini theme card (replaces old editor toolbar) ────────────── */
+.editor-mini-card {
   border-bottom: 1px solid var(--cx-border);
-  margin-bottom: 0;
-  padding: var(--cx-space-4) var(--cx-space-5);
   background: var(--cx-surface-alt);
+  overflow: hidden;
+}
+.editor-mini-swatch {
+  display: flex;
+  height: 20px;
+}
+.editor-mini-swatch span { flex: 1; display: block; }
+.editor-mini-body {
+  padding: 8px 12px 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.editor-mini-name-row {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+.editor-mini-name {
+  font-size: 14px !important;
+  font-weight: 700 !important;
+  padding: 1px 4px !important;
+  min-width: 0 !important;
+  flex: 1;
+}
+.editor-mini-desc {
+  font-size: 11px !important;
+  padding: 1px 4px !important;
+  min-width: 0 !important;
+}
+.editor-mini-meta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 10px;
+  color: var(--cx-text-subtle);
+  margin-top: 2px;
+  flex-wrap: wrap;
+}
+.editor-mini-effects {
+  display: flex;
+  gap: 3px;
+  flex-wrap: wrap;
+}
+.editor-mini-effects .theme-effect-pill {
+  font-size: 8px;
+  padding: 1px 5px;
+}
+.editor-mini-effects .theme-effects-indicators {
+  margin-top: 0;
+  padding-top: 0;
+  border-top: none;
+  gap: 3px;
+}
+.editor-mini-effects .theme-effects-empty { font-size: 9px; }
+.editor-mini-type-hint {
+  white-space: nowrap;
+  font-size: 9px;
+  opacity: 0.7;
+}
+.editor-mini-favicon {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  margin-left: auto;
+  cursor: pointer;
+  position: relative;
+}
+.editor-mini-favicon-icon {
+  display: inline-flex;
+  width: 16px;
+  height: 16px;
+}
+.editor-mini-favicon-icon svg { width: 16px; height: 16px; }
+.editor-mini-favicon .editor-favicon-toggle input {
+  width: 10px; height: 10px;
 }
 
 .editor-card-body {
