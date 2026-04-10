@@ -1274,21 +1274,9 @@
    * an outside click or Escape closes it; selecting an option closes it
    * and dispatches the create action.
    */
-  function _bindOverflowMenu() {
-    const trigger = document.getElementById('builderOverflowBtn');
-    const menu = document.getElementById('builderOverflowMenu');
-    if (!trigger || !menu) return;
-
-    const close = () => { menu.hidden = true; trigger.setAttribute('aria-expanded', 'false'); };
-    const open = () => { menu.hidden = false; trigger.setAttribute('aria-expanded', 'true'); };
-
-    trigger.addEventListener('click', (e) => { e.stopPropagation(); menu.hidden ? open() : close(); });
-    document.addEventListener('click', (e) => { if (!menu.hidden && !menu.contains(e.target) && !trigger.contains(e.target)) close(); });
-    document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !menu.hidden) close(); });
-
-    // Reset — free
+  function _bindTopbarActions() {
+    // Reset button
     document.getElementById('topbarResetBtn')?.addEventListener('click', () => {
-      close();
       editorState.coreOverrides = {};
       editorState.advancedOverrides = {};
       populateEditorFields();
@@ -1296,19 +1284,25 @@
       updatePreview();
     });
 
-    // Export — premium
+    // Save dropdown (Export JSON)
+    const saveDropBtn = document.getElementById('builderSaveDropdownBtn');
+    const saveDropMenu = document.getElementById('builderSaveDropdown');
+    if (saveDropBtn && saveDropMenu) {
+      saveDropBtn.addEventListener('click', (e) => { e.stopPropagation(); saveDropMenu.hidden = !saveDropMenu.hidden; });
+      document.addEventListener('click', (e) => {
+        if (!saveDropMenu.hidden && !saveDropMenu.contains(e.target) && !saveDropBtn.contains(e.target)) saveDropMenu.hidden = true;
+      });
+    }
+
     document.getElementById('topbarExportBtn')?.addEventListener('click', () => {
-      close();
+      if (saveDropMenu) saveDropMenu.hidden = true;
       if (!isPremium()) { openUpgradeDialog(); return; }
       exportThemeJSON();
     });
 
-    // Import — premium
-    document.getElementById('topbarImportBtn')?.addEventListener('click', () => {
-      close();
-      if (!isPremium()) { openUpgradeDialog(); return; }
-      document.getElementById('editorImportFile')?.click();
-    });
+    // Free notice visibility
+    const freeNotice = document.getElementById('builderTopbarFreeNotice');
+    if (freeNotice) freeNotice.hidden = isPremium();
   }
 
   function _bindBuilderCreateMenu() {
@@ -1349,24 +1343,46 @@
 
     function populateClonePicker() {
       if (!cloneGrid || cloneGrid.children.length > 0) return;
-      for (const theme of THEMES) {
+
+      function addCloneBadge(id, name, colors, isCustom) {
         const btn = document.createElement('button');
         btn.type = 'button';
         btn.className = 'builder-clone-badge';
-        btn.dataset.cloneTheme = theme.id;
-        const c = theme.colors;
-        const swatchColors = [c.background, c.accent, c.textPrimary];
+        btn.dataset.cloneTheme = id;
+        const c = colors || {};
+        const swatchColors = [c.background || '#ddd', c.accent || '#ddd', c.textPrimary || '#ddd'];
         btn.innerHTML = `
           <span class="builder-clone-badge-swatch">${swatchColors.map(col => `<span style="background:${col}"></span>`).join('')}</span>
-          <span>${theme.name}</span>
+          <span>${Connectry.Settings.escape(name)}${isCustom ? ' ✱' : ''}</span>
         `;
         btn.addEventListener('click', () => {
           closeMenu();
           if (clonePicker) clonePicker.hidden = true;
-          _pendingCreateEffects = getSuggestedEffectsFor(theme.id);
-          openEditor(theme.id, null);
+          if (isCustom) {
+            // Clone a custom theme — load it into editor
+            const customs = syncState.customThemes || [];
+            const ct = customs.find(t => t.id === id);
+            if (ct) { openEditor(ct.basedOn, ct); }
+          } else {
+            _pendingCreateEffects = getSuggestedEffectsFor(id);
+            openEditor(id, null);
+          }
         });
         cloneGrid.appendChild(btn);
+      }
+
+      // Built-in themes
+      for (const theme of THEMES) {
+        addCloneBadge(theme.id, theme.name, theme.colors, false);
+      }
+      // Custom themes (if any)
+      const customs = syncState.customThemes || [];
+      if (customs.length) {
+        for (const ct of customs) {
+          const base = getThemeById(ct.basedOn);
+          const resolved = base ? { ...base.colors, ...ct.coreOverrides } : ct.coreOverrides;
+          addCloneBadge(ct.id, ct.name, resolved, true);
+        }
       }
     }
 
@@ -1387,9 +1403,12 @@
         if (clonePicker) clonePicker.hidden = true;
 
         if (which === 'manual') {
-          // Manual = open the editor with a fresh theme based on connectry
           _pendingCreateEffects = getSuggestedEffectsFor('connectry');
           openEditor('connectry', null);
+          return;
+        }
+        if (which === 'import') {
+          document.getElementById('editorImportFile')?.click();
           return;
         }
         // AI / brand-guide / URL — all Premium
@@ -1678,9 +1697,9 @@
       _tabsInstance.activate('builder');
     }
 
-    // Show the free preview banner only when not premium
-    const freeBanner = document.getElementById('editorFreeBanner');
-    if (freeBanner) freeBanner.hidden = isPremium();
+    // Update free preview notice in top bar
+    const freeNotice = document.getElementById('builderTopbarFreeNotice');
+    if (freeNotice) freeNotice.hidden = isPremium();
 
     // Always start on the Colors sub-tab
     switchEditorSubtab('colors');
@@ -2040,8 +2059,8 @@
     document.getElementById('editorSaveBtn')?.addEventListener('click', saveCustomTheme);
     document.getElementById('builderTopbarSave')?.addEventListener('click', saveCustomTheme);
 
-    // Overflow menu (... button) — Reset / Export / Import
-    _bindOverflowMenu();
+    // Top bar actions — Reset, Save dropdown, free notice
+    _bindTopbarActions();
 
     document.getElementById('editorImportFile')?.addEventListener('change', importThemeJSON);
 
