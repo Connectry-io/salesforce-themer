@@ -1342,24 +1342,28 @@
     const cloneGrid = document.getElementById('builderClonePickerGrid');
 
     function populateClonePicker() {
-      if (!cloneGrid || cloneGrid.children.length > 0) return;
+      const standardGrid = document.getElementById('builderCloneStandardGrid');
+      const customGrid = document.getElementById('builderCloneCustomGrid');
+      const customSection = document.getElementById('builderCloneCustom');
+      if (!standardGrid) return;
+      if (standardGrid.children.length > 0) return; // already populated
 
-      function addCloneBadge(id, name, colors, isCustom) {
+      function addCloneBadge(grid, id, name, category, colors, isCustom) {
         const btn = document.createElement('button');
         btn.type = 'button';
         btn.className = 'builder-clone-badge';
         btn.dataset.cloneTheme = id;
+        btn.dataset.category = category || 'light';
         const c = colors || {};
         const swatchColors = [c.background || '#ddd', c.accent || '#ddd', c.textPrimary || '#ddd'];
         btn.innerHTML = `
           <span class="builder-clone-badge-swatch">${swatchColors.map(col => `<span style="background:${col}"></span>`).join('')}</span>
-          <span>${Connectry.Settings.escape(name)}${isCustom ? ' ✱' : ''}</span>
+          <span>${Connectry.Settings.escape(name)}</span>
         `;
         btn.addEventListener('click', () => {
           closeMenu();
           if (clonePicker) clonePicker.hidden = true;
           if (isCustom) {
-            // Clone a custom theme — load it into editor
             const customs = syncState.customThemes || [];
             const ct = customs.find(t => t.id === id);
             if (ct) { openEditor(ct.basedOn, ct); }
@@ -1368,22 +1372,38 @@
             openEditor(id, null);
           }
         });
-        cloneGrid.appendChild(btn);
+        grid.appendChild(btn);
       }
 
-      // Built-in themes
+      // Standard (built-in) themes
       for (const theme of THEMES) {
-        addCloneBadge(theme.id, theme.name, theme.colors, false);
+        addCloneBadge(standardGrid, theme.id, theme.name, theme.category, theme.colors, false);
       }
-      // Custom themes (if any)
+
+      // Custom themes
       const customs = syncState.customThemes || [];
-      if (customs.length) {
+      if (customs.length && customGrid && customSection) {
+        customSection.hidden = false;
         for (const ct of customs) {
           const base = getThemeById(ct.basedOn);
           const resolved = base ? { ...base.colors, ...ct.coreOverrides } : ct.coreOverrides;
-          addCloneBadge(ct.id, ct.name, resolved, true);
+          const cat = ct.category || (base ? base.category : 'light');
+          addCloneBadge(customGrid, ct.id, ct.name, cat, resolved, true);
         }
       }
+
+      // Tab filtering
+      clonePicker.querySelectorAll('.builder-clone-tab').forEach(tab => {
+        tab.addEventListener('click', () => {
+          const filter = tab.dataset.filter;
+          clonePicker.querySelectorAll('.builder-clone-tab').forEach(t => t.classList.toggle('is-active', t === tab));
+          // Show/hide badges based on category
+          clonePicker.querySelectorAll('.builder-clone-badge').forEach(badge => {
+            if (filter === 'all') { badge.hidden = false; return; }
+            badge.hidden = badge.dataset.category !== filter;
+          });
+        });
+      });
     }
 
     // Menu items

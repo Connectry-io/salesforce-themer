@@ -346,11 +346,24 @@
                 <span class="builder-startfrom-desc">Start from any built-in or custom theme</span>
               </span>
             </button>
-            <!-- Clone-picker sub-panel — slides open when "Clone a built-in theme" is clicked -->
+            <!-- Clone-picker sub-panel — tabs + categorized grids -->
             <div class="builder-clone-picker" id="builderClonePicker" hidden>
-              <div class="builder-clone-picker-label">Pick a theme to clone</div>
-              <div class="builder-clone-picker-grid" id="builderClonePickerGrid">
-                <!-- Populated by JS — one mini badge per built-in theme -->
+              <div class="builder-clone-picker-tabs">
+                <button type="button" class="builder-clone-tab is-active" data-filter="all">All</button>
+                <button type="button" class="builder-clone-tab" data-filter="light">Light</button>
+                <button type="button" class="builder-clone-tab" data-filter="dark">Dark</button>
+              </div>
+              <div class="builder-clone-picker-section" id="builderCloneStandard">
+                <div class="builder-clone-picker-label">Standard</div>
+                <div class="builder-clone-picker-grid" id="builderCloneStandardGrid">
+                  <!-- Populated by JS -->
+                </div>
+              </div>
+              <div class="builder-clone-picker-section" id="builderCloneCustom" hidden>
+                <div class="builder-clone-picker-label">My Themes</div>
+                <div class="builder-clone-picker-grid" id="builderCloneCustomGrid">
+                  <!-- Populated by JS -->
+                </div>
               </div>
             </div>
             <button type="button" class="builder-create-menu-item is-locked" data-startfrom="import" disabled role="menuitem">
