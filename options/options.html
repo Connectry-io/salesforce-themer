@@ -1333,8 +1333,36 @@
             </div>
 
             <div class="preview-header" data-bind="background">
-              <div class="preview-header-title" data-bind-color="textPrimary">Lead: John Smith</div>
-              <div class="preview-header-meta" data-bind-color="textSecondary">Senior Account Executive</div>
+              <div class="preview-header-top">
+                <div>
+                  <div class="preview-header-title" data-bind-color="textPrimary">Lead: John Smith</div>
+                  <div class="preview-header-meta" data-bind-color="textSecondary">Senior Account Executive</div>
+                </div>
+                <div class="preview-header-actions">
+                  <button class="preview-btn-neutral preview-btn-sm" data-bind="buttonNeutralBg" data-bind-color="textPrimary" data-bind-border-color="borderInput">Clone</button>
+                  <button class="preview-btn-brand preview-btn-sm" data-bind="accent" data-bind-color="buttonBrandText">Convert</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Highlights panel — horizontal key-field strip (Salesforce compact layout) -->
+            <div class="preview-highlights" data-bind="surface" data-bind-border-color="border">
+              <div class="preview-highlight">
+                <span class="preview-highlight-label" data-bind-color="textSecondary">Phone</span>
+                <span class="preview-highlight-value" data-bind-color="link">(415) 555-1234</span>
+              </div>
+              <div class="preview-highlight">
+                <span class="preview-highlight-label" data-bind-color="textSecondary">Company</span>
+                <span class="preview-highlight-value" data-bind-color="textPrimary">Acme Corp</span>
+              </div>
+              <div class="preview-highlight">
+                <span class="preview-highlight-label" data-bind-color="textSecondary">Lead Source</span>
+                <span class="preview-highlight-value" data-bind-color="textPrimary">Web</span>
+              </div>
+              <div class="preview-highlight">
+                <span class="preview-highlight-label" data-bind-color="textSecondary">Rating</span>
+                <span class="preview-highlight-value" data-bind-color="warning">Hot</span>
+              </div>
             </div>
 
             <div class="preview-path-wrap" data-bind="surface">
@@ -1366,8 +1394,8 @@
                 </div>
               </div>
               <div class="preview-card-actions">
-                <button class="preview-btn-brand" data-bind="accent" data-bind-color="buttonBrandText">Convert</button>
                 <button class="preview-btn-neutral" data-bind="buttonNeutralBg" data-bind-color="textPrimary" data-bind-border-color="borderInput">Edit</button>
+                <button class="preview-btn-neutral" data-bind="buttonNeutralBg" data-bind-color="textPrimary" data-bind-border-color="borderInput">Delete</button>
               </div>
             </div>
 
@@ -1394,6 +1422,31 @@
               <div class="preview-input" data-bind="background" data-bind-border-color="borderInput">
                 <span data-bind-color="textPlaceholder">Search leads...</span>
               </div>
+            </div>
+
+            <!-- Toast notification — shows success color + surface contrast -->
+            <div class="preview-toast" data-bind="surface" data-bind-border-color="border">
+              <span class="preview-toast-icon" data-bind-color="success">
+                <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M3.5 8.5l3 3 6-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </span>
+              <span class="preview-toast-text" data-bind-color="textPrimary">Lead "John Smith" was saved.</span>
+              <span class="preview-toast-link" data-bind-color="link">Undo</span>
+            </div>
+
+            <!-- Utility bar — thin strip at the bottom (Salesforce docked utilities) -->
+            <div class="preview-utilbar" data-bind="nav">
+              <span class="preview-utilbar-item" data-bind-color="navText">
+                <svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M2 4h12M2 8h12M2 12h12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+                Notes
+              </span>
+              <span class="preview-utilbar-item" data-bind-color="navText">
+                <svg width="12" height="12" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.5"/><path d="M8 5v3l2 1.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+                History
+              </span>
+              <span class="preview-utilbar-item" data-bind-color="navText">
+                <svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M13 10.5V12a1.5 1.5 0 01-1.5 1.5h-7A1.5 1.5 0 013 12V4a1.5 1.5 0 011.5-1.5h7A1.5 1.5 0 0113 4v1.5M6 8h7m0 0l-2.5-2.5M13 8l-2.5 2.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                Open CTI
+              </span>
             </div>
 
           </div>
