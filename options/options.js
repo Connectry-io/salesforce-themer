@@ -1002,6 +1002,12 @@
       }
     });
 
+    // Move the editor markup from the document root into the Builder
+    // tab's main column. The editor lives at the root in HTML for legacy
+    // reasons (it used to be a modal-style overlay) — we mount it once
+    // here so it sits inline as the right side of the Builder layout.
+    _embedEditorInBuilder();
+
     // Initialize tabs (must happen after all content is rendered)
     if (window.Connectry && Connectry.Settings && Connectry.Settings.Tabs) {
       const tabContainer = document.querySelector('.cx-tabs');
@@ -1009,11 +1015,12 @@
         _tabsInstance = new Connectry.Settings.Tabs(tabContainer, {
           storageKey: 'cx-themer-active-tab',
           onChange: (tabName) => {
-            // Auto-close the theme editor on any tab change. The editor is
-            // a top-level overlay (not a tabpanel), so without this it would
-            // remain visible underneath every tab's content.
-            if (editorState && editorState.active) {
-              closeEditor();
+            // When the user enters the Builder tab, make sure the editor
+            // is loaded with the current active theme. The editor is now
+            // embedded in the Builder layout, so this is just a state sync
+            // (no show/hide).
+            if (tabName === 'builder') {
+              _ensureEditorLoaded();
             }
             // Start/stop preview canvases when leaving/entering Effects tab
             if (tabName === 'effects') {
@@ -1024,6 +1031,12 @@
           },
         });
       }
+    }
+
+    // If Builder is the active tab on first paint, prime the editor.
+    // (The Tabs onChange above only fires on user-initiated switches.)
+    if (document.querySelector('[data-tabpanel="builder"]:not([hidden])')) {
+      _ensureEditorLoaded();
     }
 
     // Handoff from popup: if popup set openOptionsTab, honour it and clear
@@ -1081,21 +1094,13 @@
       openEditor('connectry', null);
     });
 
-    // Builder tab: create-method cards.
-    // V3: Manual is open to all (Save is gated). AI/brand-guide/url stay
-    // coming-soon and still show the upgrade dialog as a fallback.
-    document.querySelectorAll('.create-method-card[data-method]').forEach(card => {
-      card.addEventListener('click', () => {
-        const method = card.dataset.method;
-        if (method === 'manual') {
-          openCreationDialog('connectry');
-          return;
-        }
-        // AI, brand-guide, url are still coming-soon — show upgrade dialog
-        // for free users; no-op for premium until they ship.
-        if (!isPremium()) {
-          openUpgradeDialog();
-        }
+    // Builder sidebar: "Start from…" alternative input methods (AI, brand,
+    // URL). All Premium AND coming soon — clicking shows the upgrade
+    // dialog. The buttons are disabled but we still bind click on the
+    // wrapper for keyboard / accessibility paths that might fire it.
+    document.querySelectorAll('.builder-startfrom-item[data-startfrom]').forEach(item => {
+      item.addEventListener('click', () => {
+        openUpgradeDialog();
       });
     });
   }
@@ -1297,6 +1302,43 @@
 
   // ─── Open / Close Editor ──────────────────────────────────────────────────
 
+  /**
+   * One-time DOM move: relocate #editorView from the document root into
+   * the Builder tab's main column. The HTML still lives at the root for
+   * legacy reasons (it used to be a fixed-overlay modal). We mount it
+   * once at init so it sits inline as the Builder's right column.
+   */
+  function _embedEditorInBuilder() {
+    const editor = document.getElementById('editorView');
+    const main = document.getElementById('builderMain');
+    if (!editor || !main) return;
+    if (editor.parentElement === main) return; // already mounted
+    main.appendChild(editor);
+    // The editor is always visible inside the Builder tab now.
+    editor.hidden = false;
+  }
+
+  /**
+   * Ensure the editor is loaded with the user's currently active theme
+   * (or a sensible default). Called on Builder tab activation and on
+   * first paint if Builder is the landing tab. Idempotent — if a custom
+   * theme is already loaded that the user might be editing, we don't
+   * clobber it.
+   */
+  function _ensureEditorLoaded() {
+    // Don't trample an in-progress edit
+    if (editorState.active && editorState.basedOn) return;
+
+    const activeId = (syncState.theme && syncState.theme !== 'none') ? syncState.theme : 'connectry';
+    const customs = syncState.customThemes || [];
+    const customMatch = customs.find(c => c.id === activeId);
+    if (customMatch) {
+      openEditor(customMatch.basedOn, customMatch);
+    } else {
+      openEditor(activeId, null);
+    }
+  }
+
   function openEditor(baseThemeId, customTheme) {
     editorState.active = true;
     editorState.basedOn = customTheme ? customTheme.basedOn : baseThemeId;
@@ -1327,15 +1369,13 @@
       if (descEl) descEl.value = base?.description ? base.description : '';
     }
 
-    // Make sure the Builder tab is the active tab in the background. The
-    // editor view is a fixed overlay so this isn't strictly required for
-    // visibility, but it keeps the right tab pill highlighted in the nav
-    // and ensures Back returns the user to a coherent context.
+    // The editor is permanently embedded in the Builder layout — no
+    // show/hide needed. Just make sure the Builder tab is the visible
+    // one in case the caller didn't switch first (popup handoff path
+    // does, but in-page calls might not).
     if (_tabsInstance) {
       _tabsInstance.activate('builder');
     }
-
-    document.getElementById('editorView').hidden = false;
 
     // Show the free preview banner only when not premium
     const freeBanner = document.getElementById('editorFreeBanner');
@@ -1349,9 +1389,14 @@
     updatePreview();
   }
 
+  /**
+   * Clear the editor's "in-progress edit" flag so the next Builder tab
+   * activation re-syncs to whatever the active theme is. The editor
+   * markup itself stays mounted and visible — closing now means "I'm
+   * done editing this theme," not "hide the UI."
+   */
   function closeEditor() {
     editorState.active = false;
-    document.getElementById('editorView').hidden = true;
   }
 
   // ─── Populate Fields ──────────────────────────────────────────────────────
@@ -1536,8 +1581,8 @@
   // ─── Event Binding ────────────────────────────────────────────────────────
 
   function bindEditorEvents() {
-    // Back button
-    document.getElementById('editorBackBtn').addEventListener('click', closeEditor);
+    // (Back button removed — the editor is now permanently embedded
+    // in the Builder tab. To leave the editor, switch tabs.)
 
     // Color scheme dropdown
     document.getElementById('editorColorScheme').addEventListener('change', (e) => {

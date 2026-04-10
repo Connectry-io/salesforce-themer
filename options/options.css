@@ -1653,21 +1653,13 @@
 
 /* ─── Editor view (full-page overlay) ────────────────────────────────────── */
 
-/* Editor view: full-screen overlay below the tab nav. Lives outside the
-   tab panels in the DOM, so it covers whatever tab is active when
-   openEditor() is called. Tabs auto-close the editor on switch (see
-   Tabs onChange in options.js), so the user can't end up with a stale
-   overlay over an unrelated tab. */
+/* Editor view: embedded in the Builder tab's main column. Lives at
+   the document root in HTML (legacy reason — used to be a modal-style
+   overlay) but gets moved into #builderMain at init time by
+   _embedEditorInBuilder() in options.js. */
 .editor-view {
-  position: fixed;
-  top: var(--cx-header-height);
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: var(--cx-bg);
-  z-index: 50;
-  overflow-y: auto;
-  padding: var(--cx-space-6) var(--cx-space-8);
+  width: 100%;
+  min-width: 0;
 }
 .editor-view[hidden] { display: none !important; }
 
@@ -2051,37 +2043,57 @@
   padding: 0 var(--cx-space-2);
 }
 
+/* Compact edit-only row: small swatch + name + (active dot). No apply
+   affordance, no description preview. Click = edit. Apply happens via
+   Save (which auto-applies) or via the popup. */
 .builder-sidebar-item {
   display: flex;
   align-items: center;
-  gap: var(--cx-space-2);
-  padding: 8px 10px;
-  background: var(--cx-surface-alt);
-  border: 1px solid var(--cx-border);
-  border-radius: var(--cx-radius-md);
+  gap: 8px;
+  padding: 5px 8px;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: var(--cx-radius-sm);
   cursor: pointer;
   text-align: left;
-  transition: border-color var(--cx-transition), background-color var(--cx-transition), transform var(--cx-transition);
+  transition: border-color var(--cx-transition), background-color var(--cx-transition);
 }
 
 .builder-sidebar-item:hover {
-  border-color: var(--cx-accent);
-  transform: translateX(2px);
+  background: var(--cx-surface-alt);
+  border-color: var(--cx-border);
 }
 
+/* Active theme: heavy left bar + accent tint + bold name. The user
+   should glance at the sidebar and instantly know which one they're
+   looking at in Salesforce. */
 .builder-sidebar-item.is-active {
-  border-color: var(--cx-accent);
-  background: color-mix(in srgb, var(--cx-accent) 10%, var(--cx-surface));
-  box-shadow: 0 0 0 1px var(--cx-accent);
+  background: color-mix(in srgb, var(--cx-accent) 12%, var(--cx-surface));
+  border-color: color-mix(in srgb, var(--cx-accent) 35%, transparent);
+  position: relative;
+}
+.builder-sidebar-item.is-active::before {
+  content: '';
+  position: absolute;
+  left: -1px;
+  top: 4px;
+  bottom: 4px;
+  width: 3px;
+  background: var(--cx-accent);
+  border-radius: 0 2px 2px 0;
+}
+.builder-sidebar-item.is-active .builder-sidebar-item-name {
+  font-weight: 700;
+  color: var(--cx-accent);
 }
 
 .builder-sidebar-item-swatch {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 1px;
-  width: 28px;
-  height: 28px;
-  border-radius: 4px;
+  width: 18px;
+  height: 18px;
+  border-radius: 3px;
   border: 1px solid var(--cx-border);
   overflow: hidden;
   flex-shrink: 0;
@@ -2106,23 +2118,20 @@
   overflow: hidden;
   text-overflow: ellipsis;
   display: block;
+  line-height: 1.3;
 }
 
+/* Meta line is hidden in the compact list — name only. The base/desc
+   info still lives in the editor toolbar when you click into a theme. */
 .builder-sidebar-item-meta {
-  font-size: 10px;
-  color: var(--cx-text-subtle);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  display: block;
+  display: none;
 }
 
 .builder-sidebar-item-active-dot {
   width: 6px;
   height: 6px;
   border-radius: 50%;
-  background: #16a34a;
-  box-shadow: 0 0 0 2px color-mix(in srgb, #16a34a 30%, transparent);
+  background: var(--cx-accent);
   flex-shrink: 0;
 }
 
@@ -2151,6 +2160,116 @@
 
 .builder-main {
   min-width: 0;
+}
+
+/* ─── Sidebar: Start from… section (locked alternatives) ──────────────── */
+.builder-sidebar-divider {
+  height: 1px;
+  background: var(--cx-border);
+  margin: var(--cx-space-4) calc(-1 * var(--cx-space-5));
+}
+
+.builder-sidebar-section-header {
+  margin-bottom: var(--cx-space-2);
+}
+
+.builder-sidebar-section-title {
+  margin: 0;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--cx-text-muted);
+}
+
+.builder-sidebar-section-sub {
+  display: block;
+  font-size: 10.5px;
+  color: var(--cx-text-subtle);
+  margin-top: 2px;
+}
+
+.builder-sidebar-startfrom {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.builder-startfrom-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 8px;
+  background: var(--cx-surface-alt);
+  border: 1px dashed var(--cx-border);
+  border-radius: var(--cx-radius-sm);
+  font-family: var(--cx-font);
+  cursor: not-allowed;
+  text-align: left;
+  width: 100%;
+  opacity: 0.78;
+  transition: opacity var(--cx-transition);
+}
+
+.builder-startfrom-item:hover {
+  opacity: 1;
+}
+
+.builder-startfrom-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 4px;
+  color: var(--cx-text-muted);
+  flex-shrink: 0;
+}
+
+.builder-startfrom-body {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.builder-startfrom-name {
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--cx-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.builder-startfrom-desc {
+  font-size: 10px;
+  color: var(--cx-text-subtle);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.builder-startfrom-badge {
+  font-size: 8.5px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 2px 6px;
+  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+  color: #8f6413;
+  border: 1px solid #d4a22a;
+  border-radius: var(--cx-radius-full);
+  flex-shrink: 0;
+}
+
+.builder-sidebar-startfrom-foot {
+  margin: var(--cx-space-3) 0 0 0;
+  font-size: 10px;
+  color: var(--cx-text-subtle);
+  text-align: center;
+  font-style: italic;
 }
 
 @media (max-width: 900px) {
