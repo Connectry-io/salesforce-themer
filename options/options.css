@@ -1838,9 +1838,9 @@
   background: var(--cx-surface);
 }
 
-/* Editor layout: editor card + (optional chat) + preview. When the
-   chat panel is hidden the grid is 2-col; when visible it becomes 3.
-   The .is-chat-open class on the layout toggles the template. */
+/* Editor layout: 2-col grid — editor card (fixed-ish) + preview (1fr).
+   The AI chat panel lives as a right-side fixed drawer outside this
+   grid, so the layout stays stable whether the drawer is open or not. */
 .editor-layout {
   display: grid;
   grid-template-columns: minmax(360px, 400px) 1fr;
@@ -1848,74 +1848,11 @@
   align-items: start;
 }
 
-.editor-layout.is-chat-open {
-  grid-template-columns: minmax(340px, 380px) minmax(300px, 1fr) minmax(400px, 1.2fr);
-}
-
 @media (max-width: 1100px) {
-  .editor-layout,
-  .editor-layout.is-chat-open {
+  .editor-layout {
     grid-template-columns: 1fr;
   }
 }
-
-/* AI chat placeholder panel — lives between editor card and preview.
-   display:none when hidden so it doesn't take a grid column. */
-.builder-chat-panel[hidden] { display: none !important; }
-
-.builder-chat-panel {
-  background: var(--cx-surface);
-  border: 1px solid var(--cx-border);
-  border-radius: var(--cx-radius-lg);
-  box-shadow: var(--cx-shadow-sm);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 400px;
-}
-
-.builder-chat-placeholder {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-  padding: var(--cx-space-6);
-  max-width: 280px;
-  gap: var(--cx-space-3);
-}
-
-.builder-chat-placeholder-icon {
-  color: var(--cx-text-subtle);
-  opacity: 0.6;
-}
-
-.builder-chat-placeholder-title {
-  margin: 0;
-  font-size: 15px;
-  font-weight: 700;
-  color: var(--cx-text);
-}
-
-.builder-chat-placeholder-body {
-  margin: 0;
-  font-size: 12.5px;
-  line-height: 1.5;
-  color: var(--cx-text-muted);
-}
-
-.builder-chat-placeholder-badge {
-  display: inline-block;
-  font-size: 9px;
-  font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  padding: 3px 10px;
-  background: linear-gradient(135deg, #f3e8ff 0%, #e0e7ff 100%);
-  color: #5b21b6;
-  border: 1px solid #c4b5fd;
-  border-radius: var(--cx-radius-full);
-}
-
 /* The editor card itself — wraps banner / header / tabs / body. The
    body area is where the active form panel (Colors or Effects) lives;
    eventually it will also host the AI chat interface as an alternate
@@ -2116,10 +2053,9 @@ body:has(.cx-tabpanel[data-tabpanel="builder"]:not([hidden])) .cx-main {
   max-width: 1480px;
 }
 
-/* ─── Builder top bar ─────────────────────────────────────────────────
-   Horizontal strip: theme pills (scroll if many) + "+ New ▾" popover
-   + "Build with AI" button. Replaces the sidebar — gives full width
-   to the editor + preview below. */
+/* ─── Builder top bar (context bar) ───────────────────────────────────
+   Figma/Webflow pattern: shows WHAT you're editing (theme dropdown),
+   creation actions (+ New ▾), Save, and the AI chat toggle. Full width. */
 .builder-topbar {
   display: flex;
   align-items: center;
@@ -2132,73 +2068,126 @@ body:has(.cx-tabpanel[data-tabpanel="builder"]:not([hidden])) .cx-main {
   margin-bottom: var(--cx-space-4);
 }
 
-.builder-topbar-themes {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  overflow-x: auto;
-  flex: 1 1 auto;
-  min-width: 0;
-  scrollbar-width: thin;
-}
+.builder-topbar-spacer { flex: 1 1 auto; }
+.builder-topbar-save { flex-shrink: 0; }
 
-/* Individual theme pill in the top bar — compact, one-click to switch
-   editor target. Active theme gets accent highlight. */
-.builder-topbar-pill {
+/* Theme switcher dropdown ─────────────────────────────────────────── */
+.builder-theme-switcher { position: relative; }
+
+.builder-theme-switcher-btn {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  padding: 5px 12px;
+  gap: 8px;
+  padding: 6px 12px;
   background: var(--cx-surface-alt);
   border: 1px solid var(--cx-border);
-  border-radius: var(--cx-radius-full);
+  border-radius: var(--cx-radius-md);
+  font-family: var(--cx-font);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--cx-text);
+  cursor: pointer;
+  transition: border-color var(--cx-transition);
+  white-space: nowrap;
+}
+.builder-theme-switcher-btn:hover { border-color: var(--cx-accent); }
+
+.builder-theme-switcher-swatch {
+  display: inline-grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1px;
+  width: 18px;
+  height: 18px;
+  border-radius: 4px;
+  border: 1px solid rgba(0,0,0,0.1);
+  overflow: hidden;
+  flex-shrink: 0;
+}
+.builder-theme-switcher-swatch span { display: block; width: 100%; height: 100%; }
+
+.builder-theme-switcher-menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  z-index: 30;
+  width: 280px;
+  background: var(--cx-surface);
+  border: 1px solid var(--cx-border);
+  border-radius: var(--cx-radius-md);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.12), 0 2px 6px rgba(0,0,0,0.06);
+  padding: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  max-height: 320px;
+  overflow-y: auto;
+}
+.builder-theme-switcher-menu[hidden] { display: none; }
+
+.builder-theme-switcher-menu-label {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--cx-text-subtle);
+  padding: 6px 10px 4px;
+}
+
+.builder-theme-switcher-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: var(--cx-radius-sm);
   font-family: var(--cx-font);
   font-size: 12px;
   font-weight: 600;
   color: var(--cx-text);
-  white-space: nowrap;
   cursor: pointer;
-  transition: border-color var(--cx-transition), background-color var(--cx-transition);
-  flex-shrink: 0;
+  text-align: left;
+  width: 100%;
+  transition: background-color var(--cx-transition);
+}
+.builder-theme-switcher-item:hover {
+  background: var(--cx-surface-alt);
+  border-color: var(--cx-border);
+}
+.builder-theme-switcher-item.is-active {
+  background: color-mix(in srgb, var(--cx-accent) 12%, var(--cx-surface));
+  border-color: color-mix(in srgb, var(--cx-accent) 35%, transparent);
+  color: var(--cx-accent);
 }
 
-.builder-topbar-pill:hover {
-  border-color: var(--cx-accent);
-  background: color-mix(in srgb, var(--cx-accent) 8%, var(--cx-surface));
-}
-
-.builder-topbar-pill.is-active {
-  background: var(--cx-accent);
-  color: #ffffff;
-  border-color: var(--cx-accent);
-}
-
-.builder-topbar-pill-swatch {
+.builder-theme-switcher-item-swatch {
   display: inline-grid;
   grid-template-columns: 1fr 1fr;
   gap: 1px;
-  width: 14px;
-  height: 14px;
+  width: 16px;
+  height: 16px;
   border-radius: 3px;
-  border: 1px solid rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(0,0,0,0.1);
   overflow: hidden;
   flex-shrink: 0;
 }
+.builder-theme-switcher-item-swatch span { display: block; width: 100%; height: 100%; }
 
-.builder-topbar-pill-swatch span {
-  display: block;
-  width: 100%;
-  height: 100%;
+.builder-theme-switcher-empty {
+  padding: 12px 10px;
+  font-size: 11px;
+  color: var(--cx-text-subtle);
+  text-align: center;
 }
 
-/* The + New ▾ button — sits right after the theme pills */
-.builder-topbar-new-btn {
+/* + New ▾ button */
+.builder-topbar-btn {
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  padding: 5px 10px;
+  padding: 6px 12px;
   font-family: var(--cx-font);
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 700;
   color: var(--cx-white);
   background: var(--cx-accent);
@@ -2209,20 +2198,121 @@ body:has(.cx-tabpanel[data-tabpanel="builder"]:not([hidden])) .cx-main {
   white-space: nowrap;
   flex-shrink: 0;
 }
-
-.builder-topbar-new-btn:hover {
+.builder-topbar-btn:hover {
   filter: brightness(1.08);
   transform: translateY(-1px);
 }
 
-/* Build with AI — pushed to far right via auto margin */
-.builder-topbar .editor-build-ai-btn {
-  margin-left: auto;
+/* ─── AI chat drawer (right side, Cursor/Linear pattern) ────────────── */
+.builder-chat-drawer {
+  position: fixed;
+  top: var(--cx-header-height);
+  right: 0;
+  bottom: 0;
+  width: 380px;
+  z-index: 60;
+  background: var(--cx-surface);
+  border-left: 1px solid var(--cx-border);
+  box-shadow: -8px 0 24px rgba(0,0,0,0.08);
+  display: flex;
+  flex-direction: column;
+  transform: translateX(0);
+  transition: transform 250ms ease;
+}
+.builder-chat-drawer[hidden] { display: none !important; }
+
+.builder-chat-drawer-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--cx-border);
   flex-shrink: 0;
 }
+.builder-chat-drawer-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--cx-text);
+  flex: 1;
+}
+.builder-chat-drawer-close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  background: transparent;
+  border: 1px solid var(--cx-border);
+  border-radius: var(--cx-radius-sm);
+  color: var(--cx-text-muted);
+  cursor: pointer;
+  transition: background-color var(--cx-transition), color var(--cx-transition);
+}
+.builder-chat-drawer-close:hover {
+  background: var(--cx-surface-alt);
+  color: var(--cx-text);
+}
 
-/* (Sidebar removed — replaced by .builder-topbar horizontal strip.
-   Dead sidebar CSS cleaned up.) */
+.builder-chat-drawer-body {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--cx-space-6);
+}
+
+.builder-chat-drawer-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: var(--cx-space-3);
+  max-width: 280px;
+}
+.builder-chat-drawer-placeholder-icon {
+  color: var(--cx-text-subtle);
+  opacity: 0.5;
+}
+.builder-chat-drawer-placeholder-text {
+  margin: 0;
+  font-size: 12.5px;
+  line-height: 1.55;
+  color: var(--cx-text-muted);
+}
+.builder-chat-drawer-placeholder-badge {
+  display: inline-block;
+  font-size: 9px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 3px 10px;
+  background: linear-gradient(135deg, #f3e8ff 0%, #e0e7ff 100%);
+  color: #5b21b6;
+  border: 1px solid #c4b5fd;
+  border-radius: var(--cx-radius-full);
+}
+
+.builder-chat-drawer-input {
+  padding: 12px 16px;
+  border-top: 1px solid var(--cx-border);
+  flex-shrink: 0;
+}
+.builder-chat-drawer-input input {
+  width: 100%;
+  padding: 10px 14px;
+  background: var(--cx-surface-alt);
+  border: 1px solid var(--cx-border);
+  border-radius: var(--cx-radius-md);
+  font-family: var(--cx-font);
+  font-size: 13px;
+  color: var(--cx-text);
+  outline: none;
+}
+.builder-chat-drawer-input input:focus {
+  border-color: var(--cx-accent);
+}
+
 /* (Builder sidebar removed — replaced by .builder-topbar horizontal
    strip. All .builder-sidebar-* CSS deleted.) */
 

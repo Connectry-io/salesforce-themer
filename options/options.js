@@ -363,49 +363,87 @@
     }
   }
 
-  // ─── Builder top bar: theme pills ────────────────────────────────────────
-  // The Builder tab uses a horizontal top strip instead of a sidebar.
-  // Custom themes render as compact pills; clicking a pill loads that
-  // theme into the editor. The active theme pill is highlighted.
+  // ─── Builder top bar: theme switcher dropdown ────────────────────────────
+  // The top bar shows the current theme being edited via a dropdown.
+  // Click the dropdown → list of custom themes, one-click to switch.
+  // Also updates the swatch in the trigger button.
 
   function renderBuilderSidebar(activeThemeId) {
-    const strip = document.getElementById('builderTopbarThemes');
-    if (!strip) return;
+    // Update the trigger button's label + swatch
+    _updateThemeSwitcherTrigger();
+
+    // Rebuild the dropdown menu items
+    const menu = document.getElementById('builderThemeSwitcherMenu');
+    if (!menu) return;
 
     const customs = syncState.customThemes || [];
-    strip.innerHTML = '';
+    menu.innerHTML = '';
+
+    if (!customs.length) {
+      menu.innerHTML = `<div class="builder-theme-switcher-empty">No saved themes yet. Click + New to create one.</div>`;
+      return;
+    }
+
+    const label = document.createElement('div');
+    label.className = 'builder-theme-switcher-menu-label';
+    label.textContent = 'My Themes';
+    menu.appendChild(label);
 
     for (const ct of customs) {
       const isActive = ct.id === activeThemeId;
       const base = getThemeById(ct.basedOn);
       const resolvedColors = { ...(base?.colors || {}), ...(ct.coreOverrides || {}), ...(ct.advancedOverrides || {}) };
-      const swatchColors = [
-        resolvedColors.background,
-        resolvedColors.surface,
-        resolvedColors.accent,
-        resolvedColors.textPrimary,
-      ];
+      const swatchColors = [resolvedColors.background, resolvedColors.surface, resolvedColors.accent, resolvedColors.textPrimary];
       const swatchHtml = swatchColors.map(col => `<span style="background:${col};"></span>`).join('');
 
-      const pill = document.createElement('button');
-      pill.type = 'button';
-      pill.className = `builder-topbar-pill${isActive ? ' is-active' : ''}`;
-      pill.dataset.theme = ct.id;
-      pill.setAttribute('role', 'option');
-      pill.setAttribute('aria-selected', String(isActive));
-      pill.title = ct.name;
-
-      pill.innerHTML = `
-        <span class="builder-topbar-pill-swatch">${swatchHtml}</span>
+      const item = document.createElement('button');
+      item.type = 'button';
+      item.className = `builder-theme-switcher-item${isActive ? ' is-active' : ''}`;
+      item.dataset.theme = ct.id;
+      item.innerHTML = `
+        <span class="builder-theme-switcher-item-swatch">${swatchHtml}</span>
         <span>${Connectry.Settings.escape(ct.name)}</span>
       `;
 
-      pill.addEventListener('click', () => {
+      item.addEventListener('click', () => {
+        // Close the dropdown and switch editor target
+        _closeThemeSwitcher();
         openEditor(ct.basedOn, ct);
       });
 
-      strip.appendChild(pill);
+      menu.appendChild(item);
     }
+  }
+
+  /**
+   * Update the theme switcher trigger button to reflect whatever theme
+   * is currently loaded in the editor (or the active theme if no editor
+   * state). Shows the name + swatch in the button.
+   */
+  function _updateThemeSwitcherTrigger() {
+    const nameEl = document.getElementById('builderThemeSwitcherName');
+    const swatchEl = document.getElementById('builderThemeSwitcherSwatch');
+    if (!nameEl || !swatchEl) return;
+
+    const editorName = document.getElementById('editorName');
+    const name = editorName ? editorName.value : 'New Theme';
+    nameEl.textContent = name;
+
+    // Resolve colors for the swatch
+    const full = typeof getFullEditorTheme === 'function' && editorState.active
+      ? getFullEditorTheme()
+      : null;
+    if (full) {
+      const colors = [full.background, full.surface, full.accent, full.textPrimary];
+      swatchEl.innerHTML = colors.map(c => `<span style="background:${c || '#ddd'}"></span>`).join('');
+    }
+  }
+
+  function _closeThemeSwitcher() {
+    const menu = document.getElementById('builderThemeSwitcherMenu');
+    const btn = document.getElementById('builderThemeSwitcherBtn');
+    if (menu) menu.hidden = true;
+    if (btn) btn.setAttribute('aria-expanded', 'false');
   }
 
   async function deleteCustomTheme(customId) {
@@ -1066,22 +1104,73 @@
       openCreationDialog('connectry');
     });
 
-    // Builder sidebar: "+ New ▾" button toggles the create popover.
-    // The popover holds the 3 one-time starting points (manual = enabled,
-    // brand-guide / URL = locked Premium · Coming Soon).
+    // Builder top bar: + New ▾ popover
     _bindBuilderCreateMenu();
 
-    // "Build with AI" button in the top bar — toggles the AI chat
-    // placeholder panel visible between editor and preview. For V1
-    // this just shows a coming-soon placeholder; the actual chat UI
-    // ships post-backend.
-    document.getElementById('editorBuildWithAiBtn')?.addEventListener('click', () => {
-      const chatPanel = document.getElementById('builderChatPanel');
-      const layout = document.querySelector('.editor-layout');
-      if (!chatPanel || !layout) return;
-      const opening = chatPanel.hidden;
-      chatPanel.hidden = !opening;
-      layout.classList.toggle('is-chat-open', opening);
+    // Builder top bar: theme switcher dropdown
+    _bindThemeSwitcher();
+
+    // Builder top bar: Save button (mirrors the editor's Save action)
+    document.getElementById('builderTopbarSave')?.addEventListener('click', () => {
+      document.getElementById('editorSaveBtn')?.click();
+    });
+
+    // Builder top bar: Build with AI → toggles the right-side chat drawer
+    _bindChatDrawer();
+  }
+
+  /**
+   * Wire the theme switcher dropdown in the Builder top bar.
+   */
+  function _bindThemeSwitcher() {
+    const btn = document.getElementById('builderThemeSwitcherBtn');
+    const menu = document.getElementById('builderThemeSwitcherMenu');
+    if (!btn || !menu) return;
+
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const opening = menu.hidden;
+      if (opening) {
+        menu.hidden = false;
+        btn.setAttribute('aria-expanded', 'true');
+      } else {
+        _closeThemeSwitcher();
+      }
+    });
+
+    document.addEventListener('click', (e) => {
+      if (menu.hidden) return;
+      if (menu.contains(e.target) || btn.contains(e.target)) return;
+      _closeThemeSwitcher();
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && !menu.hidden) _closeThemeSwitcher();
+    });
+  }
+
+  /**
+   * Wire the AI chat drawer — right-side slide-in panel (Cursor pattern).
+   * Build with AI button toggles it, ✕ closes it, Escape closes it.
+   */
+  function _bindChatDrawer() {
+    const drawer = document.getElementById('builderChatDrawer');
+    const toggleBtn = document.getElementById('editorBuildWithAiBtn');
+    const closeBtn = document.getElementById('builderChatDrawerClose');
+    if (!drawer || !toggleBtn) return;
+
+    const openDrawer = () => { drawer.hidden = false; };
+    const closeDrawer = () => { drawer.hidden = true; };
+
+    toggleBtn.addEventListener('click', () => {
+      if (drawer.hidden) openDrawer();
+      else closeDrawer();
+    });
+
+    closeBtn?.addEventListener('click', closeDrawer);
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && !drawer.hidden) closeDrawer();
     });
   }
 
