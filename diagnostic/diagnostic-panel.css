@@ -484,6 +484,20 @@
   flex-shrink: 0;
 }
 
+.diag-test-total {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 14px;
+  font-size: 11px;
+  border-top: 1px solid var(--dp-border);
+}
+
+.diag-test-total-label {
+  color: var(--dp-text-3);
+  font-weight: 500;
+}
+
 .diag-scan-btn--success {
   background: var(--dp-good-bg) !important;
   border-color: rgba(34, 197, 94, 0.3) !important;

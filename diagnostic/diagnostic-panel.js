@@ -612,62 +612,96 @@
       const pct = summary.total > 0 ? Math.round((summary.completed / summary.total) * 100) : 0;
       const level = pct >= 80 ? 'good' : pct >= 40 ? 'ok' : 'bad';
 
-      let html = `
-        <div class="diag-section is-open" data-section="testing">
+      // Group items by group field
+      const lightningItems = summary.items.filter(i => (i.group || 'lightning') === 'lightning');
+      const setupItems = summary.items.filter(i => i.group === 'setup');
+
+      const lightningDone = lightningItems.filter(i => i.completed).length;
+      const setupDone = setupItems.filter(i => i.completed).length;
+
+      let html = '';
+
+      // Lightning section
+      html += `
+        <div class="diag-section is-open" data-section="testLightning">
           <div class="diag-section-header">
-            <span class="diag-section-title">Testing Progress</span>
+            <span class="diag-section-title">Lightning Pages</span>
             <span class="diag-section-badge">
-              <span class="diag-section-badge-item is-${level}">${summary.completed}/${summary.total}</span>
+              <span class="diag-section-badge-item is-${lightningDone >= lightningItems.length ? 'pass' : lightningDone > 0 ? 'gap' : 'fail'}">${lightningDone}/${lightningItems.length}</span>
             </span>
             <span class="diag-section-chevron">${ICONS.chevron}</span>
           </div>
-          <div class="diag-section-body">`;
+          <div class="diag-section-body">
+            <div class="diag-test-checklist">
+              ${lightningItems.map(item => this._testItemHTML(item, currentPage)).join('')}
+            </div>
+          </div>
+        </div>`;
 
-      // Checklist
-      html += '<div class="diag-test-checklist">';
-      for (const item of summary.items) {
-        const isCurrent = currentPage && item.id === currentPage.id;
-        const statusClass = item.completed ? 'is-done' : isCurrent ? 'is-current' : 'is-pending';
-        const tokenPct = item.result?.tokenCoverage != null ? `${Math.round(item.result.tokenCoverage * 100)}%` : '';
-        const compPct = item.result?.componentHealth != null ? `${Math.round(item.result.componentHealth)}%` : '';
-
-        // Format last-scanned date
-        let dateStr = '';
-        if (item.result?.timestamp) {
-          const d = new Date(item.result.timestamp);
-          const now = new Date();
-          const isToday = d.toDateString() === now.toDateString();
-          dateStr = isToday
-            ? d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-            : d.toLocaleDateString([], { month: 'short', day: 'numeric' });
-        }
-
+      // Setup section
+      if (setupItems.length) {
         html += `
-          <div class="diag-test-item ${statusClass}" data-test-id="${item.id}">
-            <span class="diag-test-check">
-              ${item.completed
-                ? '<svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2.5 6l2.5 2.5 4.5-5" stroke="var(--dp-good, #22c55e)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>'
-                : isCurrent
-                  ? '<svg width="12" height="12" viewBox="0 0 12 12" fill="none"><circle cx="6" cy="6" r="3" fill="var(--dp-accent, #4a6fa5)"/></svg>'
-                  : '<svg width="12" height="12" viewBox="0 0 12 12" fill="none"><circle cx="6" cy="6" r="4" stroke="var(--dp-text-3, rgba(255,255,255,0.15))" stroke-width="1.2"/></svg>'
-              }
-            </span>
-            <span class="diag-test-label">${this._escapeHtml(item.label)}</span>
-            ${item.manual ? '<span class="diag-test-manual">manual</span>' : ''}
-            ${dateStr ? `<span class="diag-test-date">${dateStr}</span>` : ''}
-            ${tokenPct ? `<span class="diag-test-score">${tokenPct}</span>` : ''}
-            ${compPct ? `<span class="diag-test-score is-comp">${compPct}</span>` : ''}
+          <div class="diag-section${setupDone > 0 ? ' is-open' : ''}" data-section="testSetup">
+            <div class="diag-section-header">
+              <span class="diag-section-title">Setup Pages</span>
+              <span class="diag-section-badge">
+                <span class="diag-section-badge-item is-${setupDone >= setupItems.length ? 'pass' : setupDone > 0 ? 'gap' : 'fail'}">${setupDone}/${setupItems.length}</span>
+              </span>
+              <span class="diag-section-chevron">${ICONS.chevron}</span>
+            </div>
+            <div class="diag-section-body">
+              <div class="diag-test-checklist">
+                ${setupItems.map(item => this._testItemHTML(item, currentPage)).join('')}
+              </div>
+            </div>
           </div>`;
       }
-      html += '</div>';
 
-      // Reset button
+      // Total progress + reset
       if (summary.completed > 0) {
-        html += `<div class="diag-test-actions"><button class="diag-test-reset" data-action="resetProgress">Reset progress</button></div>`;
+        html += `
+          <div class="diag-test-total">
+            <span class="diag-test-total-label">Total: ${summary.completed}/${summary.total} pages scanned</span>
+            <button class="diag-test-reset" data-action="resetProgress">Reset</button>
+          </div>`;
       }
 
-      html += '</div></div>';
       return html;
+    }
+
+    _testItemHTML(item, currentPage) {
+      const isCurrent = currentPage && item.id === currentPage.id;
+      const statusClass = item.completed ? 'is-done' : isCurrent ? 'is-current' : 'is-pending';
+      const tokenPct = item.result?.tokenCoverage != null ? `${Math.round(item.result.tokenCoverage * 100)}%` : '';
+      const compPct = item.result?.componentHealth != null ? `${Math.round(item.result.componentHealth)}%` : '';
+
+      // Format last-scanned date
+      let dateStr = '';
+      if (item.result?.timestamp) {
+        const d = new Date(item.result.timestamp);
+        const now = new Date();
+        const isToday = d.toDateString() === now.toDateString();
+        dateStr = isToday
+          ? d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+          : d.toLocaleDateString([], { month: 'short', day: 'numeric' });
+      }
+
+      return `
+        <div class="diag-test-item ${statusClass}" data-test-id="${item.id}">
+          <span class="diag-test-check">
+            ${item.completed
+              ? '<svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2.5 6l2.5 2.5 4.5-5" stroke="var(--dp-good, #22c55e)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>'
+              : isCurrent
+                ? '<svg width="12" height="12" viewBox="0 0 12 12" fill="none"><circle cx="6" cy="6" r="3" fill="var(--dp-accent, #4a6fa5)"/></svg>'
+                : '<svg width="12" height="12" viewBox="0 0 12 12" fill="none"><circle cx="6" cy="6" r="4" stroke="var(--dp-text-3, rgba(255,255,255,0.15))" stroke-width="1.2"/></svg>'
+            }
+          </span>
+          <span class="diag-test-label">${this._escapeHtml(item.label)}</span>
+          ${item.manual ? '<span class="diag-test-manual">manual</span>' : ''}
+          ${dateStr ? `<span class="diag-test-date">${dateStr}</span>` : ''}
+          ${tokenPct ? `<span class="diag-test-score">${tokenPct}</span>` : ''}
+          ${compPct ? `<span class="diag-test-score is-comp">${compPct}</span>` : ''}
+        </div>`;
     }
 
     _resultsHTML() {

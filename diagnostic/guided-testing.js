@@ -17,91 +17,87 @@
   // ORDER MATTERS — more specific patterns must come before generic ones.
   // Reports/Dashboards must precede Record Detail since /lightning/r/Report/
   // and /lightning/r/Dashboard/ would match the generic record pattern.
+  // ── Page groups ──────────────────────────────────────────────────────────
+  // Pages are organized into groups for the checklist UI.
+  // ORDER MATTERS within groups — more specific URL patterns first.
+
   const PAGE_TYPES = [
+    // ── Lightning Experience ──────────────────────────────────────────────
     {
       id: 'home',
       label: 'Home Page',
-      icon: 'home',
+      group: 'lightning',
       urlPatterns: [/\/lightning\/page\/home/, /\/lightning\/o\/Home/],
       hint: 'Click the Home tab in the navigation bar.',
-      scans: ['tokens', 'components'],
       keyComponents: ['card', 'pageHeader', 'nav'],
     },
     {
-      id: 'setup',
-      label: 'Setup',
-      icon: 'setup',
-      urlPatterns: [/\/lightning\/setup\//, /salesforce-setup\.com/, /\/setup\//, /SetupOneHome/],
-      hint: 'Click the gear icon → "Setup". Opens in a new tab — open the diagnostic there too.',
-      scans: ['tokens', 'components'],
-      keyComponents: ['card', 'table', 'input', 'nav'],
+      id: 'listView',
+      label: 'List View',
+      group: 'lightning',
+      urlPatterns: [/\/lightning\/o\/[A-Za-z0-9_]+\/list/, /\/lightning\/o\/[A-Za-z0-9_]+\/home/],
+      hint: 'Navigate to any object\'s list view (e.g., Accounts > All Accounts).',
+      keyComponents: ['table', 'pageHeader', 'button', 'input'],
     },
     {
       id: 'reports',
       label: 'Reports',
-      icon: 'report',
+      group: 'lightning',
       urlPatterns: [/\/lightning\/o\/Report/, /\/lightning\/r\/Report/],
       hint: 'Navigate to the Reports tab.',
-      scans: ['tokens', 'components'],
       keyComponents: ['table', 'card', 'button'],
     },
     {
       id: 'dashboards',
       label: 'Dashboards',
-      icon: 'dashboard',
+      group: 'lightning',
       urlPatterns: [/\/lightning\/o\/Dashboard/, /\/lightning\/r\/Dashboard/],
       hint: 'Navigate to the Dashboards tab.',
-      scans: ['tokens', 'components'],
       keyComponents: ['card'],
     },
     {
-      id: 'appLauncher',
-      label: 'App Launcher',
-      icon: 'launcher',
-      urlPatterns: [/\/lightning\/o\/AppLauncher/, /\/lightning\/page\/app-launcher/, /app-launcher/],
-      hint: 'Click the 9-dot waffle icon in the top-left corner.',
-      scans: ['tokens'],
-      keyComponents: ['card', 'input'],
-      manual: true, // App Launcher is an overlay modal — URL doesn't change, DOM detection unreliable across orgs
-    },
-    {
-      id: 'listView',
-      label: 'List View',
-      icon: 'list',
-      urlPatterns: [/\/lightning\/o\/[A-Za-z0-9_]+\/list/, /\/lightning\/o\/[A-Za-z0-9_]+\/home/],
-      hint: 'Navigate to any object\'s list view (e.g., Accounts > All Accounts).',
-      scans: ['tokens', 'components'],
-      keyComponents: ['table', 'pageHeader', 'button', 'input'],
+      // Record Detail MUST come after Reports/Dashboards since /lightning/r/ is broad
+      id: 'record',
+      label: 'Record Detail',
+      group: 'lightning',
+      urlPatterns: [/\/lightning\/r\/[A-Za-z0-9_]+\/[a-zA-Z0-9]+\/view/],
+      hint: 'Open any record (Account, Contact, Opportunity, etc.).',
+      keyComponents: ['card', 'button', 'input', 'tab', 'recordLayout', 'path'],
     },
     {
       id: 'relatedList',
       label: 'Related Lists',
-      icon: 'related',
+      group: 'lightning',
       urlPatterns: [/\/lightning\/r\/.*\/related/],
-      hint: 'On a record, click the "Related" tab to see related lists.',
-      scans: ['tokens', 'components'],
+      hint: 'On a record, click the "Related" tab.',
       keyComponents: ['card', 'table', 'button'],
-      manual: true, // Related lists are on record pages but URL doesn't change when switching to Related tab
+      // Also detect via DOM when Related tab is active on a record page
+      domDetect: () => {
+        // Check if the Related tab is selected (aria-selected="true" on a tab with "Related" text)
+        const relTab = document.querySelector('.slds-tabs_default__item.slds-is-active');
+        return relTab && /related/i.test(relTab.textContent);
+      },
     },
     {
-      // Record Detail MUST come after Reports/Dashboards since /lightning/r/ is a broad match
-      id: 'record',
-      label: 'Record Detail',
-      icon: 'record',
-      urlPatterns: [/\/lightning\/r\/[A-Za-z0-9_]+\/[a-zA-Z0-9]+\/view/],
-      hint: 'Open any record (Account, Contact, Opportunity, etc.).',
-      scans: ['tokens', 'components'],
-      keyComponents: ['card', 'button', 'input', 'tab', 'recordLayout', 'path'],
+      id: 'appLauncher',
+      label: 'App Launcher',
+      group: 'lightning',
+      urlPatterns: [/\/lightning\/o\/AppLauncher/, /\/lightning\/page\/app-launcher/],
+      hint: 'Click the 9-dot waffle icon in the top-left corner.',
+      keyComponents: ['card', 'input'],
+      // Detect overlay by checking for the launcher modal in DOM
+      domDetect: () => {
+        const el = document.querySelector('one-app-launcher-modal');
+        return el && el.offsetHeight > 0;
+      },
     },
     {
       id: 'modal',
       label: 'Modal / Dialog',
-      icon: 'modal',
-      urlPatterns: [/\/new\?/, /\/e\?/], // SF new/edit record URLs
-      hint: 'Open any modal (e.g., click "New" on a list view, or edit a record inline).',
-      scans: ['tokens', 'components'],
+      group: 'lightning',
+      urlPatterns: [/\/new\?/, /\/e\?/],
+      hint: 'Open any modal (e.g., click "New" on a list view).',
       keyComponents: ['modal', 'button', 'input'],
-      // Auto-detect when a modal is actually visible (check computed visibility)
       domDetect: () => {
         const modal = document.querySelector('.slds-modal__container, .modal-container, .forceModalContainer');
         if (!modal) return false;
@@ -112,12 +108,70 @@
     {
       id: 'dropdown',
       label: 'Dropdowns & Popovers',
-      icon: 'dropdown',
+      group: 'lightning',
       urlPatterns: [],
       hint: 'Click any dropdown menu or hover over a help tooltip.',
-      scans: ['tokens', 'components'],
       keyComponents: ['dropdown', 'popover'],
-      manual: true, // Keep as manual — dropdowns are too transient for auto-detect
+      manual: true, // Genuinely transient — can't auto-detect reliably
+    },
+
+    // ── Setup Pages ──────────────────────────────────────────────────────
+    {
+      id: 'setupHome',
+      label: 'Setup Home',
+      group: 'setup',
+      urlPatterns: [/SetupOneHome/, /\/lightning\/setup\/SetupOneHome/],
+      hint: 'Gear icon → Setup → you land on Setup Home.',
+      keyComponents: ['card', 'nav'],
+    },
+    {
+      id: 'setupUsers',
+      label: 'Users',
+      group: 'setup',
+      urlPatterns: [/\/lightning\/setup\/ManageUsers/, /\/setup\/ManageUsers/],
+      hint: 'Setup → Users → Users list.',
+      keyComponents: ['table', 'button', 'input'],
+    },
+    {
+      id: 'setupProfiles',
+      label: 'Profiles',
+      group: 'setup',
+      urlPatterns: [/\/lightning\/setup\/EnhancedProfiles/, /\/lightning\/setup\/Profiles/, /\/setup\/profiles/i],
+      hint: 'Setup → Profiles.',
+      keyComponents: ['table', 'button'],
+    },
+    {
+      id: 'setupPermSets',
+      label: 'Permission Sets',
+      group: 'setup',
+      urlPatterns: [/\/lightning\/setup\/PermSets/, /\/setup\/PermSets/],
+      hint: 'Setup → Permission Sets. Often a classic VF page.',
+      keyComponents: ['table', 'button'],
+    },
+    {
+      id: 'setupObjManager',
+      label: 'Object Manager',
+      group: 'setup',
+      urlPatterns: [/\/lightning\/setup\/ObjectManager/, /\/setup\/ObjectManager/],
+      hint: 'Setup → Object Manager.',
+      keyComponents: ['table', 'input', 'card'],
+    },
+    {
+      id: 'setupFlows',
+      label: 'Flows',
+      group: 'setup',
+      urlPatterns: [/\/lightning\/setup\/Flows/, /\/setup\/Flows/],
+      hint: 'Setup → Flows.',
+      keyComponents: ['table', 'button'],
+    },
+    {
+      id: 'setupGeneric',
+      label: 'Other Setup Page',
+      group: 'setup',
+      // Catch-all for any setup page not matched above
+      urlPatterns: [/\/lightning\/setup\//, /salesforce-setup\.com/, /\/setup\//],
+      hint: 'Navigate to any other Setup page.',
+      keyComponents: ['card', 'table', 'input', 'nav'],
     },
   ];
 
