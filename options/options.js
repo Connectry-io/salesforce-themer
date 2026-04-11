@@ -1168,8 +1168,8 @@
     // Remove any existing share menu
     document.querySelector('.opt-share-menu')?.remove();
 
-    const text = `Check out the "${theme.name}" theme for Salesforce Themer by Connectry.`;
-    const url = 'https://chrome.google.com/webstore/detail/salesforce-themer';
+    const text = `Check out the "${theme.name}" theme for Salesforce Themer by Connectry!`;
+    const url = `https://chromewebstore.google.com/detail/${chrome.runtime.id}`;
     const fullText = `${text}\n${url}`;
 
     const menu = document.createElement('div');
