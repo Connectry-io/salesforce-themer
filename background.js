@@ -179,6 +179,12 @@ function generateThemeCSS(theme) {
 
   /* SLDS 2 component hooks: input text */
   --slds-c-input-text-color: ${c.textPrimary} !important;
+
+  /* Kebab-case aliases — SF uses both naming conventions */
+  --lwc-color-background: ${c.background} !important;
+  --lwc-color-background-alt: ${c.surface} !important;
+  --lwc-brand-accessible: ${c.accent} !important;
+  --lwc-colorBrandDarker: ${c.accentActive} !important;
 }
 
 /* ─── Base ───────────────────────────────────────────────────────────────── */
