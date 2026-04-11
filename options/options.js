@@ -142,20 +142,20 @@
         <div class="preview-particle"></div><div class="preview-particle"></div>
       </div>
       <div class="preview-cursor-trail"></div>
-      <div class="preview-topbar">
+      <div class="preview-topbar" data-bind="surface" data-bind-border-color="border">
         <div class="preview-topbar-left">
           <svg class="preview-sf-logo" width="18" height="13" viewBox="0 0 23 16" fill="none" aria-hidden="true">
             <path d="M9.5 3.1a3.4 3.4 0 016.2-.3 3.8 3.8 0 015 3.6 3.8 3.8 0 01-3.8 3.8h-.2a3.5 3.5 0 01-6.5 1.2A3.2 3.2 0 017 13a3.2 3.2 0 01-3.2-3.2v-.1A3.5 3.5 0 011 6.4 3.5 3.5 0 014.5 3c.3 0 .6 0 .9.1a4 4 0 014.1 0z" fill="#00A1E0"/>
           </svg>
         </div>
-        <div class="preview-topbar-search">
+        <div class="preview-topbar-search" data-bind="background" data-bind-border-color="borderInput">
           <svg width="11" height="11" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-            <circle cx="7" cy="7" r="5" stroke="#9aa5b4" stroke-width="1.5"/>
-            <path d="M11 11l3.5 3.5" stroke="#9aa5b4" stroke-width="1.5" stroke-linecap="round"/>
+            <circle cx="7" cy="7" r="5" stroke="currentColor" stroke-width="1.5" opacity="0.4"/>
+            <path d="M11 11l3.5 3.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" opacity="0.4"/>
           </svg>
-          <span>Search...</span>
+          <span data-bind-color="textPlaceholder">Search...</span>
         </div>
-        <div class="preview-topbar-actions">
+        <div class="preview-topbar-actions" data-bind-color="textSecondary">
           <svg width="12" height="12" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M8.5 1.3A6.5 6.5 0 002 7.6a6.5 6.5 0 005.2 6.4l.3-1.2A5.3 5.3 0 013.2 7.6a5.3 5.3 0 015.3-5.1 5.3 5.3 0 015.3 5.1 5.3 5.3 0 01-2.6 4.5l.4 1.1A6.5 6.5 0 0015 7.6a6.5 6.5 0 00-6.5-6.3z" fill="currentColor"/><circle cx="8.5" cy="7.5" r="1.8" fill="currentColor"/></svg>
           <svg width="12" height="12" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M8 1.5l2 4.5h4.5l-3.5 3 1.2 4.5L8 11l-4.2 2.5L5 9 1.5 6H6l2-4.5z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round" fill="none"/></svg>
           <svg width="12" height="12" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M8 2v12M2 8h12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>

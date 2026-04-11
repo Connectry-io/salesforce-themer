@@ -4063,16 +4063,14 @@ body.is-premium .builder-overflow-premium-badge { display: none !important; }
 }
 
 /* Global header — white bar with logo, search, admin icons */
-/* Top bar — always white, matches real Salesforce global header behavior.
+/* Top bar — bound to surface, follows the theme.
    SF logo (left), search (center), config icons + avatar (right). */
 .preview-topbar {
   display: flex;
   align-items: center;
   gap: 10px;
   padding: 6px 14px;
-  background: #ffffff;
-  border-bottom: 1px solid #e5e5e5;
-  color: #3e3e3c;
+  border-bottom: 1px solid;
 }
 .preview-topbar-left {
   display: flex;
@@ -4087,19 +4085,16 @@ body.is-premium .builder-overflow-premium-badge { display: none !important; }
   align-items: center;
   gap: 6px;
   padding: 4px 10px;
-  background: #f3f3f3;
-  border: 1px solid #c9c9c9;
+  border: 1px solid;
   border-radius: 4px;
   font-size: 10px;
-  color: #9aa5b4;
 }
 .preview-topbar-actions {
   display: flex;
   align-items: center;
   gap: 8px;
   flex-shrink: 0;
-  color: #706e6b;
-  opacity: 0.7;
+  opacity: 0.6;
 }
 .preview-topbar-avatar {
   display: inline-flex;
