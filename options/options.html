@@ -103,10 +103,22 @@
           <span>Auto dark mode</span>
         </label>
         <span class="opt-status-bar-spacer"></span>
-        <a class="opt-status-bar-smart" href="#optSmartApplySection" id="optSmartApplyLink">
+        <button class="opt-status-bar-smart" id="optSmartApplyLink" type="button">
           <span>Smart Apply: <strong id="optSmartStatusText">Off</strong></span>
           <span class="cx-tab-badge cx-tab-badge--premium">Premium</span>
-        </a>
+          <svg class="opt-smart-chevron" width="10" height="10" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+            <path d="M3 4.5L6 7.5L9 4.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+        <!-- Smart Apply popover -->
+        <div class="opt-smart-popover" id="optSmartPopover" hidden>
+          <div class="opt-smart-popover-arrow"></div>
+          <p class="opt-smart-intro">Let Themer switch themes for you — based on time, weather, or what you're doing.</p>
+          <div class="opt-smart-modes" id="optSmartModes"></div>
+          <div class="opt-smart-cta">
+            <button class="cx-btn cx-btn-primary cx-btn-sm" id="optSmartUpgradeBtn">Upgrade to Premium</button>
+          </div>
+        </div>
       </div>
       <!-- Per-org (conditional) + reset live here, outside the bar -->
       <div class="opt-status-bar-extra" id="orgSettingsRow" hidden>
@@ -160,21 +172,6 @@
               </div>
             </div>
             <div class="opt-collection-grid" id="optPresetsGrid" role="listbox" aria-label="Preset themes"></div>
-          </section>
-
-          <!-- Smart Apply teaser -->
-          <section class="cx-section opt-smart-section" id="optSmartApplySection" aria-labelledby="opt-smart-heading">
-            <div class="cx-section-header">
-              <h2 class="cx-section-title" id="opt-smart-heading">
-                Smart Apply
-                <span class="cx-tab-badge cx-tab-badge--premium">Premium</span>
-              </h2>
-            </div>
-            <p class="opt-smart-intro">Let Themer switch themes for you — based on time, weather, or what you're doing.</p>
-            <div class="opt-smart-modes" id="optSmartModes"></div>
-            <div class="opt-smart-cta">
-              <button class="cx-btn cx-btn-primary cx-btn-sm" id="optSmartUpgradeBtn">Upgrade to unlock</button>
-            </div>
           </section>
 
         </div>

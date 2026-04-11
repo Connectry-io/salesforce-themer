@@ -1240,19 +1240,34 @@
     });
   }
 
-  // ─── Theme Manager: Smart Apply scroll link ──────────────────────────────
+  // ─── Theme Manager: Smart Apply popover ───────────────────────────────────
 
-  function bindSmartApplyScroll() {
-    const link = document.getElementById('optSmartApplyLink');
-    if (!link) return;
-    link.addEventListener('click', (e) => {
-      e.preventDefault();
-      const section = document.getElementById('optSmartApplySection');
-      if (section) section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  function bindSmartApplyPopover() {
+    const btn = document.getElementById('optSmartApplyLink');
+    const popover = document.getElementById('optSmartPopover');
+    if (!btn || !popover) return;
+
+    function toggle(show) {
+      const open = typeof show === 'boolean' ? show : popover.hidden;
+      popover.hidden = !open;
+      btn.setAttribute('aria-expanded', String(open));
+    }
+
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      toggle();
     });
+
+    document.addEventListener('click', (e) => {
+      if (!popover.hidden && !popover.contains(e.target) && !btn.contains(e.target)) {
+        toggle(false);
+      }
+    });
+
     const upgradeBtn = document.getElementById('optSmartUpgradeBtn');
     if (upgradeBtn) {
       upgradeBtn.addEventListener('click', () => {
+        toggle(false);
         const upgradeTab = document.querySelector('[data-tab="upgrade"]');
         if (upgradeTab) upgradeTab.click();
       });
@@ -1858,7 +1873,7 @@
     bindPresetsFilterPills();
     bindStatusBar();
     renderSmartApply();
-    bindSmartApplyScroll();
+    bindSmartApplyPopover();
     bindDetailPanelClose();
     bindMyThemesNewBtn();
     bindEmptyBuilderBtn();

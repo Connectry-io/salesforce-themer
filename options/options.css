@@ -24,6 +24,7 @@
 /* ─── Theme Manager: Status Bar ──────────────────────────────────────────── */
 
 .opt-status-bar {
+  position: relative;
   display: flex;
   align-items: center;
   gap: var(--cx-space-3);
@@ -61,21 +62,30 @@
   color: var(--cx-text-muted);
   white-space: nowrap;
 }
-a.opt-status-bar-smart {
+.opt-status-bar-smart {
   display: flex;
   align-items: center;
   gap: 6px;
   font-size: 12px;
   color: var(--cx-text-muted);
-  text-decoration: none;
   cursor: pointer;
   transition: color var(--cx-transition);
+  background: none;
+  border: none;
+  padding: 0;
+  font-family: var(--cx-font);
 }
-a.opt-status-bar-smart:hover {
+.opt-status-bar-smart:hover {
   color: var(--cx-accent);
 }
-a.opt-status-bar-smart strong { color: var(--cx-text); }
-a.opt-status-bar-smart:hover strong { color: var(--cx-accent); }
+.opt-status-bar-smart strong { color: var(--cx-text); }
+.opt-status-bar-smart:hover strong { color: var(--cx-accent); }
+.opt-smart-chevron {
+  transition: transform var(--cx-transition);
+}
+.opt-status-bar-smart[aria-expanded="true"] .opt-smart-chevron {
+  transform: rotate(180deg);
+}
 
 /* ─── Theme Manager: Inline scope pills in status bar ────────────────────── */
 
@@ -111,51 +121,65 @@ a.opt-status-bar-smart:hover strong { color: var(--cx-accent); }
   flex: 1;
   min-width: 0;
 }
-/* ─── Theme Manager: Smart Apply teaser ─────────────────────────────────── */
+/* ─── Theme Manager: Smart Apply popover ────────────────────────────────── */
 
-.opt-smart-section {
+.opt-smart-popover {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 8px);
+  width: 340px;
+  background: var(--cx-surface);
+  border: 1px solid var(--cx-border);
+  border-radius: var(--cx-radius-lg);
+  box-shadow: 0 8px 24px rgba(0,0,0,.12), 0 2px 8px rgba(0,0,0,.08);
+  padding: var(--cx-space-4);
+  z-index: 100;
+}
+.opt-smart-popover[hidden] { display: none; }
+.opt-smart-popover-arrow {
+  position: absolute;
+  top: -6px;
+  right: 24px;
+  width: 12px;
+  height: 12px;
+  background: var(--cx-surface);
   border-top: 1px solid var(--cx-border);
-  padding-top: var(--cx-space-5);
-  scroll-margin-top: calc(var(--cx-header-height) + 16px);
+  border-left: 1px solid var(--cx-border);
+  transform: rotate(45deg);
 }
 .opt-smart-intro {
   font-size: 13px;
   color: var(--cx-text-muted);
-  margin: 0 0 var(--cx-space-4);
+  margin: 0 0 var(--cx-space-3);
   line-height: 1.4;
 }
 .opt-smart-modes {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: var(--cx-space-3);
+  display: flex;
+  flex-direction: column;
+  gap: var(--cx-space-2);
 }
 .opt-smart-mode-card {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   gap: 10px;
-  padding: var(--cx-space-3);
-  border: 1px solid var(--cx-border);
+  padding: 8px 10px;
   border-radius: var(--cx-radius-md);
-  background: var(--cx-surface);
-  opacity: 0.6;
+  background: var(--cx-surface-alt);
 }
 .opt-smart-mode-icon {
   flex: 0 0 auto;
-  width: 28px;
-  height: 28px;
+  width: 24px;
+  height: 24px;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: var(--cx-radius-sm);
-  background: var(--cx-surface-alt);
   color: var(--cx-text-muted);
 }
 .opt-smart-mode-text { min-width: 0; }
 .opt-smart-mode-name {
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 600;
   color: var(--cx-text);
-  margin-bottom: 2px;
 }
 .opt-smart-mode-desc {
   font-size: 11px;
@@ -164,7 +188,7 @@ a.opt-status-bar-smart:hover strong { color: var(--cx-accent); }
 }
 .opt-smart-mode-card .cx-toggle { display: none; }
 .opt-smart-cta {
-  margin-top: var(--cx-space-4);
+  margin-top: var(--cx-space-3);
   text-align: center;
 }
 
@@ -223,8 +247,14 @@ a.opt-status-bar-smart:hover strong { color: var(--cx-accent); }
   display: flex;
   align-items: center;
   gap: var(--cx-space-2);
-  padding: 0 var(--cx-space-4) var(--cx-space-3);
+  padding: var(--cx-space-2) var(--cx-space-4);
+  margin: 0 var(--cx-space-3) var(--cx-space-3);
+  background: var(--cx-surface-alt);
+  border-radius: var(--cx-radius-md);
   flex-wrap: wrap;
+}
+.opt-detail-panel-toolbar .cx-btn {
+  font-weight: 600;
 }
 .opt-detail-panel-toolbar .opt-toolbar-spacer { flex: 1; }
 .opt-detail-panel-toolbar .cx-btn-delete {
