@@ -62,6 +62,38 @@
   color: var(--cx-text-muted);
   white-space: nowrap;
 }
+
+/* ─── Inline hover tooltips (status bar) ─────────────────────────────── */
+
+.opt-has-tip {
+  position: relative;
+  cursor: help;
+  border-bottom: 1px dotted var(--cx-text-subtle);
+}
+.opt-has-tip::after {
+  content: attr(data-tip);
+  position: absolute;
+  left: 50%;
+  top: calc(100% + 8px);
+  transform: translateX(-50%);
+  background: var(--cx-text);
+  color: var(--cx-surface);
+  font-size: 11px;
+  font-weight: 400;
+  line-height: 1.4;
+  padding: 6px 10px;
+  border-radius: var(--cx-radius-sm);
+  white-space: normal;
+  width: max-content;
+  max-width: 220px;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 150ms;
+  z-index: 300;
+}
+.opt-has-tip:hover::after {
+  opacity: 1;
+}
 .opt-status-bar-smart {
   display: flex;
   align-items: center;
@@ -201,7 +233,7 @@
   max-height: calc(100vh - var(--cx-header-height) - 24px);
   overflow-y: auto;
   background: var(--cx-surface);
-  border: 1.5px solid var(--cx-accent);
+  border: 1px solid var(--cx-border);
   border-radius: var(--cx-radius-lg);
   box-shadow: var(--cx-shadow-md);
   animation: opt-panel-slide 220ms cubic-bezier(0.16, 1, 0.3, 1) both;
@@ -263,6 +295,42 @@
   background: var(--cx-border);
   color: var(--cx-text);
 }
+/* ─── Share dropdown menu ─────────────────────────────────────────────── */
+
+.opt-share-menu {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: 4px;
+  min-width: 140px;
+  background: var(--cx-surface);
+  border: 1px solid var(--cx-border);
+  border-radius: var(--cx-radius-md);
+  box-shadow: 0 6px 16px rgba(0,0,0,.12);
+  padding: 4px;
+  z-index: 200;
+}
+.opt-share-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 7px 10px;
+  border: none;
+  background: transparent;
+  border-radius: var(--cx-radius-sm);
+  font-size: 12px;
+  font-family: var(--cx-font);
+  color: var(--cx-text);
+  cursor: pointer;
+  transition: background var(--cx-transition);
+}
+.opt-share-menu-item:hover {
+  background: var(--cx-surface-alt);
+}
+
+/* ─── Detail panel: preview + body ────────────────────────────────────── */
+
 .opt-detail-panel-preview {
   padding: var(--cx-space-3) var(--cx-space-4) 0;
 }
@@ -348,8 +416,29 @@
 .opt-collection-grid[hidden] { display: none; }
 .opt-collection-grid .theme-card.is-hidden { display: none; }
 .opt-premium-gate {
-  border: 1px dashed var(--cx-accent);
-  background: var(--cx-accent-light);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: var(--cx-space-4) var(--cx-space-5);
+  border: 1px dashed var(--cx-border);
+  border-radius: var(--cx-radius-md);
+  background: var(--cx-surface-alt);
+}
+.opt-premium-gate[hidden] { display: none; }
+.opt-premium-gate-text {
+  font-size: 13px;
+  color: var(--cx-text-muted);
+}
+.opt-premium-gate-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  transition: transform var(--cx-transition);
+}
+.opt-premium-gate-btn:hover {
+  transform: scale(1.05);
 }
 
 /* ─── Palette Preview (compact color strip for detail panel) ─────────────── */

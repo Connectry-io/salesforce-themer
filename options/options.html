@@ -91,7 +91,7 @@
           <span id="optStatusText">Theme on</span>
         </label>
         <span class="opt-status-bar-sep"></span>
-        <span class="opt-status-bar-label" title="Where the theme applies: Lightning (everyday pages), Setup (admin area), or Both">Apply to</span>
+        <span class="opt-status-bar-label opt-has-tip" data-tip="Where the theme applies: Lightning (everyday pages), Setup (admin area), or Both">Apply to</span>
         <div class="opt-scope-pills opt-scope-pills--bar" id="optionsScopePills" role="group" aria-label="Theme scope">
           <button class="opt-scope-pill" data-scope="both">Both</button>
           <button class="opt-scope-pill" data-scope="lightning">Lightning</button>
@@ -100,7 +100,7 @@
         <span class="opt-status-bar-sep"></span>
         <label class="opt-status-bar-auto">
           <input type="checkbox" id="autoModeToggle" />
-          <span title="Automatically switch between a light and dark theme when your computer toggles dark mode">Auto dark mode</span>
+          <span class="opt-has-tip" data-tip="Automatically switch between a light and dark theme when your computer toggles dark mode">Auto dark mode</span>
         </label>
         <span class="opt-status-bar-spacer"></span>
         <button class="opt-status-bar-smart" id="optSmartApplyLink" type="button">
@@ -157,10 +157,11 @@
               <p class="cx-empty-body">Clone any preset or create from scratch in the Builder.</p>
               <button class="cx-btn cx-btn-primary cx-btn-sm" id="optEmptyBuilderBtn">Open Builder</button>
             </div>
-            <div class="cx-empty opt-premium-gate" id="optMyThemesPremiumGate" hidden>
-              <h3 class="cx-empty-title">Custom themes are a Premium feature</h3>
-              <p class="cx-empty-body">Create your own themes, clone presets, and customize colors, fonts, and effects.</p>
-              <button class="cx-btn cx-btn-primary cx-btn-sm" id="optMyThemesUpgradeBtn">Upgrade to Premium</button>
+            <div class="opt-premium-gate" id="optMyThemesPremiumGate" hidden>
+              <span class="opt-premium-gate-text">Create your own themes with</span>
+              <button class="opt-premium-gate-btn" id="optMyThemesUpgradeBtn">
+                <span class="cx-tab-badge cx-tab-badge--premium">Premium</span>
+              </button>
             </div>
           </section>
 

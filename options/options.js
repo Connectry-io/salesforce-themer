@@ -1132,30 +1132,12 @@
         renderCollectionGrid(syncState.theme);
       });
     }
-    // Share — use Web Share API if available, fall back to email
+    // Share — custom dropdown menu with explicit options
     const shareBtn = toolbar.querySelector('[data-detail-share]');
     if (shareBtn) {
-      shareBtn.addEventListener('click', async () => {
-        const shareData = {
-          title: `${theme.name} — Salesforce Themer`,
-          text: `Check out the "${theme.name}" theme for Salesforce Themer by Connectry.`,
-          url: 'https://chrome.google.com/webstore/detail/salesforce-themer',
-        };
-        try {
-          if (navigator.share) {
-            await navigator.share(shareData);
-          } else {
-            // Fallback: copy text to clipboard
-            await navigator.clipboard.writeText(`${shareData.text}\n${shareData.url}`);
-            _flashToast('Link copied to clipboard');
-          }
-        } catch (err) {
-          if (err.name !== 'AbortError') {
-            // User cancelled the share sheet — not an error
-            await navigator.clipboard.writeText(`${shareData.text}\n${shareData.url}`);
-            _flashToast('Link copied to clipboard');
-          }
-        }
+      shareBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        _showShareMenu(shareBtn, theme);
       });
     }
 
@@ -1178,6 +1160,62 @@
         }
       });
     });
+  }
+
+  // ─── Share menu (WhatsApp, Email, Copy link) ────────────────────────────
+
+  function _showShareMenu(anchor, theme) {
+    // Remove any existing share menu
+    document.querySelector('.opt-share-menu')?.remove();
+
+    const text = `Check out the "${theme.name}" theme for Salesforce Themer by Connectry.`;
+    const url = 'https://chrome.google.com/webstore/detail/salesforce-themer';
+    const fullText = `${text}\n${url}`;
+
+    const menu = document.createElement('div');
+    menu.className = 'opt-share-menu';
+    menu.innerHTML = `
+      <button class="opt-share-menu-item" data-share="whatsapp">
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M8 1a7 7 0 0 0-6.1 10.4L1 15l3.7-.9A7 7 0 1 0 8 1z" stroke="currentColor" stroke-width="1.2"/><path d="M5.5 4.8c.2-.4.4-.5.6-.5s.3 0 .4.1l.8 1.8c.1.1 0 .3-.1.5l-.4.5c-.1.1-.1.2 0 .4.3.5.7.9 1.2 1.2.2.1.3.1.4 0l.5-.5c.1-.1.3-.2.5-.1l1.6.8c.2.1.3.2.3.4 0 .5-.2 1-.6 1.3-.5.3-1.2.3-1.8 0A8 8 0 0 1 5.5 7c-.4-.8-.5-1.3-.3-1.7l.3-.5z" fill="currentColor"/></svg>
+        WhatsApp
+      </button>
+      <button class="opt-share-menu-item" data-share="email">
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><rect x="1.5" y="3" width="13" height="10" rx="1.5" stroke="currentColor" stroke-width="1.2"/><path d="M1.5 4.5L8 9l6.5-4.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Email
+      </button>
+      <button class="opt-share-menu-item" data-share="copy">
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><rect x="5" y="5" width="9" height="9" rx="1.5" stroke="currentColor" stroke-width="1.2"/><path d="M11 5V3.5A1.5 1.5 0 009.5 2h-6A1.5 1.5 0 002 3.5v6A1.5 1.5 0 003.5 11H5" stroke="currentColor" stroke-width="1.2"/></svg>
+        Copy link
+      </button>
+    `;
+
+    // Position below anchor
+    anchor.style.position = 'relative';
+    anchor.appendChild(menu);
+
+    menu.addEventListener('click', async (e) => {
+      const item = e.target.closest('[data-share]');
+      if (!item) return;
+      const type = item.dataset.share;
+      if (type === 'whatsapp') {
+        window.open(`https://wa.me/?text=${encodeURIComponent(fullText)}`, '_blank');
+      } else if (type === 'email') {
+        window.location.href = `mailto:?subject=${encodeURIComponent(`${theme.name} — Salesforce Themer`)}&body=${encodeURIComponent(fullText)}`;
+      } else if (type === 'copy') {
+        await navigator.clipboard.writeText(fullText);
+        _flashToast('Link copied to clipboard');
+      }
+      menu.remove();
+    });
+
+    // Close on outside click
+    const close = (e) => {
+      if (!menu.contains(e.target) && e.target !== anchor) {
+        menu.remove();
+        document.removeEventListener('click', close);
+      }
+    };
+    setTimeout(() => document.addEventListener('click', close), 0);
   }
 
   function closeDetailPanel() {
