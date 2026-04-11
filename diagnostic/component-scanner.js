@@ -423,4 +423,117 @@
       : '';
     return `${tag}${id}${cls}`.slice(0, 80);
   }
+
+  // ─── DOM Structure Capture ──────────────────────────────────────────────
+  // Captures the actual HTML hierarchy of components for the knowledge base.
+  // This is what replaces manual copy-paste from the inspector.
+
+  /**
+   * Capture the DOM structure of an element up to a given depth.
+   * Returns a compact structural representation.
+   */
+  function captureDOMStructure(el, maxDepth = 3) {
+    function walk(node, depth) {
+      if (depth > maxDepth) return null;
+      if (node.nodeType !== 1) return null; // Element nodes only
+
+      const tag = node.tagName.toLowerCase();
+      const classes = node.className && typeof node.className === 'string'
+        ? node.className.trim().split(/\s+/).filter(c => c.startsWith('slds-') || c.startsWith('force') || c.startsWith('lwc-')).slice(0, 5)
+        : [];
+      const attrs = {};
+      if (node.getAttribute('role')) attrs.role = node.getAttribute('role');
+      if (node.getAttribute('data-aura-rendered-by')) attrs.aura = true;
+
+      const children = [];
+      for (const child of node.children) {
+        if (children.length >= 8) { // Cap child count
+          children.push({ tag: '...', truncated: node.children.length - 8 });
+          break;
+        }
+        const childStruct = walk(child, depth + 1);
+        if (childStruct) children.push(childStruct);
+      }
+
+      return {
+        tag,
+        classes: classes.length ? classes : undefined,
+        attrs: Object.keys(attrs).length ? attrs : undefined,
+        children: children.length ? children : undefined,
+      };
+    }
+
+    return walk(el, 0);
+  }
+
+  /**
+   * Capture computed styles for a component element.
+   * Returns only theme-relevant CSS properties.
+   */
+  function captureComputedStyles(el) {
+    const cs = getComputedStyle(el);
+    return {
+      backgroundColor: cs.backgroundColor,
+      color: cs.color,
+      borderColor: cs.borderColor,
+      borderTopColor: cs.borderTopColor,
+      borderBottomColor: cs.borderBottomColor,
+      boxShadow: cs.boxShadow !== 'none' ? cs.boxShadow : undefined,
+    };
+  }
+
+  /**
+   * Scan and capture DOM structures for all component types on the page.
+   * Returns a structured snapshot that can be saved to the knowledge base.
+   */
+  ns.captureDOMSnapshot = function captureDOMSnapshot() {
+    const snapshot = {
+      url: location.href,
+      timestamp: new Date().toISOString(),
+      components: {},
+    };
+
+    // Standard components
+    for (const [type, config] of Object.entries(COMPONENT_REGISTRY)) {
+      const selector = config.selectors.join(',');
+      const el = document.querySelector(selector);
+      if (!el) continue;
+
+      // Find a visible instance
+      let target = el;
+      if (target.offsetParent === null) {
+        const all = document.querySelectorAll(selector);
+        for (const candidate of all) {
+          if (candidate.offsetParent !== null) { target = candidate; break; }
+        }
+      }
+
+      snapshot.components[type] = {
+        label: config.label,
+        matchedSelector: describeElement(target),
+        domStructure: captureDOMStructure(target),
+        computedStyles: captureComputedStyles(target),
+        instanceCount: document.querySelectorAll(selector).length,
+      };
+    }
+
+    // Custom LWCs — capture structure of each unique custom element
+    const customEls = scanCustomLWCs();
+    for (const comp of customEls) {
+      const el = document.querySelector(comp.tag);
+      if (!el) continue;
+      snapshot.components[`custom:${comp.tag}`] = {
+        label: `Custom: <${comp.tag}>`,
+        source: comp.source,
+        packageName: comp.packageName,
+        matchedSelector: comp.tag,
+        domStructure: captureDOMStructure(el, 2), // Shallower for custom
+        computedStyles: captureComputedStyles(el),
+        instanceCount: comp.count,
+      };
+    }
+
+    return snapshot;
+  };
 })();
+

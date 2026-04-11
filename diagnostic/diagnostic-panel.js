@@ -653,10 +653,15 @@
       return `
         <div class="diag-footer">
           <span class="diag-footer-brand">Powered by <strong>Connectry AI</strong></span>
-          <button class="diag-copy-btn" data-action="copy" title="Copy scan report to clipboard">
-            ${ICONS.copy}
-            <span>Copy Report</span>
-          </button>
+          <div class="diag-footer-actions">
+            <button class="diag-copy-btn" data-action="copyDOM" title="Copy DOM structure snapshot to clipboard">
+              <span>DOM</span>
+            </button>
+            <button class="diag-copy-btn" data-action="copy" title="Copy scan report to clipboard">
+              ${ICONS.copy}
+              <span>Copy Report</span>
+            </button>
+          </div>
         </div>`;
     }
 
@@ -701,6 +706,7 @@
         else if (action === 'scanAll') this._runScanAll(btn);
         else if (action === 'resetProgress') this._resetTestingProgress();
         else if (action === 'copy') this._copyReport(btn);
+        else if (action === 'copyDOM') this._copyDOMSnapshot(btn);
       });
 
       // Tab switching
@@ -1053,6 +1059,29 @@
         setTimeout(() => {
           btn.classList.remove('is-copied');
           if (textSpan) textSpan.textContent = 'Copy Report';
+        }, 2000);
+      } catch (err) {
+        console.warn('[SFT Diag] Clipboard write failed:', err.message);
+      }
+    }
+
+    async _copyDOMSnapshot(btn) {
+      if (!ns.captureDOMSnapshot) {
+        console.warn('[SFT Diag] DOM snapshot not available');
+        return;
+      }
+
+      const snapshot = ns.captureDOMSnapshot();
+      const json = JSON.stringify(snapshot, null, 2);
+
+      try {
+        await navigator.clipboard.writeText(json);
+        const textSpan = btn.querySelector('span');
+        btn.classList.add('is-copied');
+        if (textSpan) textSpan.textContent = 'Copied!';
+        setTimeout(() => {
+          btn.classList.remove('is-copied');
+          if (textSpan) textSpan.textContent = 'DOM';
         }, 2000);
       } catch (err) {
         console.warn('[SFT Diag] Clipboard write failed:', err.message);

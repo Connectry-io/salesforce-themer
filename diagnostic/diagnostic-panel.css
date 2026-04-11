@@ -829,6 +829,12 @@
   flex-shrink: 0;
 }
 
+.diag-footer-actions {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+}
+
 .diag-footer-brand {
   font-size: 9px;
   letter-spacing: 0.06em;
