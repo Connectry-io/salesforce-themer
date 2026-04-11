@@ -883,24 +883,27 @@
       <div class="theme-card-body">
         <div class="theme-card-header">
           <span class="theme-name">${theme.name}</span>
+          ${isActive ? '<span class="theme-active-badge">✓ Active</span>' : ''}
           <span class="theme-category-badge ${theme.isCustom ? (theme.category || 'light') : theme.category}">${theme.isCustom ? 'Custom' : (theme.category === 'light' ? 'Light' : 'Dark')}</span>
         </div>
         <div class="theme-description">${theme.description || ''}</div>
-        ${theme.isCustom ? '' : buildEffectIndicators(theme.id)}
+        ${theme.isCustom ? buildEffectIndicators(theme.effects || getSuggestedEffectsFor(theme.basedOn || 'connectry')) : buildEffectIndicators(theme.id)}
         <div class="theme-card-type-row">
           <span class="theme-card-type-icon">Aa</span>
           <span class="theme-card-type-text">System Default · Md · 1.375/0</span>
         </div>
       </div>
-      <div class="theme-card-actions">
-        <div class="theme-card-status">
-          <span class="theme-card-status-dot"></span>
-          <span>${isActive ? 'Active' : 'Apply'}</span>
-        </div>
-      </div>
+      ${isActive ? '' : '<div class="theme-card-actions"><button class="theme-card-apply-btn" data-quick-apply>Apply</button></div>'}
     `;
 
     card.addEventListener('click', (e) => {
+      // Quick-apply button — apply directly without opening panel
+      if (e.target.closest('[data-quick-apply]')) {
+        e.stopPropagation();
+        selectTheme(theme.id);
+        renderCollectionGrid(syncState.theme);
+        return;
+      }
       const effectPill = e.target.closest('[data-effect-pill]');
       if (effectPill) {
         e.stopPropagation();
