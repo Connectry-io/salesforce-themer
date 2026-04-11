@@ -66,16 +66,25 @@
       this.isMinimized = false;
       console.log('[SFT Diag] Opening panel...');
 
-      if (!this._cssLoaded) {
-        await this._loadCSS();
-        console.log('[SFT Diag] CSS loaded:', this._cssText.length, 'chars');
+      // Load CSS and testing progress in parallel
+      const loads = [];
+      if (!this._cssLoaded) loads.push(this._loadCSS());
+      if (ns.getTestingProgress) {
+        loads.push(
+          ns.getTestingProgress(this.currentTheme).then(p => { this.testingProgress = p || {}; })
+        );
+      } else {
+        this.testingProgress = {};
       }
+      if (loads.length) await Promise.all(loads);
 
       this._createHost();
       this._renderPanel();
       this._setupDrag();
       await this._restorePosition();
-      console.log('[SFT Diag] Panel rendered, host in DOM:', !!document.getElementById(HOST_ID));
+
+      // Run initial scan automatically
+      this._autoScan();
     }
 
     close() {
@@ -129,6 +138,14 @@
     async _autoScan() {
       console.log('[SFT Diag] Auto-scanning on navigation...');
 
+      // Small delay — let SF finish rendering the new page
+      await new Promise(r => setTimeout(r, 500));
+
+      // Always load latest testing progress first
+      if (ns.getTestingProgress) {
+        this.testingProgress = await ns.getTestingProgress(this.currentTheme) || {};
+      }
+
       // Token scan
       try {
         if (ns.scanTokens) {
@@ -143,8 +160,9 @@
         }
       } catch (_) {}
 
-      // Save testing progress
+      // Save testing progress for detected page type
       const pageType = ns.detectPageType?.();
+      console.log('[SFT Diag] Page type:', pageType?.id || 'none', 'URL:', location.pathname.slice(0, 60));
       if (pageType && ns.saveTestResult) {
         const tokenCoverage = this.scanResults?.coverage || null;
         const s = this.componentResults?.summary;
@@ -152,7 +170,8 @@
           ? ((s.totalStyled + s.totalPartial * 0.5) / s.totalStandardFound) * 100
           : null;
         await ns.saveTestResult(this.currentTheme, pageType.id, { tokenCoverage, componentHealth });
-        this.testingProgress = await ns.getTestingProgress?.(this.currentTheme) || {};
+        // Reload progress to include the save we just did
+        this.testingProgress = await ns.getTestingProgress(this.currentTheme) || {};
       }
 
       // Update info bar (page may have changed)
