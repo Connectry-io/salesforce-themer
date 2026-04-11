@@ -87,7 +87,7 @@
       keyComponents: ['card', 'table', 'button'],
       domDetect: () => {
         if (!/\/lightning\/r\//.test(location.pathname)) return false;
-        return document.querySelectorAll('.forceRelatedListContainer, [class*="relatedList"], .slds-card.forceRelatedListCardDesktop').length > 0;
+        return document.querySelectorAll('.forceRelatedListSingleContainer, lst-related-list-container, lst-related-list-single-container, .forceRelatedListCardDesktop').length > 0;
       },
     },
     {
