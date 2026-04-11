@@ -63,7 +63,7 @@
       scans: ['tokens'],
       keyComponents: ['card', 'input'],
       domDetect: () => {
-        const launcher = document.querySelector('.appLauncherMenu, .slds-app-launcher, [class*="appLauncher"]');
+        const launcher = document.querySelector('one-app-launcher-modal, .al-modal-container, .appLauncherMenu');
         if (!launcher) return false;
         return launcher.offsetHeight > 100;
       },
