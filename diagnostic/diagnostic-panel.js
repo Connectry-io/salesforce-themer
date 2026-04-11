@@ -65,6 +65,8 @@
       this.isOpen = true;
       this.isMinimized = false;
       console.log('[SFT Diag] Opening panel...');
+      // Persist open state so panel reopens after page refresh
+      try { chrome.storage.local.set({ diagnosticPanelOpen: true }); } catch (_) {}
 
       // Load CSS and testing progress in parallel
       const loads = [];
@@ -89,6 +91,7 @@
 
     close() {
       if (!this.isOpen) return;
+      try { chrome.storage.local.set({ diagnosticPanelOpen: false }); } catch (_) {}
       const el = this.shadow?.querySelector('.diag-panel, .diag-badge');
       if (el && el.classList.contains('diag-panel')) {
         el.classList.add('is-closing');

@@ -57,7 +57,7 @@
       id: 'setup',
       label: 'Setup',
       icon: 'setup',
-      urlPatterns: [/\/lightning\/setup\//, /salesforce-setup\.com/, /\/setup\//],
+      urlPatterns: [/\/lightning\/setup\//, /salesforce-setup\.com/, /\/setup\//, /SetupOneHome/],
       hint: 'Click the gear icon → "Setup". Opens in a new tab — open the diagnostic there too.',
       scans: ['tokens', 'components'],
       keyComponents: ['card', 'table', 'input', 'nav'],
@@ -117,6 +117,12 @@
 
   const STORAGE_KEY_PREFIX = 'diagTestProgress_';
 
+  /** Build storage key: per theme + per org */
+  function storageKey(themeId) {
+    const org = location.hostname.replace('.lightning.force.com', '').replace('.my.salesforce.com', '').replace('.my.salesforce-setup.com', '');
+    return STORAGE_KEY_PREFIX + (themeId || 'unknown') + '_' + org;
+  }
+
   // ─── Page detection ─────────────────────────────────────────────────────
 
   /**
@@ -155,7 +161,7 @@
    */
   ns.getTestingProgress = async function getTestingProgress(themeId) {
     try {
-      const key = STORAGE_KEY_PREFIX + (themeId || 'unknown');
+      const key = storageKey(themeId);
       const data = await chrome.storage.local.get(key);
       return data[key] || {};
     } catch (_) {
@@ -168,7 +174,7 @@
    */
   ns.saveTestResult = async function saveTestResult(themeId, pageTypeId, result) {
     try {
-      const key = STORAGE_KEY_PREFIX + (themeId || 'unknown');
+      const key = storageKey(themeId);
       const data = await chrome.storage.local.get(key);
       const progress = data[key] || {};
 
@@ -189,7 +195,7 @@
    */
   ns.clearTestingProgress = async function clearTestingProgress(themeId) {
     try {
-      const key = STORAGE_KEY_PREFIX + (themeId || 'unknown');
+      const key = storageKey(themeId);
       await chrome.storage.local.remove(key);
     } catch (_) {}
   };

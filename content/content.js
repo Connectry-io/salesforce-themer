@@ -697,6 +697,21 @@
 
       // Favicon — Connectry branding on free themes, toggleable + customizable
       applyFavicon(syncResult.faviconEnabled, syncResult.faviconConfig);
+
+      // Auto-reopen diagnostic panel if it was open before page refresh
+      if (isTopFrame && window.__sfThemerDiag?.DiagnosticPanel) {
+        try {
+          const diagState = await chrome.storage.local.get('diagnosticPanelOpen');
+          if (diagState.diagnosticPanelOpen) {
+            diagnosticPanel = new window.__sfThemerDiag.DiagnosticPanel({
+              currentTheme,
+              styleId: STYLE_ID,
+            });
+            diagnosticPanel.open();
+            console.log('[SFT] Diagnostic panel auto-reopened');
+          }
+        } catch (_) {}
+      }
     } catch (err) {
       if (isExtensionContextDead(err)) {
         handleDeadContext();
