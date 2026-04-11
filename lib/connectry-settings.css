@@ -173,6 +173,7 @@ body.cx-settings {
 .cx-tabs {
   display: flex;
   align-items: stretch;
+  justify-content: center;
   gap: 0;
   flex: 1;
   min-width: 0;

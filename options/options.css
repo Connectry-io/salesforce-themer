@@ -4343,7 +4343,8 @@ body.is-premium .builder-overflow-premium-badge { display: none !important; }
   justify-content: flex-start;
   gap: 0;
   margin-top: auto;
-  border-top: 1px solid rgba(255,255,255,0.1);
+  border-top: 1px solid currentColor;
+  opacity: 0.15;
 }
 .preview-utilbar-item {
   display: inline-flex;
@@ -4352,8 +4353,8 @@ body.is-premium .builder-overflow-premium-badge { display: none !important; }
   padding: 6px 14px;
   font-size: 10px;
   font-weight: 600;
-  opacity: 0.85;
-  border-right: 1px solid rgba(255,255,255,0.08);
+  opacity: 1;
+  border-right: 1px solid currentColor;
 }
 
 @media (max-width: 900px) {
