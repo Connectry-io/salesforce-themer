@@ -202,6 +202,44 @@
   box-shadow: 0 0 6px rgba(239, 68, 68, 0.4);
 }
 
+/* ─── Tab bar ──────────────────────────────────────────────────────────── */
+
+.diag-tab-bar {
+  display: flex;
+  gap: 0;
+  padding: 0 14px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  background: rgba(255, 255, 255, 0.01);
+  flex-shrink: 0;
+}
+
+.diag-tab {
+  flex: 1;
+  padding: 8px 12px;
+  border: none;
+  border-bottom: 2px solid transparent;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.35);
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  cursor: pointer;
+  transition: all 150ms ease;
+  text-align: center;
+}
+
+.diag-tab:hover {
+  color: rgba(255, 255, 255, 0.6);
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.diag-tab.is-active {
+  color: #93b5e0;
+  border-bottom-color: #4a6fa5;
+}
+
 /* ─── Scan button ──────────────────────────────────────────────────────── */
 
 .diag-scan-bar {
@@ -526,6 +564,56 @@
   font-family: 'SF Mono', 'JetBrains Mono', Consolas, monospace;
   font-size: 10px;
   color: rgba(234, 179, 8, 0.7);
+}
+
+/* ─── Component scan extras ──────────────────────────────────────────── */
+
+.diag-comp-counts {
+  display: flex;
+  gap: 3px;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.diag-comp-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 16px;
+  padding: 0 4px;
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.diag-comp-count.is-styled {
+  background: rgba(34, 197, 94, 0.12);
+  color: #4ade80;
+}
+
+.diag-comp-count.is-partial {
+  background: rgba(234, 179, 8, 0.12);
+  color: #facc15;
+}
+
+.diag-comp-count.is-unstyled {
+  background: rgba(239, 68, 68, 0.12);
+  color: #f87171;
+}
+
+.diag-comp-pkg {
+  display: inline-block;
+  padding: 1px 5px;
+  border-radius: 4px;
+  background: rgba(147, 130, 220, 0.1);
+  color: rgba(167, 150, 240, 0.7);
+  font-size: 9px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  flex-shrink: 0;
 }
 
 /* ─── Empty / placeholder states ──────────────────────────────────────── */
