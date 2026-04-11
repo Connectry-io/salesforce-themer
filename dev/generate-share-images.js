@@ -292,13 +292,11 @@ function renderShareImage(canvas, theme) {
   // ─── BOTTOM: Branding (stacked, centered) ─────────────────────
   ctx.textAlign = 'center';
 
-  // Logo
-  drawConnectryLogo(ctx, W / 2, H - 46, 14);
-
-  // "Salesforce Themer"
+  // Logo + "Salesforce Themer" on same line
+  drawConnectryLogo(ctx, W / 2 - 68, H - 26, 12);
   ctx.fillStyle = '#e2e8f0';
   ctx.font = 'bold 14px Inter, system-ui, sans-serif';
-  ctx.fillText('Salesforce Themer', W / 2, H - 24);
+  ctx.fillText('Salesforce Themer', W / 2 + 4, H - 22);
 
   // "Built with care by Connectry"
   ctx.fillStyle = '#64748b';
