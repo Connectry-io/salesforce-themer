@@ -1040,7 +1040,7 @@
       toolbarHtml += `<button class="cx-btn cx-btn-secondary cx-btn-sm" data-detail-clone="${theme.id}">Clone</button>`;
     } else {
       toolbarHtml += `<button class="cx-btn cx-btn-secondary cx-btn-sm" data-detail-edit="${theme.id}">Edit</button>`;
-      toolbarHtml += `<button class="cx-btn cx-btn-ghost cx-btn-sm" data-detail-export="${theme.id}">Export</button>`;
+      toolbarHtml += `<button class="cx-btn cx-btn-ghost cx-btn-sm" data-detail-export="${theme.id}"${isPremium() ? '' : ' disabled title="Premium feature"'}>Export</button>`;
     }
     // Share (standard share icon) + Delete (custom only, far right)
     toolbarHtml += `<span class="opt-toolbar-spacer"></span>`;
