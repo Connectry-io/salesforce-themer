@@ -96,6 +96,91 @@
     return declared;
   }
 
+  // Tokens we intentionally don't theme — structural/layout tokens that
+  // should NOT appear as gaps. Overriding these would break SF layouts.
+  const IGNORE_PREFIXES = [
+    '--slds-g-spacing',
+    '--slds-g-sizing',
+    '--slds-g-shadow',
+    '--slds-g-ratio',
+    '--slds-g-radius',
+    '--slds-g-duration',
+    '--slds-g-transparent',
+    '--slds-g-color-palette-',    // Raw palette values (blue-10 etc.)
+    '--slds-g-color-neutral-base-',
+    '--slds-g-color-brand-base-',
+    '--slds-g-color-error-base-',
+    '--slds-g-color-warning-base-',
+    '--slds-g-color-success-base-',
+    '--slds-g-color-neutral-10-opacity',
+    '--slds-g-color-neutral-100-opacity',
+    '--slds-g-font-scale',
+    '--slds-g-font-lineheight',
+    '--slds-g-font-weight-bold',
+    '--slds-g-font-weight-1',
+    '--slds-g-font-weight-2',
+    '--slds-g-font-weight-3',
+    '--slds-g-font-weight-5',
+    '--slds-g-font-weight-6',
+    '--slds-g-font-size-base',
+    '--slds-g-font-family-monospace',
+    '--slds-g-link-color',
+    '--slds-g-spacing-var',
+    '--lwc-spacing',
+    '--lwc-varSpacing',
+    '--lwc-size',
+    '--lwc-square',
+    '--lwc-height',
+    '--lwc-width',
+    '--lwc-borderWidth',
+    '--lwc-borderStroke',
+    '--lwc-borderRadius',
+    '--lwc-lineClamp',
+    '--lwc-lineHeight',
+    '--lwc-fontSize',                // font sizing tokens — not color
+    '--lwc-fontWeight',
+    '--lwc-fontFamily',
+    '--lwc-fontSizeText',
+    '--lwc-varFontSize',
+    '--lwc-font',                    // generic font prefix
+    '--lwc-zIndex',
+    '--lwc-duration',
+    '--lwc-shadow',
+    '--lwc-opacity',
+    '--lwc-maxWidth',
+    '--lwc-template',
+    '--lwc-banner',
+    '--lwc-textTransform',
+    '--lwc-palette',
+    '--lwc-codeSnippet',
+    '--lwc-comment',
+    '--lwc-feed',
+    '--lwc-action',
+    '--lwc-mention',
+    '--lwc-crud',
+    '--lwc-tooltip',
+    '--lwc-negTooltip',
+    '--lwc-list',
+    '--lwc-page',
+    '--lwc-split',
+    '--lwc-setup',
+    '--lwc-autoComplete',
+    '--lwc-brandBand',
+    '--lwc-card',                    // cardFontWeight, cardSpacing — not color
+  ];
+
+  /** Check if a token name should be excluded from gap analysis. */
+  function isIgnoredToken(token) {
+    for (const prefix of IGNORE_PREFIXES) {
+      if (token.startsWith(prefix)) return true;
+    }
+    // Also skip tokens that are clearly non-color (sizing, spacing numbers)
+    if (/\d+$/.test(token) && !token.includes('color') && !token.includes('brand') && !token.includes('surface') && !token.includes('border') && !token.includes('accent')) {
+      return true;
+    }
+    return false;
+  }
+
   /** Scan page stylesheets for var(--token) references SF is consuming. */
   function getPageUsedTokens() {
     const used = new Set();
@@ -112,7 +197,11 @@
           const text = rule.cssText;
           let m;
           while ((m = re.exec(text)) !== null) {
-            used.add(m[1]);
+            const token = m[1];
+            // Only include color/theme-relevant tokens, skip structural ones
+            if (!isIgnoredToken(token)) {
+              used.add(token);
+            }
           }
         }
       } catch (_) {
