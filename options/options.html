@@ -91,6 +91,7 @@
           <span id="optStatusText">Theme on</span>
         </label>
         <span class="opt-status-bar-sep"></span>
+        <span class="opt-status-bar-label">Apply to</span>
         <div class="opt-scope-pills opt-scope-pills--bar" id="optionsScopePills" role="group" aria-label="Theme scope">
           <button class="opt-scope-pill" data-scope="both">Both</button>
           <button class="opt-scope-pill" data-scope="lightning">Lightning</button>
@@ -99,13 +100,13 @@
         <span class="opt-status-bar-sep"></span>
         <label class="opt-status-bar-auto">
           <input type="checkbox" id="autoModeToggle" />
-          <span>Follow system</span>
+          <span>Auto dark mode</span>
         </label>
         <span class="opt-status-bar-spacer"></span>
-        <span class="opt-status-bar-smart">
+        <a class="opt-status-bar-smart" href="#optSmartApplySection" id="optSmartApplyLink">
           <span>Smart Apply: <strong id="optSmartStatusText">Off</strong></span>
           <span class="cx-tab-badge cx-tab-badge--premium">Premium</span>
-        </span>
+        </a>
       </div>
       <!-- Per-org (conditional) + reset live here, outside the bar -->
       <div class="opt-status-bar-extra" id="orgSettingsRow" hidden>
@@ -114,7 +115,7 @@
       </div>
 
       <!-- Floating tooltips (positioned by JS, shared across the tab) -->
-      <div class="opt-settings-tooltip" id="optAutoTooltip" hidden>Pick both a light theme and a dark theme — Themer will automatically switch between them whenever your computer toggles light/dark mode.</div>
+      <div class="opt-settings-tooltip" id="optAutoTooltip" hidden>Pick a light and a dark theme — Themer switches automatically when your computer toggles dark mode.</div>
       <div class="opt-settings-tooltip" id="optScopeTooltip" hidden>Where the theme applies. <strong>Lightning</strong> = the everyday user-facing Salesforce. <strong>Setup</strong> = admin only. <strong>Both</strong> = everywhere.</div>
       <div class="opt-settings-tooltip" id="optEffectsTooltip" hidden>Each preset theme ships with curated effects. The volume knob scales intensity.</div>
       <div class="opt-settings-tooltip" id="optOrgTooltip" hidden>Each Salesforce org can have its own theme override. Useful for keeping production and sandbox visually distinct.</div>
@@ -159,6 +160,21 @@
               </div>
             </div>
             <div class="opt-collection-grid" id="optPresetsGrid" role="listbox" aria-label="Preset themes"></div>
+          </section>
+
+          <!-- Smart Apply teaser -->
+          <section class="cx-section opt-smart-section" id="optSmartApplySection" aria-labelledby="opt-smart-heading">
+            <div class="cx-section-header">
+              <h2 class="cx-section-title" id="opt-smart-heading">
+                Smart Apply
+                <span class="cx-tab-badge cx-tab-badge--premium">Premium</span>
+              </h2>
+            </div>
+            <p class="opt-smart-intro">Let Themer switch themes for you — based on time, weather, or what you're doing.</p>
+            <div class="opt-smart-modes" id="optSmartModes"></div>
+            <div class="opt-smart-cta">
+              <button class="cx-btn cx-btn-primary cx-btn-sm" id="optSmartUpgradeBtn">Upgrade to unlock</button>
+            </div>
           </section>
 
         </div>

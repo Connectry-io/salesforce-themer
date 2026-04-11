@@ -1240,6 +1240,25 @@
     });
   }
 
+  // ─── Theme Manager: Smart Apply scroll link ──────────────────────────────
+
+  function bindSmartApplyScroll() {
+    const link = document.getElementById('optSmartApplyLink');
+    if (!link) return;
+    link.addEventListener('click', (e) => {
+      e.preventDefault();
+      const section = document.getElementById('optSmartApplySection');
+      if (section) section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+    const upgradeBtn = document.getElementById('optSmartUpgradeBtn');
+    if (upgradeBtn) {
+      upgradeBtn.addEventListener('click', () => {
+        const upgradeTab = document.querySelector('[data-tab="upgrade"]');
+        if (upgradeTab) upgradeTab.click();
+      });
+    }
+  }
+
   // ─── Theme Manager: Share as Image ────────────────────────────────────────
 
   function shareThemeAsImage(theme) {
@@ -1838,6 +1857,8 @@
     renderCollectionGrid(activeTheme);
     bindPresetsFilterPills();
     bindStatusBar();
+    renderSmartApply();
+    bindSmartApplyScroll();
     bindDetailPanelClose();
     bindMyThemesNewBtn();
     bindEmptyBuilderBtn();
