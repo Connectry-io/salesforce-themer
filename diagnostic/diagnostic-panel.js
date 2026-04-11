@@ -222,26 +222,29 @@
     }
 
     _scanBarHTML() {
+      let primaryAction, primaryLabel;
       if (this.activeTab === 'testing') {
         const pageType = ns.detectPageType?.();
-        const label = pageType
-          ? `Scan This Page (${pageType.label})`
-          : 'Scan This Page';
-        return `
-          <div class="diag-scan-bar">
-            <button class="diag-scan-btn" data-action="scanForTesting">
-              ${ICONS.scan}
-              <span>${label}</span>
-            </button>
-          </div>`;
+        primaryAction = 'scanForTesting';
+        primaryLabel = pageType ? `Scan This Page (${pageType.label})` : 'Scan This Page';
+      } else if (this.activeTab === 'components') {
+        primaryAction = 'scanComponents';
+        primaryLabel = 'Scan Components';
+      } else {
+        primaryAction = 'scan';
+        primaryLabel = 'Run Token Scan';
       }
-      const isTokenTab = this.activeTab === 'tokens';
       return `
         <div class="diag-scan-bar">
-          <button class="diag-scan-btn" data-action="${isTokenTab ? 'scan' : 'scanComponents'}">
-            ${ICONS.scan}
-            <span>${isTokenTab ? 'Run Token Scan' : 'Scan Components'}</span>
-          </button>
+          <div class="diag-scan-row">
+            <button class="diag-scan-btn diag-scan-btn--primary" data-action="${primaryAction}">
+              ${ICONS.scan}
+              <span>${primaryLabel}</span>
+            </button>
+            <button class="diag-scan-btn diag-scan-btn--all" data-action="scanAll" title="Run all scans (Tokens + Components + Testing)">
+              <span>Scan All</span>
+            </button>
+          </div>
         </div>`;
     }
 
@@ -636,6 +639,7 @@
         else if (action === 'scan') this._runScan(btn);
         else if (action === 'scanComponents') this._runComponentScan(btn);
         else if (action === 'scanForTesting') this._runTestingScan(btn);
+        else if (action === 'scanAll') this._runScanAll(btn);
         else if (action === 'resetProgress') this._resetTestingProgress();
         else if (action === 'copy') this._copyReport(btn);
       });
@@ -717,12 +721,14 @@
     }
 
     _bindScanButton() {
-      const btn = this.shadow?.querySelector('.diag-scan-btn');
-      if (!btn) return;
-      btn.addEventListener('click', () => {
-        const action = btn.dataset.action;
-        if (action === 'scan') this._runScan(btn);
-        else if (action === 'scanComponents') this._runComponentScan(btn);
+      this.shadow?.querySelectorAll('.diag-scan-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const action = btn.dataset.action;
+          if (action === 'scan') this._runScan(btn);
+          else if (action === 'scanComponents') this._runComponentScan(btn);
+          else if (action === 'scanForTesting') this._runTestingScan(btn);
+          else if (action === 'scanAll') this._runScanAll(btn);
+        });
       });
     }
 
@@ -756,6 +762,56 @@
       const newText = btn.querySelector('span');
       if (newIcon) newIcon.outerHTML = ICONS.scan;
       if (newText) newText.textContent = 'Scan Components';
+    }
+
+    async _runScanAll(btn) {
+      btn.classList.add('is-scanning');
+      const textSpan = btn.querySelector('span');
+      if (textSpan) textSpan.textContent = 'Scanning...';
+
+      await new Promise(r => setTimeout(r, 50));
+
+      // 1. Token scan
+      try {
+        if (ns.scanTokens) {
+          this.scanResults = ns.scanTokens(this.currentTheme);
+        }
+      } catch (err) {
+        console.error('[SFT Diag] Token scan failed:', err);
+      }
+
+      // 2. Component scan
+      try {
+        if (ns.scanComponents) {
+          this.componentResults = ns.scanComponents();
+        }
+      } catch (err) {
+        console.error('[SFT Diag] Component scan failed:', err);
+      }
+
+      // 3. Save testing progress (if page type detected)
+      const pageType = ns.detectPageType?.();
+      if (pageType && ns.saveTestResult) {
+        const tokenCoverage = this.scanResults?.coverage || null;
+        const s = this.componentResults?.summary;
+        const componentHealth = s && s.totalStandardFound > 0
+          ? ((s.totalStyled + s.totalPartial * 0.5) / s.totalStandardFound) * 100
+          : null;
+
+        await ns.saveTestResult(this.currentTheme, pageType.id, {
+          tokenCoverage,
+          componentHealth,
+        });
+        this.testingProgress = await ns.getTestingProgress?.(this.currentTheme) || {};
+      }
+
+      // Re-render current tab
+      const resultsEl = this.shadow?.querySelector('.diag-results');
+      if (resultsEl) resultsEl.innerHTML = this._activeTabContent();
+
+      // Reset button
+      btn.classList.remove('is-scanning');
+      if (textSpan) textSpan.textContent = 'Scan All';
     }
 
     async _runTestingScan(btn) {

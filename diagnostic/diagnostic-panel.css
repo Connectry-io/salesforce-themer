@@ -248,8 +248,29 @@
   flex-shrink: 0;
 }
 
+.diag-scan-row {
+  display: flex;
+  gap: 6px;
+}
+
+.diag-scan-btn--primary {
+  flex: 1;
+}
+
+.diag-scan-btn--all {
+  flex-shrink: 0;
+  border-color: rgba(255, 255, 255, 0.08) !important;
+  background: rgba(255, 255, 255, 0.04) !important;
+  color: rgba(255, 255, 255, 0.45) !important;
+}
+
+.diag-scan-btn--all:hover {
+  background: rgba(255, 255, 255, 0.08) !important;
+  color: rgba(255, 255, 255, 0.7) !important;
+  border-color: rgba(255, 255, 255, 0.15) !important;
+}
+
 .diag-scan-btn {
-  width: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
