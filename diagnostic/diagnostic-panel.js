@@ -47,6 +47,7 @@
       this.themeColors = null;        // active theme color config
       this.patchSummary = null;       // custom patches summary
       this.hasScanned = false;        // true after first scan
+      this.autoScanEnabled = false;  // continuous scan mode
       this.testingProgress = null;   // guided testing progress
       this._panelTheme = 'dark';     // 'dark' | 'light'
       this._configuredThemeName = null;
@@ -93,10 +94,11 @@
       }
       if (loads.length) await Promise.all(loads);
 
-      // Restore panel theme preference
+      // Restore panel preferences
       try {
-        const pref = await chrome.storage.local.get('diagnosticPanelTheme');
+        const pref = await chrome.storage.local.get(['diagnosticPanelTheme', 'diagnosticAutoScan']);
         if (pref.diagnosticPanelTheme === 'light') this._panelTheme = 'light';
+        if (pref.diagnosticAutoScan) this.autoScanEnabled = true;
       } catch (_) {}
 
       this._createHost();
@@ -169,10 +171,27 @@
       try { chrome.storage.local.set({ diagnosticPanelTheme: this._panelTheme }); } catch (_) {}
     }
 
+    _toggleAutoScan() {
+      this.autoScanEnabled = !this.autoScanEnabled;
+      // Persist preference
+      try { chrome.storage.local.set({ diagnosticAutoScan: this.autoScanEnabled }); } catch (_) {}
+      // Re-render scan bar to reflect state
+      const scanBar = this.shadow?.querySelector('.diag-scan-bar');
+      if (scanBar) scanBar.outerHTML = this._scanBarHTML();
+      // If just enabled, run an immediate scan
+      if (this.autoScanEnabled) this._autoScan();
+    }
+
     /** Called by content.js when SPA navigation occurs. */
     onNavigate() {
       if (!this.isOpen || this.isMinimized) return;
-      // Auto-scan on navigation — panel is open, user wants live data
+      if (!this.autoScanEnabled) {
+        // Not auto-scanning — just update the scan button label with new page type
+        const scanBar = this.shadow?.querySelector('.diag-scan-bar');
+        if (scanBar) scanBar.outerHTML = this._scanBarHTML();
+        return;
+      }
+      // Auto-scan on navigation
       this._autoScan();
     }
 
@@ -386,10 +405,17 @@
       const pageLabel = pageType ? ` · ${pageType.label}` : '';
       return `
         <div class="diag-scan-bar">
-          <button class="diag-scan-btn diag-scan-btn--primary" data-action="scanAll" style="width:100%">
-            ${ICONS.scan}
-            <span>${this.hasScanned ? 'Re-Scan' : 'Scan This Page'}${pageLabel}</span>
-          </button>
+          <div class="diag-scan-row">
+            <button class="diag-scan-btn diag-scan-btn--primary" data-action="scanAll">
+              ${ICONS.scan}
+              <span>${this.hasScanned ? 'Re-Scan' : 'Scan'}${pageLabel}</span>
+            </button>
+            <button class="diag-scan-btn diag-autoscan-btn ${this.autoScanEnabled ? 'is-active' : ''}" data-action="toggleAutoScan" title="${this.autoScanEnabled ? 'Stop auto-scanning as you navigate' : 'Auto-scan each page as you navigate through the checklist'}">
+              <span class="diag-autoscan-dot"></span>
+              <span>Auto</span>
+            </button>
+          </div>
+          ${this.autoScanEnabled ? '<div class="diag-autoscan-hint">Scanning each page as you navigate</div>' : ''}
         </div>`;
     }
 
@@ -1201,6 +1227,7 @@
         else if (action === 'minimize') this.minimize();
         else if (action === 'togglePanelTheme') this._togglePanelTheme();
         else if (action === 'scanAll') this._runScanAll(btn);
+        else if (action === 'toggleAutoScan') this._toggleAutoScan();
         else if (action === 'resetProgress') this._resetTestingProgress();
         else if (action === 'copyTokenFixes') this._copyTokenFixes(btn);
         else if (action === 'copyComponentPatches') this._copyComponentPatches(btn);

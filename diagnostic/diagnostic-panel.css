@@ -361,28 +361,6 @@
   flex-shrink: 0;
 }
 
-.diag-scan-row {
-  display: flex;
-  gap: 6px;
-}
-
-.diag-scan-btn--primary {
-  flex: 1;
-}
-
-.diag-scan-btn--all {
-  flex-shrink: 0;
-  border-color: rgba(255, 255, 255, 0.08) !important;
-  background: rgba(255, 255, 255, 0.04) !important;
-  color: rgba(255, 255, 255, 0.45) !important;
-}
-
-.diag-scan-btn--all:hover {
-  background: rgba(255, 255, 255, 0.08) !important;
-  color: rgba(255, 255, 255, 0.7) !important;
-  border-color: rgba(255, 255, 255, 0.15) !important;
-}
-
 .diag-scan-btn {
   display: flex;
   align-items: center;
@@ -421,6 +399,66 @@
   width: 14px;
   height: 14px;
   flex-shrink: 0;
+}
+
+/* ─── Scan bar layout ──────────────────────────────────────────────────── */
+
+.diag-scan-row {
+  display: flex;
+  gap: 6px;
+}
+
+.diag-scan-btn--primary {
+  flex: 1;
+}
+
+/* ─── Auto-scan toggle ─────────────────────────────────────────────────── */
+
+.diag-autoscan-btn {
+  flex-shrink: 0;
+  gap: 5px !important;
+  padding: 9px 12px !important;
+  background: var(--dp-surface) !important;
+  border-color: var(--dp-border) !important;
+  color: var(--dp-text-3) !important;
+}
+
+.diag-autoscan-btn:hover {
+  background: var(--dp-surface-hover) !important;
+  color: var(--dp-text-2) !important;
+}
+
+.diag-autoscan-btn.is-active {
+  background: var(--dp-good-bg) !important;
+  border-color: rgba(34, 197, 94, 0.3) !important;
+  color: var(--dp-good) !important;
+}
+
+.diag-autoscan-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--dp-text-3);
+  flex-shrink: 0;
+}
+
+.diag-autoscan-btn.is-active .diag-autoscan-dot {
+  background: var(--dp-good);
+  box-shadow: 0 0 6px rgba(34, 197, 94, 0.5);
+  animation: diag-autoscan-pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes diag-autoscan-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+.diag-autoscan-hint {
+  margin-top: 6px;
+  font-size: 10px;
+  color: var(--dp-good);
+  text-align: center;
+  opacity: 0.7;
 }
 
 .diag-scan-btn--success {
