@@ -134,8 +134,8 @@
     border: 1px solid var(--cx-border); border-radius: var(--cx-radius);
     margin-bottom: 24px;
   }
-  .report-swatch { display: flex; width: 64px; height: 36px; border-radius: 6px; overflow: hidden; box-shadow: inset 0 0 0 1px rgba(255,255,255,0.08); flex-shrink: 0; }
-  .report-swatch span { flex: 1; display: block; }
+  .report-swatch { display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; width: 40px; height: 40px; border-radius: 8px; overflow: hidden; box-shadow: inset 0 0 0 1px rgba(255,255,255,0.08); flex-shrink: 0; }
+  .report-swatch span { display: block; }
   .report-theme-info { flex: 1; min-width: 0; }
   .report-theme-name { font-size: 16px; font-weight: 700; color: #fff; }
   .report-theme-org { font-size: 12px; color: var(--cx-text-2); }

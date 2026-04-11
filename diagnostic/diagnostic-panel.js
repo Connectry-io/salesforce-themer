@@ -302,23 +302,25 @@
     _infoBarHTML(themeName, injected) {
       const host = location.hostname.replace('.my.salesforce.com', '').replace('.lightning.force.com', '');
 
-      // Build minicard swatch from theme colors (4 bars: bg, surface, accent, text)
+      // Build 2x2 swatch grid from theme colors (bg, surface, accent, text)
       let swatchHTML = '';
       if (this.themeColors) {
         const c = this.themeColors;
-        const cols = [c.background, c.surface, c.accent, c.textPrimary].filter(Boolean);
-        swatchHTML = `<div class="diag-minicard-swatch">${cols.map(col => `<span style="background:${col}"></span>`).join('')}</div>`;
+        swatchHTML = `<div class="diag-swatch">
+          <span style="background:${c.background || '#eee'}"></span>
+          <span style="background:${c.surface || '#fff'}"></span>
+          <span style="background:${c.accent || '#4a6fa5'}"></span>
+          <span style="background:${c.textPrimary || '#333'}"></span>
+        </div>`;
       }
 
       return `
         <div class="diag-info-bar">
           <div class="diag-minicard">
             ${swatchHTML}
-            <div class="diag-minicard-info">
-              <span class="diag-minicard-name">${this._escapeHtml(themeName)}</span>
-              <span class="diag-minicard-org">${this._escapeHtml(host)}</span>
-            </div>
+            <span class="diag-minicard-name">${this._escapeHtml(themeName)}</span>
             <span class="diag-info-dot ${injected ? 'is-on' : 'is-off'}"></span>
+            <span class="diag-minicard-org">${this._escapeHtml(host)}</span>
           </div>
           <div class="diag-heartbeat" id="diagHeartbeat"></div>
         </div>`;
