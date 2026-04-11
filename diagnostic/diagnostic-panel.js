@@ -301,11 +301,26 @@
 
     _infoBarHTML(themeName, injected) {
       const host = location.hostname.replace('.my.salesforce.com', '').replace('.lightning.force.com', '');
+
+      // Build minicard swatch from theme colors (4 bars: bg, surface, accent, text)
+      let swatchHTML = '';
+      if (this.themeColors) {
+        const c = this.themeColors;
+        const cols = [c.background, c.surface, c.accent, c.textPrimary].filter(Boolean);
+        swatchHTML = `<div class="diag-minicard-swatch">${cols.map(col => `<span style="background:${col}"></span>`).join('')}</div>`;
+      }
+
       return `
         <div class="diag-info-bar">
-          <span class="diag-info-dot ${injected ? 'is-on' : 'is-off'}"></span>
-          <span class="diag-info-chip"><strong>${this._escapeHtml(themeName)}</strong></span>
-          <span class="diag-info-chip">${this._escapeHtml(host)}</span>
+          <div class="diag-minicard">
+            ${swatchHTML}
+            <div class="diag-minicard-info">
+              <span class="diag-minicard-name">${this._escapeHtml(themeName)}</span>
+              <span class="diag-minicard-org">${this._escapeHtml(host)}</span>
+            </div>
+            <span class="diag-info-dot ${injected ? 'is-on' : 'is-off'}"></span>
+          </div>
+          <div class="diag-heartbeat" id="diagHeartbeat"></div>
         </div>`;
     }
 
@@ -1101,7 +1116,8 @@
       const bar = this.shadow?.querySelector('.diag-info-bar');
       if (!bar) return;
       const styleTag = document.getElementById(this.styleId);
-      bar.innerHTML = this._infoBarHTML(this.currentTheme || 'none', !!styleTag).replace(/<\/?div[^>]*>/g, '').trim();
+      // Replace the entire info bar with a fresh render
+      bar.outerHTML = this._infoBarHTML(this.currentTheme || 'none', !!styleTag);
     }
 
     // ── Event binding ─────────────────────────────────────────────────────
@@ -1146,6 +1162,12 @@
       const textSpan = btn.querySelector('span');
       if (iconSpan) iconSpan.outerHTML = ICONS.spinner;
       if (textSpan) textSpan.textContent = 'Scanning...';
+
+      // Show heartbeat animation
+      const hb = this.shadow?.getElementById('diagHeartbeat');
+      if (hb) hb.classList.add('is-active');
+      // Add scanning state to panel
+      this.panel?.classList.add('is-scanning');
 
       await new Promise(r => setTimeout(r, 50));
 
@@ -1204,9 +1226,17 @@
 
       this.hasScanned = true;
 
+      // Stop heartbeat
+      const hb2 = this.shadow?.getElementById('diagHeartbeat');
+      if (hb2) hb2.classList.remove('is-active');
+      this.panel?.classList.remove('is-scanning');
+
       // Re-render unified view
       const resultsEl = this.shadow?.querySelector('.diag-results');
       if (resultsEl) resultsEl.innerHTML = this._unifiedResultsHTML();
+
+      // Update info bar (theme colors may have loaded)
+      this._updateInfoBar();
 
       // Reset scan button
       const scanBar = this.shadow?.querySelector('.diag-scan-bar');
