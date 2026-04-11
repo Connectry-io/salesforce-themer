@@ -32,7 +32,7 @@
   border: 1px solid var(--cx-border);
   border-radius: var(--cx-radius-md);
   margin-bottom: var(--cx-space-4);
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
 }
 .opt-status-bar-sep {
   width: 1px;
@@ -67,10 +67,13 @@
 
 /* ─── Theme Manager: Inline scope pills in status bar ────────────────────── */
 
-.opt-scope-pills--bar {
+.opt-scope-pills.opt-scope-pills--bar {
   gap: 2px;
+  width: auto;
+  display: inline-flex;
 }
 .opt-scope-pills--bar .opt-scope-pill {
+  flex: 0 0 auto;
   padding: 3px 10px;
   font-size: 11px;
 }
