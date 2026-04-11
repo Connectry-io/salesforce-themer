@@ -48,6 +48,8 @@
       this.patchSummary = null;       // custom patches summary
       this.hasScanned = false;        // true after first scan
       this.testingProgress = null;   // guided testing progress
+      this._panelTheme = 'dark';     // 'dark' | 'light'
+      this._configuredThemeName = null;
       this._dragState = null;
       this._cssLoaded = false;
       this._cssText = '';
@@ -81,11 +83,9 @@
       } else {
         this.testingProgress = {};
       }
-      if (ns.resolveThemeColors) {
-        loads.push(
-          ns.resolveThemeColors(this.currentTheme).then(c => { this.themeColors = c; })
-        );
-      }
+      // Load theme colors — if current theme is 'none', resolve the configured
+      // theme from storage so we still get the swatch + can generate fixes
+      loads.push(this._loadThemeColors());
       if (ns.getPatchSummary) {
         loads.push(
           ns.getPatchSummary().then(s => { this.patchSummary = s; })
@@ -93,7 +93,17 @@
       }
       if (loads.length) await Promise.all(loads);
 
+      // Restore panel theme preference
+      try {
+        const pref = await chrome.storage.local.get('diagnosticPanelTheme');
+        if (pref.diagnosticPanelTheme === 'light') this._panelTheme = 'light';
+      } catch (_) {}
+
       this._createHost();
+      // Apply light mode class if needed
+      if (this._panelTheme === 'light') {
+        this.host.classList.add('diag-light');
+      }
       this._renderPanel();
       this._setupDrag();
       await this._restorePosition();
@@ -148,6 +158,15 @@
           ns.resolveThemeColors(themeName).then(c => { this.themeColors = c; });
         }
       }
+    }
+
+    _togglePanelTheme() {
+      this._panelTheme = this._panelTheme === 'dark' ? 'light' : 'dark';
+      if (this.host) {
+        this.host.classList.toggle('diag-light', this._panelTheme === 'light');
+      }
+      // Persist preference
+      try { chrome.storage.local.set({ diagnosticPanelTheme: this._panelTheme }); } catch (_) {}
     }
 
     /** Called by content.js when SPA navigation occurs. */
@@ -245,6 +264,33 @@
       }
     }
 
+    async _loadThemeColors() {
+      // Try the current theme first
+      if (this.currentTheme && this.currentTheme !== 'none' && ns.resolveThemeColors) {
+        this.themeColors = await ns.resolveThemeColors(this.currentTheme);
+        if (this.themeColors) return;
+      }
+      // If theme is 'none' or resolution failed, look up the configured theme
+      // from storage so we still have colors for the swatch + fix generation
+      try {
+        const syncData = await chrome.storage.sync.get({
+          theme: 'connectry', autoMode: false,
+          lastLightTheme: 'connectry', lastDarkTheme: 'connectry-dark',
+        });
+        const configuredTheme = syncData.autoMode
+          ? (window.matchMedia('(prefers-color-scheme: dark)').matches
+            ? syncData.lastDarkTheme : syncData.lastLightTheme)
+          : syncData.theme;
+        if (configuredTheme && configuredTheme !== 'none' && ns.resolveThemeColors) {
+          this.themeColors = await ns.resolveThemeColors(configuredTheme);
+          // Store the configured name so the swatch shows what WOULD apply
+          if (this.themeColors && this.currentTheme === 'none') {
+            this._configuredThemeName = configuredTheme;
+          }
+        }
+      } catch (_) {}
+    }
+
     async _loadCSS() {
       try {
         const url = chrome.runtime.getURL('diagnostic/diagnostic-panel.css');
@@ -293,6 +339,9 @@
             <div class="diag-header-subtitle">Powered by Connectry AI</div>
           </div>
           <div class="diag-header-actions">
+            <button class="diag-icon-btn" data-action="togglePanelTheme" title="Toggle light/dark panel">
+              <svg viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="4" stroke="currentColor" stroke-width="1.4"/><path d="M7 1v2M7 11v2M1 7h2M11 7h2M3.05 3.05l1.4 1.4M9.55 9.55l1.4 1.4M3.05 10.95l1.4-1.4M9.55 4.45l1.4-1.4" stroke="currentColor" stroke-width="1" stroke-linecap="round"/></svg>
+            </button>
             <button class="diag-icon-btn" data-action="minimize" title="Minimize">${ICONS.minimize}</button>
             <button class="diag-icon-btn" data-action="close" title="Close">${ICONS.close}</button>
           </div>
@@ -301,6 +350,11 @@
 
     _infoBarHTML(themeName, injected) {
       const host = location.hostname.replace('.my.salesforce.com', '').replace('.lightning.force.com', '');
+
+      // Display name: show configured theme if current is 'none'
+      const displayName = (themeName === 'none' && this._configuredThemeName)
+        ? `${this._configuredThemeName} (off)`
+        : themeName;
 
       // Build 2x2 swatch grid from theme colors (bg, surface, accent, text)
       let swatchHTML = '';
@@ -318,7 +372,7 @@
         <div class="diag-info-bar">
           <div class="diag-minicard">
             ${swatchHTML}
-            <span class="diag-minicard-name">${this._escapeHtml(themeName)}</span>
+            <span class="diag-minicard-name">${this._escapeHtml(displayName)}</span>
             <span class="diag-info-dot ${injected ? 'is-on' : 'is-off'}"></span>
             <span class="diag-minicard-org">${this._escapeHtml(host)}</span>
           </div>
@@ -1138,6 +1192,7 @@
         const action = btn.dataset.action;
         if (action === 'close') this.close();
         else if (action === 'minimize') this.minimize();
+        else if (action === 'togglePanelTheme') this._togglePanelTheme();
         else if (action === 'scanAll') this._runScanAll(btn);
         else if (action === 'resetProgress') this._resetTestingProgress();
         else if (action === 'copyTokenFixes') this._copyTokenFixes(btn);
@@ -1178,8 +1233,8 @@
       await new Promise(r => setTimeout(r, 50));
 
       // Load theme colors if not cached
-      if (!this.themeColors && ns.resolveThemeColors) {
-        this.themeColors = await ns.resolveThemeColors(this.currentTheme);
+      if (!this.themeColors) {
+        await this._loadThemeColors();
       }
 
       // 1. Token scan
