@@ -944,6 +944,14 @@
   border-radius: 8px;
 }
 
+.diag-route-hint {
+  padding: 4px 0 6px;
+  font-size: 10px;
+  color: rgba(255, 255, 255, 0.35);
+  font-style: italic;
+  line-height: 1.4;
+}
+
 .diag-fix-actions {
   padding: 8px 0 4px;
 }

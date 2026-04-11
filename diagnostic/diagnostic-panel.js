@@ -46,7 +46,7 @@
       this.fixReport = null;          // generated CSS fixes
       this.themeColors = null;        // active theme color config
       this.patchSummary = null;       // custom patches summary
-      this.activeTab = 'tokens';      // 'tokens' | 'components' | 'testing' | 'fixes'
+      this.hasScanned = false;        // true after first scan
       this.testingProgress = null;   // guided testing progress
       this._dragState = null;
       this._cssLoaded = false;
@@ -211,12 +211,17 @@
         this.testingProgress = await ns.getTestingProgress(this.currentTheme) || {};
       }
 
+      this.hasScanned = true;
+
       // Update info bar (page may have changed)
       this._updateInfoBar();
 
-      // Refresh current tab content
+      // Refresh unified results
       const resultsEl = this.shadow?.querySelector('.diag-results');
-      if (resultsEl) resultsEl.innerHTML = this._activeTabContent();
+      if (resultsEl) resultsEl.innerHTML = this._unifiedResultsHTML();
+      // Update scan button text
+      const scanBar = this.shadow?.querySelector('.diag-scan-bar');
+      if (scanBar) scanBar.outerHTML = this._scanBarHTML();
     }
 
     // ── Host management ───────────────────────────────────────────────────
@@ -267,10 +272,9 @@
         <div class="diag-panel">
           ${this._headerHTML()}
           ${this._infoBarHTML(themeName, injected)}
-          ${this._tabBarHTML()}
           ${this._scanBarHTML()}
           <div class="diag-results">
-            ${this._activeTabContent()}
+            ${this._unifiedResultsHTML()}
           </div>
           ${this._footerHTML()}
         </div>
@@ -305,46 +309,15 @@
         </div>`;
     }
 
-    _tabBarHTML() {
-      const fixCount = this.fixReport?.summary?.tokenGapsFixed || 0;
-      const patchCount = this.fixReport?.summary?.componentsPatched || 0;
-      const fixBadge = (fixCount + patchCount) > 0 ? ` <span class="diag-tab-badge">${fixCount + patchCount}</span>` : '';
-      return `
-        <div class="diag-tab-bar">
-          <button class="diag-tab ${this.activeTab === 'tokens' ? 'is-active' : ''}" data-tab="tokens">Tokens</button>
-          <button class="diag-tab ${this.activeTab === 'components' ? 'is-active' : ''}" data-tab="components">Components</button>
-          <button class="diag-tab ${this.activeTab === 'fixes' ? 'is-active' : ''}" data-tab="fixes">Fixes${fixBadge}</button>
-          <button class="diag-tab ${this.activeTab === 'testing' ? 'is-active' : ''}" data-tab="testing">Testing</button>
-        </div>`;
-    }
-
     _scanBarHTML() {
-      let primaryAction, primaryLabel;
-      if (this.activeTab === 'testing') {
-        const pageType = ns.detectPageType?.();
-        primaryAction = 'scanForTesting';
-        primaryLabel = pageType ? `Scan This Page (${pageType.label})` : 'Scan This Page';
-      } else if (this.activeTab === 'components') {
-        primaryAction = 'scanComponents';
-        primaryLabel = 'Scan Components';
-      } else if (this.activeTab === 'fixes') {
-        primaryAction = 'generateFixes';
-        primaryLabel = 'Generate Fixes';
-      } else {
-        primaryAction = 'scan';
-        primaryLabel = 'Run Token Scan';
-      }
+      const pageType = ns.detectPageType?.();
+      const pageLabel = pageType ? ` · ${pageType.label}` : '';
       return `
         <div class="diag-scan-bar">
-          <div class="diag-scan-row">
-            <button class="diag-scan-btn diag-scan-btn--primary" data-action="${primaryAction}">
-              ${ICONS.scan}
-              <span>${primaryLabel}</span>
-            </button>
-            <button class="diag-scan-btn diag-scan-btn--all" data-action="scanAll" title="Run all scans (Tokens + Components + Testing)">
-              <span>Scan All</span>
-            </button>
-          </div>
+          <button class="diag-scan-btn diag-scan-btn--primary" data-action="scanAll" style="width:100%">
+            ${ICONS.scan}
+            <span>${this.hasScanned ? 'Re-Scan' : 'Scan This Page'}${pageLabel}</span>
+          </button>
         </div>`;
     }
 
@@ -358,8 +331,207 @@
             </svg>
           </div>
           <div class="diag-empty-title">No scan yet</div>
-          <div class="diag-empty-desc">Hit "Run Token Scan" to check how your theme's CSS tokens are landing on this page.</div>
+          <div class="diag-empty-desc">Hit "Scan This Page" to check how your theme is landing.</div>
         </div>`;
+    }
+
+    // ── Unified section builders ──────────────────────────────────────────
+
+    _healthSummaryHTML() {
+      const tokenPct = this.scanResults ? Math.round(this.scanResults.coverage * 100) : null;
+      const s = this.componentResults?.summary;
+      const compPct = s && s.totalStandardFound > 0
+        ? Math.round(((s.totalStyled + s.totalPartial * 0.5) / s.totalStandardFound) * 100)
+        : null;
+
+      // Combined score (average of both, or whichever is available)
+      let overallPct, overallLevel;
+      if (tokenPct !== null && compPct !== null) {
+        overallPct = Math.round((tokenPct + compPct) / 2);
+      } else {
+        overallPct = tokenPct ?? compPct ?? 0;
+      }
+      overallLevel = overallPct >= 85 ? 'good' : overallPct >= 60 ? 'ok' : 'bad';
+
+      const gapCount = this.scanResults?.gaps?.length || 0;
+      const unstyledCount = s?.totalUnstyled || 0;
+      const hardcodedCount = s?.totalHardcoded || 0;
+      const issueCount = gapCount + unstyledCount + hardcodedCount;
+
+      return `
+        <div class="diag-coverage">
+          <div class="diag-coverage-header">
+            <span class="diag-coverage-label">Theme Health</span>
+            <span class="diag-coverage-pct is-${overallLevel}">${overallPct}%</span>
+          </div>
+          <div class="diag-coverage-bar">
+            <div class="diag-coverage-fill is-${overallLevel}" style="width:${overallPct}%"></div>
+          </div>
+          <div class="diag-coverage-stats">
+            ${tokenPct !== null ? `<span class="diag-coverage-stat"><strong>${tokenPct}%</strong> tokens</span>` : ''}
+            ${compPct !== null ? `<span class="diag-coverage-stat"><strong>${compPct}%</strong> components</span>` : ''}
+            <span class="diag-coverage-stat"><strong>${issueCount}</strong> issue${issueCount !== 1 ? 's' : ''}</span>
+          </div>
+        </div>`;
+    }
+
+    _tokenFixesSection() {
+      const fr = this.fixReport;
+      if (!fr?.tokenFixes?.fixes?.length) return '';
+
+      return `
+        <div class="diag-section" data-section="tokenFixes">
+          <div class="diag-section-header">
+            <span class="diag-section-title">Token Gaps</span>
+            <span class="diag-section-badge">
+              <span class="diag-section-badge-item is-gap">${fr.tokenFixes.fixes.length}</span>
+            </span>
+            <button class="diag-copy-inline" data-action="copyTokenFixes" title="Copy CSS for Connectry to fix in engine">Copy for Connectry</button>
+            <span class="diag-section-chevron">${ICONS.chevron}</span>
+          </div>
+          <div class="diag-section-body">
+            <div class="diag-route-hint">Standard tokens — copy &amp; send to Connectry for permanent engine fix</div>
+            ${fr.tokenFixes.fixes.map(f => this._fixRowHTML(f)).join('')}
+            ${fr.tokenFixes.unknownGaps.length ? `<div class="diag-gaps-desc" style="padding:6px 0 2px;opacity:0.5">${fr.tokenFixes.unknownGaps.length} unmapped: ${fr.tokenFixes.unknownGaps.slice(0, 3).join(', ')}${fr.tokenFixes.unknownGaps.length > 3 ? '...' : ''}</div>` : ''}
+          </div>
+        </div>`;
+    }
+
+    _componentIssuesSection() {
+      const s = this.componentResults.summary;
+      const cr = this.componentResults;
+      const activeStandard = Object.entries(cr.standard)
+        .filter(([, v]) => v.found > 0 && (v.unstyled > 0 || v.partial > 0));
+
+      // Managed packages (third-party AppExchange)
+      const managedIssues = cr.managed?.length > 0;
+
+      if (!activeStandard.length && !s.totalHardcoded && !managedIssues) return '';
+
+      let html = `
+        <div class="diag-section" data-section="componentIssues">
+          <div class="diag-section-header">
+            <span class="diag-section-title">Standard / Managed</span>
+            <span class="diag-section-badge">
+              ${s.totalUnstyled ? `<span class="diag-section-badge-item is-fail">${s.totalUnstyled} unstyled</span>` : ''}
+              ${s.totalPartial ? `<span class="diag-section-badge-item is-gap">${s.totalPartial} partial</span>` : ''}
+              ${cr.managed?.length ? `<span class="diag-section-badge-item is-gap">${cr.managed.length} pkg</span>` : ''}
+            </span>
+            <span class="diag-section-chevron">${ICONS.chevron}</span>
+          </div>
+          <div class="diag-section-body">
+            <div class="diag-route-hint">Standard SF &amp; managed package issues — Connectry engine fixes</div>`;
+
+      if (activeStandard.length) {
+        html += activeStandard.map(([type, data]) => this._componentRowHTML(type, data)).join('');
+      }
+
+      if (cr.managed?.length) {
+        const pkgNames = [...new Set(cr.managed.map(m => m.packageName))];
+        html += `<div class="diag-gaps-desc" style="padding:6px 0 2px">Managed packages: <strong>${pkgNames.join(', ')}</strong> (${cr.managed.length} components)</div>`;
+        html += cr.managed.map(c => this._customComponentRowHTML(c)).join('');
+      }
+
+      if (s.totalHardcoded > 0) {
+        html += `<div class="diag-gaps-desc" style="padding:6px 0 2px">${s.totalHardcoded} element${s.totalHardcoded > 1 ? 's' : ''} use inline colors the theme can't reach.</div>`;
+      }
+
+      html += '</div></div>';
+      return html;
+    }
+
+    _lwcPatchesSection() {
+      const patches = this.fixReport.componentPatches;
+      if (!patches?.length) return '';
+
+      return `
+        <div class="diag-section" data-section="lwcPatches">
+          <div class="diag-section-header">
+            <span class="diag-section-title">Custom LWCs</span>
+            <span class="diag-section-badge">
+              <span class="diag-section-badge-item is-pass">${patches.length} fixable</span>
+            </span>
+            <button class="diag-copy-inline" data-action="copyComponentPatches" title="Copy CSS patches">Copy CSS</button>
+            <span class="diag-section-chevron">${ICONS.chevron}</span>
+          </div>
+          <div class="diag-section-body">
+            <div class="diag-route-hint">Your org's custom components — click Enable to apply a local patch</div>
+            ${patches.map(p => this._patchRowHTML(p)).join('')}
+          </div>
+        </div>`;
+    }
+
+    _activePatchesSection() {
+      if (!this.patchSummary?.total) return '';
+
+      return `
+        <div class="diag-section is-open" data-section="activePatches">
+          <div class="diag-section-header">
+            <span class="diag-section-title">Active Patches</span>
+            <span class="diag-section-badge">
+              <span class="diag-section-badge-item is-pass">${this.patchSummary.enabled} on</span>
+              ${this.patchSummary.disabled > 0 ? `<span class="diag-section-badge-item is-fail">${this.patchSummary.disabled} off</span>` : ''}
+            </span>
+            <span class="diag-section-chevron">${ICONS.chevron}</span>
+          </div>
+          <div class="diag-section-body">
+            ${this.patchSummary.tags.map(t => this._activePatchRowHTML(t)).join('')}
+          </div>
+        </div>`;
+    }
+
+    _testingChecklistSection() {
+      if (!ns.PAGE_TYPES || !this.testingProgress) return '';
+
+      const summary = ns.getCompletionSummary(this.testingProgress);
+      const currentPage = ns.detectPageType?.();
+      const pct = summary.total > 0 ? Math.round((summary.completed / summary.total) * 100) : 0;
+      const level = pct >= 80 ? 'good' : pct >= 40 ? 'ok' : 'bad';
+
+      let html = `
+        <div class="diag-section is-open" data-section="testing">
+          <div class="diag-section-header">
+            <span class="diag-section-title">Testing Progress</span>
+            <span class="diag-section-badge">
+              <span class="diag-section-badge-item is-${level}">${summary.completed}/${summary.total}</span>
+            </span>
+            <span class="diag-section-chevron">${ICONS.chevron}</span>
+          </div>
+          <div class="diag-section-body">`;
+
+      // Checklist
+      html += '<div class="diag-test-checklist">';
+      for (const item of summary.items) {
+        const isCurrent = currentPage && item.id === currentPage.id;
+        const statusClass = item.completed ? 'is-done' : isCurrent ? 'is-current' : 'is-pending';
+        const tokenPct = item.result?.tokenCoverage != null ? `${Math.round(item.result.tokenCoverage * 100)}%` : '';
+        const compPct = item.result?.componentHealth != null ? `${Math.round(item.result.componentHealth)}%` : '';
+
+        html += `
+          <div class="diag-test-item ${statusClass}" data-test-id="${item.id}">
+            <span class="diag-test-check">
+              ${item.completed
+                ? '<svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2.5 6l2.5 2.5 4.5-5" stroke="#22c55e" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>'
+                : isCurrent
+                  ? '<svg width="12" height="12" viewBox="0 0 12 12" fill="none"><circle cx="6" cy="6" r="3" fill="#4a6fa5"/></svg>'
+                  : '<svg width="12" height="12" viewBox="0 0 12 12" fill="none"><circle cx="6" cy="6" r="4" stroke="rgba(255,255,255,0.15)" stroke-width="1.2"/></svg>'
+              }
+            </span>
+            <span class="diag-test-label">${this._escapeHtml(item.label)}</span>
+            ${item.manual ? '<span class="diag-test-manual">manual</span>' : ''}
+            ${tokenPct ? `<span class="diag-test-score">${tokenPct}</span>` : ''}
+            ${compPct ? `<span class="diag-test-score is-comp">${compPct}</span>` : ''}
+          </div>`;
+      }
+      html += '</div>';
+
+      // Reset button
+      if (summary.completed > 0) {
+        html += `<div class="diag-test-actions"><button class="diag-test-reset" data-action="resetProgress">Reset progress</button></div>`;
+      }
+
+      html += '</div></div>';
+      return html;
     }
 
     _resultsHTML() {
@@ -426,17 +598,56 @@
       return html;
     }
 
-    _activeTabContent() {
-      if (this.activeTab === 'components') {
-        return this.componentResults ? this._componentResultsHTML() : this._emptyComponentHTML();
+    /** Single unified view — no tabs. Everything in one scroll. */
+    _unifiedResultsHTML() {
+      if (!this.hasScanned) return this._emptyHTML();
+
+      let html = '';
+
+      // ── 1. Health summary (token coverage + component health combined) ──
+      html += this._healthSummaryHTML();
+
+      // ── 2. Issues: token gaps with inline fixes ──
+      if (this.fixReport?.tokenFixes?.fixes?.length > 0) {
+        html += this._tokenFixesSection();
       }
-      if (this.activeTab === 'fixes') {
-        return this._fixesTabHTML();
+
+      // ── 3. Issues: component problems ──
+      if (this.componentResults) {
+        const s = this.componentResults.summary;
+        if (s.totalUnstyled > 0 || s.totalPartial > 0 || s.totalHardcoded > 0) {
+          html += this._componentIssuesSection();
+        }
       }
-      if (this.activeTab === 'testing') {
-        return this._testingTabHTML();
+
+      // ── 4. Custom LWC patches (with Enable buttons) ──
+      if (this.fixReport?.componentPatches?.length > 0) {
+        html += this._lwcPatchesSection();
       }
-      return this.scanResults ? this._resultsHTML() : this._emptyHTML();
+
+      // ── 5. Active patches ──
+      if (this.patchSummary?.total > 0) {
+        html += this._activePatchesSection();
+      }
+
+      // ── 6. Testing checklist (always visible) ──
+      html += this._testingChecklistSection();
+
+      // ── 7. Copy all fixes button ──
+      if (this.fixReport?.fullCSS) {
+        const total = (this.fixReport.summary?.tokenGapsFixed || 0) + (this.fixReport.summary?.componentsPatched || 0);
+        if (total > 0) {
+          html += `
+            <div class="diag-fix-actions">
+              <button class="diag-scan-btn diag-scan-btn--primary" data-action="copyFullCSS" style="width:100%">
+                ${ICONS.copy}
+                <span>Copy All Fixes (${total} rules)</span>
+              </button>
+            </div>`;
+        }
+      }
+
+      return html;
     }
 
     _emptyComponentHTML() {
@@ -906,12 +1117,8 @@
         const action = btn.dataset.action;
         if (action === 'close') this.close();
         else if (action === 'minimize') this.minimize();
-        else if (action === 'scan') this._runScan(btn);
-        else if (action === 'scanComponents') this._runComponentScan(btn);
-        else if (action === 'scanForTesting') this._runTestingScan(btn);
         else if (action === 'scanAll') this._runScanAll(btn);
         else if (action === 'resetProgress') this._resetTestingProgress();
-        else if (action === 'generateFixes') this._runGenerateFixes(btn);
         else if (action === 'copyTokenFixes') this._copyTokenFixes(btn);
         else if (action === 'copyComponentPatches') this._copyComponentPatches(btn);
         else if (action === 'copyFullCSS') this._copyFullCSS(btn);
@@ -920,16 +1127,6 @@
         else if (action === 'removePatch') this._removePatchAction(btn);
         else if (action === 'copy') this._copyReport(btn);
         else if (action === 'copyDOM') this._copyDOMSnapshot(btn);
-      });
-
-      // Tab switching
-      this.shadow.addEventListener('click', (e) => {
-        const tab = e.target.closest('[data-tab]');
-        if (!tab) return;
-        const tabName = tab.dataset.tab;
-        if (tabName === this.activeTab) return;
-        this.activeTab = tabName;
-        this._refreshTabContent();
       });
 
       // Section collapse toggles
@@ -943,108 +1140,19 @@
 
     // ── Scan execution ────────────────────────────────────────────────────
 
-    async _runScan(btn) {
-      if (!ns.scanTokens) {
-        console.warn('[SFT Diag] Token scanner not loaded');
-        return;
-      }
-
-      btn.classList.add('is-scanning');
-      const iconSpan = btn.querySelector('svg');
-      const textSpan = btn.querySelector('span');
-      if (iconSpan) iconSpan.outerHTML = ICONS.spinner;
-      if (textSpan) textSpan.textContent = 'Scanning...';
-
-      // Small delay so the UI updates before the sync scan runs
-      await new Promise(r => setTimeout(r, 50));
-
-      try {
-        this.scanResults = ns.scanTokens(this.currentTheme);
-      } catch (err) {
-        console.error('[SFT Diag] Scan failed:', err);
-      }
-
-      // Re-render results
-      const resultsEl = this.shadow?.querySelector('.diag-results');
-      if (resultsEl) {
-        resultsEl.innerHTML = this.scanResults ? this._resultsHTML() : this._emptyHTML();
-      }
-
-      // Reset button
-      btn.classList.remove('is-scanning');
-      const newIcon = btn.querySelector('svg');
-      const newText = btn.querySelector('span');
-      if (newIcon) newIcon.outerHTML = ICONS.scan;
-      if (newText) newText.textContent = 'Run Token Scan';
-    }
-
-    async _refreshTabContent() {
-      // Load testing progress if switching to testing tab
-      if (this.activeTab === 'testing' && this.testingProgress === null) {
-        this.testingProgress = await ns.getTestingProgress?.(this.currentTheme) || {};
-      }
-      // Load theme colors if switching to fixes tab
-      if (this.activeTab === 'fixes' && !this.themeColors && ns.resolveThemeColors) {
-        this.themeColors = await ns.resolveThemeColors(this.currentTheme);
-      }
-      // Update tab bar active state
-      const tabs = this.shadow?.querySelectorAll('[data-tab]');
-      if (tabs) {
-        tabs.forEach(t => t.classList.toggle('is-active', t.dataset.tab === this.activeTab));
-      }
-      // Update scan button
-      const scanBar = this.shadow?.querySelector('.diag-scan-bar');
-      if (scanBar) scanBar.outerHTML = this._scanBarHTML();
-      // Update results
-      const resultsEl = this.shadow?.querySelector('.diag-results');
-      if (resultsEl) resultsEl.innerHTML = this._activeTabContent();
-      // Re-bind scan button (replaced via outerHTML)
-      this._bindScanButton();
-    }
-
-    _bindScanButton() {
-      // No-op: shadow-level event delegation in _bindEvents handles all
-      // [data-action] clicks, including dynamically replaced scan buttons.
-    }
-
-    async _runComponentScan(btn) {
-      if (!ns.scanComponents) {
-        console.warn('[SFT Diag] Component scanner not loaded');
-        return;
-      }
-
-      btn.classList.add('is-scanning');
-      const iconSpan = btn.querySelector('svg');
-      const textSpan = btn.querySelector('span');
-      if (iconSpan) iconSpan.outerHTML = ICONS.spinner;
-      if (textSpan) textSpan.textContent = 'Scanning...';
-
-      await new Promise(r => setTimeout(r, 50));
-
-      try {
-        this.componentResults = ns.scanComponents();
-      } catch (err) {
-        console.error('[SFT Diag] Component scan failed:', err);
-      }
-
-      const resultsEl = this.shadow?.querySelector('.diag-results');
-      if (resultsEl) {
-        resultsEl.innerHTML = this.componentResults ? this._componentResultsHTML() : this._emptyComponentHTML();
-      }
-
-      btn.classList.remove('is-scanning');
-      const newIcon = btn.querySelector('svg');
-      const newText = btn.querySelector('span');
-      if (newIcon) newIcon.outerHTML = ICONS.scan;
-      if (newText) newText.textContent = 'Scan Components';
-    }
-
     async _runScanAll(btn) {
       btn.classList.add('is-scanning');
+      const iconSpan = btn.querySelector('svg');
       const textSpan = btn.querySelector('span');
+      if (iconSpan) iconSpan.outerHTML = ICONS.spinner;
       if (textSpan) textSpan.textContent = 'Scanning...';
 
       await new Promise(r => setTimeout(r, 50));
+
+      // Load theme colors if not cached
+      if (!this.themeColors && ns.resolveThemeColors) {
+        this.themeColors = await ns.resolveThemeColors(this.currentTheme);
+      }
 
       // 1. Token scan
       try {
@@ -1064,7 +1172,21 @@
         console.error('[SFT Diag] Component scan failed:', err);
       }
 
-      // 3. Save testing progress (if page type detected)
+      // 3. Generate fixes
+      try {
+        if (ns.generateFullFixReport && this.themeColors) {
+          this.fixReport = ns.generateFullFixReport(this.scanResults, this.componentResults, this.themeColors);
+        }
+      } catch (_) {}
+
+      // 4. Load patch summary
+      try {
+        if (ns.getPatchSummary) {
+          this.patchSummary = await ns.getPatchSummary();
+        }
+      } catch (_) {}
+
+      // 5. Save testing progress
       const pageType = ns.detectPageType?.();
       if (pageType && ns.saveTestResult) {
         const tokenCoverage = this.scanResults?.coverage || null;
@@ -1080,87 +1202,15 @@
         this.testingProgress = await ns.getTestingProgress?.(this.currentTheme) || {};
       }
 
-      // Re-render current tab
+      this.hasScanned = true;
+
+      // Re-render unified view
       const resultsEl = this.shadow?.querySelector('.diag-results');
-      if (resultsEl) resultsEl.innerHTML = this._activeTabContent();
+      if (resultsEl) resultsEl.innerHTML = this._unifiedResultsHTML();
 
-      // Reset button
-      btn.classList.remove('is-scanning');
-      if (textSpan) textSpan.textContent = 'Scan All';
-    }
-
-    async _runTestingScan(btn) {
-      btn.classList.add('is-scanning');
-      const textSpan = btn.querySelector('span');
-      const iconSpan = btn.querySelector('svg');
-      if (iconSpan) iconSpan.outerHTML = ICONS.spinner;
-      if (textSpan) textSpan.textContent = 'Scanning...';
-
-      await new Promise(r => setTimeout(r, 50));
-
-      // Determine page type (auto-detect or manual fallback)
-      let pageType = ns.detectPageType?.();
-      let pageId = pageType?.id || 'unknown';
-
-      // If no auto-detect and this is a manual type, check if user
-      // triggered from a manual checklist item
-      if (!pageType) {
-        // For manual page types (modal, dropdown), we still scan
-        // and mark the first unfinished manual type
-        const progress = this.testingProgress || {};
-        const manualTypes = ns.PAGE_TYPES?.filter(p => p.manual && !progress[p.id]?.completed);
-        if (manualTypes?.length) {
-          pageType = manualTypes[0];
-          pageId = pageType.id;
-        }
-      }
-
-      // Run both scans
-      let tokenCoverage = null;
-      let componentHealth = null;
-
-      try {
-        if (ns.scanTokens) {
-          const tokenResult = ns.scanTokens(this.currentTheme);
-          this.scanResults = tokenResult;
-          tokenCoverage = tokenResult.coverage;
-        }
-      } catch (_) {}
-
-      try {
-        if (ns.scanComponents) {
-          const compResult = ns.scanComponents();
-          this.componentResults = compResult;
-          const s = compResult.summary;
-          componentHealth = s.totalStandardFound > 0
-            ? ((s.totalStyled + s.totalPartial * 0.5) / s.totalStandardFound) * 100
-            : 100;
-        }
-      } catch (_) {}
-
-      // Save result
-      if (pageId !== 'unknown' && ns.saveTestResult) {
-        await ns.saveTestResult(this.currentTheme, pageId, {
-          tokenCoverage,
-          componentHealth,
-        });
-        // Reload progress
-        this.testingProgress = await ns.getTestingProgress?.(this.currentTheme) || {};
-      }
-
-      // Re-render testing tab
-      const resultsEl = this.shadow?.querySelector('.diag-results');
-      if (resultsEl) resultsEl.innerHTML = this._testingTabHTML();
-
-      // Reset button
-      btn.classList.remove('is-scanning');
-      const newIcon = btn.querySelector('svg');
-      const newText = btn.querySelector('span');
-      if (newIcon) newIcon.outerHTML = ICONS.scan;
-      if (newText) {
-        const pt = ns.detectPageType?.();
-        newText.textContent = pt ? `Scan This Page (${pt.label})` : 'Scan This Page';
-      }
+      // Reset scan button
+      const scanBar = this.shadow?.querySelector('.diag-scan-bar');
+      if (scanBar) scanBar.outerHTML = this._scanBarHTML();
     }
 
     async _resetTestingProgress() {
@@ -1169,57 +1219,10 @@
       }
       this.testingProgress = {};
       const resultsEl = this.shadow?.querySelector('.diag-results');
-      if (resultsEl) resultsEl.innerHTML = this._testingTabHTML();
+      if (resultsEl) resultsEl.innerHTML = this._unifiedResultsHTML();
     }
 
-    // ── Fix generation & patch management ──────────────────────────────────
-
-    async _runGenerateFixes(btn) {
-      btn.classList.add('is-scanning');
-      const textSpan = btn.querySelector('span');
-      const iconSpan = btn.querySelector('svg');
-      if (iconSpan) iconSpan.outerHTML = ICONS.spinner;
-      if (textSpan) textSpan.textContent = 'Generating...';
-
-      await new Promise(r => setTimeout(r, 50));
-
-      // Ensure we have theme colors
-      if (!this.themeColors && ns.resolveThemeColors) {
-        this.themeColors = await ns.resolveThemeColors(this.currentTheme);
-      }
-
-      // Run scans if not done yet
-      if (!this.scanResults && ns.scanTokens) {
-        try { this.scanResults = ns.scanTokens(this.currentTheme); } catch (_) {}
-      }
-      if (!this.componentResults && ns.scanComponents) {
-        try { this.componentResults = ns.scanComponents(); } catch (_) {}
-      }
-
-      // Generate fixes
-      if (ns.generateFullFixReport && this.themeColors) {
-        this.fixReport = ns.generateFullFixReport(this.scanResults, this.componentResults, this.themeColors);
-      }
-
-      // Load patch summary
-      if (ns.getPatchSummary) {
-        this.patchSummary = await ns.getPatchSummary();
-      }
-
-      // Re-render
-      const resultsEl = this.shadow?.querySelector('.diag-results');
-      if (resultsEl) resultsEl.innerHTML = this._fixesTabHTML();
-
-      // Update tab bar (badge count may have changed)
-      const tabBar = this.shadow?.querySelector('.diag-tab-bar');
-      if (tabBar) tabBar.outerHTML = this._tabBarHTML();
-
-      btn.classList.remove('is-scanning');
-      const newIcon = btn.querySelector('svg');
-      const newText = btn.querySelector('span');
-      if (newIcon) newIcon.outerHTML = ICONS.scan;
-      if (newText) newText.textContent = 'Generate Fixes';
-    }
+    // ── Patch management ─────────────────────────────────────────────────
 
     async _copyTokenFixes(btn) {
       if (!this.fixReport?.tokenFixes?.css) return;
@@ -1253,7 +1256,7 @@
       // Refresh patch summary and re-render
       if (ns.getPatchSummary) this.patchSummary = await ns.getPatchSummary();
       const resultsEl = this.shadow?.querySelector('.diag-results');
-      if (resultsEl) resultsEl.innerHTML = this._fixesTabHTML();
+      if (resultsEl) resultsEl.innerHTML = this._unifiedResultsHTML();
 
       // Visual feedback
       btn.textContent = 'Saved!';
@@ -1270,7 +1273,7 @@
       if (ns.getPatchSummary) this.patchSummary = await ns.getPatchSummary();
 
       const resultsEl = this.shadow?.querySelector('.diag-results');
-      if (resultsEl) resultsEl.innerHTML = this._fixesTabHTML();
+      if (resultsEl) resultsEl.innerHTML = this._unifiedResultsHTML();
     }
 
     async _removePatchAction(btn) {
@@ -1282,7 +1285,7 @@
       if (ns.getPatchSummary) this.patchSummary = await ns.getPatchSummary();
 
       const resultsEl = this.shadow?.querySelector('.diag-results');
-      if (resultsEl) resultsEl.innerHTML = this._fixesTabHTML();
+      if (resultsEl) resultsEl.innerHTML = this._unifiedResultsHTML();
     }
 
     /** Shared clipboard helper with visual feedback. */
