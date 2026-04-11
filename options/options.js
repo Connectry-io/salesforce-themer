@@ -965,80 +965,57 @@
     });
   }
 
-  // ─── Theme Manager: Inline Expand ─────────────────────────────────────────
+  // ─── Theme Manager: Side Detail Panel ──────────────────────────────────────
 
   function toggleDetailPanel(theme) {
-    // Clicking same card closes it
     if (_openDetailId === theme.id) {
       closeDetailPanel();
       return;
     }
-
-    closeDetailPanel();
-
-    // Find the card in whichever grid it lives in
-    const clickedCard = document.querySelector(`#optMyThemesGrid .theme-card[data-theme="${theme.id}"], #optPresetsGrid .theme-card[data-theme="${theme.id}"]`);
-    const grid = clickedCard ? clickedCard.closest('.opt-collection-grid') : null;
-    if (!clickedCard) return;
-
-    requestAnimationFrame(() => {
-      const rowTop = clickedCard.offsetTop;
-      let lastInRow = clickedCard;
-      let next = clickedCard.nextElementSibling;
-      while (next && !next.classList.contains('opt-card-detail') && Math.abs(next.offsetTop - rowTop) < 2) {
-        if (!next.classList.contains('is-hidden')) lastInRow = next;
-        next = next.nextElementSibling;
-      }
-
-      const detail = buildDetailPanel(theme);
-      lastInRow.after(detail);
-      _openDetailId = theme.id;
-
-      // Highlight the clicked card
-      clickedCard.classList.add('is-expanded');
-
-      // Render preview
-      const previewHost = detail.querySelector('.opt-card-detail-preview');
-      const colors = theme.isCustom ? theme.colors : theme.colors;
-      const effects = theme.isCustom
-        ? (theme.effects || getSuggestedEffectsFor(theme.basedOn || 'connectry'))
-        : getSuggestedEffectsFor(theme.id);
-      renderThemePreview(previewHost, colors, { size: 'card', effects });
-
-      // Scroll into view
-      setTimeout(() => detail.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 60);
-    });
+    openDetailPanel(theme);
   }
 
-  function closeDetailPanel() {
-    // Search both grids for an open detail panel
-    document.querySelectorAll('#optMyThemesGrid .opt-card-detail, #optPresetsGrid .opt-card-detail').forEach(d => d.remove());
-    document.querySelectorAll('#optMyThemesGrid .theme-card.is-expanded, #optPresetsGrid .theme-card.is-expanded').forEach(c => c.classList.remove('is-expanded'));
-    _openDetailId = null;
-  }
+  function openDetailPanel(theme) {
+    const panel = document.getElementById('optDetailPanel');
+    if (!panel) return;
 
-  function buildDetailPanel(theme) {
-    const detail = document.createElement('div');
-    detail.className = 'opt-card-detail';
-    detail.dataset.detailFor = theme.id;
-    detail.setAttribute('role', 'region');
-    detail.setAttribute('aria-label', `${theme.name} theme details`);
+    // Clear expanded highlight from all cards
+    document.querySelectorAll('.theme-card.is-expanded').forEach(c => c.classList.remove('is-expanded'));
 
+    // Highlight the clicked card
+    const card = document.querySelector(`#optMyThemesGrid .theme-card[data-theme="${theme.id}"], #optPresetsGrid .theme-card[data-theme="${theme.id}"]`);
+    if (card) card.classList.add('is-expanded');
+
+    _openDetailId = theme.id;
+
+    // Header
+    document.getElementById('optDetailName').textContent = theme.name;
+
+    // Preview
+    const previewHost = document.getElementById('optDetailPreview');
+    previewHost.innerHTML = '';
+    const colors = theme.isCustom ? theme.colors : theme.colors;
+    const effects = theme.isCustom
+      ? (theme.effects || getSuggestedEffectsFor(theme.basedOn || 'connectry'))
+      : getSuggestedEffectsFor(theme.id);
+    renderThemePreview(previewHost, colors, { size: 'card', effects });
+
+    // Body content
+    const body = document.getElementById('optDetailBody');
     const isBuiltIn = !theme.isCustom;
-    const tagline = (isBuiltIn && theme.tagline) ? `<p class="opt-card-detail-tagline">${theme.tagline}</p>` : '';
-    const bestFor = (isBuiltIn && theme.bestFor) ? `<p class="opt-card-detail-bestfor"><strong>Best for:</strong> ${theme.bestFor}</p>` : '';
-    const basedOn = !isBuiltIn ? `<p class="opt-card-detail-bestfor">Based on: ${(getThemeById(theme.basedOn) || THEMES[0]).name}</p>` : '';
 
-    // Effects section (presets only — with volume control)
+    const tagline = (isBuiltIn && theme.tagline) ? `<p class="opt-detail-tagline">${theme.tagline}</p>` : '';
+    const bestFor = (isBuiltIn && theme.bestFor) ? `<p class="opt-detail-bestfor"><strong>Best for:</strong> ${theme.bestFor}</p>` : '';
+    const basedOn = !isBuiltIn ? `<p class="opt-detail-bestfor">Based on: ${(getThemeById(theme.basedOn) || THEMES[0]).name}</p>` : '';
+
     let effectsHtml = '';
     if (isBuiltIn) {
-      const effectCfg = getSuggestedEffectsFor(theme.id);
       const pills = buildEffectIndicators(theme.id);
       effectsHtml = `
-        <div class="opt-card-detail-effects">
-          <div class="opt-card-detail-effects-label">Effects</div>
-          <div class="opt-card-detail-effects-pills">${pills}</div>
-          <div class="opt-card-detail-volume">
+        <div class="opt-detail-effects">
+          <div class="opt-detail-effects-label">Effects</div>
+          <div class="opt-detail-effects-pills">${pills}</div>
+          <div class="opt-detail-volume">
             <span>Volume</span>
             <div class="opt-scope-pills" role="radiogroup" aria-label="Effects volume">
               <button class="opt-scope-pill${syncState.effectsVolume === 'off' ? ' is-active' : ''}" data-detail-volume="off">Off</button>
@@ -1050,22 +1027,18 @@
         </div>`;
     }
 
-    // Actions
     const applyLabel = theme.id === syncState.theme ? 'Active' : 'Apply';
     const applyDisabled = theme.id === syncState.theme ? ' disabled' : '';
     let actionsHtml = `<button class="cx-btn cx-btn-primary cx-btn-sm" data-detail-apply="${theme.id}"${applyDisabled}>${applyLabel}</button>`;
-
     if (isBuiltIn) {
-      actionsHtml += `<button class="cx-btn cx-btn-secondary cx-btn-sm" data-detail-clone="${theme.id}">Clone to Builder</button>`;
+      actionsHtml += `<button class="cx-btn cx-btn-secondary cx-btn-sm" data-detail-clone="${theme.id}">Clone</button>`;
     } else {
-      actionsHtml += `<button class="cx-btn cx-btn-secondary cx-btn-sm" data-detail-edit="${theme.id}">Edit in Builder</button>`;
-      actionsHtml += `<button class="cx-btn cx-btn-ghost cx-btn-sm" data-detail-export="${theme.id}">Export JSON</button>`;
-      actionsHtml += `<button class="cx-btn cx-btn-ghost cx-btn-sm opt-card-detail-delete" data-detail-delete="${theme.id}">Delete</button>`;
+      actionsHtml += `<button class="cx-btn cx-btn-secondary cx-btn-sm" data-detail-edit="${theme.id}">Edit</button>`;
+      actionsHtml += `<button class="cx-btn cx-btn-ghost cx-btn-sm" data-detail-export="${theme.id}">Export</button>`;
+      actionsHtml += `<button class="cx-btn cx-btn-ghost cx-btn-sm" data-detail-delete="${theme.id}" style="color:var(--cx-error)">Delete</button>`;
     }
-
-    // Share buttons
     const shareHtml = `
-      <div class="opt-card-detail-share">
+      <div class="opt-detail-share">
         <button class="cx-btn cx-btn-ghost cx-btn-sm" data-share-image="${theme.id}" title="Share as image">
           <svg width="13" height="13" viewBox="0 0 16 16" fill="none"><rect x="2" y="3" width="12" height="10" rx="1.5" stroke="currentColor" stroke-width="1.4"/><circle cx="6" cy="7" r="1.5" stroke="currentColor" stroke-width="1.2"/><path d="M2 11l3-3 2 2 3-3 4 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </button>
@@ -1074,66 +1047,53 @@
         </button>
       </div>`;
 
-    detail.innerHTML = `
-      <div class="opt-card-detail-layout">
-        <div class="opt-card-detail-preview"></div>
-        <div class="opt-card-detail-info">
-          <h3 class="opt-card-detail-name">${theme.name}</h3>
-          ${tagline}
-          ${bestFor}
-          ${basedOn}
-          ${effectsHtml}
-          <div class="opt-card-detail-actions">
-            ${actionsHtml}
-            ${shareHtml}
-          </div>
-        </div>
+    body.innerHTML = `
+      ${tagline}${bestFor}${basedOn}
+      ${effectsHtml}
+      <div class="opt-detail-actions">
+        ${actionsHtml}
+        ${shareHtml}
       </div>
-      <button class="opt-card-detail-close" aria-label="Close details">&times;</button>
     `;
 
-    // Wire up action handlers
-    detail.querySelector('.opt-card-detail-close').addEventListener('click', closeDetailPanel);
+    // Wire action handlers on the body
+    _wireDetailActions(body, theme);
 
-    const applyBtn = detail.querySelector('[data-detail-apply]');
+    // Show panel
+    panel.hidden = false;
+  }
+
+  function _wireDetailActions(body, theme) {
+    const applyBtn = body.querySelector('[data-detail-apply]');
     if (applyBtn && !applyBtn.disabled) {
       applyBtn.addEventListener('click', () => {
         selectTheme(theme.id);
         updateCollectionActiveState(theme.id);
-        // Update apply button state
         applyBtn.textContent = 'Active';
         applyBtn.disabled = true;
       });
     }
+    const cloneBtn = body.querySelector('[data-detail-clone]');
+    if (cloneBtn) cloneBtn.addEventListener('click', () => openCreationDialog(theme.id));
 
-    const cloneBtn = detail.querySelector('[data-detail-clone]');
-    if (cloneBtn) {
-      cloneBtn.addEventListener('click', () => openCreationDialog(theme.id));
-    }
-
-    const editBtn = detail.querySelector('[data-detail-edit]');
+    const editBtn = body.querySelector('[data-detail-edit]');
     if (editBtn) {
       editBtn.addEventListener('click', () => {
-        // Switch to Builder tab and load this custom theme
         chrome.storage.local.set({ openOptionsTab: 'builder', openBuilderClone: theme.id });
         if (_tabsInstance) _tabsInstance.activate('builder');
       });
     }
-
-    const exportBtn = detail.querySelector('[data-detail-export]');
+    const exportBtn = body.querySelector('[data-detail-export]');
     if (exportBtn) {
       exportBtn.addEventListener('click', () => {
         const blob = new Blob([JSON.stringify(theme, null, 2)], { type: 'application/json' });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
-        a.href = url;
-        a.download = `${theme.name || 'theme'}.json`;
-        a.click();
+        a.href = url; a.download = `${theme.name || 'theme'}.json`; a.click();
         URL.revokeObjectURL(url);
       });
     }
-
-    const deleteBtn = detail.querySelector('[data-detail-delete]');
+    const deleteBtn = body.querySelector('[data-detail-delete]');
     if (deleteBtn) {
       deleteBtn.addEventListener('click', async () => {
         if (!confirm(`Delete "${theme.name}"? This cannot be undone.`)) return;
@@ -1144,86 +1104,58 @@
         renderCollectionGrid(syncState.theme);
       });
     }
-
-    // Volume control pills (preset themes only)
-    detail.querySelectorAll('[data-detail-volume]').forEach(pill => {
+    body.querySelectorAll('[data-detail-volume]').forEach(pill => {
       pill.addEventListener('click', async () => {
         const volume = pill.dataset.detailVolume;
-        detail.querySelectorAll('[data-detail-volume]').forEach(p => p.classList.remove('is-active'));
+        body.querySelectorAll('[data-detail-volume]').forEach(p => p.classList.remove('is-active'));
         pill.classList.add('is-active');
         await chrome.storage.sync.set({ effectsVolume: volume });
         syncState.effectsVolume = volume;
       });
     });
-
-    // Share handlers
-    const shareImageBtn = detail.querySelector('[data-share-image]');
-    if (shareImageBtn) {
-      shareImageBtn.addEventListener('click', () => shareThemeAsImage(theme));
-    }
-    const shareEmailBtn = detail.querySelector('[data-share-email]');
+    const shareImageBtn = body.querySelector('[data-share-image]');
+    if (shareImageBtn) shareImageBtn.addEventListener('click', () => shareThemeAsImage(theme));
+    const shareEmailBtn = body.querySelector('[data-share-email]');
     if (shareEmailBtn) {
       shareEmailBtn.addEventListener('click', () => {
         const subject = encodeURIComponent(`Check out the "${theme.name}" theme for Salesforce Themer`);
-        const body = encodeURIComponent(`I'm using the "${theme.name}" theme in Salesforce Themer by Connectry. It looks great!\n\nhttps://chrome.google.com/webstore/detail/salesforce-themer`);
-        window.open(`mailto:?subject=${subject}&body=${body}`);
+        const body2 = encodeURIComponent(`I'm using the "${theme.name}" theme in Salesforce Themer by Connectry.\n\nhttps://chrome.google.com/webstore/detail/salesforce-themer`);
+        window.open(`mailto:?subject=${subject}&body=${body2}`);
       });
     }
-
-    return detail;
   }
 
-  // ─── Theme Manager: Hero ──────────────────────────────────────────────────
+  function closeDetailPanel() {
+    const panel = document.getElementById('optDetailPanel');
+    if (panel) panel.hidden = true;
+    document.querySelectorAll('.theme-card.is-expanded').forEach(c => c.classList.remove('is-expanded'));
+    _openDetailId = null;
+  }
 
-  function updateHero(activeThemeId) {
-    const builtIn = getThemeById(activeThemeId);
-    const custom = !builtIn ? (syncState.customThemes || []).find(ct => ct.id === activeThemeId) : null;
-    const theme = builtIn || custom;
-    if (!theme) return;
+  function bindDetailPanelClose() {
+    const btn = document.getElementById('optDetailClose');
+    if (btn) btn.addEventListener('click', closeDetailPanel);
+  }
 
-    const isCustom = !!custom;
-    const colors = isCustom ? resolveCustomColors(custom) : theme.colors;
+  // ─── Theme Manager: Status Bar + Config Drawer ────────────────────────────
 
-    // Name
-    const nameEl = document.getElementById('optHeroName');
-    if (nameEl) nameEl.textContent = theme.name;
+  function bindStatusBar() {
+    const configBtn = document.getElementById('optStatusBarConfigure');
+    const drawer = document.getElementById('optConfigDrawer');
+    if (!configBtn || !drawer) return;
 
-    // Tagline
-    const taglineEl = document.getElementById('optHeroTagline');
-    if (taglineEl) taglineEl.textContent = theme.tagline || theme.description || '';
+    configBtn.addEventListener('click', () => {
+      const expanded = configBtn.getAttribute('aria-expanded') === 'true';
+      configBtn.setAttribute('aria-expanded', String(!expanded));
+      drawer.classList.toggle('is-collapsed', expanded);
+    });
+  }
 
-    // Subtitle (scope summary)
-    const subtitleEl = document.getElementById('opt-hero-subtitle');
-    if (subtitleEl) {
-      const scope = syncState.themeScope === 'both' ? 'Lightning + Setup' : _capitalize(syncState.themeScope || 'lightning');
-      const cat = isCustom ? 'Custom' : _capitalize(theme.category || 'light');
-      subtitleEl.textContent = `${cat} · Applied to ${scope}`;
-    }
-
-    // Swatch
-    const swatchEl = document.getElementById('optHeroSwatch');
-    if (swatchEl) {
-      const four = [colors.background, colors.surface, colors.accent, colors.textPrimary];
-      swatchEl.innerHTML = `<div class="theme-swatch">${four.map(c => `<span style="background:${c || '#ddd'}"></span>`).join('')}</div>`;
-    }
-
-    // Details (category badge + effect pills)
-    const detailsEl = document.getElementById('optHeroDetails');
-    if (detailsEl) {
-      const badge = `<span class="theme-category-badge ${isCustom ? (theme.category || 'light') : theme.category}">${isCustom ? 'Custom' : (theme.category === 'light' ? 'Light' : 'Dark')}</span>`;
-      const pills = isCustom ? '' : buildEffectIndicators(theme.id);
-      detailsEl.innerHTML = badge + pills;
-    }
-
-    // Preview
-    const previewEl = document.getElementById('optHeroPreview');
-    if (previewEl) {
-      previewEl.innerHTML = '';
-      const effects = isCustom
-        ? (custom.effects || getSuggestedEffectsFor(custom.basedOn || 'connectry'))
-        : getSuggestedEffectsFor(theme.id);
-      renderThemePreview(previewEl, colors, { size: 'hero', effects });
-    }
+  function updateStatusBarScope() {
+    const el = document.getElementById('optStatusScope');
+    if (!el) return;
+    const labels = { both: 'Both', lightning: 'Lightning', setup: 'Setup' };
+    el.textContent = labels[syncState.themeScope] || 'Lightning';
   }
 
   // ─── Theme Manager: Smart Apply (stub) ────────────────────────────────────
@@ -1873,9 +1805,11 @@
     renderCollectionGrid(activeTheme);
     renderSmartApply();
     bindPresetsFilterPills();
-    bindSmartApplyCollapse();
+    bindStatusBar();
+    bindDetailPanelClose();
     bindMyThemesNewBtn();
     bindEmptyBuilderBtn();
+    updateStatusBarScope();
     renderBuilderSidebar(activeTheme);
     updateHeaderMeta(activeTheme);
     syncOptSettingsCardStatus(activeTheme);
@@ -1897,6 +1831,7 @@
         scopePills.forEach(p => p.classList.toggle('is-active', p === pill));
         await chrome.storage.sync.set({ themeScope: scope });
         syncState.themeScope = scope;
+        updateStatusBarScope();
       });
     });
 

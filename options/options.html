@@ -83,158 +83,128 @@
     <!-- ═══ Themes Tab ═══ -->
     <div class="cx-tabpanel" role="tabpanel" data-tabpanel="themes" id="galleryView" hidden>
 
-      <!-- ═══ Config Bar: Settings + Smart Apply side-by-side ═══ -->
-      <div class="opt-config-bar">
-
-        <!-- Settings card (left) -->
-        <div class="opt-settings-card">
-          <button class="opt-settings-card-header" id="optSettingsCardToggle" type="button" aria-expanded="false" aria-controls="optSettingsCardBody">
-            <span class="opt-settings-card-status">
-              <span class="opt-status-dot opt-status-dot--on" id="optStatusDot"></span>
-              <span id="optStatusText">Theme on</span>
-            </span>
-            <span class="opt-settings-card-spacer"></span>
-            <span class="opt-settings-card-label">Settings</span>
-            <svg class="opt-settings-card-chevron" width="14" height="14" viewBox="0 0 12 12" fill="none" aria-hidden="true">
-              <path d="M3 4.5L6 7.5L9 4.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+      <!-- ═══ Status Bar (compact inline settings) ═══ -->
+      <div class="opt-status-bar" id="optStatusBar">
+        <div class="opt-status-bar-left">
+          <span class="opt-status-dot opt-status-dot--on" id="optStatusDot"></span>
+          <label class="opt-status-bar-toggle">
+            <input type="checkbox" id="optThemeOnToggle" />
+            <span id="optStatusText">Theme on</span>
+          </label>
+          <span class="opt-status-bar-sep"></span>
+          <span class="opt-status-bar-scope" id="optStatusScope">Lightning</span>
+          <span class="opt-status-bar-sep"></span>
+          <label class="opt-status-bar-auto">
+            <input type="checkbox" id="autoModeToggle" />
+            <span>Follow system</span>
+          </label>
+        </div>
+        <div class="opt-status-bar-right">
+          <span class="opt-status-bar-smart">
+            <span class="opt-status-dot" id="optSmartDot"></span>
+            <span>Smart Apply: <strong id="optSmartStatusText">Off</strong></span>
+            <span class="cx-tab-badge cx-tab-badge--premium">Premium</span>
+          </span>
+          <button class="opt-status-bar-configure" id="optStatusBarConfigure" type="button" aria-expanded="false">
+            <svg width="13" height="13" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+              <circle cx="8" cy="8" r="1.5" fill="currentColor"/><circle cx="8" cy="3" r="1.5" fill="currentColor"/><circle cx="8" cy="13" r="1.5" fill="currentColor"/>
             </svg>
           </button>
-          <div class="opt-settings-card-body is-collapsed" id="optSettingsCardBody">
+        </div>
+      </div>
+
+      <!-- Expandable config drawer (hidden by default, shown on ⋮ click) -->
+      <div class="opt-config-drawer is-collapsed" id="optConfigDrawer">
+        <div class="opt-config-drawer-grid">
+          <!-- Settings column -->
+          <div class="opt-config-drawer-col">
+            <h4 class="opt-config-drawer-heading">Settings</h4>
             <div class="opt-settings-row">
-              <div class="opt-settings-label">
-                <svg class="opt-settings-icon" width="15" height="15" viewBox="0 0 14 14" fill="none" aria-hidden="true">
-                  <path d="M7 1.5v5.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
-                  <path d="M4 3.5a5 5 0 1 0 6 0" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
-                </svg>
-                <span class="opt-settings-text">Theme</span>
-              </div>
-              <label class="cx-toggle" title="Turn the active theme on or off">
-                <input type="checkbox" id="optThemeOnToggle" />
-                <span class="cx-toggle-track"><span class="cx-toggle-thumb"></span></span>
-              </label>
-            </div>
-            <div class="opt-settings-row">
-              <div class="opt-settings-label">
-                <svg class="opt-settings-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                  <circle cx="12" cy="12" r="4" fill="currentColor"/>
-                  <path d="M12 2v2M12 20v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M2 12h2M20 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-                </svg>
-                <span class="opt-settings-text">Follow system theme</span>
-                <button class="opt-settings-help-btn" data-tooltip="optAutoTooltip" aria-label="About follow system theme">
-                  <svg width="13" height="13" viewBox="0 0 14 14" fill="none" aria-hidden="true"><circle cx="7" cy="7" r="6" stroke="currentColor" stroke-width="1.3"/><path d="M7 6.5v3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/><circle cx="7" cy="4.5" r="0.65" fill="currentColor"/></svg>
-                </button>
-              </div>
-              <label class="cx-toggle">
-                <input type="checkbox" id="autoModeToggle" />
-                <span class="cx-toggle-track"><span class="cx-toggle-thumb"></span></span>
-              </label>
-            </div>
-            <div class="opt-settings-row opt-settings-row--stacked">
-              <div class="opt-settings-label">
-                <svg class="opt-settings-icon" width="15" height="15" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-                  <rect x="2" y="3" width="12" height="10" rx="1.5" stroke="currentColor" stroke-width="1.4"/>
-                  <path d="M2 6h12" stroke="currentColor" stroke-width="1.4"/>
-                </svg>
-                <span class="opt-settings-text">Apply to</span>
-                <button class="opt-settings-help-btn" data-tooltip="optScopeTooltip" aria-label="About apply scope">
-                  <svg width="13" height="13" viewBox="0 0 14 14" fill="none" aria-hidden="true"><circle cx="7" cy="7" r="6" stroke="currentColor" stroke-width="1.3"/><path d="M7 6.5v3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/><circle cx="7" cy="4.5" r="0.65" fill="currentColor"/></svg>
-                </button>
-              </div>
+              <span class="opt-settings-text">Apply to</span>
               <div class="opt-scope-pills" id="optionsScopePills" role="group" aria-label="Theme scope">
                 <button class="opt-scope-pill" data-scope="both">Both</button>
                 <button class="opt-scope-pill" data-scope="lightning">Lightning</button>
                 <button class="opt-scope-pill" data-scope="setup">Setup</button>
               </div>
             </div>
-            <div class="opt-settings-row opt-settings-row--stacked" id="orgSettingsRow" hidden>
-              <div class="opt-settings-label">
-                <svg class="opt-settings-icon" width="15" height="15" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-                  <path d="M3 14h10M3 14V6l5-3 5 3v8M6 14V9h4v5" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/>
-                </svg>
-                <span class="opt-settings-text">Per-org themes</span>
-                <button class="opt-settings-help-btn" data-tooltip="optOrgTooltip" aria-label="About per-org themes">
-                  <svg width="13" height="13" viewBox="0 0 14 14" fill="none" aria-hidden="true"><circle cx="7" cy="7" r="6" stroke="currentColor" stroke-width="1.3"/><path d="M7 6.5v3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/><circle cx="7" cy="4.5" r="0.65" fill="currentColor"/></svg>
-                </button>
-              </div>
+            <div class="opt-settings-row" id="orgSettingsRow" hidden>
+              <span class="opt-settings-text">Per-org themes</span>
               <div class="org-list" id="orgList"></div>
             </div>
-            <div class="opt-settings-footer">
-              <button type="button" class="opt-reset-link" id="optResetSettingsBtn">Reset all settings to defaults</button>
-            </div>
+            <button type="button" class="opt-reset-link" id="optResetSettingsBtn">Reset to defaults</button>
           </div>
-          <div class="opt-settings-tooltip" id="optAutoTooltip" hidden>Pick both a light theme and a dark theme — Themer will automatically switch between them whenever your computer toggles light/dark mode. Off by default.</div>
-          <div class="opt-settings-tooltip" id="optScopeTooltip" hidden>Where the theme applies. <strong>Lightning</strong> = the everyday user-facing Salesforce app pages. <strong>Setup</strong> = the admin Setup area only. <strong>Both</strong> = everywhere (default).</div>
-          <div class="opt-settings-tooltip" id="optEffectsTooltip" hidden>Each preset theme ships with curated effects. The volume knob scales them: <strong>Off</strong> disables all, <strong>Subtle</strong> mutes them, <strong>Default</strong> is as designed, <strong>Immersive</strong> amplifies everything.</div>
-          <div class="opt-settings-tooltip" id="optOrgTooltip" hidden>Each Salesforce org can have its own theme override, independent of the global setting. Useful for keeping production and sandbox visually distinct.</div>
-        </div>
-
-        <!-- Smart Apply card (right) -->
-        <div class="opt-settings-card">
-          <button class="opt-settings-card-header" id="optSmartApplyToggle"
-                  type="button" aria-expanded="false" aria-controls="optSmartApplyBody">
-            <span class="opt-settings-card-status">
-              <span class="opt-status-dot" id="optSmartDot"></span>
-              <span id="optSmartStatusText">Off</span>
-            </span>
-            <span class="opt-settings-card-spacer"></span>
-            <span class="opt-settings-card-label">Smart Apply</span>
-            <span class="cx-tab-badge cx-tab-badge--premium">Premium</span>
-            <svg class="opt-settings-card-chevron" width="14" height="14" viewBox="0 0 12 12" fill="none" aria-hidden="true">
-              <path d="M3 4.5L6 7.5L9 4.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-          </button>
-          <div class="opt-settings-card-body is-collapsed" id="optSmartApplyBody">
-            <p class="opt-smart-intro">Automatically switch themes based on time, weather, or mood. One mode active at a time.</p>
+          <!-- Smart Apply column -->
+          <div class="opt-config-drawer-col">
+            <h4 class="opt-config-drawer-heading">Smart Apply <span class="cx-tab-badge cx-tab-badge--premium">Premium</span></h4>
+            <p class="opt-smart-intro">Switch themes automatically based on time, weather, or mood.</p>
             <div class="opt-smart-modes" id="optSmartModes"></div>
           </div>
         </div>
+      </div>
 
-      </div><!-- /opt-config-bar -->
+      <!-- Floating tooltips (positioned by JS, shared across the tab) -->
+      <div class="opt-settings-tooltip" id="optAutoTooltip" hidden>Pick both a light theme and a dark theme — Themer will automatically switch between them whenever your computer toggles light/dark mode.</div>
+      <div class="opt-settings-tooltip" id="optScopeTooltip" hidden>Where the theme applies. <strong>Lightning</strong> = the everyday user-facing Salesforce. <strong>Setup</strong> = admin only. <strong>Both</strong> = everywhere.</div>
+      <div class="opt-settings-tooltip" id="optEffectsTooltip" hidden>Each preset theme ships with curated effects. The volume knob scales intensity.</div>
+      <div class="opt-settings-tooltip" id="optOrgTooltip" hidden>Each Salesforce org can have its own theme override. Useful for keeping production and sandbox visually distinct.</div>
 
-      <!-- ═══ My Themes (custom) ═══ -->
-      <section class="cx-section" aria-labelledby="opt-mythemes-heading">
-        <div class="cx-section-header">
-          <div>
-            <h2 class="cx-section-title" id="opt-mythemes-heading">My Themes</h2>
-            <p class="cx-section-subtitle">Your custom themes. Click any card for details.</p>
-          </div>
-          <div class="cx-section-actions">
-            <button class="cx-btn cx-btn-secondary cx-btn-sm" id="optMyThemesNewBtn">
-              <svg width="11" height="11" viewBox="0 0 14 14" fill="none" aria-hidden="true">
-                <path d="M7 2v10M2 7h10" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-              </svg>
-              New
-            </button>
-          </div>
-        </div>
+      <!-- ═══ Main content: grids + detail panel ═══ -->
+      <div class="opt-manager-layout" id="optManagerLayout">
 
-        <div class="opt-collection-grid" id="optMyThemesGrid" role="listbox" aria-label="My custom themes"></div>
+        <!-- Left: scrollable theme grids -->
+        <div class="opt-manager-grids">
 
-        <div class="cx-empty" id="optMyThemesEmpty" hidden>
-          <h3 class="cx-empty-title">No custom themes yet</h3>
-          <p class="cx-empty-body">Clone any preset or create one from scratch in the Theme Builder.</p>
-          <button class="cx-btn cx-btn-primary cx-btn-sm" id="optEmptyBuilderBtn">Open Builder</button>
-        </div>
-      </section>
-
-      <!-- ═══ Presets (15 curated themes) ═══ -->
-      <section class="cx-section" aria-labelledby="opt-presets-heading">
-        <div class="cx-section-header">
-          <div>
-            <h2 class="cx-section-title" id="opt-presets-heading">Presets</h2>
-            <p class="cx-section-subtitle">15 curated themes, free forever. Click any card for details.</p>
-          </div>
-          <div class="cx-section-actions">
-            <div class="cx-pills" role="group" aria-label="Filter presets">
-              <button class="cx-pill is-active" data-filter="all">All</button>
-              <button class="cx-pill" data-filter="light">Light</button>
-              <button class="cx-pill" data-filter="dark">Dark</button>
+          <!-- My Themes -->
+          <section class="cx-section" aria-labelledby="opt-mythemes-heading">
+            <div class="cx-section-header">
+              <h2 class="cx-section-title" id="opt-mythemes-heading">My Themes</h2>
+              <div class="cx-section-actions">
+                <button class="cx-btn cx-btn-secondary cx-btn-sm" id="optMyThemesNewBtn">
+                  <svg width="11" height="11" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+                    <path d="M7 2v10M2 7h10" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                  </svg>
+                  New
+                </button>
+              </div>
             </div>
-          </div>
+            <div class="opt-collection-grid" id="optMyThemesGrid" role="listbox" aria-label="My custom themes"></div>
+            <div class="cx-empty" id="optMyThemesEmpty" hidden>
+              <h3 class="cx-empty-title">No custom themes yet</h3>
+              <p class="cx-empty-body">Clone any preset or create from scratch in the Builder.</p>
+              <button class="cx-btn cx-btn-primary cx-btn-sm" id="optEmptyBuilderBtn">Open Builder</button>
+            </div>
+          </section>
+
+          <!-- Presets -->
+          <section class="cx-section" aria-labelledby="opt-presets-heading">
+            <div class="cx-section-header">
+              <h2 class="cx-section-title" id="opt-presets-heading">Presets</h2>
+              <div class="cx-section-actions">
+                <div class="cx-pills" role="group" aria-label="Filter presets">
+                  <button class="cx-pill is-active" data-filter="all">All</button>
+                  <button class="cx-pill" data-filter="light">Light</button>
+                  <button class="cx-pill" data-filter="dark">Dark</button>
+                </div>
+              </div>
+            </div>
+            <div class="opt-collection-grid" id="optPresetsGrid" role="listbox" aria-label="Preset themes"></div>
+          </section>
+
         </div>
 
-        <div class="opt-collection-grid" id="optPresetsGrid" role="listbox" aria-label="Preset themes"></div>
-      </section>
+        <!-- Right: detail panel (hidden until a card is clicked) -->
+        <aside class="opt-detail-panel" id="optDetailPanel" hidden>
+          <div class="opt-detail-panel-header">
+            <h3 class="opt-detail-panel-name" id="optDetailName"></h3>
+            <button class="opt-detail-panel-close" id="optDetailClose" aria-label="Close details">&times;</button>
+          </div>
+          <div class="opt-detail-panel-preview" id="optDetailPreview"></div>
+          <div class="opt-detail-panel-body" id="optDetailBody">
+            <!-- Populated by JS: tagline, bestFor, effects, volume, actions, share -->
+          </div>
+        </aside>
+
+      </div>
 
     </div>
 

@@ -21,19 +21,204 @@
   margin-bottom: var(--cx-space-4);
 }
 
-/* ─── Theme Manager: Config Bar ──────────────────────────────────────────── */
+/* ─── Theme Manager: Status Bar ──────────────────────────────────────────── */
 
-.opt-config-bar {
+.opt-status-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--cx-space-4);
+  padding: var(--cx-space-3) var(--cx-space-4);
+  background: var(--cx-surface);
+  border: 1px solid var(--cx-border);
+  border-radius: var(--cx-radius-md);
+  margin-bottom: var(--cx-space-4);
+  flex-wrap: wrap;
+}
+.opt-status-bar-left,
+.opt-status-bar-right {
+  display: flex;
+  align-items: center;
+  gap: var(--cx-space-3);
+}
+.opt-status-bar-sep {
+  width: 1px;
+  height: 14px;
+  background: var(--cx-border);
+}
+.opt-status-bar-toggle,
+.opt-status-bar-auto {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--cx-text);
+  cursor: pointer;
+}
+.opt-status-bar-toggle input,
+.opt-status-bar-auto input {
+  accent-color: var(--cx-accent);
+  width: 14px;
+  height: 14px;
+  margin: 0;
+  cursor: pointer;
+}
+.opt-status-bar-scope {
+  font-size: 12px;
+  color: var(--cx-text-muted);
+  font-weight: 500;
+}
+.opt-status-bar-smart {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--cx-text-muted);
+}
+.opt-status-bar-smart strong { color: var(--cx-text); }
+.opt-status-bar-configure {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border: 1px solid var(--cx-border);
+  border-radius: var(--cx-radius-sm);
+  background: transparent;
+  color: var(--cx-text-muted);
+  cursor: pointer;
+  transition: var(--cx-transition);
+}
+.opt-status-bar-configure:hover {
+  background: var(--cx-surface-alt);
+  color: var(--cx-text);
+}
+.opt-status-bar-configure[aria-expanded="true"] {
+  background: var(--cx-accent-light);
+  color: var(--cx-accent);
+  border-color: var(--cx-accent);
+}
+
+/* ─── Theme Manager: Config Drawer ───────────────────────────────────────── */
+
+.opt-config-drawer {
+  background: var(--cx-surface);
+  border: 1px solid var(--cx-border);
+  border-radius: var(--cx-radius-md);
+  margin-bottom: var(--cx-space-4);
+  overflow: hidden;
+  transition: max-height 260ms ease, padding 260ms ease, opacity 200ms ease;
+}
+.opt-config-drawer.is-collapsed {
+  max-height: 0;
+  padding: 0;
+  opacity: 0;
+  border-color: transparent;
+  margin-bottom: 0;
+}
+.opt-config-drawer:not(.is-collapsed) {
+  max-height: 600px;
+  padding: var(--cx-space-5);
+  opacity: 1;
+}
+.opt-config-drawer-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: var(--cx-space-4);
-  margin-bottom: var(--cx-space-8);
+  gap: var(--cx-space-6);
 }
-.opt-config-bar > .opt-settings-card {
-  max-width: none;
+.opt-config-drawer-heading {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--cx-text);
+  margin: 0 0 var(--cx-space-3);
+  display: flex;
+  align-items: center;
+  gap: var(--cx-space-2);
 }
 @media (max-width: 760px) {
-  .opt-config-bar { grid-template-columns: 1fr; }
+  .opt-config-drawer-grid { grid-template-columns: 1fr; }
+}
+
+/* ─── Theme Manager: Layout (grids + detail panel) ───────────────────────── */
+
+.opt-manager-layout {
+  display: flex;
+  gap: var(--cx-space-5);
+  align-items: flex-start;
+}
+.opt-manager-grids {
+  flex: 1;
+  min-width: 0;
+}
+.opt-detail-panel {
+  flex: 0 0 380px;
+  position: sticky;
+  top: calc(var(--cx-header-height) + 12px);
+  max-height: calc(100vh - var(--cx-header-height) - 24px);
+  overflow-y: auto;
+  background: var(--cx-surface);
+  border: 1.5px solid var(--cx-accent);
+  border-radius: var(--cx-radius-lg);
+  box-shadow: var(--cx-shadow-md);
+  animation: opt-panel-slide 220ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+@keyframes opt-panel-slide {
+  from { opacity: 0; transform: translateX(12px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+.opt-detail-panel[hidden] { display: none; }
+.opt-detail-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--cx-space-4) var(--cx-space-4) var(--cx-space-2);
+}
+.opt-detail-panel-name {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--cx-text);
+  margin: 0;
+  letter-spacing: -0.2px;
+}
+.opt-detail-panel-close {
+  width: 26px;
+  height: 26px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: var(--cx-surface-alt);
+  border-radius: var(--cx-radius-full);
+  color: var(--cx-text-muted);
+  font-size: 15px;
+  cursor: pointer;
+  transition: var(--cx-transition);
+  flex-shrink: 0;
+}
+.opt-detail-panel-close:hover {
+  background: var(--cx-border);
+  color: var(--cx-text);
+}
+.opt-detail-panel-preview {
+  padding: 0 var(--cx-space-4);
+}
+.opt-detail-panel-preview .preview-size-card {
+  border-radius: var(--cx-radius-md);
+}
+.opt-detail-panel-body {
+  padding: var(--cx-space-3) var(--cx-space-4) var(--cx-space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--cx-space-3);
+}
+@media (max-width: 900px) {
+  .opt-manager-layout { flex-direction: column; }
+  .opt-detail-panel {
+    flex: none;
+    width: 100%;
+    position: static;
+    max-height: none;
+  }
 }
 
 /* ─── Theme Manager: Smart Apply ─────────────────────────────────────────── */
@@ -96,132 +281,67 @@
 }
 .opt-collection-grid .theme-card.is-hidden { display: none; }
 
-/* ─── Theme Manager: Expanded Card Detail ────────────────────────────────── */
+/* ─── Theme Manager: Detail Panel Body Content ───────────────────────────── */
 
-.opt-card-detail {
-  grid-column: 1 / -1;
-  background: var(--cx-surface);
-  border: 1.5px solid var(--cx-accent);
-  border-radius: var(--cx-radius-lg);
-  box-shadow: var(--cx-shadow-md);
-  padding: var(--cx-space-6);
-  position: relative;
-  animation: opt-detail-expand 260ms cubic-bezier(0.16, 1, 0.3, 1) both;
-}
-@keyframes opt-detail-expand {
-  from { opacity: 0; transform: translateY(-8px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-.opt-card-detail-layout {
-  display: flex;
-  gap: var(--cx-space-6);
-  align-items: flex-start;
-}
-.opt-card-detail-preview {
-  flex: 0 0 55%;
-  max-width: 480px;
-  overflow: hidden;
-  border-radius: var(--cx-radius-md);
-}
-.opt-card-detail-info {
-  flex: 1;
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  gap: var(--cx-space-3);
-}
-.opt-card-detail-name {
-  font-size: 18px;
-  font-weight: 700;
-  color: var(--cx-text);
-  letter-spacing: -0.2px;
-  margin: 0;
-}
-.opt-card-detail-tagline {
+.opt-detail-tagline {
   font-size: 13px;
   color: var(--cx-text-muted);
   font-style: italic;
   line-height: 1.5;
   margin: 0;
 }
-.opt-card-detail-bestfor {
+.opt-detail-bestfor {
   font-size: 12px;
   color: var(--cx-text-subtle);
   margin: 0;
 }
-.opt-card-detail-bestfor strong {
+.opt-detail-bestfor strong {
   color: var(--cx-text-muted);
   font-weight: 600;
 }
-.opt-card-detail-effects {
+.opt-detail-effects {
   display: flex;
   flex-direction: column;
   gap: var(--cx-space-2);
   padding-top: var(--cx-space-2);
   border-top: 1px dashed var(--cx-border);
 }
-.opt-card-detail-effects-label {
+.opt-detail-effects-label {
   font-size: 11px;
   font-weight: 600;
   color: var(--cx-text-muted);
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
-.opt-card-detail-effects-pills {
+.opt-detail-effects-pills {
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
 }
-.opt-card-detail-volume {
+.opt-detail-volume {
   display: flex;
-  align-items: center;
-  gap: var(--cx-space-3);
+  flex-direction: column;
+  gap: var(--cx-space-1);
   margin-top: var(--cx-space-1);
 }
-.opt-card-detail-volume > span {
+.opt-detail-volume > span {
   font-size: 11px;
   font-weight: 600;
   color: var(--cx-text-muted);
   white-space: nowrap;
 }
-.opt-card-detail-actions {
+.opt-detail-actions {
   display: flex;
   flex-wrap: wrap;
   gap: var(--cx-space-2);
   align-items: center;
   padding-top: var(--cx-space-3);
   border-top: 1px solid var(--cx-border);
-  margin-top: auto;
 }
-.opt-card-detail-share {
+.opt-detail-share {
   display: flex;
   gap: var(--cx-space-1);
   margin-left: auto;
-}
-.opt-card-detail-close {
-  position: absolute;
-  top: var(--cx-space-3);
-  right: var(--cx-space-3);
-  width: 28px;
-  height: 28px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border: none;
-  background: var(--cx-surface-alt);
-  border-radius: var(--cx-radius-full);
-  color: var(--cx-text-muted);
-  font-size: 16px;
-  cursor: pointer;
-  transition: var(--cx-transition);
-}
-.opt-card-detail-close:hover {
-  background: var(--cx-border);
-  color: var(--cx-text);
-}
-@media (max-width: 760px) {
-  .opt-card-detail-layout { flex-direction: column; }
-  .opt-card-detail-preview { flex: none; max-width: 100%; }
 }
 
 /* ─── Theme Manager: Empty state ─────────────────────────────────────────── */
