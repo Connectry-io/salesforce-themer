@@ -46,12 +46,16 @@
       id: 'relatedList',
       label: 'Related Lists',
       icon: 'related',
-      urlPatterns: [/\/lightning\/r\/.*\/related/, /\/lightning\/r\/[A-Za-z0-9_]+\/[a-zA-Z0-9]+\/view/],
-      hint: 'Open a record — Related Lists are on the Related tab.',
+      urlPatterns: [/\/lightning\/r\/.*\/related/],
+      hint: 'On a record, click the "Related" tab to see related lists.',
       scans: ['tokens', 'components'],
       keyComponents: ['card', 'table', 'button'],
-      // Detected via DOM: record pages always have related lists
-      domDetect: () => document.querySelectorAll('.forceRelatedListContainer, .slds-related-list').length > 0,
+      // Detect Related tab being active on a record page
+      domDetect: () => {
+        // Check if we're on a record page AND a related list container is visible
+        if (!/\/lightning\/r\//.test(location.pathname)) return false;
+        return document.querySelectorAll('.forceRelatedListContainer, [class*="relatedList"], .slds-card.forceRelatedListCardDesktop').length > 0;
+      },
     },
     {
       id: 'setup',
@@ -66,12 +70,16 @@
       id: 'appLauncher',
       label: 'App Launcher',
       icon: 'launcher',
-      urlPatterns: [/\/lightning\/o\/AppLauncher/, /\/lightning\/page\/app-launcher/],
+      urlPatterns: [/\/lightning\/o\/AppLauncher/, /\/lightning\/page\/app-launcher/, /app-launcher/],
       hint: 'Click the 9-dot waffle icon in the top-left corner.',
       scans: ['tokens'],
       keyComponents: ['card', 'input'],
-      // App Launcher often opens as a modal overlay — detect via DOM
-      domDetect: () => document.querySelector('.appLauncherMenu, .slds-app-launcher') !== null,
+      // App Launcher opens as a full-page overlay — detect visible overlay
+      domDetect: () => {
+        const launcher = document.querySelector('.appLauncherMenu, .slds-app-launcher, [class*="appLauncher"]');
+        if (!launcher) return false;
+        return launcher.offsetHeight > 100; // Must be actually visible, not a tiny hidden element
+      },
     },
     {
       id: 'reports',
@@ -95,12 +103,17 @@
       id: 'modal',
       label: 'Modal / Dialog',
       icon: 'modal',
-      urlPatterns: [],
+      urlPatterns: [/\/new\?/, /\/e\?/], // SF new/edit record URLs
       hint: 'Open any modal (e.g., click "New" on a list view, or edit a record inline).',
       scans: ['tokens', 'components'],
       keyComponents: ['modal', 'button', 'input'],
-      // Auto-detect when a modal is visible in the DOM
-      domDetect: () => document.querySelector('.slds-modal__container, .modal-container, .forceModalContainer') !== null,
+      // Auto-detect when a modal is actually visible (check computed visibility)
+      domDetect: () => {
+        const modal = document.querySelector('.slds-modal__container, .modal-container, .forceModalContainer');
+        if (!modal) return false;
+        const style = getComputedStyle(modal);
+        return style.display !== 'none' && style.visibility !== 'hidden' && modal.offsetHeight > 0;
+      },
     },
     {
       id: 'dropdown',
@@ -110,8 +123,7 @@
       hint: 'Click any dropdown menu or hover over a help tooltip.',
       scans: ['tokens', 'components'],
       keyComponents: ['dropdown', 'popover'],
-      // Auto-detect when a dropdown/popover is visible
-      domDetect: () => document.querySelector('.slds-dropdown.slds-dropdown_length-5, .slds-popover:not([hidden]), .slds-dropdown[aria-expanded="true"]') !== null,
+      manual: true, // Keep as manual — dropdowns are too transient for auto-detect
     },
   ];
 
@@ -133,23 +145,24 @@
     const url = location.pathname + location.search + location.hash;
     const host = location.hostname;
 
-    // First check DOM-detected types (modals, dropdowns, app launcher overlay)
-    // These take priority since they're transient overlays on top of other pages
+    // URL patterns first — they're the most reliable signal
     for (const pt of PAGE_TYPES) {
-      if (pt.domDetect && pt.domDetect()) {
-        return pt;
-      }
-    }
-
-    // Then check URL patterns
-    for (const pt of PAGE_TYPES) {
-      if (!pt.urlPatterns.length) continue;
+      if (!pt.urlPatterns || !pt.urlPatterns.length) continue;
       for (const pattern of pt.urlPatterns) {
         if (pattern.test(url) || pattern.test(host)) {
           return pt;
         }
       }
     }
+
+    // Then DOM-detected types (modals, app launcher overlay)
+    // Only checked if no URL pattern matched
+    for (const pt of PAGE_TYPES) {
+      if (pt.domDetect && pt.domDetect()) {
+        return pt;
+      }
+    }
+
     return null;
   };
 

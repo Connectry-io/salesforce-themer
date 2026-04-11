@@ -207,6 +207,7 @@
       'webruntimedesign-',
       'slot-',
       'search_dialog-', 'search_input-',
+      'setup_discovery-', 'setup_home-', 'setup_service-',
       'sf-themer-',  // Our own — skip
     ];
 
