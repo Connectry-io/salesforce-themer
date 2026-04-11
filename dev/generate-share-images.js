@@ -1,11 +1,11 @@
 async function loadThemes() {
   try {
-    const url = (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.getURL)
+    var url = (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.getURL)
       ? chrome.runtime.getURL('themes/themes.json')
       : '../themes/themes.json';
-    const resp = await fetch(url);
+    var resp = await fetch(url);
     if (!resp.ok) throw new Error('Fetch failed: ' + resp.status);
-    const data = await resp.json();
+    var data = await resp.json();
     return data.themes;
   } catch (err) {
     document.getElementById('status').innerHTML = '<div style="color:#ef4444">Error loading themes: ' + err.message + '</div>';
@@ -14,18 +14,14 @@ async function loadThemes() {
 }
 
 function drawConnectryLogo(ctx, cx, cy, size) {
-  // Two connected dots — the Connectry mark
   var r = size * 0.29;
   var gap = size * 0.5;
-  // Left dot (graphite)
   ctx.fillStyle = '#2D2D2D';
   ctx.beginPath(); ctx.arc(cx - gap, cy, r, 0, Math.PI * 2); ctx.fill();
-  // Connection line (Connectry blue)
   ctx.strokeStyle = '#4A6FA5';
   ctx.lineWidth = size * 0.12;
   ctx.lineCap = 'round';
   ctx.beginPath(); ctx.moveTo(cx - gap + r, cy); ctx.lineTo(cx + gap - r, cy); ctx.stroke();
-  // Right dot (blue)
   ctx.fillStyle = '#4A6FA5';
   ctx.beginPath(); ctx.arc(cx + gap, cy, r, 0, Math.PI * 2); ctx.fill();
 }
@@ -45,243 +41,309 @@ function renderShareImage(canvas, theme) {
   ctx.fillRect(0, 0, W, H);
 
   // Subtle dot grid
-  ctx.fillStyle = 'rgba(255,255,255,0.025)';
-  for (var x = 20; x < W; x += 28) {
-    for (var y = 20; y < H; y += 28) {
-      ctx.beginPath();
-      ctx.arc(x, y, 0.8, 0, Math.PI * 2);
-      ctx.fill();
+  ctx.fillStyle = 'rgba(255,255,255,0.02)';
+  for (var x = 16; x < W; x += 24) {
+    for (var y = 16; y < H; y += 24) {
+      ctx.beginPath(); ctx.arc(x, y, 0.6, 0, Math.PI * 2); ctx.fill();
     }
   }
 
   // Accent glow blobs
-  ctx.globalAlpha = 0.07;
+  ctx.globalAlpha = 0.06;
   ctx.fillStyle = c.accent || '#4a6fa5';
-  ctx.beginPath(); ctx.arc(60, 60, 160, 0, Math.PI * 2); ctx.fill();
-  ctx.beginPath(); ctx.arc(W - 60, H - 60, 120, 0, Math.PI * 2); ctx.fill();
+  ctx.beginPath(); ctx.arc(0, 0, 200, 0, Math.PI * 2); ctx.fill();
+  ctx.beginPath(); ctx.arc(W, H, 180, 0, Math.PI * 2); ctx.fill();
   ctx.globalAlpha = 1;
 
-  // ─── Left side: theme name, tagline, logo, palette ─────────────
-  var leftX = 56;
-  var leftW = 360;
-
-  // Theme name
+  // ─── Top bar: logo + theme name + palette (centered) ───────────
+  // Connectry logo
+  drawConnectryLogo(ctx, 42, 30, 16);
+  ctx.fillStyle = '#94a3b8';
+  ctx.font = '12px Inter, system-ui, sans-serif';
   ctx.textAlign = 'left';
+  ctx.fillText('Salesforce Themer', 62, 34);
+
+  // Theme name — centered
+  ctx.textAlign = 'center';
   ctx.fillStyle = '#ffffff';
-  ctx.font = 'bold 38px Inter, system-ui, sans-serif';
-  ctx.fillText(theme.name, leftX, 80);
+  ctx.font = 'bold 28px Inter, system-ui, sans-serif';
+  ctx.fillText(theme.name, W / 2, 34);
 
-  // Tagline
-  if (theme.tagline) {
-    ctx.fillStyle = '#94a3b8';
-    ctx.font = '15px Inter, system-ui, sans-serif';
-    // Word wrap tagline to ~40 chars
-    var words = theme.tagline.split(' ');
-    var line = '';
-    var lineY = 112;
-    for (var i = 0; i < words.length; i++) {
-      var test = line + (line ? ' ' : '') + words[i];
-      if (ctx.measureText(test).width > leftW) {
-        ctx.fillText(line, leftX, lineY);
-        line = words[i];
-        lineY += 20;
-      } else {
-        line = test;
-      }
-    }
-    if (line) ctx.fillText(line, leftX, lineY);
-  }
-
-  // Color palette dots
-  var paletteY = 175;
+  // Color palette dots — right side
   var dotColors = [c.nav, c.accent, c.surface, c.background, c.textPrimary].filter(Boolean);
-  var dotR = 12, dotGap = 10;
+  var dotR = 8, dotGap = 6;
+  var totalDotsW = dotColors.length * dotR * 2 + (dotColors.length - 1) * dotGap;
+  var dotsStartX = W - 40 - totalDotsW;
   dotColors.forEach(function(col, i) {
     ctx.fillStyle = col;
     ctx.beginPath();
-    ctx.arc(leftX + i * (dotR * 2 + dotGap) + dotR, paletteY, dotR, 0, Math.PI * 2);
+    ctx.arc(dotsStartX + i * (dotR * 2 + dotGap) + dotR, 30, dotR, 0, Math.PI * 2);
     ctx.fill();
-    ctx.strokeStyle = 'rgba(255,255,255,0.12)';
-    ctx.lineWidth = 1.5;
+    ctx.strokeStyle = 'rgba(255,255,255,0.1)';
+    ctx.lineWidth = 1;
     ctx.stroke();
   });
 
-  // Connectry logo + wordmark at bottom-left
-  drawConnectryLogo(ctx, leftX + 22, H - 52, 20);
-  ctx.fillStyle = '#e2e8f0';
-  ctx.font = 'bold 16px Inter, system-ui, sans-serif';
-  ctx.textAlign = 'left';
-  ctx.fillText('Salesforce Themer', leftX + 52, H - 46);
-  ctx.fillStyle = '#64748b';
-  ctx.font = '12px Inter, system-ui, sans-serif';
-  ctx.fillText('Built with care by Connectry', leftX + 52, H - 28);
-
-  // ─── Right side: browser preview (fills right ~60%) ────────────
-  var previewX = 430, previewY = 36;
-  var previewW = W - previewX - 36;
-  var previewH = H - 72;
+  // ─── Browser preview (centered, fills most of the space) ───────
+  var margin = 40;
+  var previewW = W - margin * 2;
+  var browserBarH = 32;
+  var previewY = 56;
+  var previewH = H - previewY - 46;
 
   // Shadow
-  ctx.shadowColor = 'rgba(0,0,0,0.5)';
-  ctx.shadowBlur = 50;
-  ctx.shadowOffsetY = 12;
+  ctx.shadowColor = 'rgba(0,0,0,0.45)';
+  ctx.shadowBlur = 40;
+  ctx.shadowOffsetY = 8;
 
   // Browser chrome bar
   ctx.fillStyle = '#1e293b';
   ctx.beginPath();
-  ctx.roundRect(previewX, previewY, previewW, 32, [10, 10, 0, 0]);
+  ctx.roundRect(margin, previewY, previewW, browserBarH, [10, 10, 0, 0]);
   ctx.fill();
 
   // Traffic lights
   ['#ff5f57', '#ffbd2e', '#28c840'].forEach(function(col, i) {
     ctx.fillStyle = col;
     ctx.beginPath();
-    ctx.arc(previewX + 18 + i * 16, previewY + 16, 4.5, 0, Math.PI * 2);
+    ctx.arc(margin + 20 + i * 16, previewY + 16, 4.5, 0, Math.PI * 2);
     ctx.fill();
   });
 
-  // Tab
+  // Browser tab
   ctx.fillStyle = '#334155';
   ctx.beginPath();
-  ctx.roundRect(previewX + 64, previewY + 6, 140, 20, [5, 5, 0, 0]);
+  ctx.roundRect(margin + 68, previewY + 6, 160, 20, [5, 5, 0, 0]);
   ctx.fill();
   ctx.fillStyle = '#94a3b8';
   ctx.font = '10px Inter, system-ui, sans-serif';
   ctx.textAlign = 'left';
-  ctx.fillText('Salesforce | Leads', previewX + 74, previewY + 20);
+  ctx.fillText('Salesforce | Leads', margin + 80, previewY + 20);
 
   // Reset shadow
   ctx.shadowColor = 'transparent';
   ctx.shadowBlur = 0;
   ctx.shadowOffsetY = 0;
 
-  // ─── App content area ──────────────────────────────────────────
-  var appY = previewY + 32;
-  var appH = previewH - 32;
+  // ─── Salesforce app content ────────────────────────────────────
+  var appX = margin;
+  var appY = previewY + browserBarH;
+  var appW = previewW;
+  var appH = previewH - browserBarH;
 
   // Background
   ctx.fillStyle = c.background || '#f7f7f5';
   ctx.beginPath();
-  ctx.roundRect(previewX, appY, previewW, appH, [0, 0, 10, 10]);
+  ctx.roundRect(appX, appY, appW, appH, [0, 0, 10, 10]);
   ctx.fill();
 
-  // Nav bar
+  // ── Nav bar ──
+  var navH = 40;
   ctx.fillStyle = c.nav || '#4a6fa5';
-  ctx.fillRect(previewX, appY, previewW, 38);
+  ctx.fillRect(appX, appY, appW, navH);
+
+  // App launcher
+  ctx.fillStyle = 'rgba(255,255,255,0.8)';
+  for (var row = 0; row < 3; row++) {
+    for (var col = 0; col < 3; col++) {
+      ctx.beginPath();
+      ctx.arc(appX + 20 + col * 6, appY + 14 + row * 6, 1.5, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  }
+
+  // Search bar
+  ctx.fillStyle = 'rgba(255,255,255,0.12)';
+  ctx.beginPath(); ctx.roundRect(appX + 46, appY + 9, 200, 22, 11); ctx.fill();
+  ctx.fillStyle = 'rgba(255,255,255,0.45)';
+  ctx.font = '10px Inter, system-ui, sans-serif';
+  ctx.fillText('Search...', appX + 62, appY + 24);
 
   // Nav items
   ctx.fillStyle = '#ffffff';
-  ctx.font = 'bold 11px Inter, system-ui, sans-serif';
-  ['Sales', 'Home', 'Leads', 'Contacts'].forEach(function(item, i) {
-    ctx.fillText(item, previewX + 20 + i * 68, appY + 24);
+  ctx.font = 'bold 12px Inter, system-ui, sans-serif';
+  var navItems = ['Sales', 'Home', 'Leads', 'Contacts', 'Accounts'];
+  navItems.forEach(function(item, i) {
+    ctx.fillText(item, appX + 280 + i * 80, appY + 25);
   });
+
   // Active underline
   ctx.fillStyle = '#ffffff';
-  ctx.fillRect(previewX + 20 + 2 * 68, appY + 32, 40, 2.5);
+  ctx.fillRect(appX + 280 + 2 * 80, appY + navH - 3, 44, 3);
+
+  // User avatar circle (right side of nav)
+  ctx.fillStyle = c.accent || '#4a6fa5';
+  ctx.beginPath(); ctx.arc(appX + appW - 30, appY + 20, 12, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = '#ffffff';
+  ctx.font = 'bold 10px Inter, system-ui, sans-serif';
+  ctx.textAlign = 'center';
+  ctx.fillText('N', appX + appW - 30, appY + 24);
+  ctx.textAlign = 'left';
+
+  // Utility icons (right of nav)
+  ctx.strokeStyle = 'rgba(255,255,255,0.6)';
+  ctx.lineWidth = 1.2;
+  // + icon
+  ctx.beginPath(); ctx.moveTo(appX + appW - 100, appY + 15); ctx.lineTo(appX + appW - 100, appY + 25); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(appX + appW - 105, appY + 20); ctx.lineTo(appX + appW - 95, appY + 20); ctx.stroke();
+
+  // ── Page content ──
+  var contentY = appY + navH + 8;
+  var contentMargin = 28;
 
   // Page header
-  var hdrY = appY + 48;
   ctx.fillStyle = c.textPrimary || '#2d2d2d';
-  ctx.font = 'bold 16px Inter, system-ui, sans-serif';
-  ctx.fillText('Lead: John Smith', previewX + 24, hdrY + 20);
+  ctx.font = 'bold 18px Inter, system-ui, sans-serif';
+  ctx.fillText('Lead: John Smith', appX + contentMargin, contentY + 20);
+
   ctx.fillStyle = c.textSecondary || '#4a5568';
-  ctx.font = '10px Inter, system-ui, sans-serif';
-  ctx.fillText('Senior Account Executive', previewX + 24, hdrY + 36);
+  ctx.font = '11px Inter, system-ui, sans-serif';
+  ctx.fillText('Senior Account Executive', appX + contentMargin, contentY + 38);
 
-  // Brand button
-  ctx.fillStyle = c.buttonBrandBg || c.accent || '#4a6fa5';
-  ctx.beginPath(); ctx.roundRect(previewX + previewW - 90, hdrY + 8, 68, 24, 5); ctx.fill();
-  ctx.fillStyle = c.buttonBrandText || '#ffffff';
+  // Action buttons (right side of header)
+  // Clone button
+  ctx.fillStyle = c.buttonNeutralBg || c.surface || '#ffffff';
+  ctx.strokeStyle = c.buttonNeutralBorder || c.border || '#c4cdd6';
+  ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.roundRect(appX + appW - contentMargin - 160, contentY + 6, 68, 26, 5); ctx.fill(); ctx.stroke();
+  ctx.fillStyle = c.buttonNeutralText || c.textPrimary || '#2d2d2d';
   ctx.font = 'bold 10px Inter, system-ui, sans-serif';
-  ctx.fillText('Convert', previewX + previewW - 78, hdrY + 24);
+  ctx.fillText('Clone', appX + appW - contentMargin - 140, contentY + 23);
 
-  // Surface card
-  var scX = previewX + 18, scY = hdrY + 52;
-  var scW = previewW - 36, scH = appH - 110;
+  // Convert button
+  ctx.fillStyle = c.buttonBrandBg || c.accent || '#4a6fa5';
+  ctx.beginPath(); ctx.roundRect(appX + appW - contentMargin - 82, contentY + 6, 82, 26, 5); ctx.fill();
+  ctx.fillStyle = c.buttonBrandText || '#ffffff';
+  ctx.fillText('Convert', appX + appW - contentMargin - 60, contentY + 23);
+
+  // ── Main surface card ──
+  var cardX = appX + contentMargin;
+  var cardY = contentY + 52;
+  var cardW = appW - contentMargin * 2;
+  var cardH = appH - (contentY - appY) - 52 - 30;
+
   ctx.fillStyle = c.surface || '#ffffff';
-  ctx.beginPath(); ctx.roundRect(scX, scY, scW, scH, 6); ctx.fill();
+  ctx.beginPath(); ctx.roundRect(cardX, cardY, cardW, cardH, 8); ctx.fill();
   ctx.strokeStyle = c.border || '#e8e8e6';
   ctx.lineWidth = 0.8;
   ctx.stroke();
 
-  // Path breadcrumbs
-  var pathY2 = scY + 18;
-  ['New', 'Working', 'Converted'].forEach(function(label, i) {
-    var px = scX + 16 + i * 90;
+  // ── Path / Stage ──
+  var pathY = cardY + 16;
+  var stages = ['New', 'Working', 'Converted'];
+  stages.forEach(function(label, i) {
+    var px = cardX + 20 + i * 110;
     ctx.fillStyle = i < 2 ? (c.accent || '#4a6fa5') : (c.surfaceAlt || '#eee');
-    ctx.beginPath(); ctx.roundRect(px, pathY2, 82, 22, 11); ctx.fill();
+    ctx.beginPath(); ctx.roundRect(px, pathY, 100, 24, 12); ctx.fill();
     ctx.fillStyle = i < 2 ? '#ffffff' : (c.textSecondary || '#4a5568');
-    ctx.font = '9px Inter, system-ui, sans-serif';
-    ctx.fillText(label, px + (i === 2 ? 22 : 26), pathY2 + 14);
+    ctx.font = '10px Inter, system-ui, sans-serif';
+    ctx.fillText(label, px + (i === 2 ? 28 : 34), pathY + 16);
   });
 
-  // Tab strip
-  var tabY2 = scY + 52;
+  // ── Tab strip ──
+  var tabY = pathY + 38;
   ctx.fillStyle = c.tabActiveColor || c.accent || '#4a6fa5';
-  ctx.font = '10px Inter, system-ui, sans-serif';
-  ctx.fillText('Details', scX + 16, tabY2 + 4);
-  ctx.fillRect(scX + 16, tabY2 + 8, 36, 2);
-  ctx.fillStyle = c.tabInactiveColor || c.textSecondary || '#4a5568';
-  ctx.fillText('Activity', scX + 70, tabY2 + 4);
-  ctx.fillText('Chatter', scX + 126, tabY2 + 4);
-  ctx.strokeStyle = c.tabNavBorder || c.border || '#e8e8e6';
-  ctx.beginPath(); ctx.moveTo(scX, tabY2 + 11); ctx.lineTo(scX + scW, tabY2 + 11); ctx.stroke();
+  ctx.font = '11px Inter, system-ui, sans-serif';
+  ctx.fillText('Details', cardX + 20, tabY + 4);
+  ctx.fillRect(cardX + 20, tabY + 9, 40, 2.5);
 
-  // Detail rows
-  var rows = [['Name', 'John Smith'], ['Email', 'john@example.com'], ['Company', 'Acme Corp'], ['Phone', '+1 (555) 123-4567']];
-  rows.forEach(function(row, i) {
-    var ry = tabY2 + 28 + i * 28;
+  ctx.fillStyle = c.tabInactiveColor || c.textSecondary || '#4a5568';
+  ctx.fillText('Activity', cardX + 82, tabY + 4);
+  ctx.fillText('Chatter', cardX + 148, tabY + 4);
+
+  // Tab border
+  ctx.strokeStyle = c.tabNavBorder || c.border || '#e8e8e6';
+  ctx.lineWidth = 0.5;
+  ctx.beginPath(); ctx.moveTo(cardX + 8, tabY + 13); ctx.lineTo(cardX + cardW - 8, tabY + 13); ctx.stroke();
+
+  // ── Detail rows ──
+  var detailRows = [
+    ['Name', 'John Smith'],
+    ['Email', 'john@example.com'],
+    ['Company', 'Acme Corp'],
+    ['Phone', '+1 (555) 123-4567']
+  ];
+  detailRows.forEach(function(row, i) {
+    var ry = tabY + 30 + i * 26;
     ctx.fillStyle = c.textSecondary || '#64748b';
     ctx.font = '10px Inter, system-ui, sans-serif';
-    ctx.fillText(row[0], scX + 16, ry);
+    ctx.fillText(row[0], cardX + 20, ry);
     ctx.fillStyle = row[0] === 'Email' ? (c.link || c.accent || '#4a6fa5') : (c.textPrimary || '#1e293b');
-    ctx.fillText(row[1], scX + 120, ry);
+    ctx.font = '10px Inter, system-ui, sans-serif';
+    ctx.fillText(row[1], cardX + 160, ry);
+    // Separator
     ctx.strokeStyle = c.tableBorderRow || c.border || '#e8e8e6';
     ctx.lineWidth = 0.4;
-    ctx.beginPath(); ctx.moveTo(scX + 10, ry + 10); ctx.lineTo(scX + scW - 10, ry + 10); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(cardX + 12, ry + 10); ctx.lineTo(cardX + cardW - 12, ry + 10); ctx.stroke();
   });
 
-  // Edit/Delete buttons
-  var btnRow = tabY2 + 28 + rows.length * 28 + 6;
+  // ── Edit / Delete buttons ──
+  var btnRowY = tabY + 30 + detailRows.length * 26 + 8;
   ctx.fillStyle = c.buttonNeutralBg || c.surface || '#ffffff';
   ctx.strokeStyle = c.buttonNeutralBorder || c.border || '#c4cdd6';
   ctx.lineWidth = 0.8;
-  ctx.beginPath(); ctx.roundRect(scX + 16, btnRow, 46, 20, 4); ctx.fill(); ctx.stroke();
-  ctx.beginPath(); ctx.roundRect(scX + 70, btnRow, 52, 20, 4); ctx.fill(); ctx.stroke();
+  ctx.beginPath(); ctx.roundRect(cardX + 20, btnRowY, 50, 22, 4); ctx.fill(); ctx.stroke();
+  ctx.beginPath(); ctx.roundRect(cardX + 78, btnRowY, 58, 22, 4); ctx.fill(); ctx.stroke();
   ctx.fillStyle = c.buttonNeutralText || c.textPrimary || '#2d2d2d';
   ctx.font = 'bold 9px Inter, system-ui, sans-serif';
-  ctx.fillText('Edit', scX + 30, btnRow + 13);
-  ctx.fillText('Delete', scX + 82, btnRow + 13);
+  ctx.fillText('Edit', cardX + 36, btnRowY + 14);
+  ctx.fillText('Delete', cardX + 94, btnRowY + 14);
 
-  // Toast
-  var toastY2 = btnRow + 30;
-  if (toastY2 + 24 < scY + scH) {
+  // ── Toast ──
+  var toastY = btnRowY + 32;
+  if (toastY + 22 < cardY + cardH - 4) {
     ctx.fillStyle = c.success || '#059669';
-    ctx.globalAlpha = 0.12;
-    ctx.beginPath(); ctx.roundRect(scX + 10, toastY2, scW - 20, 24, 4); ctx.fill();
+    ctx.globalAlpha = 0.1;
+    ctx.beginPath(); ctx.roundRect(cardX + 12, toastY, cardW - 24, 22, 4); ctx.fill();
     ctx.globalAlpha = 1;
     ctx.fillStyle = c.success || '#059669';
     ctx.font = '9px Inter, system-ui, sans-serif';
-    ctx.fillText('\u2713 Lead "John Smith" was saved.', scX + 24, toastY2 + 15);
+    ctx.fillText('\u2713 Lead "John Smith" was saved.', cardX + 28, toastY + 14);
     ctx.fillStyle = c.link || c.accent || '#4a6fa5';
     ctx.font = 'bold 9px Inter, system-ui, sans-serif';
     ctx.textAlign = 'right';
-    ctx.fillText('Undo', scX + scW - 20, toastY2 + 15);
+    ctx.fillText('Undo', cardX + cardW - 24, toastY + 14);
     ctx.textAlign = 'left';
   }
 
-  // Bottom bar (footer strip)
+  // ── Footer utility bar ──
+  var footerY = appY + appH - 24;
   ctx.fillStyle = c.nav || '#4a6fa5';
-  ctx.globalAlpha = 0.6;
-  ctx.fillRect(previewX, appY + appH - 24, previewW, 24);
+  ctx.globalAlpha = 0.5;
+  ctx.beginPath();
+  ctx.roundRect(appX, footerY, appW, 24, [0, 0, 10, 10]);
+  ctx.fill();
   ctx.globalAlpha = 1;
   ctx.fillStyle = '#ffffff';
   ctx.font = '8px Inter, system-ui, sans-serif';
   ctx.globalAlpha = 0.7;
-  ctx.fillText('Notes', previewX + 20, appY + appH - 9);
-  ctx.fillText('History', previewX + 80, appY + appH - 9);
-  ctx.fillText('Open CTI', previewX + 148, appY + appH - 9);
+  ctx.fillText('\u2261 Notes', appX + 20, footerY + 15);
+  ctx.fillText('\u25cb History', appX + 90, footerY + 15);
+  ctx.fillText('\u25a1 Open CTI', appX + 170, footerY + 15);
   ctx.globalAlpha = 1;
+
+  // ─── Bottom bar: logo + tagline + theme name (centered) ────────
+  var bottomY = H - 32;
+  ctx.textAlign = 'center';
+
+  // Connectry logo centered
+  drawConnectryLogo(ctx, W / 2 - 100, bottomY, 12);
+
+  // "Salesforce Themer" next to logo
+  ctx.fillStyle = '#e2e8f0';
+  ctx.font = 'bold 13px Inter, system-ui, sans-serif';
+  ctx.textAlign = 'left';
+  ctx.fillText('Salesforce Themer', W / 2 - 84, bottomY + 4);
+
+  // Separator dot
+  ctx.fillStyle = '#475569';
+  ctx.font = '13px Inter, system-ui, sans-serif';
+  ctx.fillText('\u00b7', W / 2 + 28, bottomY + 4);
+
+  // "Built with care by Connectry"
+  ctx.fillStyle = '#64748b';
+  ctx.font = '12px Inter, system-ui, sans-serif';
+  ctx.fillText('Built with care by Connectry', W / 2 + 40, bottomY + 4);
 }
 
 document.getElementById('generateBtn').addEventListener('click', async function() {
@@ -298,9 +360,9 @@ document.getElementById('generateBtn').addEventListener('click', async function(
       var card = document.createElement('div');
       card.className = 'preview';
 
-      var canvas = document.createElement('canvas');
-      renderShareImage(canvas, theme);
-      card.appendChild(canvas);
+      var cvs = document.createElement('canvas');
+      renderShareImage(cvs, theme);
+      card.appendChild(cvs);
 
       var info = document.createElement('div');
       info.className = 'preview-info';
@@ -323,7 +385,7 @@ document.getElementById('generateBtn').addEventListener('click', async function(
             URL.revokeObjectURL(url);
           }, 'image/png');
         });
-      })(canvas, theme);
+      })(cvs, theme);
 
       info.appendChild(name);
       info.appendChild(dl);
