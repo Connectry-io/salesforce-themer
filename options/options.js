@@ -815,17 +815,77 @@
     });
   }
 
-  // ─── Theme Manager: Collection Grid ────────────────────────────────────────
+  // ─── Theme Manager: Grids (My Themes + Presets) ────────────────────────────
 
-  let _activeCollectionFilter = 'all';
+  let _activePresetsFilter = 'all';
   let _openDetailId = null;
 
-  function renderCollectionGrid(activeThemeId) {
-    const grid = document.getElementById('optCollectionGrid');
-    const empty = document.getElementById('optCollectionEmpty');
+  /** Build a theme card element for any grid. */
+  function _buildThemeCard(theme, activeThemeId) {
+    const isActive = theme.id === activeThemeId;
+    const card = document.createElement('div');
+    card.className = `theme-card${isActive ? ' is-active' : ''}`;
+    card.dataset.theme = theme.id;
+    card.dataset.category = theme.isCustom ? 'custom' : theme.category;
+    card.setAttribute('role', 'option');
+    card.setAttribute('aria-selected', String(isActive));
+    card.setAttribute('tabindex', '0');
+    card.setAttribute('title', theme.name);
+
+    const c = theme.colors || {};
+    const swatchColors = [c.background, c.surface, c.accent, c.textPrimary];
+    const swatchHtml = swatchColors.map(col => `<span style="background:${col || '#ddd'}"></span>`).join('');
+
+    card.innerHTML = `
+      <div class="theme-swatch">${swatchHtml}</div>
+      <div class="theme-card-body">
+        <div class="theme-card-header">
+          <span class="theme-name">${theme.name}</span>
+          <span class="theme-category-badge ${theme.isCustom ? (theme.category || 'light') : theme.category}">${theme.isCustom ? 'Custom' : (theme.category === 'light' ? 'Light' : 'Dark')}</span>
+        </div>
+        <div class="theme-description">${theme.description || ''}</div>
+        ${theme.isCustom ? '' : buildEffectIndicators(theme.id)}
+        <div class="theme-card-type-row">
+          <span class="theme-card-type-icon">Aa</span>
+          <span class="theme-card-type-text">System Default · Md · 1.375/0</span>
+        </div>
+      </div>
+      <div class="theme-card-actions">
+        <div class="theme-card-status">
+          <span class="theme-card-status-dot"></span>
+          <span>${isActive ? 'Active' : 'Apply'}</span>
+        </div>
+      </div>
+    `;
+
+    card.addEventListener('click', (e) => {
+      const effectPill = e.target.closest('[data-effect-pill]');
+      if (effectPill) {
+        e.stopPropagation();
+        const effectId = effectPill.dataset.effectPill;
+        if (_tabsInstance) _tabsInstance.activate('effects');
+        setTimeout(() => highlightGuideEffect(effectId), 80);
+        return;
+      }
+      toggleDetailPanel(theme);
+    });
+    card.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        toggleDetailPanel(theme);
+      }
+    });
+
+    return card;
+  }
+
+  /** Render the My Themes grid (custom themes only). */
+  function renderMyThemesGrid(activeThemeId) {
+    const grid = document.getElementById('optMyThemesGrid');
+    const empty = document.getElementById('optMyThemesEmpty');
     if (!grid) return;
     grid.innerHTML = '';
-    _openDetailId = null;
+    closeDetailPanel();
 
     const customs = (syncState.customThemes || []).map(ct => ({
       ...ct,
@@ -833,128 +893,69 @@
       colors: resolveCustomColors(ct),
       category: ct.category || (_detectThemeCategory(resolveCustomColors(ct).background) === 'dark' ? 'dark' : 'light'),
     }));
-    const allThemes = [
-      ...THEMES.map(t => ({ ...t, isCustom: false })),
-      ...customs,
-    ];
 
-    for (const theme of allThemes) {
-      const isActive = theme.id === activeThemeId;
-      const card = document.createElement('div');
-      card.className = `theme-card${isActive ? ' is-active' : ''}`;
-      card.dataset.theme = theme.id;
-      card.dataset.category = theme.isCustom ? 'custom' : theme.category;
-      card.setAttribute('role', 'option');
-      card.setAttribute('aria-selected', String(isActive));
-      card.setAttribute('tabindex', '0');
-      card.setAttribute('title', theme.name);
+    if (empty) empty.hidden = customs.length > 0;
 
-      const c = theme.colors || {};
-      const swatchColors = [c.background, c.surface, c.accent, c.textPrimary];
-      const swatchHtml = swatchColors.map(col => `<span style="background:${col || '#ddd'}"></span>`).join('');
+    for (const theme of customs) {
+      grid.appendChild(_buildThemeCard(theme, activeThemeId));
+    }
+  }
 
-      card.innerHTML = `
-        <div class="theme-swatch">${swatchHtml}</div>
-        <div class="theme-card-body">
-          <div class="theme-card-header">
-            <span class="theme-name">${theme.name}</span>
-            <span class="theme-category-badge ${theme.isCustom ? (theme.category || 'light') : theme.category}">${theme.isCustom ? 'Custom' : (theme.category === 'light' ? 'Light' : 'Dark')}</span>
-          </div>
-          <div class="theme-description">${theme.description || ''}</div>
-          ${theme.isCustom ? '' : buildEffectIndicators(theme.id)}
-          <div class="theme-card-type-row">
-            <span class="theme-card-type-icon">Aa</span>
-            <span class="theme-card-type-text">System Default · Md · 1.375/0</span>
-          </div>
-        </div>
-        <div class="theme-card-actions">
-          <div class="theme-card-status">
-            <span class="theme-card-status-dot"></span>
-            <span>${isActive ? 'Active' : 'Apply'}</span>
-          </div>
-        </div>
-      `;
+  /** Render the Presets grid (preset themes only). */
+  function renderPresetsGrid(activeThemeId) {
+    const grid = document.getElementById('optPresetsGrid');
+    if (!grid) return;
+    grid.innerHTML = '';
+    closeDetailPanel();
 
-      card.addEventListener('click', (e) => {
-        // Don't handle effect pill clicks — let them bubble to guide nav
-        const effectPill = e.target.closest('[data-effect-pill]');
-        if (effectPill) {
-          e.stopPropagation();
-          const effectId = effectPill.dataset.effectPill;
-          if (_tabsInstance) _tabsInstance.activate('effects');
-          setTimeout(() => highlightGuideEffect(effectId), 80);
-          return;
-        }
-        toggleDetailPanel(theme);
-      });
-
-      card.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter' || e.key === ' ') {
-          e.preventDefault();
-          toggleDetailPanel(theme);
-        }
-      });
-
+    for (const theme of THEMES) {
+      const t = { ...theme, isCustom: false };
+      const card = _buildThemeCard(t, activeThemeId);
       grid.appendChild(card);
     }
 
-    applyCollectionFilter();
-
-    // Show/hide empty state for custom filter
-    if (empty) {
-      empty.hidden = _activeCollectionFilter !== 'custom' || customs.length > 0;
-    }
+    applyPresetsFilter();
   }
 
-  function applyCollectionFilter() {
-    const grid = document.getElementById('optCollectionGrid');
-    const empty = document.getElementById('optCollectionEmpty');
-    if (!grid) return;
+  /** Convenience: render both grids. */
+  function renderCollectionGrid(activeThemeId) {
+    renderMyThemesGrid(activeThemeId);
+    renderPresetsGrid(activeThemeId);
+  }
 
-    const cards = grid.querySelectorAll('.theme-card');
-    const customs = (syncState.customThemes || []);
-    cards.forEach(card => {
+  function applyPresetsFilter() {
+    const grid = document.getElementById('optPresetsGrid');
+    if (!grid) return;
+    grid.querySelectorAll('.theme-card').forEach(card => {
       const cat = card.dataset.category;
-      const show = _activeCollectionFilter === 'all'
-        || cat === _activeCollectionFilter;
+      const show = _activePresetsFilter === 'all' || cat === _activePresetsFilter;
       card.classList.toggle('is-hidden', !show);
     });
-
-    // Close detail if the card is now hidden
     if (_openDetailId) {
       const openCard = grid.querySelector(`.theme-card[data-theme="${_openDetailId}"]`);
-      if (openCard && openCard.classList.contains('is-hidden')) {
-        closeDetailPanel();
-      }
-    }
-
-    if (empty) {
-      empty.hidden = _activeCollectionFilter !== 'custom' || customs.length > 0;
+      if (openCard && openCard.classList.contains('is-hidden')) closeDetailPanel();
     }
   }
 
-  function bindCollectionFilterPills() {
-    const pills = document.querySelectorAll('#opt-collection-heading ~ .cx-section-actions .cx-pill[data-filter], .cx-section-actions .cx-pill[data-filter]');
-    // Target the collection section's pills specifically
-    const section = document.getElementById('opt-collection-heading');
+  function bindPresetsFilterPills() {
+    const section = document.getElementById('opt-presets-heading');
     if (!section) return;
     const sectionEl = section.closest('.cx-section');
     if (!sectionEl) return;
-    const filterPills = sectionEl.querySelectorAll('.cx-pill[data-filter]');
-    filterPills.forEach(pill => {
+    const pills = sectionEl.querySelectorAll('.cx-pill[data-filter]');
+    pills.forEach(pill => {
       pill.addEventListener('click', () => {
-        _activeCollectionFilter = pill.dataset.filter;
-        filterPills.forEach(p => p.classList.remove('is-active'));
+        _activePresetsFilter = pill.dataset.filter;
+        pills.forEach(p => p.classList.remove('is-active'));
         pill.classList.add('is-active');
-        applyCollectionFilter();
+        applyPresetsFilter();
       });
     });
   }
 
   function updateCollectionActiveState(activeThemeId) {
-    const grid = document.getElementById('optCollectionGrid');
-    if (!grid) return;
-    grid.querySelectorAll('.theme-card').forEach(card => {
+    // Update both grids
+    document.querySelectorAll('#optMyThemesGrid .theme-card, #optPresetsGrid .theme-card').forEach(card => {
       const id = card.dataset.theme;
       const isActive = id === activeThemeId;
       card.classList.toggle('is-active', isActive);
@@ -967,9 +968,6 @@
   // ─── Theme Manager: Inline Expand ─────────────────────────────────────────
 
   function toggleDetailPanel(theme) {
-    const grid = document.getElementById('optCollectionGrid');
-    if (!grid) return;
-
     // Clicking same card closes it
     if (_openDetailId === theme.id) {
       closeDetailPanel();
@@ -978,8 +976,9 @@
 
     closeDetailPanel();
 
-    // Find end of visual row for this card
-    const clickedCard = grid.querySelector(`.theme-card[data-theme="${theme.id}"]`);
+    // Find the card in whichever grid it lives in
+    const clickedCard = document.querySelector(`#optMyThemesGrid .theme-card[data-theme="${theme.id}"], #optPresetsGrid .theme-card[data-theme="${theme.id}"]`);
+    const grid = clickedCard ? clickedCard.closest('.opt-collection-grid') : null;
     if (!clickedCard) return;
 
     requestAnimationFrame(() => {
@@ -1012,12 +1011,9 @@
   }
 
   function closeDetailPanel() {
-    const grid = document.getElementById('optCollectionGrid');
-    if (!grid) return;
-    const existing = grid.querySelector('.opt-card-detail');
-    if (existing) existing.remove();
-    // Remove expanded highlight
-    grid.querySelectorAll('.theme-card.is-expanded').forEach(c => c.classList.remove('is-expanded'));
+    // Search both grids for an open detail panel
+    document.querySelectorAll('#optMyThemesGrid .opt-card-detail, #optPresetsGrid .opt-card-detail').forEach(d => d.remove());
+    document.querySelectorAll('#optMyThemesGrid .theme-card.is-expanded, #optPresetsGrid .theme-card.is-expanded').forEach(c => c.classList.remove('is-expanded'));
     _openDetailId = null;
   }
 
@@ -1033,7 +1029,7 @@
     const bestFor = (isBuiltIn && theme.bestFor) ? `<p class="opt-card-detail-bestfor"><strong>Best for:</strong> ${theme.bestFor}</p>` : '';
     const basedOn = !isBuiltIn ? `<p class="opt-card-detail-bestfor">Based on: ${(getThemeById(theme.basedOn) || THEMES[0]).name}</p>` : '';
 
-    // Effects section (built-in only — with volume control)
+    // Effects section (presets only — with volume control)
     let effectsHtml = '';
     if (isBuiltIn) {
       const effectCfg = getSuggestedEffectsFor(theme.id);
@@ -1103,7 +1099,6 @@
     if (applyBtn && !applyBtn.disabled) {
       applyBtn.addEventListener('click', () => {
         selectTheme(theme.id);
-        updateHero(theme.id);
         updateCollectionActiveState(theme.id);
         // Update apply button state
         applyBtn.textContent = 'Active';
@@ -1150,7 +1145,7 @@
       });
     }
 
-    // Volume control pills (built-in themes only)
+    // Volume control pills (preset themes only)
     detail.querySelectorAll('[data-detail-volume]').forEach(pill => {
       pill.addEventListener('click', async () => {
         const volume = pill.dataset.detailVolume;
@@ -1355,14 +1350,13 @@
     }, 'image/png');
   }
 
-  // ─── Theme Manager: Hero customize button ─────────────────────────────────
+  // ─── Theme Manager: Button bindings ────────────────────────────────────────
 
-  function bindHeroCustomize() {
-    const btn = document.getElementById('optHeroCustomize');
+  function bindMyThemesNewBtn() {
+    const btn = document.getElementById('optMyThemesNewBtn');
     if (!btn) return;
     btn.addEventListener('click', () => {
-      const activeId = syncState.theme;
-      openCreationDialog(activeId);
+      if (_tabsInstance) _tabsInstance.activate('builder');
     });
   }
 
@@ -1388,7 +1382,6 @@
     syncState = { ...syncState, ...updates };
 
     updateCollectionActiveState(themeId);
-    updateHero(themeId);
     updateHeaderMeta(themeId);
     updateEffectsContextBanner();
     renderEffectsTabForActiveTheme();
@@ -1878,11 +1871,10 @@
 
     // Themes tab — Theme Manager
     renderCollectionGrid(activeTheme);
-    updateHero(activeTheme);
     renderSmartApply();
-    bindCollectionFilterPills();
+    bindPresetsFilterPills();
     bindSmartApplyCollapse();
-    bindHeroCustomize();
+    bindMyThemesNewBtn();
     bindEmptyBuilderBtn();
     renderBuilderSidebar(activeTheme);
     updateHeaderMeta(activeTheme);
@@ -1932,7 +1924,6 @@
       if (changes.theme) {
         syncState.theme = changes.theme.newValue;
         updateCollectionActiveState(syncState.theme);
-        updateHero(syncState.theme);
         updateHeaderMeta(syncState.theme);
         syncOptSettingsCardStatus(syncState.theme);
         updateEffectsContextBanner();
@@ -2246,7 +2237,7 @@
         grid.appendChild(btn);
       }
 
-      // Standard (built-in) themes
+      // Standard (preset) themes
       for (const theme of THEMES) {
         addCloneBadge(standardGrid, theme.id, theme.name, theme.category, theme.colors, false);
       }

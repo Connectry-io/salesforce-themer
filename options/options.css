@@ -21,56 +21,19 @@
   margin-bottom: var(--cx-space-4);
 }
 
-/* ─── Theme Manager: Hero ────────────────────────────────────────────────── */
+/* ─── Theme Manager: Config Bar ──────────────────────────────────────────── */
 
-.opt-hero-card {
-  background: var(--cx-surface);
-  border: 1.5px solid var(--cx-border);
-  border-radius: var(--cx-radius-lg);
-  padding: var(--cx-space-5);
-  box-shadow: var(--cx-shadow-sm);
+.opt-config-bar {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--cx-space-4);
+  margin-bottom: var(--cx-space-8);
 }
-.opt-hero-layout {
-  display: flex;
-  gap: var(--cx-space-6);
-  align-items: flex-start;
+.opt-config-bar > .opt-settings-card {
+  max-width: none;
 }
-.opt-hero-preview {
-  flex: 0 0 58%;
-  max-width: 520px;
-}
-.opt-hero-meta {
-  flex: 1;
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  gap: var(--cx-space-3);
-}
-.opt-hero-swatch { margin-bottom: var(--cx-space-1); }
-.opt-hero-swatch .theme-swatch { height: 28px; border-radius: var(--cx-radius-sm); overflow: hidden; }
-.opt-hero-name {
-  font-size: 20px;
-  font-weight: 700;
-  color: var(--cx-text);
-  letter-spacing: -0.2px;
-  margin: 0;
-}
-.opt-hero-tagline {
-  font-size: 13px;
-  color: var(--cx-text-muted);
-  line-height: 1.5;
-  margin: 0;
-}
-.opt-hero-details {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--cx-space-2);
-  align-items: center;
-}
-.opt-hero-actions { margin-top: var(--cx-space-2); }
 @media (max-width: 760px) {
-  .opt-hero-layout { flex-direction: column; }
-  .opt-hero-preview { flex: none; max-width: 100%; }
+  .opt-config-bar { grid-template-columns: 1fr; }
 }
 
 /* ─── Theme Manager: Smart Apply ─────────────────────────────────────────── */
@@ -397,7 +360,7 @@
   text-overflow: ellipsis;
 }
 
-/* Effects volume strip — sits at the top of the Built-in Themes section.
+/* Effects volume strip — sits at the top of the Presets section.
    Conceptually belongs to those themes since custom themes manage their
    own per-effect intensities. */
 .opt-themes-effects-strip {

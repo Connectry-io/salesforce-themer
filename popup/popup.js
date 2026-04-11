@@ -235,8 +235,8 @@
     });
   }
 
-  // ─── Theme tab strip (Built-in vs My Themes) ─────────────────────────────
-  // Persists which tab is active in localStorage. Built-in is the default
+  // ─── Theme tab strip (Presets vs My Themes) ──────────────────────────────
+  // Persists which tab is active in localStorage. Presets is the default
   // because the popup is theme-centric and most users live in the gallery.
 
   const POPUP_THEME_TAB_KEY = 'sft-popup-theme-tab';
@@ -321,7 +321,7 @@
         <div class="custom-themes-empty">
           <div class="custom-themes-empty-icon">✨</div>
           <div class="custom-themes-empty-title">No custom themes yet</div>
-          <p class="custom-themes-empty-body">Clone any built-in theme to start, or create one from scratch in the Theme Builder.</p>
+          <p class="custom-themes-empty-body">Clone any preset theme to start, or create one from scratch in the Theme Builder.</p>
           <button type="button" class="custom-themes-empty-cta" id="customThemesEmptyCta">
             <svg width="11" height="11" viewBox="0 0 14 14" fill="none" aria-hidden="true">
               <path d="M7 2v10M2 7h10" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
@@ -363,7 +363,7 @@
             <svg width="11" height="11" viewBox="0 0 14 14" fill="none" aria-hidden="true">
               <path d="M2.5 7L5.5 10L11.5 4" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
             </svg>
-            <span>Clone any built-in theme &amp; tweak it</span>
+            <span>Clone any preset theme &amp; tweak it</span>
           </div>
           <div class="custom-themes-upsell-feature">
             <svg width="11" height="11" viewBox="0 0 14 14" fill="none" aria-hidden="true">
@@ -983,7 +983,7 @@
   async function init() {
     await loadThemes();
     renderThemesSection();
-    // Built-in tab badge count = total OOTB theme count
+    // Presets tab badge count = total OOTB theme count
     const builtinCount = document.getElementById('builtinTabCount');
     if (builtinCount) builtinCount.textContent = String(THEMES.length);
 

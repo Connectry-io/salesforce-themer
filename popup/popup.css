@@ -571,7 +571,7 @@ body {
   display: none;
 }
 
-/* ─── Theme tab strip: Built-in vs My Themes ─────────────────────────── */
+/* ─── Theme tab strip: Presets vs My Themes ──────────────────────────── */
 .theme-tabs {
   display: flex;
   gap: 4px;
@@ -795,7 +795,7 @@ body {
 }
 
 /* State 3: Premium user with custom themes — render the same theme cards
-   the built-in panel uses, just from a different source. No special styling. */
+   the presets panel uses, just from a different source. No special styling. */
 
 /* Effects volume strip — sits at the top of the pre-built themes section.
    Conceptually belongs to those themes since custom themes manage their
