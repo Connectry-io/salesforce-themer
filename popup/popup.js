@@ -38,6 +38,7 @@
   // canonical map in effects/presets.js (popup runs in a different script
   // context so it can't import from there).
   const POPUP_THEME_EFFECTS = {
+    'salesforce':      [],
     'connectry':       ['hoverLift'],
     'connectry-dark':  ['hoverLift', 'ambientGlow'],
     'midnight':        ['hoverLift', 'aurora', 'particles'],
@@ -178,13 +179,20 @@
             ${buildPopupEffectPills(theme.id)}
             ${_popupTypeRow(null)}
           </div>
-          <div class="theme-clone-row">
-            <span class="theme-clone-btn" data-clone="${theme.id}" title="Clone & customize this theme">
+          <div class="theme-action-row">
+            <span class="theme-action-btn" data-open-builder="${theme.id}" title="Open in Builder">
               <svg width="10" height="10" viewBox="0 0 12 12" fill="none" aria-hidden="true">
-                <rect x="3.5" y="3.5" width="7" height="7" rx="1" stroke="currentColor" stroke-width="1.2"/>
-                <path d="M8.5 3.5v-1a1 1 0 0 0-1-1h-5a1 1 0 0 0-1 1v5a1 1 0 0 0 1 1h1" stroke="currentColor" stroke-width="1.2"/>
+                <path d="M9.5 1.5h-7a1 1 0 0 0-1 1v7a1 1 0 0 0 1 1h7a1 1 0 0 0 1-1v-7a1 1 0 0 0-1-1z" stroke="currentColor" stroke-width="1.2"/>
+                <path d="M4 6h4M6 4v4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
               </svg>
-              Clone
+              Open in Builder
+            </span>
+            <span class="theme-action-btn" data-share="${theme.id}" title="Share this theme">
+              <svg width="10" height="10" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+                <path d="M3 7v3a.75.75 0 00.75.75h4.5A.75.75 0 009 10V7" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M6 1.5v6M4 3.5l2-2 2 2" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              Share
             </span>
           </div>
           <div class="theme-check" aria-hidden="true">
@@ -214,17 +222,26 @@
     // Bind theme cards
     document.querySelectorAll('.theme-card[data-theme]').forEach(btn => {
       btn.addEventListener('click', (e) => {
-        // Clone button → open Builder on the options page with this theme pre-selected
-        const cloneBtn = e.target.closest('[data-clone]');
-        if (cloneBtn) {
+        // Open in Builder → open options page Builder tab with this theme
+        const builderBtn = e.target.closest('[data-open-builder]');
+        if (builderBtn) {
           e.stopPropagation();
           chrome.storage.local.set({
             openOptionsTab: 'builder',
-            openBuilderClone: cloneBtn.dataset.clone,
+            openBuilderClone: builderBtn.dataset.openBuilder,
           }).then(() => {
             chrome.runtime.openOptionsPage();
             window.close();
           });
+          return;
+        }
+        // Share → show share menu
+        const shareBtn = e.target.closest('[data-share]');
+        if (shareBtn) {
+          e.stopPropagation();
+          const themeId = shareBtn.dataset.share;
+          const theme = THEMES.find(t => t.id === themeId);
+          if (theme) _showPopupShareMenu(shareBtn, theme);
           return;
         }
         selectTheme(btn.dataset.theme);
@@ -233,6 +250,72 @@
         if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); selectTheme(btn.dataset.theme); }
       });
     });
+  }
+
+  // ─── Share menu (popup version) ────────────────────────────────────────────
+
+  function _showPopupShareMenu(anchor, theme) {
+    document.querySelector('.popup-share-menu')?.remove();
+
+    const text = `Check out the "${theme.name}" theme for Salesforce Themer by Connectry!`;
+    const SHARE_BASE = 'https://connectry-io.github.io/salesforce-themer/share';
+    const url = theme.isCustom
+      ? `https://chromewebstore.google.com/detail/${chrome.runtime.id}`
+      : `${SHARE_BASE}/${theme.id}`;
+    const fullText = `${text}\n${url}`;
+
+    const menu = document.createElement('div');
+    menu.className = 'popup-share-menu';
+    menu.innerHTML = `
+      <button class="popup-share-menu-item" data-popup-share="whatsapp">
+        <svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M8 1a7 7 0 0 0-6.1 10.4L1 15l3.7-.9A7 7 0 1 0 8 1z" stroke="currentColor" stroke-width="1.2"/></svg>
+        WhatsApp
+      </button>
+      <button class="popup-share-menu-item" data-popup-share="email">
+        <svg width="12" height="12" viewBox="0 0 16 16" fill="none"><rect x="1.5" y="3" width="13" height="10" rx="1.5" stroke="currentColor" stroke-width="1.2"/><path d="M1.5 4.5L8 9l6.5-4.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+        Email
+      </button>
+      <button class="popup-share-menu-item" data-popup-share="copy">
+        <svg width="12" height="12" viewBox="0 0 16 16" fill="none"><rect x="5" y="5" width="9" height="9" rx="1.5" stroke="currentColor" stroke-width="1.2"/><path d="M11 5V3.5A1.5 1.5 0 009.5 2h-6A1.5 1.5 0 002 3.5v6A1.5 1.5 0 003.5 11H5" stroke="currentColor" stroke-width="1.2"/></svg>
+        Copy link
+      </button>
+    `;
+
+    anchor.style.position = 'relative';
+    anchor.appendChild(menu);
+
+    menu.addEventListener('click', async (e) => {
+      const item = e.target.closest('[data-popup-share]');
+      if (!item) return;
+      const type = item.dataset.popupShare;
+      if (type === 'whatsapp') {
+        window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(fullText)}`, '_blank');
+      } else if (type === 'email') {
+        window.location.href = `mailto:?subject=${encodeURIComponent(`${theme.name} — Salesforce Themer`)}&body=${encodeURIComponent(fullText)}`;
+      } else if (type === 'copy') {
+        await navigator.clipboard.writeText(fullText);
+        _popupToast('Link copied!');
+      }
+      menu.remove();
+    });
+
+    const close = (e) => {
+      if (!menu.contains(e.target) && e.target !== anchor) {
+        menu.remove();
+        document.removeEventListener('click', close);
+      }
+    };
+    setTimeout(() => document.addEventListener('click', close), 0);
+  }
+
+  function _popupToast(msg) {
+    const existing = document.querySelector('.popup-toast');
+    if (existing) existing.remove();
+    const toast = document.createElement('div');
+    toast.className = 'popup-toast';
+    toast.textContent = msg;
+    document.querySelector('.popup').appendChild(toast);
+    setTimeout(() => toast.remove(), 2000);
   }
 
   // ─── Theme tab strip (Presets vs My Themes) ──────────────────────────────
@@ -454,8 +537,8 @@
         <div class="theme-effects-pills is-empty">Custom effects</div>
         ${_popupTypeRow(ct.typography)}
       </div>
-      <div class="theme-clone-row">
-        <span class="theme-clone-btn" data-edit="${ct.id}" title="Edit in Builder">
+      <div class="theme-action-row">
+        <span class="theme-action-btn" data-edit="${ct.id}" title="Edit in Builder">
           <svg width="10" height="10" viewBox="0 0 12 12" fill="none" aria-hidden="true">
             <path d="M8 1.5l2 2-7 7H1v-2l7-7z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/>
           </svg>
@@ -704,6 +787,20 @@
         setEffectsUI(volume);
       });
     });
+
+    // "What are effects?" → open Guide tab, scrolled to effects section
+    const learnMore = document.getElementById('effectsLearnMore');
+    if (learnMore) {
+      learnMore.addEventListener('click', () => {
+        chrome.storage.local.set({
+          openOptionsTab: 'effects',
+          openOptionsScroll: 'guide-effects',
+        }).then(() => {
+          chrome.runtime.openOptionsPage();
+          window.close();
+        });
+      });
+    }
   }
 
   function setEffectsUI(volume) {
