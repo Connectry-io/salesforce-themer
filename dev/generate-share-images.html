@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Generate Share Images — Dev Tool</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: Inter, system-ui, sans-serif; background: #0f172a; color: #e2e8f0; padding: 40px; }
+  h1 { font-size: 20px; margin-bottom: 8px; }
+  p { color: #94a3b8; font-size: 13px; margin-bottom: 24px; }
+  .actions { display: flex; gap: 12px; margin-bottom: 32px; }
+  button { padding: 10px 20px; border: none; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; }
+  .btn-primary { background: #3b82f6; color: #fff; }
+  .btn-primary:hover { background: #2563eb; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
+  .preview { border-radius: 12px; overflow: hidden; background: #1e293b; }
+  .preview canvas { width: 100%; height: auto; display: block; }
+  .preview-info { padding: 8px 12px; font-size: 12px; color: #94a3b8; display: flex; justify-content: space-between; }
+  .preview-info a { color: #60a5fa; text-decoration: none; font-size: 11px; }
+  .status { font-size: 12px; color: #22c55e; margin-top: 8px; }
+</style>
+</head>
+<body>
+<h1>Share Image Generator</h1>
+<p>Generates 1200×1200 branded share images for all preset themes. Open this page from the extension (chrome-extension://…/dev/generate-share-images.html).</p>
+<div class="actions">
+  <button class="btn-primary" id="generateBtn">Generate All</button>
+</div>
+<div id="status"></div>
+<div class="grid" id="grid"></div>
+
+<script>
+async function loadThemes() {
+  const resp = await fetch(chrome.runtime.getURL('themes/themes.json'));
+  const data = await resp.json();
+  return data.themes;
+}
+
+function renderShareImage(canvas, theme) {
+  const S = 1200;
+  canvas.width = S;
+  canvas.height = S;
+  const ctx = canvas.getContext('2d');
+  const c = theme.colors || {};
+
+  // ─── Dark Connectry backdrop ────────────────────────────────────
+  const grad = ctx.createLinearGradient(0, 0, S, S);
+  grad.addColorStop(0, '#0f172a');
+  grad.addColorStop(1, '#1e293b');
+  ctx.fillStyle = grad;
+  ctx.fillRect(0, 0, S, S);
+
+  // Subtle dot grid
+  ctx.fillStyle = 'rgba(255,255,255,0.025)';
+  for (let x = 20; x < S; x += 32) {
+    for (let y = 20; y < S; y += 32) {
+      ctx.beginPath();
+      ctx.arc(x, y, 1, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  }
+
+  // ─── Accent glow blobs ─────────────────────────────────────────
+  const accentColor = c.accent || '#4a6fa5';
+  ctx.globalAlpha = 0.08;
+  ctx.fillStyle = accentColor;
+  ctx.beginPath(); ctx.arc(100, 100, 200, 0, Math.PI * 2); ctx.fill();
+  ctx.beginPath(); ctx.arc(S - 100, S - 120, 150, 0, Math.PI * 2); ctx.fill();
+  ctx.globalAlpha = 1;
+
+  // ─── Theme name + tagline ──────────────────────────────────────
+  ctx.textAlign = 'center';
+  ctx.fillStyle = '#ffffff';
+  ctx.font = 'bold 48px Inter, system-ui, sans-serif';
+  ctx.fillText(theme.name, S / 2, 110);
+
+  if (theme.tagline) {
+    ctx.fillStyle = '#94a3b8';
+    ctx.font = '20px Inter, system-ui, sans-serif';
+    ctx.fillText(theme.tagline, S / 2, 150);
+  }
+
+  // ─── Browser window (centered, 16:10) ──────────────────────────
+  const cardW = 960, cardH = 600;
+  const cardX = (S - cardW) / 2, cardY = 200;
+
+  // Shadow
+  ctx.shadowColor = 'rgba(0,0,0,0.5)';
+  ctx.shadowBlur = 80;
+  ctx.shadowOffsetY = 24;
+
+  // Browser chrome
+  ctx.fillStyle = '#1e293b';
+  ctx.beginPath();
+  ctx.roundRect(cardX, cardY, cardW, 40, [14, 14, 0, 0]);
+  ctx.fill();
+
+  // Traffic lights
+  ['#ff5f57', '#ffbd2e', '#28c840'].forEach((col, i) => {
+    ctx.fillStyle = col;
+    ctx.beginPath();
+    ctx.arc(cardX + 24 + i * 20, cardY + 20, 6, 0, Math.PI * 2);
+    ctx.fill();
+  });
+
+  // Tab
+  ctx.fillStyle = '#334155';
+  ctx.beginPath();
+  ctx.roundRect(cardX + 80, cardY + 8, 180, 26, [6, 6, 0, 0]);
+  ctx.fill();
+  ctx.fillStyle = '#94a3b8';
+  ctx.font = '12px Inter, system-ui, sans-serif';
+  ctx.textAlign = 'left';
+  ctx.fillText('Salesforce | Leads', cardX + 92, cardY + 26);
+
+  // Reset shadow
+  ctx.shadowColor = 'transparent';
+  ctx.shadowBlur = 0;
+  ctx.shadowOffsetY = 0;
+
+  // ─── App content ───────────────────────────────────────────────
+  const cy = cardY + 40;
+  const ch = cardH - 40;
+
+  // Background
+  ctx.fillStyle = c.background || '#f7f7f5';
+  ctx.beginPath();
+  ctx.roundRect(cardX, cy, cardW, ch, [0, 0, 14, 14]);
+  ctx.fill();
+
+  // Nav bar
+  ctx.fillStyle = c.nav || '#4a6fa5';
+  ctx.fillRect(cardX, cy, cardW, 48);
+
+  // Nav items
+  ctx.fillStyle = '#ffffff';
+  ctx.font = 'bold 14px Inter, system-ui, sans-serif';
+  ctx.textAlign = 'left';
+  ['Sales', 'Home', 'Leads', 'Contacts', 'Accounts'].forEach((item, i) => {
+    ctx.fillText(item, cardX + 28 + i * 86, cy + 30);
+  });
+
+  // Active tab underline
+  ctx.fillStyle = '#ffffff';
+  ctx.fillRect(cardX + 28 + 2 * 86, cy + 40, 50, 3);
+
+  // Page header area
+  const headerY = cy + 58;
+  ctx.fillStyle = c.textPrimary || '#2d2d2d';
+  ctx.font = 'bold 20px Inter, system-ui, sans-serif';
+  ctx.fillText('Lead: John Smith', cardX + 44, headerY + 28);
+
+  ctx.fillStyle = c.textSecondary || '#4a5568';
+  ctx.font = '13px Inter, system-ui, sans-serif';
+  ctx.fillText('Senior Account Executive', cardX + 44, headerY + 50);
+
+  // Action buttons
+  const btnY = headerY + 14;
+  // Neutral button
+  ctx.fillStyle = c.buttonNeutralBg || c.surface || '#ffffff';
+  ctx.strokeStyle = c.buttonNeutralBorder || c.border || '#c4cdd6';
+  ctx.lineWidth = 1.5;
+  ctx.beginPath(); ctx.roundRect(cardX + cardW - 240, btnY, 80, 32, 6); ctx.fill(); ctx.stroke();
+  ctx.fillStyle = c.buttonNeutralText || c.textPrimary || '#2d2d2d';
+  ctx.font = 'bold 12px Inter, system-ui, sans-serif';
+  ctx.fillText('Clone', cardX + cardW - 218, btnY + 21);
+
+  // Brand button
+  ctx.fillStyle = c.buttonBrandBg || c.accent || '#4a6fa5';
+  ctx.beginPath(); ctx.roundRect(cardX + cardW - 148, btnY, 100, 32, 6); ctx.fill();
+  ctx.fillStyle = c.buttonBrandText || '#ffffff';
+  ctx.fillText('Convert', cardX + cardW - 124, btnY + 21);
+
+  // ─── Surface card ──────────────────────────────────────────────
+  const scX = cardX + 36, scY = headerY + 70;
+  const scW = cardW - 72, scH = ch - 148;
+  ctx.fillStyle = c.surface || '#ffffff';
+  ctx.beginPath(); ctx.roundRect(scX, scY, scW, scH, 8); ctx.fill();
+  ctx.strokeStyle = c.border || '#e8e8e6';
+  ctx.lineWidth = 1;
+  ctx.stroke();
+
+  // Path breadcrumb
+  const pathY = scY + 24;
+  const pathColors = [c.accent || '#4a6fa5', c.accentHover || '#3d5e8c'];
+  ['New', 'Working', 'Converted'].forEach((label, i) => {
+    const px = scX + 24 + i * 120;
+    ctx.fillStyle = i < 2 ? (pathColors[0]) : (c.surfaceAlt || '#eee');
+    ctx.beginPath(); ctx.roundRect(px, pathY, 110, 28, 14); ctx.fill();
+    ctx.fillStyle = i < 2 ? '#ffffff' : (c.textSecondary || '#4a5568');
+    ctx.font = '11px Inter, system-ui, sans-serif';
+    ctx.fillText(label, px + (i === 2 ? 30 : 34), pathY + 18);
+  });
+
+  // Tab strip
+  const tabY = scY + 68;
+  ctx.fillStyle = c.tabActiveColor || c.accent || '#4a6fa5';
+  ctx.font = '13px Inter, system-ui, sans-serif';
+  ctx.fillText('Details', scX + 24, tabY + 4);
+  ctx.fillRect(scX + 24, tabY + 10, 48, 2.5);
+  ctx.fillStyle = c.tabInactiveColor || c.textSecondary || '#4a5568';
+  ctx.fillText('Activity', scX + 100, tabY + 4);
+  ctx.fillText('Chatter', scX + 176, tabY + 4);
+  ctx.strokeStyle = c.tabNavBorder || c.border || '#e8e8e6';
+  ctx.beginPath(); ctx.moveTo(scX, tabY + 14); ctx.lineTo(scX + scW, tabY + 14); ctx.stroke();
+
+  // Detail rows
+  const rows = [
+    ['Name', 'John Smith'],
+    ['Email', 'john@example.com'],
+    ['Company', 'Acme Corp'],
+    ['Phone', '+1 (555) 123-4567'],
+  ];
+  rows.forEach(([label, value], i) => {
+    const ry = tabY + 36 + i * 34;
+    ctx.fillStyle = c.textSecondary || '#64748b';
+    ctx.font = '12px Inter, system-ui, sans-serif';
+    ctx.fillText(label, scX + 24, ry);
+    ctx.fillStyle = label === 'Email' ? (c.link || c.accent || '#4a6fa5') : (c.textPrimary || '#1e293b');
+    ctx.font = '12px Inter, system-ui, sans-serif';
+    ctx.fillText(value, scX + 180, ry);
+    // Row separator
+    ctx.strokeStyle = c.tableBorderRow || c.border || '#e8e8e6';
+    ctx.lineWidth = 0.5;
+    ctx.beginPath(); ctx.moveTo(scX + 16, ry + 14); ctx.lineTo(scX + scW - 16, ry + 14); ctx.stroke();
+  });
+
+  // Edit / Delete buttons
+  const btnRowY = tabY + 36 + rows.length * 34 + 10;
+  ctx.fillStyle = c.buttonNeutralBg || c.surface || '#ffffff';
+  ctx.strokeStyle = c.buttonNeutralBorder || c.border || '#c4cdd6';
+  ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.roundRect(scX + 24, btnRowY, 60, 28, 5); ctx.fill(); ctx.stroke();
+  ctx.beginPath(); ctx.roundRect(scX + 96, btnRowY, 70, 28, 5); ctx.fill(); ctx.stroke();
+  ctx.fillStyle = c.buttonNeutralText || c.textPrimary || '#2d2d2d';
+  ctx.font = 'bold 11px Inter, system-ui, sans-serif';
+  ctx.fillText('Edit', scX + 42, btnRowY + 18);
+  ctx.fillText('Delete', scX + 114, btnRowY + 18);
+
+  // Toast
+  const toastY = btnRowY + 46;
+  ctx.fillStyle = c.success || '#059669';
+  ctx.globalAlpha = 0.12;
+  ctx.beginPath(); ctx.roundRect(scX + 16, toastY, scW - 32, 32, 6); ctx.fill();
+  ctx.globalAlpha = 1;
+  ctx.fillStyle = c.success || '#059669';
+  ctx.font = '12px Inter, system-ui, sans-serif';
+  ctx.fillText('✓  Lead "John Smith" was saved.', scX + 36, toastY + 20);
+  ctx.fillStyle = c.link || c.accent || '#4a6fa5';
+  ctx.font = 'bold 12px Inter, system-ui, sans-serif';
+  ctx.textAlign = 'right';
+  ctx.fillText('Undo', scX + scW - 36, toastY + 20);
+  ctx.textAlign = 'left';
+
+  // ─── Color palette dots ────────────────────────────────────────
+  const paletteY = cardY + cardH + 50;
+  const dotColors = [c.nav, c.accent, c.surface, c.background, c.textPrimary].filter(Boolean);
+  const dotR = 16, dotGap = 18;
+  const totalDotsW = dotColors.length * dotR * 2 + (dotColors.length - 1) * dotGap;
+  ctx.textAlign = 'center';
+  dotColors.forEach((col, i) => {
+    const dx = S / 2 - totalDotsW / 2 + i * (dotR * 2 + dotGap) + dotR;
+    ctx.fillStyle = col;
+    ctx.beginPath(); ctx.arc(dx, paletteY, dotR, 0, Math.PI * 2); ctx.fill();
+    ctx.strokeStyle = 'rgba(255,255,255,0.12)';
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+  });
+
+  // ─── Bottom footer bar ─────────────────────────────────────────
+  ctx.fillStyle = '#475569';
+  ctx.font = '15px Inter, system-ui, sans-serif';
+  ctx.textAlign = 'center';
+  ctx.fillText('Salesforce Themer by Connectry', S / 2, S - 50);
+
+  ctx.fillStyle = '#64748b';
+  ctx.font = '12px Inter, system-ui, sans-serif';
+  ctx.fillText('connectry.io', S / 2, S - 28);
+}
+
+document.getElementById('generateBtn').addEventListener('click', async () => {
+  const status = document.getElementById('status');
+  const grid = document.getElementById('grid');
+  grid.innerHTML = '';
+  status.innerHTML = '<div class="status">Loading themes...</div>';
+
+  const themes = await loadThemes();
+  status.innerHTML = `<div class="status">Generating ${themes.length} images...</div>`;
+
+  for (const theme of themes) {
+    const card = document.createElement('div');
+    card.className = 'preview';
+
+    const canvas = document.createElement('canvas');
+    renderShareImage(canvas, theme);
+    card.appendChild(canvas);
+
+    const info = document.createElement('div');
+    info.className = 'preview-info';
+
+    const name = document.createElement('span');
+    name.textContent = theme.name;
+
+    const dl = document.createElement('a');
+    dl.textContent = 'Download';
+    dl.href = '#';
+    dl.addEventListener('click', (e) => {
+      e.preventDefault();
+      canvas.toBlob((blob) => {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${theme.id}.png`;
+        a.click();
+        URL.revokeObjectURL(url);
+      }, 'image/png');
+    });
+
+    info.appendChild(name);
+    info.appendChild(dl);
+    card.appendChild(info);
+    grid.appendChild(card);
+  }
+
+  // Download all button
+  status.innerHTML = `<div class="status">✓ Generated ${themes.length} images. Click each to download, or use Download All below.</div>`;
+
+  const dlAllBtn = document.createElement('button');
+  dlAllBtn.className = 'btn-primary';
+  dlAllBtn.textContent = 'Download All';
+  dlAllBtn.style.marginTop = '12px';
+  dlAllBtn.addEventListener('click', () => {
+    grid.querySelectorAll('.preview').forEach((card, i) => {
+      const canvas = card.querySelector('canvas');
+      const theme = themes[i];
+      setTimeout(() => {
+        canvas.toBlob((blob) => {
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = `${theme.id}.png`;
+          a.click();
+          URL.revokeObjectURL(url);
+        }, 'image/png');
+      }, i * 200); // stagger downloads
+    });
+  });
+  status.appendChild(dlAllBtn);
+});
+</script>
+</body>
+</html>

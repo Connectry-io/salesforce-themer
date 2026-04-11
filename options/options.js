@@ -1169,7 +1169,12 @@
     document.querySelector('.opt-share-menu')?.remove();
 
     const text = `Check out the "${theme.name}" theme for Salesforce Themer by Connectry!`;
-    const url = `https://chromewebstore.google.com/detail/${chrome.runtime.id}`;
+    // Presets get a share page with OG meta (rich previews in iMessage/WhatsApp/Slack).
+    // Custom themes fall back to the Chrome Web Store URL until we have a backend.
+    const SHARE_BASE = 'https://connectry-io.github.io/salesforce-themer/share';
+    const url = theme.isCustom
+      ? `https://chromewebstore.google.com/detail/${chrome.runtime.id}`
+      : `${SHARE_BASE}/${theme.id}`;
     const fullText = `${text}\n${url}`;
 
     const menu = document.createElement('div');
