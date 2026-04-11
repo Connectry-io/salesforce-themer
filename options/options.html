@@ -83,52 +83,34 @@
     <!-- ═══ Themes Tab ═══ -->
     <div class="cx-tabpanel" role="tabpanel" data-tabpanel="themes" id="galleryView" hidden>
 
-      <!-- ═══ Status Bar (compact inline settings) ═══ -->
+      <!-- ═══ Status Bar (all settings inline, no hidden menus) ═══ -->
       <div class="opt-status-bar" id="optStatusBar">
-        <div class="opt-status-bar-left">
-          <span class="opt-status-dot opt-status-dot--on" id="optStatusDot"></span>
-          <label class="opt-status-bar-toggle">
-            <input type="checkbox" id="optThemeOnToggle" />
-            <span id="optStatusText">Theme on</span>
-          </label>
-          <span class="opt-status-bar-sep"></span>
-          <span class="opt-status-bar-scope" id="optStatusScope">Lightning</span>
-          <span class="opt-status-bar-sep"></span>
-          <label class="opt-status-bar-auto">
-            <input type="checkbox" id="autoModeToggle" />
-            <span>Follow system</span>
-          </label>
+        <span class="opt-status-dot opt-status-dot--on" id="optStatusDot"></span>
+        <label class="opt-status-bar-toggle">
+          <input type="checkbox" id="optThemeOnToggle" />
+          <span id="optStatusText">Theme on</span>
+        </label>
+        <span class="opt-status-bar-sep"></span>
+        <div class="opt-scope-pills opt-scope-pills--bar" id="optionsScopePills" role="group" aria-label="Theme scope">
+          <button class="opt-scope-pill" data-scope="both">Both</button>
+          <button class="opt-scope-pill" data-scope="lightning">Lightning</button>
+          <button class="opt-scope-pill" data-scope="setup">Setup</button>
         </div>
-        <div class="opt-status-bar-right">
-          <span class="opt-status-bar-smart">
-            <span class="opt-status-dot" id="optSmartDot"></span>
-            <span>Smart Apply: <strong id="optSmartStatusText">Off</strong></span>
-            <span class="cx-tab-badge cx-tab-badge--premium">Premium</span>
-          </span>
-          <div class="opt-status-bar-menu-wrap">
-            <button class="opt-status-bar-configure" id="optStatusBarConfigure" type="button" aria-expanded="false" aria-haspopup="true">
-              <svg width="13" height="13" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-                <circle cx="8" cy="8" r="1.5" fill="currentColor"/><circle cx="8" cy="3" r="1.5" fill="currentColor"/><circle cx="8" cy="13" r="1.5" fill="currentColor"/>
-              </svg>
-            </button>
-            <div class="opt-settings-popover" id="optSettingsPopover" hidden>
-              <div class="opt-settings-popover-row">
-                <span class="opt-settings-popover-label">Apply to</span>
-                <div class="opt-scope-pills" id="optionsScopePills" role="group" aria-label="Theme scope">
-                  <button class="opt-scope-pill" data-scope="both">Both</button>
-                  <button class="opt-scope-pill" data-scope="lightning">Lightning</button>
-                  <button class="opt-scope-pill" data-scope="setup">Setup</button>
-                </div>
-              </div>
-              <div class="opt-settings-popover-row" id="orgSettingsRow" hidden>
-                <span class="opt-settings-popover-label">Per-org themes</span>
-                <div class="org-list" id="orgList"></div>
-              </div>
-              <div class="opt-settings-popover-divider"></div>
-              <button type="button" class="opt-settings-popover-reset" id="optResetSettingsBtn">Reset to defaults</button>
-            </div>
-          </div>
-        </div>
+        <span class="opt-status-bar-sep"></span>
+        <label class="opt-status-bar-auto">
+          <input type="checkbox" id="autoModeToggle" />
+          <span>Follow system</span>
+        </label>
+        <span class="opt-status-bar-spacer"></span>
+        <span class="opt-status-bar-smart">
+          <span>Smart Apply: <strong id="optSmartStatusText">Off</strong></span>
+          <span class="cx-tab-badge cx-tab-badge--premium">Premium</span>
+        </span>
+      </div>
+      <!-- Per-org (conditional) + reset live here, outside the bar -->
+      <div class="opt-status-bar-extra" id="orgSettingsRow" hidden>
+        <span class="opt-settings-popover-label">Per-org themes</span>
+        <div class="org-list" id="orgList"></div>
       </div>
 
       <!-- Floating tooltips (positioned by JS, shared across the tab) -->

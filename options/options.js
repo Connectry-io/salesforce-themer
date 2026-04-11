@@ -1180,33 +1180,8 @@
   // ─── Theme Manager: Status Bar + Config Drawer ────────────────────────────
 
   function bindStatusBar() {
-    const configBtn = document.getElementById('optStatusBarConfigure');
-    const popover = document.getElementById('optSettingsPopover');
-    if (!configBtn || !popover) return;
-
-    configBtn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      const open = !popover.hidden;
-      popover.hidden = open;
-      configBtn.setAttribute('aria-expanded', String(!open));
-    });
-
-    // Close on click outside
-    document.addEventListener('click', (e) => {
-      if (!popover.hidden && !e.target.closest('.opt-status-bar-menu-wrap')) {
-        popover.hidden = true;
-        configBtn.setAttribute('aria-expanded', 'false');
-      }
-    });
-
-    // Close on Escape
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape' && !popover.hidden) {
-        popover.hidden = true;
-        configBtn.setAttribute('aria-expanded', 'false');
-        configBtn.focus();
-      }
-    });
+    // No-op — all controls are inline in the status bar now.
+    // Scope pills, theme toggle, and follow-system are wired separately.
   }
 
   function updateStatusBarScope() {
