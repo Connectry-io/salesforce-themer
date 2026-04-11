@@ -893,17 +893,9 @@
           <span class="theme-card-type-text">System Default · Md · 1.375/0</span>
         </div>
       </div>
-      ${isActive ? '' : '<div class="theme-card-actions"><button class="theme-card-apply-btn" data-quick-apply>Apply</button></div>'}
     `;
 
     card.addEventListener('click', (e) => {
-      // Quick-apply button — apply directly without opening panel
-      if (e.target.closest('[data-quick-apply]')) {
-        e.stopPropagation();
-        selectTheme(theme.id);
-        renderCollectionGrid(syncState.theme);
-        return;
-      }
       const effectPill = e.target.closest('[data-effect-pill]');
       if (effectPill) {
         e.stopPropagation();

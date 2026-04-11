@@ -457,10 +457,10 @@
 }
 
 .theme-card.is-active {
-  border-color: #059669;
+  border-color: var(--cx-accent);
   border-width: 2px;
-  box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.15), var(--cx-shadow-sm);
-  background: #f0fdf4;
+  box-shadow: 0 0 0 3px var(--cx-accent-light), var(--cx-shadow-sm);
+  background: #f8fafd;
 }
 .theme-card.is-expanded {
   border-color: var(--cx-accent);
@@ -505,8 +505,8 @@
 .theme-active-badge {
   font-size: 10px;
   font-weight: 700;
-  color: #059669;
-  background: rgba(5, 150, 105, 0.1);
+  color: var(--cx-accent);
+  background: var(--cx-accent-light);
   padding: 1px 6px;
   border-radius: var(--cx-radius-full);
   letter-spacing: 0.3px;
