@@ -31,9 +31,19 @@
 
 <script>
 async function loadThemes() {
-  const resp = await fetch(chrome.runtime.getURL('themes/themes.json'));
-  const data = await resp.json();
-  return data.themes;
+  try {
+    // Try chrome.runtime first (extension context), then relative path
+    const url = (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.getURL)
+      ? chrome.runtime.getURL('themes/themes.json')
+      : '../themes/themes.json';
+    const resp = await fetch(url);
+    if (!resp.ok) throw new Error(`Fetch failed: ${resp.status}`);
+    const data = await resp.json();
+    return data.themes;
+  } catch (err) {
+    document.getElementById('status').innerHTML = `<div style="color:#ef4444">Error loading themes: ${err.message}</div>`;
+    throw err;
+  }
 }
 
 function renderShareImage(canvas, theme) {
@@ -283,6 +293,7 @@ document.getElementById('generateBtn').addEventListener('click', async () => {
   const grid = document.getElementById('grid');
   grid.innerHTML = '';
   status.innerHTML = '<div class="status">Loading themes...</div>';
+  try {
 
   const themes = await loadThemes();
   status.innerHTML = `<div class="status">Generating ${themes.length} images...</div>`;
@@ -346,6 +357,9 @@ document.getElementById('generateBtn').addEventListener('click', async () => {
     });
   });
   status.appendChild(dlAllBtn);
+  } catch (err) {
+    status.innerHTML = `<div style="color:#ef4444">Error: ${err.message}<br><pre style="margin-top:8px;font-size:11px;color:#94a3b8">${err.stack}</pre></div>`;
+  }
 });
 </script>
 </body>
