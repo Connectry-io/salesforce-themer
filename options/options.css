@@ -214,16 +214,35 @@
 .opt-detail-panel-header {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  padding: var(--cx-space-4) var(--cx-space-4) var(--cx-space-2);
+  gap: var(--cx-space-2);
+  padding: var(--cx-space-3) var(--cx-space-4);
+  border-bottom: 1px solid var(--cx-border);
 }
 .opt-detail-panel-name {
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 700;
   color: var(--cx-text);
   margin: 0;
   letter-spacing: -0.2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
 }
+.opt-detail-panel-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--cx-space-1);
+  margin-left: auto;
+  flex-shrink: 0;
+}
+.opt-detail-panel-actions .cx-btn { font-weight: 600; }
+.opt-detail-panel-actions .opt-toolbar-spacer { display: none; }
+.opt-detail-panel-actions .cx-btn-delete {
+  color: var(--cx-text-muted);
+  transition: var(--cx-transition);
+}
+.opt-detail-panel-actions .cx-btn-delete:hover { color: var(--cx-error); }
 .opt-detail-panel-close {
   width: 26px;
   height: 26px;
@@ -238,35 +257,19 @@
   cursor: pointer;
   transition: var(--cx-transition);
   flex-shrink: 0;
+  margin-left: var(--cx-space-1);
 }
 .opt-detail-panel-close:hover {
   background: var(--cx-border);
   color: var(--cx-text);
 }
-.opt-detail-panel-toolbar {
-  display: flex;
-  align-items: center;
-  gap: var(--cx-space-2);
-  padding: var(--cx-space-2) var(--cx-space-4);
-  margin: 0 var(--cx-space-3) var(--cx-space-3);
-  background: var(--cx-surface-alt);
-  border-radius: var(--cx-radius-md);
-  flex-wrap: wrap;
-}
-.opt-detail-panel-toolbar .cx-btn {
-  font-weight: 600;
-}
-.opt-detail-panel-toolbar .opt-toolbar-spacer { flex: 1; }
-.opt-detail-panel-toolbar .cx-btn-delete {
-  color: var(--cx-text-muted);
-  transition: var(--cx-transition);
-}
-.opt-detail-panel-toolbar .cx-btn-delete:hover { color: var(--cx-error); }
 .opt-detail-panel-preview {
-  padding: 0 var(--cx-space-4);
+  padding: var(--cx-space-3) var(--cx-space-4) 0;
 }
 .opt-detail-panel-preview .preview-size-compact {
   border-radius: var(--cx-radius-md);
+  border: none;
+  box-shadow: none;
 }
 .opt-detail-panel-body {
   padding: var(--cx-space-3) var(--cx-space-4) var(--cx-space-4);
@@ -514,7 +517,9 @@
 }
 .theme-card.is-expanded {
   border-color: var(--cx-accent);
-  box-shadow: 0 0 0 2px var(--cx-accent-light);
+  border-style: dashed;
+  box-shadow: 0 0 0 3px var(--cx-accent-light);
+  background: var(--cx-accent-light);
 }
 
 .theme-card.is-hidden {

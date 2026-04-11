@@ -91,7 +91,7 @@
           <span id="optStatusText">Theme on</span>
         </label>
         <span class="opt-status-bar-sep"></span>
-        <span class="opt-status-bar-label">Apply to</span>
+        <span class="opt-status-bar-label" title="Where the theme applies: Lightning (everyday pages), Setup (admin area), or Both">Apply to</span>
         <div class="opt-scope-pills opt-scope-pills--bar" id="optionsScopePills" role="group" aria-label="Theme scope">
           <button class="opt-scope-pill" data-scope="both">Both</button>
           <button class="opt-scope-pill" data-scope="lightning">Lightning</button>
@@ -100,7 +100,7 @@
         <span class="opt-status-bar-sep"></span>
         <label class="opt-status-bar-auto">
           <input type="checkbox" id="autoModeToggle" />
-          <span>Auto dark mode</span>
+          <span title="Automatically switch between a light and dark theme when your computer toggles dark mode">Auto dark mode</span>
         </label>
         <span class="opt-status-bar-spacer"></span>
         <button class="opt-status-bar-smart" id="optSmartApplyLink" type="button">
@@ -180,10 +180,10 @@
         <aside class="opt-detail-panel" id="optDetailPanel" hidden>
           <div class="opt-detail-panel-header">
             <h3 class="opt-detail-panel-name" id="optDetailName"></h3>
+            <div class="opt-detail-panel-actions" id="optDetailToolbar">
+              <!-- Populated by JS: Apply, Clone/Edit, Share, Delete -->
+            </div>
             <button class="opt-detail-panel-close" id="optDetailClose" aria-label="Close details">&times;</button>
-          </div>
-          <div class="opt-detail-panel-toolbar" id="optDetailToolbar">
-            <!-- Populated by JS: Apply, Clone/Edit, Share, Delete -->
           </div>
           <div class="opt-detail-panel-preview" id="optDetailPreview"></div>
           <div class="opt-detail-panel-body" id="optDetailBody">

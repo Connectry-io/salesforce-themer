@@ -1208,6 +1208,8 @@
         icon: '<svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M8 1c0 3-3 5-3 8a3 3 0 0 0 6 0c0-3-3-5-3-8z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>' },
       { id: 'focus', name: 'Focus Mode', desc: 'A dedicated minimal theme when you need to concentrate',
         icon: '<svg width="14" height="14" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="3" stroke="currentColor" stroke-width="1.3"/><circle cx="8" cy="8" r="6.5" stroke="currentColor" stroke-width="1.3" stroke-dasharray="2 3"/></svg>' },
+      { id: 'reports', name: 'Reports & Dashboards', desc: 'A separate theme just for reports and dashboards — e.g. dark mode for data, light everywhere else',
+        icon: '<svg width="14" height="14" viewBox="0 0 16 16" fill="none"><rect x="1" y="6" width="3" height="8" rx="0.5" stroke="currentColor" stroke-width="1.3"/><rect x="6.5" y="3" width="3" height="11" rx="0.5" stroke="currentColor" stroke-width="1.3"/><rect x="12" y="1" width="3" height="13" rx="0.5" stroke="currentColor" stroke-width="1.3"/></svg>' },
     ];
 
     host.innerHTML = modes.map(m => `
