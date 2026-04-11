@@ -28,7 +28,7 @@
       id: 'record',
       label: 'Record Detail',
       icon: 'record',
-      urlPatterns: [/\/lightning\/r\/[A-Za-z0-9]+\/[a-zA-Z0-9]+\/view/],
+      urlPatterns: [/\/lightning\/r\/[A-Za-z0-9_]+\/[a-zA-Z0-9]+\/view/],
       hint: 'Open any record (Account, Contact, Opportunity, etc.).',
       scans: ['tokens', 'components'],
       keyComponents: ['card', 'button', 'input', 'tab', 'recordLayout', 'path'],
@@ -37,7 +37,7 @@
       id: 'listView',
       label: 'List View',
       icon: 'list',
-      urlPatterns: [/\/lightning\/o\/[A-Za-z0-9_]+\/list/],
+      urlPatterns: [/\/lightning\/o\/[A-Za-z0-9_]+\/list/, /\/lightning\/o\/[A-Za-z0-9_]+\/home/],
       hint: 'Navigate to any object\'s list view (e.g., Accounts > All Accounts).',
       scans: ['tokens', 'components'],
       keyComponents: ['table', 'pageHeader', 'button', 'input'],
@@ -46,17 +46,19 @@
       id: 'relatedList',
       label: 'Related Lists',
       icon: 'related',
-      urlPatterns: [/\/lightning\/r\/.*\/related/],
-      hint: 'Open a record and scroll to the Related tab/lists.',
+      urlPatterns: [/\/lightning\/r\/.*\/related/, /\/lightning\/r\/[A-Za-z0-9_]+\/[a-zA-Z0-9]+\/view/],
+      hint: 'Open a record — Related Lists are on the Related tab.',
       scans: ['tokens', 'components'],
       keyComponents: ['card', 'table', 'button'],
+      // Detected via DOM: record pages always have related lists
+      domDetect: () => document.querySelectorAll('.forceRelatedListContainer, .slds-related-list').length > 0,
     },
     {
       id: 'setup',
       label: 'Setup',
       icon: 'setup',
-      urlPatterns: [/\/lightning\/setup\//, /salesforce-setup\.com/],
-      hint: 'Click the gear icon and select "Setup".',
+      urlPatterns: [/\/lightning\/setup\//, /salesforce-setup\.com/, /\/setup\//],
+      hint: 'Click the gear icon → "Setup". Opens in a new tab — open the diagnostic there too.',
       scans: ['tokens', 'components'],
       keyComponents: ['card', 'table', 'input', 'nav'],
     },
@@ -68,6 +70,8 @@
       hint: 'Click the 9-dot waffle icon in the top-left corner.',
       scans: ['tokens'],
       keyComponents: ['card', 'input'],
+      // App Launcher often opens as a modal overlay — detect via DOM
+      domDetect: () => document.querySelector('.appLauncherMenu, .slds-app-launcher') !== null,
     },
     {
       id: 'reports',
@@ -91,21 +95,23 @@
       id: 'modal',
       label: 'Modal / Dialog',
       icon: 'modal',
-      urlPatterns: [], // Can't detect via URL — manual trigger
-      hint: 'Open any modal (e.g., click "New" on a list view, or edit a record).',
+      urlPatterns: [],
+      hint: 'Open any modal (e.g., click "New" on a list view, or edit a record inline).',
       scans: ['tokens', 'components'],
       keyComponents: ['modal', 'button', 'input'],
-      manual: true,
+      // Auto-detect when a modal is visible in the DOM
+      domDetect: () => document.querySelector('.slds-modal__container, .modal-container, .forceModalContainer') !== null,
     },
     {
       id: 'dropdown',
       label: 'Dropdowns & Popovers',
       icon: 'dropdown',
-      urlPatterns: [], // Manual
+      urlPatterns: [],
       hint: 'Click any dropdown menu or hover over a help tooltip.',
       scans: ['tokens', 'components'],
       keyComponents: ['dropdown', 'popover'],
-      manual: true,
+      // Auto-detect when a dropdown/popover is visible
+      domDetect: () => document.querySelector('.slds-dropdown.slds-dropdown_length-5, .slds-popover:not([hidden]), .slds-dropdown[aria-expanded="true"]') !== null,
     },
   ];
 
@@ -121,7 +127,17 @@
     const url = location.pathname + location.search + location.hash;
     const host = location.hostname;
 
+    // First check DOM-detected types (modals, dropdowns, app launcher overlay)
+    // These take priority since they're transient overlays on top of other pages
     for (const pt of PAGE_TYPES) {
+      if (pt.domDetect && pt.domDetect()) {
+        return pt;
+      }
+    }
+
+    // Then check URL patterns
+    for (const pt of PAGE_TYPES) {
+      if (!pt.urlPatterns.length) continue;
       for (const pattern of pt.urlPatterns) {
         if (pattern.test(url) || pattern.test(host)) {
           return pt;

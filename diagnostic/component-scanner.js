@@ -206,6 +206,7 @@
       'util-', 'utils-',
       'webruntimedesign-',
       'slot-',
+      'search_dialog-', 'search_input-',
       'sf-themer-',  // Our own — skip
     ];
 
