@@ -199,6 +199,19 @@
   background: var(--cx-border);
   color: var(--cx-text);
 }
+.opt-detail-panel-toolbar {
+  display: flex;
+  align-items: center;
+  gap: var(--cx-space-2);
+  padding: 0 var(--cx-space-4) var(--cx-space-3);
+  flex-wrap: wrap;
+}
+.opt-detail-panel-toolbar .opt-toolbar-spacer { flex: 1; }
+.opt-detail-panel-toolbar .cx-btn-delete {
+  color: var(--cx-text-muted);
+  transition: var(--cx-transition);
+}
+.opt-detail-panel-toolbar .cx-btn-delete:hover { color: var(--cx-error); }
 .opt-detail-panel-preview {
   padding: 0 var(--cx-space-4);
 }

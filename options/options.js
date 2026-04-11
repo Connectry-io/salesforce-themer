@@ -1029,7 +1029,32 @@
     // Header
     document.getElementById('optDetailName').textContent = theme.name;
 
-    // Compact preview with live effects (full mockup lives in Builder)
+    // Toolbar: actions above the preview (always visible, no scrolling)
+    const toolbar = document.getElementById('optDetailToolbar');
+    const isBuiltIn = !theme.isCustom;
+    const applyLabel = theme.id === syncState.theme ? 'Active' : 'Apply';
+    const applyDisabled = theme.id === syncState.theme ? ' disabled' : '';
+
+    let toolbarHtml = `<button class="cx-btn cx-btn-primary cx-btn-sm" data-detail-apply="${theme.id}"${applyDisabled}>${applyLabel}</button>`;
+    if (isBuiltIn) {
+      toolbarHtml += `<button class="cx-btn cx-btn-secondary cx-btn-sm" data-detail-clone="${theme.id}">Clone</button>`;
+    } else {
+      toolbarHtml += `<button class="cx-btn cx-btn-secondary cx-btn-sm" data-detail-edit="${theme.id}">Edit</button>`;
+      toolbarHtml += `<button class="cx-btn cx-btn-ghost cx-btn-sm" data-detail-export="${theme.id}">Export</button>`;
+    }
+    // Share (standard share icon) + Delete (custom only, far right)
+    toolbarHtml += `<span class="opt-toolbar-spacer"></span>`;
+    toolbarHtml += `<button class="cx-btn cx-btn-ghost cx-btn-sm" data-detail-share="${theme.id}" title="Share">
+      <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M4 9v4a1 1 0 001 1h6a1 1 0 001-1V9" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M8 2v8M5 5l3-3 3 3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </button>`;
+    if (!isBuiltIn) {
+      toolbarHtml += `<button class="cx-btn cx-btn-ghost cx-btn-sm cx-btn-delete" data-detail-delete="${theme.id}" title="Delete">
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M3 4h10M6 4V3a1 1 0 011-1h2a1 1 0 011 1v1M5 4v9a1 1 0 001 1h4a1 1 0 001-1V4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>`;
+    }
+    toolbar.innerHTML = toolbarHtml;
+
+    // Compact preview with live effects
     const previewHost = document.getElementById('optDetailPreview');
     previewHost.innerHTML = '';
     const colors = theme.isCustom ? theme.colors : theme.colors;
@@ -1038,12 +1063,8 @@
       : getSuggestedEffectsFor(theme.id);
     renderThemePreview(previewHost, colors, { size: 'compact', effects });
 
-    // Body content
+    // Body: base-theme label (custom only) + effects + intensity
     const body = document.getElementById('optDetailBody');
-    const isBuiltIn = !theme.isCustom;
-
-    const tagline = (isBuiltIn && theme.tagline) ? `<p class="opt-detail-tagline">${theme.tagline}</p>` : '';
-    const bestFor = (isBuiltIn && theme.bestFor) ? `<p class="opt-detail-bestfor"><strong>Best for:</strong> ${theme.bestFor}</p>` : '';
     const basedOn = !isBuiltIn ? `<p class="opt-detail-bestfor">Based on: ${(getThemeById(theme.basedOn) || THEMES[0]).name}</p>` : '';
 
     let effectsHtml = '';
@@ -1055,7 +1076,7 @@
           <div class="opt-detail-effects-pills">${pills}</div>
           <div class="opt-detail-volume">
             <span>Intensity</span>
-            <div class="opt-scope-pills" role="radiogroup" aria-label="Effects volume">
+            <div class="opt-scope-pills" role="radiogroup" aria-label="Effects intensity">
               <button class="opt-scope-pill${syncState.effectsVolume === 'off' ? ' is-active' : ''}" data-detail-volume="off">Off</button>
               <button class="opt-scope-pill${syncState.effectsVolume === 'subtle' ? ' is-active' : ''}" data-detail-volume="subtle">Subtle</button>
               <button class="opt-scope-pill${(!syncState.effectsVolume || syncState.effectsVolume === 'default') ? ' is-active' : ''}" data-detail-volume="default">Default</button>
@@ -1065,44 +1086,18 @@
         </div>`;
     }
 
-    const applyLabel = theme.id === syncState.theme ? 'Active' : 'Apply';
-    const applyDisabled = theme.id === syncState.theme ? ' disabled' : '';
-    let actionsHtml = `<button class="cx-btn cx-btn-primary cx-btn-sm" data-detail-apply="${theme.id}"${applyDisabled}>${applyLabel}</button>`;
-    if (isBuiltIn) {
-      actionsHtml += `<button class="cx-btn cx-btn-secondary cx-btn-sm" data-detail-clone="${theme.id}">Clone</button>`;
-    } else {
-      actionsHtml += `<button class="cx-btn cx-btn-secondary cx-btn-sm" data-detail-edit="${theme.id}">Edit</button>`;
-      actionsHtml += `<button class="cx-btn cx-btn-ghost cx-btn-sm" data-detail-export="${theme.id}">Export</button>`;
-      actionsHtml += `<button class="cx-btn cx-btn-ghost cx-btn-sm" data-detail-delete="${theme.id}" style="color:var(--cx-error)">Delete</button>`;
-    }
-    const shareHtml = `
-      <div class="opt-detail-share">
-        <button class="cx-btn cx-btn-ghost cx-btn-sm" data-share-image="${theme.id}" title="Share as image">
-          <svg width="13" height="13" viewBox="0 0 16 16" fill="none"><rect x="2" y="3" width="12" height="10" rx="1.5" stroke="currentColor" stroke-width="1.4"/><circle cx="6" cy="7" r="1.5" stroke="currentColor" stroke-width="1.2"/><path d="M2 11l3-3 2 2 3-3 4 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        </button>
-        <button class="cx-btn cx-btn-ghost cx-btn-sm" data-share-email="${theme.id}" title="Share via email">
-          <svg width="13" height="13" viewBox="0 0 16 16" fill="none"><rect x="1.5" y="3.5" width="13" height="9" rx="1.5" stroke="currentColor" stroke-width="1.3"/><path d="M1.5 4.5l6.5 5 6.5-5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        </button>
-      </div>`;
-
-    body.innerHTML = `
-      ${tagline}${bestFor}${basedOn}
-      ${effectsHtml}
-      <div class="opt-detail-actions">
-        ${actionsHtml}
-        ${shareHtml}
-      </div>
-    `;
+    body.innerHTML = `${basedOn}${effectsHtml}`;
 
     // Wire action handlers on the body
-    _wireDetailActions(body, theme);
+    _wireDetailActions(toolbar, body, theme);
 
     // Show panel
     panel.hidden = false;
   }
 
-  function _wireDetailActions(body, theme) {
-    const applyBtn = body.querySelector('[data-detail-apply]');
+  function _wireDetailActions(toolbar, body, theme) {
+    // Toolbar actions (above preview)
+    const applyBtn = toolbar.querySelector('[data-detail-apply]');
     if (applyBtn && !applyBtn.disabled) {
       applyBtn.addEventListener('click', () => {
         selectTheme(theme.id);
@@ -1111,17 +1106,17 @@
         applyBtn.disabled = true;
       });
     }
-    const cloneBtn = body.querySelector('[data-detail-clone]');
+    const cloneBtn = toolbar.querySelector('[data-detail-clone]');
     if (cloneBtn) cloneBtn.addEventListener('click', () => openCreationDialog(theme.id));
 
-    const editBtn = body.querySelector('[data-detail-edit]');
+    const editBtn = toolbar.querySelector('[data-detail-edit]');
     if (editBtn) {
       editBtn.addEventListener('click', () => {
         chrome.storage.local.set({ openOptionsTab: 'builder', openBuilderClone: theme.id });
         if (_tabsInstance) _tabsInstance.activate('builder');
       });
     }
-    const exportBtn = body.querySelector('[data-detail-export]');
+    const exportBtn = toolbar.querySelector('[data-detail-export]');
     if (exportBtn) {
       exportBtn.addEventListener('click', () => {
         const blob = new Blob([JSON.stringify(theme, null, 2)], { type: 'application/json' });
@@ -1131,7 +1126,7 @@
         URL.revokeObjectURL(url);
       });
     }
-    const deleteBtn = body.querySelector('[data-detail-delete]');
+    const deleteBtn = toolbar.querySelector('[data-detail-delete]');
     if (deleteBtn) {
       deleteBtn.addEventListener('click', async () => {
         if (!confirm(`Delete "${theme.name}"? This cannot be undone.`)) return;
@@ -1142,6 +1137,34 @@
         renderCollectionGrid(syncState.theme);
       });
     }
+    // Share — use Web Share API if available, fall back to email
+    const shareBtn = toolbar.querySelector('[data-detail-share]');
+    if (shareBtn) {
+      shareBtn.addEventListener('click', async () => {
+        const shareData = {
+          title: `${theme.name} — Salesforce Themer`,
+          text: `Check out the "${theme.name}" theme for Salesforce Themer by Connectry.`,
+          url: 'https://chrome.google.com/webstore/detail/salesforce-themer',
+        };
+        try {
+          if (navigator.share) {
+            await navigator.share(shareData);
+          } else {
+            // Fallback: copy text to clipboard
+            await navigator.clipboard.writeText(`${shareData.text}\n${shareData.url}`);
+            _flashToast('Link copied to clipboard');
+          }
+        } catch (err) {
+          if (err.name !== 'AbortError') {
+            // User cancelled the share sheet — not an error
+            await navigator.clipboard.writeText(`${shareData.text}\n${shareData.url}`);
+            _flashToast('Link copied to clipboard');
+          }
+        }
+      });
+    }
+
+    // Body: intensity pills (below preview)
     body.querySelectorAll('[data-detail-volume]').forEach(pill => {
       pill.addEventListener('click', async () => {
         const volume = pill.dataset.detailVolume;
@@ -1160,16 +1183,6 @@
         }
       });
     });
-    const shareImageBtn = body.querySelector('[data-share-image]');
-    if (shareImageBtn) shareImageBtn.addEventListener('click', () => shareThemeAsImage(theme));
-    const shareEmailBtn = body.querySelector('[data-share-email]');
-    if (shareEmailBtn) {
-      shareEmailBtn.addEventListener('click', () => {
-        const subject = encodeURIComponent(`Check out the "${theme.name}" theme for Salesforce Themer`);
-        const body2 = encodeURIComponent(`I'm using the "${theme.name}" theme in Salesforce Themer by Connectry.\n\nhttps://chrome.google.com/webstore/detail/salesforce-themer`);
-        window.open(`mailto:?subject=${subject}&body=${body2}`);
-      });
-    }
   }
 
   function closeDetailPanel() {
