@@ -121,9 +121,46 @@
     /** Called by content.js when SPA navigation occurs. */
     onNavigate() {
       if (!this.isOpen || this.isMinimized) return;
-      if (this.activeTab === 'testing') {
-        this._refreshTabContent();
+      // Auto-scan on navigation — panel is open, user wants live data
+      this._autoScan();
+    }
+
+    /** Run all scans silently and refresh the active tab. */
+    async _autoScan() {
+      console.log('[SFT Diag] Auto-scanning on navigation...');
+
+      // Token scan
+      try {
+        if (ns.scanTokens) {
+          this.scanResults = ns.scanTokens(this.currentTheme);
+        }
+      } catch (_) {}
+
+      // Component scan
+      try {
+        if (ns.scanComponents) {
+          this.componentResults = ns.scanComponents();
+        }
+      } catch (_) {}
+
+      // Save testing progress
+      const pageType = ns.detectPageType?.();
+      if (pageType && ns.saveTestResult) {
+        const tokenCoverage = this.scanResults?.coverage || null;
+        const s = this.componentResults?.summary;
+        const componentHealth = s && s.totalStandardFound > 0
+          ? ((s.totalStyled + s.totalPartial * 0.5) / s.totalStandardFound) * 100
+          : null;
+        await ns.saveTestResult(this.currentTheme, pageType.id, { tokenCoverage, componentHealth });
+        this.testingProgress = await ns.getTestingProgress?.(this.currentTheme) || {};
       }
+
+      // Update info bar (page may have changed)
+      this._updateInfoBar();
+
+      // Refresh current tab content
+      const resultsEl = this.shadow?.querySelector('.diag-results');
+      if (resultsEl) resultsEl.innerHTML = this._activeTabContent();
     }
 
     // ── Host management ───────────────────────────────────────────────────
@@ -721,15 +758,8 @@
     }
 
     _bindScanButton() {
-      this.shadow?.querySelectorAll('.diag-scan-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-          const action = btn.dataset.action;
-          if (action === 'scan') this._runScan(btn);
-          else if (action === 'scanComponents') this._runComponentScan(btn);
-          else if (action === 'scanForTesting') this._runTestingScan(btn);
-          else if (action === 'scanAll') this._runScanAll(btn);
-        });
-      });
+      // No-op: shadow-level event delegation in _bindEvents handles all
+      // [data-action] clicks, including dynamically replaced scan buttons.
     }
 
     async _runComponentScan(btn) {

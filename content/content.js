@@ -647,6 +647,11 @@
       origReplaceState.apply(this, args);
       notify();
     };
+    // Polling fallback — SF sometimes navigates without pushState
+    // Only runs when diagnostic panel is open, checks every 2s
+    setInterval(() => {
+      if (diagnosticPanel && diagnosticPanel.isOpen) notify();
+    }, 2000);
   }
 
   // ─── Initialisation ──────────────────────────────────────────────────────
