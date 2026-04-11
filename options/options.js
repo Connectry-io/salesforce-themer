@@ -1029,10 +1029,14 @@
     // Header
     document.getElementById('optDetailName').textContent = theme.name;
 
-    // Palette preview (compact color strip — full mockup lives in Builder)
+    // Compact preview with live effects (full mockup lives in Builder)
     const previewHost = document.getElementById('optDetailPreview');
+    previewHost.innerHTML = '';
     const colors = theme.isCustom ? theme.colors : theme.colors;
-    renderPalettePreview(previewHost, colors);
+    const effects = theme.isCustom
+      ? (theme.effects || getSuggestedEffectsFor(theme.basedOn || 'connectry'))
+      : getSuggestedEffectsFor(theme.id);
+    renderThemePreview(previewHost, colors, { size: 'compact', effects });
 
     // Body content
     const body = document.getElementById('optDetailBody');
@@ -1050,7 +1054,7 @@
           <div class="opt-detail-effects-label">Effects</div>
           <div class="opt-detail-effects-pills">${pills}</div>
           <div class="opt-detail-volume">
-            <span>Volume</span>
+            <span>Intensity</span>
             <div class="opt-scope-pills" role="radiogroup" aria-label="Effects volume">
               <button class="opt-scope-pill${syncState.effectsVolume === 'off' ? ' is-active' : ''}" data-detail-volume="off">Off</button>
               <button class="opt-scope-pill${syncState.effectsVolume === 'subtle' ? ' is-active' : ''}" data-detail-volume="subtle">Subtle</button>
@@ -1145,6 +1149,15 @@
         pill.classList.add('is-active');
         await chrome.storage.sync.set({ effectsVolume: volume });
         syncState.effectsVolume = volume;
+        // Live-update the preview effects
+        const frame = document.querySelector('#optDetailPreview .editor-preview-frame');
+        if (frame && theme.id) {
+          const baseEffects = getSuggestedEffectsFor(theme.id);
+          const scaled = (typeof applyVolume === 'function')
+            ? applyVolume(baseEffects, volume)
+            : baseEffects;
+          applyPreviewEffects(frame, scaled, (theme.colors || {}).accent);
+        }
       });
     });
     const shareImageBtn = body.querySelector('[data-share-image]');
