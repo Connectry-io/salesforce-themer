@@ -697,7 +697,7 @@
             }
           </span>
           <span class="diag-test-label">${this._escapeHtml(item.label)}</span>
-          ${item.manual ? '<span class="diag-test-manual">manual</span>' : ''}
+          ${item.manual ? '<span class="diag-test-manual" data-tooltip="This element is transient — open it on screen, then click Scan to capture it.">manual</span>' : ''}
           ${dateStr ? `<span class="diag-test-date">${dateStr}</span>` : ''}
           ${tokenPct ? `<span class="diag-test-score">${tokenPct}</span>` : ''}
           ${compPct ? `<span class="diag-test-score is-comp">${compPct}</span>` : ''}
