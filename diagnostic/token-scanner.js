@@ -169,15 +169,60 @@
     '--lwc-card',                    // cardFontWeight, cardSpacing — not color
   ];
 
+  // Allowlist approach: a token is theme-relevant ONLY if it contains one
+  // of these substrings indicating it's a color/visual token worth theming.
+  const THEME_RELEVANT_KEYWORDS = [
+    'color',       // colorBackground, colorText, color-surface, etc.
+    'brand',       // brandPrimary, brand-1, etc.
+    'surface',     // color-surface-1, etc.
+    'accent',      // color-accent-1, etc.
+    'border',      // colorBorder, color-border-1 (but NOT borderRadius, borderWidth)
+    'background',  // colorBackground*, Background*
+    'text',        // colorText*, on-surface (text color)
+    'shadow-focus',// focus ring shadows only
+    'shadow-outline', // focus outlines
+  ];
+
+  // Even if a token matches a keyword, these are still structural — exclude.
+  const STRUCTURAL_OVERRIDES = [
+    'border-radius', 'borderRadius', 'radius-border',
+    'border-width', 'borderWidth', 'sizing-border',
+    'border-stroke', 'borderStroke',
+    'line-height', 'lineHeight',
+    'font-size', 'fontSize',
+    'font-weight', 'fontWeight',
+    'font-family', 'fontFamily',
+    'font-scale', 'fontScale',
+    'spacing', 'sizing',
+    'button-line-height',
+    'button-radius', 'buttonBorderRadius',
+    'card-radius', 'card-shadow', 'cardShadow', 'cardSpacing', 'cardFontWeight',
+    'modal-radius', 'modal-header-spacing',
+    'input-radius',
+    'tabs-list-sizing',
+    'pageheader-title-font-size',
+    '-base-',     // palette base scales (error-base-60 etc.)
+    'palette-',   // raw palette values
+    'opacity',
+  ];
+
   /** Check if a token name should be excluded from gap analysis. */
   function isIgnoredToken(token) {
+    const lower = token.toLowerCase();
+
+    // First check blocklist prefixes (fast path for obvious non-theme tokens)
     for (const prefix of IGNORE_PREFIXES) {
       if (token.startsWith(prefix)) return true;
     }
-    // Also skip tokens that are clearly non-color (sizing, spacing numbers)
-    if (/\d+$/.test(token) && !token.includes('color') && !token.includes('brand') && !token.includes('surface') && !token.includes('border') && !token.includes('accent')) {
-      return true;
-    }
+
+    // Must contain a theme-relevant keyword to pass
+    const hasRelevantKeyword = THEME_RELEVANT_KEYWORDS.some(kw => lower.includes(kw));
+    if (!hasRelevantKeyword) return true;
+
+    // Even with a keyword match, exclude structural overrides
+    const isStructural = STRUCTURAL_OVERRIDES.some(so => lower.includes(so.toLowerCase()));
+    if (isStructural) return true;
+
     return false;
   }
 
