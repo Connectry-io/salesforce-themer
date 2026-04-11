@@ -37,7 +37,8 @@
     },
     "toggle-diagnostic": {
       "suggested_key": {
-        "default": "Alt+Shift+X"
+        "default": "Alt+D",
+        "mac": "Alt+D"
       },
       "description": "Toggle theme diagnostic panel"
     }
