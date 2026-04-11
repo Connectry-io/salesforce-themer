@@ -16,36 +16,88 @@
   // ─── Canonical token lists (mirrored from background.js engine) ──────────
 
   const SLDS1_TOKENS = [
+    // Core backgrounds
     '--lwc-colorBackground',
     '--lwc-colorBackgroundAlt',
     '--lwc-colorBackgroundRow',
     '--lwc-colorBackgroundRowHover',
     '--lwc-colorBackgroundHighlight',
     '--lwc-colorBackgroundSelection',
+    '--lwc-colorBackgroundLight',
+    '--lwc-colorBackgroundShade',
+    '--lwc-colorBackgroundShadeDark',
+    '--lwc-colorBackgroundSpin',
+    '--lwc-headerColorBackground',
+    '--lwc-pageColorBackground',
+    // Button backgrounds
     '--lwc-colorBackgroundButtonBrand',
     '--lwc-colorBackgroundButtonBrandHover',
     '--lwc-colorBackgroundButtonBrandActive',
+    '--lwc-colorBackgroundButtonBrandDisabled',
     '--lwc-colorBackgroundButtonDefault',
     '--lwc-colorBackgroundButtonDefaultHover',
-    '--lwc-headerColorBackground',
-    '--lwc-pageColorBackground',
+    '--lwc-colorBackgroundButtonDefaultActive',
+    '--lwc-colorBackgroundButtonDefaultDisabled',
+    '--lwc-buttonColorBackgroundPrimary',
+    // Input backgrounds
+    '--lwc-colorBackgroundInput',
+    '--lwc-colorBackgroundInputActive',
+    '--lwc-colorBackgroundInputDisabled',
+    '--lwc-colorBackgroundInputError',
+    '--lwc-colorBackgroundInputSearch',
+    '--lwc-colorBackgroundInputCheckbox',
+    '--lwc-colorBackgroundInputCheckboxSelected',
+    // Modal / pill
+    '--lwc-colorBackgroundModal',
+    '--lwc-colorBackgroundBackdropTint',
+    '--lwc-colorBackgroundPill',
+    // Text
     '--lwc-colorTextDefault',
     '--lwc-colorTextWeak',
     '--lwc-colorTextLabel',
     '--lwc-colorTextPlaceholder',
-    '--lwc-colorTextButtonBrand',
     '--lwc-colorTextLink',
     '--lwc-colorTextLinkHover',
+    // Text — buttons
+    '--lwc-colorTextButtonBrand',
+    '--lwc-colorTextButtonBrandHover',
+    '--lwc-colorTextButtonBrandDisabled',
+    '--lwc-colorTextButtonDefault',
+    '--lwc-colorTextButtonDefaultHover',
+    '--lwc-colorTextButtonDefaultHint',
+    '--lwc-colorTextButtonDefaultDisabled',
+    // Text — icons & actions
+    '--lwc-colorTextIconDefault',
+    '--lwc-colorTextIconDefaultHover',
+    '--lwc-colorTextIconDefaultActive',
+    '--lwc-colorTextIconDefaultDisabled',
+    '--lwc-colorTextActionLabel',
+    '--lwc-colorTextActionLabelActive',
+    '--lwc-colorTextInputIcon',
+    // Text — brand
+    '--lwc-colorTextBrand',
+    '--lwc-colorTextBrandPrimary',
+    // Borders
     '--lwc-colorBorder',
     '--lwc-colorBorderSeparator',
     '--lwc-colorBorderInput',
     '--lwc-colorBorderInputActive',
+    '--lwc-colorBorderPrimary',
+    '--lwc-colorBorderBrand',
+    '--lwc-colorBorderButtonBrand',
+    '--lwc-colorBorderButtonBrandDisabled',
+    '--lwc-colorBorderButtonDefault',
+    '--lwc-buttonColorBorderPrimary',
+    // Brand
     '--lwc-brandPrimary',
     '--lwc-brandPrimaryActive',
     '--lwc-brandPrimaryTransparent',
     '--lwc-brandAccessible',
     '--lwc-brandAccessibleActive',
-    '--lwc-colorBackgroundSpin',
+    '--lwc-colorBrand',
+    '--lwc-colorBrandDark',
+    '--lwc-colorBrandDarker',
+    // Focus
     '--lwc-shadowOutlineFocus',
   ];
 
@@ -54,6 +106,9 @@
     '--slds-g-color-surface-2',
     '--slds-g-color-surface-3',
     '--slds-g-color-surface-4',
+    '--slds-g-color-surface-container-1',
+    '--slds-g-color-surface-container-2',
+    '--slds-g-color-surface-container-3',
     '--slds-g-color-on-surface-1',
     '--slds-g-color-on-surface-2',
     '--slds-g-color-on-surface-3',
@@ -65,19 +120,39 @@
     '--slds-g-color-neutral-1',
     '--slds-g-color-neutral-2',
     '--slds-g-color-neutral-3',
+    '--slds-g-color-accent-1',
+    '--slds-g-color-accent-2',
+    '--slds-g-color-accent-3',
   ];
 
   const SLDS2_COMPONENT_TOKENS = [
+    // Cards
     '--slds-c-card-color-background',
     '--slds-c-card-color-border',
+    // Inputs
     '--slds-c-input-color-background',
     '--slds-c-input-color-border',
     '--slds-c-input-color-border-focus',
+    '--slds-c-input-text-color',
+    // Buttons — brand
     '--slds-c-button-brand-color-background',
     '--slds-c-button-brand-color-border',
     '--slds-c-button-brand-color-background-hover',
+    // Buttons — neutral
     '--slds-c-button-neutral-color-background',
     '--slds-c-button-neutral-color-border',
+    '--slds-c-button-neutral-color-background-hover',
+    '--slds-c-button-neutral-color-border-hover',
+    '--slds-c-button-neutral-color-background-active',
+    '--slds-c-button-neutral-color-border-active',
+    // Buttons — text
+    '--slds-c-button-text-color-hover',
+    '--slds-c-button-text-color-active',
+    // Tabs
+    '--slds-c-tabs-item-text-color',
+    '--slds-c-tabs-item-text-color-active',
+    '--slds-c-tabs-item-color-border-hover',
+    '--slds-c-tabs-item-color-border-active',
   ];
 
   const ALL_TOKENS = [...SLDS1_TOKENS, ...SLDS2_GLOBAL_TOKENS, ...SLDS2_COMPONENT_TOKENS];

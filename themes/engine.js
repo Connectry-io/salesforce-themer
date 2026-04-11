@@ -151,17 +151,93 @@ function generateThemeCSS(theme) {
   --slds-g-color-neutral-2: ${c.surfaceAlt || c.surfaceHover} !important;
   --slds-g-color-neutral-3: ${c.border} !important;
 
-  /* Component hooks */
+  /* SLDS 2 surface containers */
+  --slds-g-color-surface-container-1: ${c.surface} !important;
+  --slds-g-color-surface-container-2: ${c.surfaceHover} !important;
+  --slds-g-color-surface-container-3: ${c.surfaceAlt || c.surfaceHover} !important;
+
+  /* SLDS 2 accent */
+  --slds-g-color-accent-1: ${c.accent} !important;
+  --slds-g-color-accent-2: ${c.accentHover} !important;
+  --slds-g-color-accent-3: ${c.accentLight} !important;
+
+  /* Legacy LWC — brand */
+  --lwc-colorBrand: ${c.accent} !important;
+  --lwc-colorBrandDark: ${c.accentActive} !important;
+  --lwc-colorBrandDarker: ${c.accentActive} !important;
+  --lwc-colorTextBrand: ${c.accent} !important;
+  --lwc-colorTextBrandPrimary: ${c.accent} !important;
+
+  /* Legacy LWC — backgrounds (surfaces, inputs, modals) */
+  --lwc-colorBackgroundLight: ${c.surface} !important;
+  --lwc-colorBackgroundShade: ${c.surfaceAlt || c.surfaceHover} !important;
+  --lwc-colorBackgroundShadeDark: ${c.surfaceAlt || c.surfaceHover} !important;
+  --lwc-colorBackgroundInput: ${isDark ? c.background : c.surface} !important;
+  --lwc-colorBackgroundInputActive: ${isDark ? c.background : c.surface} !important;
+  --lwc-colorBackgroundInputDisabled: ${c.surfaceAlt || c.surfaceHover} !important;
+  --lwc-colorBackgroundInputError: ${c.surface} !important;
+  --lwc-colorBackgroundInputSearch: ${isDark ? c.background : c.surface} !important;
+  --lwc-colorBackgroundInputCheckbox: ${c.surface} !important;
+  --lwc-colorBackgroundInputCheckboxSelected: ${c.accent} !important;
+  --lwc-colorBackgroundModal: ${c.modalBg} !important;
+  --lwc-colorBackgroundBackdropTint: ${c.modalBackdrop} !important;
+  --lwc-colorBackgroundPill: ${c.pillBg} !important;
+
+  /* Legacy LWC — button states */
+  --lwc-colorBackgroundButtonBrandDisabled: ${c.textMuted} !important;
+  --lwc-colorBackgroundButtonDefaultActive: ${c.surfaceHover} !important;
+  --lwc-colorBackgroundButtonDefaultDisabled: ${c.surface} !important;
+  --lwc-buttonColorBackgroundPrimary: ${c.buttonBrandBg} !important;
+  --lwc-buttonColorBorderPrimary: ${c.buttonBrandBorder} !important;
+
+  /* Legacy LWC — text (buttons, icons, actions) */
+  --lwc-colorTextButtonBrandHover: ${c.buttonBrandText} !important;
+  --lwc-colorTextButtonBrandDisabled: ${c.textMuted} !important;
+  --lwc-colorTextButtonDefault: ${c.textPrimary} !important;
+  --lwc-colorTextButtonDefaultHover: ${c.textPrimary} !important;
+  --lwc-colorTextButtonDefaultHint: ${c.textSecondary} !important;
+  --lwc-colorTextButtonDefaultDisabled: ${c.textMuted} !important;
+  --lwc-colorTextIconDefault: ${c.textSecondary} !important;
+  --lwc-colorTextIconDefaultHover: ${c.textPrimary} !important;
+  --lwc-colorTextIconDefaultActive: ${c.accent} !important;
+  --lwc-colorTextIconDefaultDisabled: ${c.textMuted} !important;
+  --lwc-colorTextActionLabel: ${c.textSecondary} !important;
+  --lwc-colorTextActionLabelActive: ${c.textPrimary} !important;
+  --lwc-colorTextInputIcon: ${c.textSecondary} !important;
+
+  /* Legacy LWC — borders */
+  --lwc-colorBorderPrimary: ${c.border} !important;
+  --lwc-colorBorderBrand: ${c.accent} !important;
+  --lwc-colorBorderButtonBrand: ${c.buttonBrandBorder} !important;
+  --lwc-colorBorderButtonBrandDisabled: ${c.textMuted} !important;
+  --lwc-colorBorderButtonDefault: ${c.buttonNeutralBorder} !important;
+
+  /* Component hooks — cards & inputs */
   --slds-c-card-color-background: ${c.surface} !important;
   --slds-c-card-color-border: ${c.border} !important;
   --slds-c-input-color-background: ${isDark ? c.background : c.surface} !important;
   --slds-c-input-color-border: ${c.borderInput} !important;
   --slds-c-input-color-border-focus: ${c.accent} !important;
+  --slds-c-input-text-color: ${c.textPrimary} !important;
+
+  /* Component hooks — buttons */
   --slds-c-button-brand-color-background: ${c.buttonBrandBg} !important;
   --slds-c-button-brand-color-border: ${c.buttonBrandBorder} !important;
   --slds-c-button-brand-color-background-hover: ${c.buttonBrandHover} !important;
   --slds-c-button-neutral-color-background: ${c.buttonNeutralBg} !important;
   --slds-c-button-neutral-color-border: ${c.buttonNeutralBorder} !important;
+  --slds-c-button-neutral-color-background-hover: ${c.buttonNeutralHover} !important;
+  --slds-c-button-neutral-color-border-hover: ${c.buttonNeutralBorder} !important;
+  --slds-c-button-neutral-color-background-active: ${c.surfaceHover} !important;
+  --slds-c-button-neutral-color-border-active: ${c.borderInput} !important;
+  --slds-c-button-text-color-hover: ${c.textPrimary} !important;
+  --slds-c-button-text-color-active: ${c.textPrimary} !important;
+
+  /* Component hooks — tabs */
+  --slds-c-tabs-item-text-color: ${c.tabInactiveColor} !important;
+  --slds-c-tabs-item-text-color-active: ${c.tabActiveColor} !important;
+  --slds-c-tabs-item-color-border-hover: ${c.tabActiveBorder} !important;
+  --slds-c-tabs-item-color-border-active: ${c.tabActiveBorder} !important;
 }
 
 /* ─── Base ───────────────────────────────────────────────────────────────── */
@@ -253,10 +329,7 @@ one-app-nav-bar-item-root.slds-is-active,
 one-app-nav-bar-item-root.navItem.slds-is-active,
 .navexConsoleTabItem.active {
   background-color: ${c.navActive} !important;
-  background: ${c.navActive} !important;
-  border-bottom-color: ${c.navActiveBorder} !important;
-  border-radius: 0 !important;
-  box-shadow: none !important;${fx && fx.navActiveBoxShadow ? `
+  border-bottom-color: ${c.navActiveBorder} !important;${fx && fx.navActiveBoxShadow ? `
   box-shadow: ${fx.navActiveBoxShadow} !important;` : ''}
   color: ${c.navActiveText} !important;
 }
@@ -275,7 +348,8 @@ one-app-nav-bar-item-root.slds-is-active a::after {
   border-color: ${c.navActiveBorder} !important;
 }
 
-/* Active tab inner link — must beat SF's aria-current="page" + pill styling */
+/* Active tab inner link — beat SF's aria-current="page" pill styling.
+   Only override color and background — let borders/radius/shadow inherit. */
 .slds-context-bar__item.slds-is-active .slds-context-bar__label-action,
 .slds-context-bar__item.slds-is-active a,
 one-app-nav-bar-item-root.slds-is-active a,
@@ -283,11 +357,7 @@ one-app-nav-bar-item-root.slds-is-active a.dndItem,
 one-app-nav-bar-item-root.slds-is-active .slds-context-bar__label-action,
 .slds-context-bar a[aria-current="page"] {
   color: ${c.navActiveText} !important;
-  background-color: transparent !important;
-  background: transparent !important;
-  border-color: transparent !important;
-  box-shadow: none !important;
-  border-radius: 0 !important;
+  background-color: inherit !important;
 }
 
 /* Nav text and icons */
@@ -995,12 +1065,11 @@ ${c.globalHeaderWhite ? `
   color: #54698d !important;
 }` : ''}
 
-/* Profile avatar container */
+/* Profile avatar container — keep structure, just hide border visually */
 .slds-avatar,
 .forceSocialPhoto,
 .photoContainer {
-  border: none !important;
-  box-shadow: none !important;
+  border-color: transparent !important;
 }
 ` + _generateTypographyCSS(typo);
 }
