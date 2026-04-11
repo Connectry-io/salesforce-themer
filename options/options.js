@@ -471,9 +471,13 @@
     if (!enabled.length) {
       return `<div class="theme-effects-indicators is-empty"><span class="theme-effects-empty">No effects</span></div>`;
     }
+    const DOTS = { subtle: '·', medium: '··', strong: '···' };
     const pills = enabled.map(e => {
       const label = EFFECT_LABELS[e] || e;
-      return `<button type="button" class="theme-effect-pill" data-effect-pill="${e}" title="${label} — click to learn more">${label}</button>`;
+      const intensity = cfg[e + 'Intensity'] || 'medium';
+      const dots = DOTS[intensity] || '··';
+      const intensityLabel = intensity.charAt(0).toUpperCase() + intensity.slice(1);
+      return `<button type="button" class="theme-effect-pill" data-effect-pill="${e}" title="${label} — ${intensityLabel}">${label}<span class="theme-effect-dots">${dots}</span></button>`;
     }).join('');
     return `<div class="theme-effects-indicators">${pills}</div>`;
   }
@@ -1063,30 +1067,11 @@
       : getSuggestedEffectsFor(theme.id);
     renderThemePreview(previewHost, colors, { size: 'compact', effects });
 
-    // Body: base-theme label (custom only) + effects + intensity
+    // Body: base-theme label for custom themes only
+    // Effects + intensity are shown on the cards via dots — no controls in panel
     const body = document.getElementById('optDetailBody');
     const basedOn = !isBuiltIn ? `<p class="opt-detail-bestfor">Based on: ${(getThemeById(theme.basedOn) || THEMES[0]).name}</p>` : '';
-
-    let effectsHtml = '';
-    if (isBuiltIn) {
-      const pills = buildEffectIndicators(theme.id);
-      effectsHtml = `
-        <div class="opt-detail-effects">
-          <div class="opt-detail-effects-label">Effects</div>
-          <div class="opt-detail-effects-pills">${pills}</div>
-          <div class="opt-detail-volume">
-            <span>Intensity</span>
-            <div class="opt-scope-pills" role="radiogroup" aria-label="Effects intensity">
-              <button class="opt-scope-pill${syncState.effectsVolume === 'off' ? ' is-active' : ''}" data-detail-volume="off">Off</button>
-              <button class="opt-scope-pill${syncState.effectsVolume === 'subtle' ? ' is-active' : ''}" data-detail-volume="subtle">Subtle</button>
-              <button class="opt-scope-pill${(!syncState.effectsVolume || syncState.effectsVolume === 'default') ? ' is-active' : ''}" data-detail-volume="default">Default</button>
-              <button class="opt-scope-pill${syncState.effectsVolume === 'immersive' ? ' is-active' : ''}" data-detail-volume="immersive">Immersive</button>
-            </div>
-          </div>
-        </div>`;
-    }
-
-    body.innerHTML = `${basedOn}${effectsHtml}`;
+    body.innerHTML = basedOn;
 
     // Wire action handlers on the body
     _wireDetailActions(toolbar, body, theme);
