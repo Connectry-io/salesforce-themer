@@ -146,7 +146,15 @@
     const url = location.pathname + location.search + location.hash;
     const host = location.hostname;
 
-    // URL patterns first — they're the most reliable signal
+    // Overlay detection FIRST — App Launcher and Modals are overlays on
+    // top of other pages. Their DOM is present but the URL still shows
+    // the underlying page. Must check before URL patterns.
+    const overlayTypes = PAGE_TYPES.filter(pt => pt.domDetect && (pt.id === 'appLauncher' || pt.id === 'modal'));
+    for (const pt of overlayTypes) {
+      if (pt.domDetect()) return pt;
+    }
+
+    // URL patterns — most reliable for non-overlay page types
     for (const pt of PAGE_TYPES) {
       if (!pt.urlPatterns || !pt.urlPatterns.length) continue;
       for (const pattern of pt.urlPatterns) {
@@ -156,11 +164,10 @@
       }
     }
 
-    // Then DOM-detected types (modals, app launcher overlay)
-    // Only checked if no URL pattern matched
+    // Remaining DOM detection (related lists on record pages)
     for (const pt of PAGE_TYPES) {
-      if (pt.domDetect && pt.domDetect()) {
-        return pt;
+      if (pt.domDetect && pt.id !== 'appLauncher' && pt.id !== 'modal') {
+        if (pt.domDetect()) return pt;
       }
     }
 
