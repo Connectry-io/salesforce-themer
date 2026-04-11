@@ -1181,13 +1181,31 @@
 
   function bindStatusBar() {
     const configBtn = document.getElementById('optStatusBarConfigure');
-    const drawer = document.getElementById('optConfigDrawer');
-    if (!configBtn || !drawer) return;
+    const popover = document.getElementById('optSettingsPopover');
+    if (!configBtn || !popover) return;
 
-    configBtn.addEventListener('click', () => {
-      const expanded = configBtn.getAttribute('aria-expanded') === 'true';
-      configBtn.setAttribute('aria-expanded', String(!expanded));
-      drawer.classList.toggle('is-collapsed', expanded);
+    configBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const open = !popover.hidden;
+      popover.hidden = open;
+      configBtn.setAttribute('aria-expanded', String(!open));
+    });
+
+    // Close on click outside
+    document.addEventListener('click', (e) => {
+      if (!popover.hidden && !e.target.closest('.opt-status-bar-menu-wrap')) {
+        popover.hidden = true;
+        configBtn.setAttribute('aria-expanded', 'false');
+      }
+    });
+
+    // Close on Escape
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && !popover.hidden) {
+        popover.hidden = true;
+        configBtn.setAttribute('aria-expanded', 'false');
+        configBtn.focus();
+      }
     });
   }
 
@@ -1843,7 +1861,6 @@
 
     // Themes tab — Theme Manager
     renderCollectionGrid(activeTheme);
-    renderSmartApply();
     bindPresetsFilterPills();
     bindStatusBar();
     bindDetailPanelClose();

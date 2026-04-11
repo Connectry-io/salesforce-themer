@@ -105,39 +105,28 @@
             <span>Smart Apply: <strong id="optSmartStatusText">Off</strong></span>
             <span class="cx-tab-badge cx-tab-badge--premium">Premium</span>
           </span>
-          <button class="opt-status-bar-configure" id="optStatusBarConfigure" type="button" aria-expanded="false">
-            <svg width="13" height="13" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-              <circle cx="8" cy="8" r="1.5" fill="currentColor"/><circle cx="8" cy="3" r="1.5" fill="currentColor"/><circle cx="8" cy="13" r="1.5" fill="currentColor"/>
-            </svg>
-          </button>
-        </div>
-      </div>
-
-      <!-- Expandable config drawer (hidden by default, shown on ⋮ click) -->
-      <div class="opt-config-drawer is-collapsed" id="optConfigDrawer">
-        <div class="opt-config-drawer-grid">
-          <!-- Settings column -->
-          <div class="opt-config-drawer-col">
-            <h4 class="opt-config-drawer-heading">Settings</h4>
-            <div class="opt-settings-row">
-              <span class="opt-settings-text">Apply to</span>
-              <div class="opt-scope-pills" id="optionsScopePills" role="group" aria-label="Theme scope">
-                <button class="opt-scope-pill" data-scope="both">Both</button>
-                <button class="opt-scope-pill" data-scope="lightning">Lightning</button>
-                <button class="opt-scope-pill" data-scope="setup">Setup</button>
+          <div class="opt-status-bar-menu-wrap">
+            <button class="opt-status-bar-configure" id="optStatusBarConfigure" type="button" aria-expanded="false" aria-haspopup="true">
+              <svg width="13" height="13" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                <circle cx="8" cy="8" r="1.5" fill="currentColor"/><circle cx="8" cy="3" r="1.5" fill="currentColor"/><circle cx="8" cy="13" r="1.5" fill="currentColor"/>
+              </svg>
+            </button>
+            <div class="opt-settings-popover" id="optSettingsPopover" hidden>
+              <div class="opt-settings-popover-row">
+                <span class="opt-settings-popover-label">Apply to</span>
+                <div class="opt-scope-pills" id="optionsScopePills" role="group" aria-label="Theme scope">
+                  <button class="opt-scope-pill" data-scope="both">Both</button>
+                  <button class="opt-scope-pill" data-scope="lightning">Lightning</button>
+                  <button class="opt-scope-pill" data-scope="setup">Setup</button>
+                </div>
               </div>
+              <div class="opt-settings-popover-row" id="orgSettingsRow" hidden>
+                <span class="opt-settings-popover-label">Per-org themes</span>
+                <div class="org-list" id="orgList"></div>
+              </div>
+              <div class="opt-settings-popover-divider"></div>
+              <button type="button" class="opt-settings-popover-reset" id="optResetSettingsBtn">Reset to defaults</button>
             </div>
-            <div class="opt-settings-row" id="orgSettingsRow" hidden>
-              <span class="opt-settings-text">Per-org themes</span>
-              <div class="org-list" id="orgList"></div>
-            </div>
-            <button type="button" class="opt-reset-link" id="optResetSettingsBtn">Reset to defaults</button>
-          </div>
-          <!-- Smart Apply column -->
-          <div class="opt-config-drawer-col">
-            <h4 class="opt-config-drawer-heading">Smart Apply <span class="cx-tab-badge cx-tab-badge--premium">Premium</span></h4>
-            <p class="opt-smart-intro">Switch themes automatically based on time, weather, or mood.</p>
-            <div class="opt-smart-modes" id="optSmartModes"></div>
           </div>
         </div>
       </div>
