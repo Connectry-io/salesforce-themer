@@ -228,6 +228,7 @@
       { prefix: 'maps', label: 'Salesforce Maps' },
       { prefix: 'taskray', label: 'TaskRay' },
       { prefix: 'formassembly', label: 'FormAssembly' },
+      { prefix: 'mholt', label: 'Matt Holt (AppExchange)' },
     ];
 
     const allCustomEls = document.querySelectorAll('*');

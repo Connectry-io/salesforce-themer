@@ -216,41 +216,115 @@
     if (!component || !themeColors) return null;
 
     const tag = component.tag;
+    const isDark = themeColors.colorScheme === 'dark';
     const rules = [];
 
-    // Map hardcoded colors to appropriate theme tokens
+    // ── Always generate a comprehensive set of overrides for custom LWCs ──
+    // Custom components often inherit SF defaults (white bg, dark text) that
+    // clash with dark themes. Even if the component's computed bg is transparent,
+    // its children may not be — so we theme the host AND its descendants.
+
+    // Host element: background + text + border
+    rules.push({
+      property: 'background-color',
+      value: `var(--lwc-colorBackgroundAlt, ${themeColors.surface})`,
+      reason: 'Theme surface color on custom component host',
+    });
+
+    rules.push({
+      property: 'color',
+      value: `var(--lwc-colorTextDefault, ${themeColors.textPrimary})`,
+      reason: 'Theme text color on custom component host',
+    });
+
+    // Border: only if the component actually has visible borders
     if (component.styling) {
-      const s = component.styling;
-
-      // Background: if it's a hardcoded color, map to surface
-      if (s.backgroundColor && s.backgroundColor !== 'rgba(0, 0, 0, 0)' && s.backgroundColor !== 'transparent') {
-        rules.push({
-          property: 'background-color',
-          value: `var(--lwc-colorBackgroundAlt, ${themeColors.surface})`,
-          reason: `Replaces hardcoded ${s.backgroundColor}`,
-        });
-      }
-
-      // Text color: if hardcoded, map to textPrimary
-      if (s.color && !s.color.includes('inherit')) {
-        rules.push({
-          property: 'color',
-          value: `var(--lwc-colorTextDefault, ${themeColors.textPrimary})`,
-          reason: `Replaces hardcoded ${s.color}`,
-        });
-      }
-
-      // Border: if hardcoded, map to border
-      if (s.borderColor && s.borderColor !== 'rgb(0, 0, 0)' && s.borderColor !== 'rgba(0, 0, 0, 0)') {
+      const bc = component.styling.borderColor;
+      const hasBorder = bc && bc !== 'rgb(0, 0, 0)' && bc !== 'rgba(0, 0, 0, 0)' && bc !== 'transparent';
+      if (hasBorder) {
         rules.push({
           property: 'border-color',
           value: `var(--lwc-colorBorder, ${themeColors.border})`,
-          reason: `Replaces hardcoded ${s.borderColor}`,
+          reason: `Replaces ${bc}`,
         });
       }
     }
 
-    // Also include explicit hardcoded issues from inline styles
+    // ── Descendant overrides ────────────────────────────────────────────────
+    // Custom LWCs contain inner elements (divs, spans, tables, inputs) that
+    // hardcode SF default colors. The descendant rules ensure these inherit
+    // the theme's palette instead of rendering as bright white patches.
+    const descendantRules = [];
+
+    // Inner containers and divs
+    descendantRules.push({
+      selector: `${tag} div, ${tag} section, ${tag} article`,
+      properties: [
+        { property: 'color', value: 'inherit' },
+      ],
+    });
+
+    // Inner headings and labels
+    descendantRules.push({
+      selector: `${tag} h1, ${tag} h2, ${tag} h3, ${tag} h4, ${tag} label, ${tag} span`,
+      properties: [
+        { property: 'color', value: 'inherit' },
+      ],
+    });
+
+    // Links inside the component
+    descendantRules.push({
+      selector: `${tag} a`,
+      properties: [
+        { property: 'color', value: `var(--lwc-colorTextLink, ${themeColors.link})` },
+      ],
+    });
+
+    // Tables inside the component
+    descendantRules.push({
+      selector: `${tag} table, ${tag} .slds-table`,
+      properties: [
+        { property: 'background-color', value: `var(--lwc-colorBackgroundAlt, ${themeColors.surface})` },
+        { property: 'border-color', value: `var(--lwc-colorBorder, ${themeColors.border})` },
+      ],
+    });
+
+    descendantRules.push({
+      selector: `${tag} th`,
+      properties: [
+        { property: 'background-color', value: `var(--lwc-colorBackground, ${themeColors.background})` },
+        { property: 'color', value: `var(--lwc-colorTextDefault, ${themeColors.textPrimary})` },
+      ],
+    });
+
+    descendantRules.push({
+      selector: `${tag} td`,
+      properties: [
+        { property: 'border-color', value: `var(--lwc-colorBorder, ${themeColors.border})` },
+        { property: 'color', value: 'inherit' },
+      ],
+    });
+
+    // Inputs inside the component
+    descendantRules.push({
+      selector: `${tag} input, ${tag} textarea, ${tag} select`,
+      properties: [
+        { property: 'background-color', value: `var(--lwc-colorBackgroundInput, ${isDark ? themeColors.background : themeColors.surface})` },
+        { property: 'border-color', value: `var(--lwc-colorBorderInput, ${themeColors.borderInput})` },
+        { property: 'color', value: `var(--lwc-colorTextDefault, ${themeColors.textPrimary})` },
+      ],
+    });
+
+    // Buttons inside the component
+    descendantRules.push({
+      selector: `${tag} button, ${tag} .slds-button`,
+      properties: [
+        { property: 'color', value: 'inherit' },
+      ],
+    });
+
+    // Also include explicit hardcoded issues from inline styles (these add
+    // more specific rules where the scanner found actual hardcoded values)
     if (component.styling?.hardcodedIssues) {
       for (const issue of component.styling.hardcodedIssues) {
         const mapped = mapHardcodedProperty(issue.property, themeColors);
@@ -260,12 +334,16 @@
       }
     }
 
-    if (!rules.length) return null;
+    // ── Build CSS ──────────────────────────────────────────────────────────
+    let css = `/* Patch: <${tag}> */\n`;
+    css += `${tag} {\n${rules.map(r => `  ${r.property}: ${r.value} !important;`).join('\n')}\n}\n`;
 
-    // Build CSS
-    const css = `${tag} {\n${rules.map(r => `  ${r.property}: ${r.value} !important;`).join('\n')}\n}`;
+    for (const dr of descendantRules) {
+      const props = dr.properties.map(p => `  ${p.property}: ${p.value} !important;`).join('\n');
+      css += `\n${dr.selector} {\n${props}\n}`;
+    }
 
-    return { tag, rules, css };
+    return { tag, rules, descendantRules, css };
   };
 
   /**
