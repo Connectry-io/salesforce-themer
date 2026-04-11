@@ -62,11 +62,7 @@
       hint: 'Click the 9-dot waffle icon in the top-left corner.',
       scans: ['tokens'],
       keyComponents: ['card', 'input'],
-      domDetect: () => {
-        const launcher = document.querySelector('one-app-launcher-modal, .al-modal-container, .appLauncherMenu');
-        if (!launcher) return false;
-        return launcher.offsetHeight > 100;
-      },
+      manual: true, // App Launcher is an overlay modal — URL doesn't change, DOM detection unreliable across orgs
     },
     {
       id: 'listView',
@@ -85,10 +81,7 @@
       hint: 'On a record, click the "Related" tab to see related lists.',
       scans: ['tokens', 'components'],
       keyComponents: ['card', 'table', 'button'],
-      domDetect: () => {
-        if (!/\/lightning\/r\//.test(location.pathname)) return false;
-        return document.querySelectorAll('.forceRelatedListSingleContainer, lst-related-list-container, lst-related-list-single-container, .forceRelatedListCardDesktop').length > 0;
-      },
+      manual: true, // Related lists are on record pages but URL doesn't change when switching to Related tab
     },
     {
       // Record Detail MUST come after Reports/Dashboards since /lightning/r/ is a broad match
