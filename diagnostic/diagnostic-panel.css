@@ -423,6 +423,19 @@
   flex-shrink: 0;
 }
 
+.diag-scan-btn--success {
+  background: var(--dp-good-bg) !important;
+  border-color: rgba(34, 197, 94, 0.3) !important;
+  color: var(--dp-good) !important;
+  cursor: default !important;
+}
+
+.diag-scan-time {
+  font-size: 10px;
+  color: var(--dp-text-3);
+  font-variant-numeric: tabular-nums;
+}
+
 .diag-scan-btn.is-scanning svg {
   animation: diag-spin 1s linear infinite;
 }

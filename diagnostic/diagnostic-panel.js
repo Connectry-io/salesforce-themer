@@ -231,6 +231,7 @@
       }
 
       this.hasScanned = true;
+      this._lastScanTime = new Date();
 
       // Update info bar (page may have changed)
       this._updateInfoBar();
@@ -429,10 +430,16 @@
       const hardcodedCount = s?.totalHardcoded || 0;
       const issueCount = gapCount + unstyledCount + hardcodedCount;
 
+      // Last scan timestamp
+      const timeStr = this._lastScanTime
+        ? this._lastScanTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })
+        : '';
+
       return `
         <div class="diag-coverage">
           <div class="diag-coverage-header">
             <span class="diag-coverage-label">Theme Health</span>
+            ${timeStr ? `<span class="diag-scan-time">${timeStr}</span>` : ''}
             <span class="diag-coverage-pct is-${overallLevel}">${overallPct}%</span>
           </div>
           <div class="diag-coverage-bar">
@@ -1218,6 +1225,10 @@
     // ── Scan execution ────────────────────────────────────────────────────
 
     async _runScanAll(btn) {
+      // Prevent double-click
+      if (this._scanning) return;
+      this._scanning = true;
+
       btn.classList.add('is-scanning');
       const iconSpan = btn.querySelector('svg');
       const textSpan = btn.querySelector('span');
@@ -1227,10 +1238,13 @@
       // Show heartbeat animation
       const hb = this.shadow?.getElementById('diagHeartbeat');
       if (hb) hb.classList.add('is-active');
-      // Add scanning state to panel
       this.panel?.classList.add('is-scanning');
 
-      await new Promise(r => setTimeout(r, 50));
+      // Record start time — enforce minimum 800ms so animation is visible
+      const scanStart = Date.now();
+
+      // Let the UI paint the spinner before running sync scans
+      await new Promise(r => setTimeout(r, 80));
 
       // Load theme colors if not cached
       if (!this.themeColors) {
@@ -1286,6 +1300,13 @@
       }
 
       this.hasScanned = true;
+      this._lastScanTime = new Date();
+
+      // Wait for minimum animation time so heartbeat is visible
+      const elapsed = Date.now() - scanStart;
+      if (elapsed < 800) {
+        await new Promise(r => setTimeout(r, 800 - elapsed));
+      }
 
       // Stop heartbeat
       const hb2 = this.shadow?.getElementById('diagHeartbeat');
@@ -1296,12 +1317,25 @@
       const resultsEl = this.shadow?.querySelector('.diag-results');
       if (resultsEl) resultsEl.innerHTML = this._unifiedResultsHTML();
 
-      // Update info bar (theme colors may have loaded)
+      // Update info bar
       this._updateInfoBar();
 
-      // Reset scan button
+      // Show success state on scan button, then reset
       const scanBar = this.shadow?.querySelector('.diag-scan-bar');
-      if (scanBar) scanBar.outerHTML = this._scanBarHTML();
+      if (scanBar) {
+        scanBar.innerHTML = `
+          <button class="diag-scan-btn diag-scan-btn--success" style="width:100%" disabled>
+            <svg viewBox="0 0 14 14" fill="none" width="14" height="14"><path d="M3 7l3 3 5-5.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <span>Scanned</span>
+          </button>`;
+        // After 1.2s, swap back to the real Re-Scan button
+        setTimeout(() => {
+          const bar = this.shadow?.querySelector('.diag-scan-bar');
+          if (bar) bar.outerHTML = this._scanBarHTML();
+        }, 1200);
+      }
+
+      this._scanning = false;
     }
 
     async _resetTestingProgress() {
