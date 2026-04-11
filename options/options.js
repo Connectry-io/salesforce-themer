@@ -920,9 +920,24 @@
   function renderMyThemesGrid(activeThemeId) {
     const grid = document.getElementById('optMyThemesGrid');
     const empty = document.getElementById('optMyThemesEmpty');
+    const premiumGate = document.getElementById('optMyThemesPremiumGate');
+    const newBtn = document.getElementById('optMyThemesNewBtn');
     if (!grid) return;
     grid.innerHTML = '';
     closeDetailPanel();
+
+    // Free users: hide grid, show premium gate
+    if (!isPremium()) {
+      grid.hidden = true;
+      if (empty) empty.hidden = true;
+      if (premiumGate) premiumGate.hidden = false;
+      if (newBtn) newBtn.hidden = true;
+      return;
+    }
+
+    grid.hidden = false;
+    if (premiumGate) premiumGate.hidden = true;
+    if (newBtn) newBtn.hidden = false;
 
     const customs = (syncState.customThemes || []).map(ct => ({
       ...ct,
@@ -1363,9 +1378,12 @@
 
   function bindEmptyBuilderBtn() {
     const btn = document.getElementById('optEmptyBuilderBtn');
-    if (!btn) return;
-    btn.addEventListener('click', () => {
+    if (btn) btn.addEventListener('click', () => {
       if (_tabsInstance) _tabsInstance.activate('builder');
+    });
+    const upgradeBtn = document.getElementById('optMyThemesUpgradeBtn');
+    if (upgradeBtn) upgradeBtn.addEventListener('click', () => {
+      if (_tabsInstance) _tabsInstance.activate('upgrade');
     });
   }
 

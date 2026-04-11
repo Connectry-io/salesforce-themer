@@ -345,7 +345,12 @@
   grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
   gap: var(--cx-space-4);
 }
+.opt-collection-grid[hidden] { display: none; }
 .opt-collection-grid .theme-card.is-hidden { display: none; }
+.opt-premium-gate {
+  border: 1px dashed var(--cx-accent);
+  background: var(--cx-accent-light);
+}
 
 /* ─── Palette Preview (compact color strip for detail panel) ─────────────── */
 
