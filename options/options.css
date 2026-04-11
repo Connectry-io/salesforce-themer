@@ -281,6 +281,53 @@
 }
 .opt-collection-grid .theme-card.is-hidden { display: none; }
 
+/* ─── Palette Preview (compact color strip for detail panel) ─────────────── */
+
+.palette-preview {
+  border-radius: var(--cx-radius-md);
+  overflow: hidden;
+  border: 1px solid var(--cx-border);
+}
+.palette-preview-nav {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 10px;
+  font-size: 10px;
+  font-weight: 500;
+}
+.palette-preview-nav-app { font-weight: 700; font-size: 11px; }
+.palette-preview-nav-active { border-bottom: 2px solid; padding-bottom: 2px; }
+.palette-preview-body { padding: 8px; }
+.palette-preview-card {
+  border: 1px solid;
+  border-radius: 6px;
+  padding: 8px 10px;
+}
+.palette-preview-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+.palette-preview-title { font-size: 12px; font-weight: 700; }
+.palette-preview-btn {
+  font-size: 9px;
+  font-weight: 600;
+  padding: 3px 8px;
+  border-radius: 4px;
+}
+.palette-preview-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.palette-preview-field {
+  display: flex;
+  justify-content: space-between;
+  font-size: 10px;
+}
+
 /* ─── Theme Manager: Detail Panel Body Content ───────────────────────────── */
 
 .opt-detail-tagline {

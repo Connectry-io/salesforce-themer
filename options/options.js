@@ -402,6 +402,44 @@
     }
   }
 
+  // ─── Palette Preview (compact, for detail panel) ──────────────────────────
+  //
+  // Lightweight color-relationship strip showing how nav, surface, accent,
+  // text, and buttons relate. ~100px tall vs the full SF mockup's 300-640px.
+  // Used in the Theme Manager detail panel. The full mockup stays in the
+  // Builder via renderThemePreview().
+
+  function renderPalettePreview(container, colors) {
+    const c = colors || {};
+    container.innerHTML = `
+      <div class="palette-preview">
+        <div class="palette-preview-nav" style="background:${c.nav || '#4a6fa5'}">
+          <span class="palette-preview-nav-app" style="color:${c.navText || '#fff'}">Sales</span>
+          <span class="palette-preview-nav-item" style="color:${c.navText || '#fff'}">Home</span>
+          <span class="palette-preview-nav-item palette-preview-nav-active" style="color:${c.navActiveText || '#fff'}; border-color:${c.accent || '#fff'}">Leads</span>
+          <span class="palette-preview-nav-item" style="color:${c.navText || '#fff'}">Accounts</span>
+        </div>
+        <div class="palette-preview-body" style="background:${c.background || '#f7f7f5'}">
+          <div class="palette-preview-card" style="background:${c.surface || '#fff'}; border-color:${c.border || '#e8e8e6'}">
+            <div class="palette-preview-card-header">
+              <span class="palette-preview-title" style="color:${c.textPrimary || '#2d2d2d'}">Record Name</span>
+              <span class="palette-preview-btn" style="background:${c.accent || '#4a6fa5'}; color:${c.buttonBrandText || '#fff'}">Action</span>
+            </div>
+            <div class="palette-preview-fields">
+              <div class="palette-preview-field">
+                <span style="color:${c.textSecondary || '#4a5568'}">Label</span>
+                <span style="color:${c.textPrimary || '#2d2d2d'}">Value</span>
+              </div>
+              <div class="palette-preview-field">
+                <span style="color:${c.textSecondary || '#4a5568'}">Email</span>
+                <span style="color:${c.link || '#4a6fa5'}">link@example.com</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>`;
+  }
+
   // ─── Theme grid rendering ─────────────────────────────────────────────────
 
   // Effect display names — used by the theme card pills and the Guide tab.
@@ -991,14 +1029,10 @@
     // Header
     document.getElementById('optDetailName').textContent = theme.name;
 
-    // Preview
+    // Palette preview (compact color strip — full mockup lives in Builder)
     const previewHost = document.getElementById('optDetailPreview');
-    previewHost.innerHTML = '';
     const colors = theme.isCustom ? theme.colors : theme.colors;
-    const effects = theme.isCustom
-      ? (theme.effects || getSuggestedEffectsFor(theme.basedOn || 'connectry'))
-      : getSuggestedEffectsFor(theme.id);
-    renderThemePreview(previewHost, colors, { size: 'card', effects });
+    renderPalettePreview(previewHost, colors);
 
     // Body content
     const body = document.getElementById('optDetailBody');
