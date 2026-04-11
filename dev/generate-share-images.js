@@ -116,60 +116,75 @@ function renderShareImage(canvas, theme) {
   ctx.fillStyle = c.background || '#f7f7f5';
   ctx.beginPath(); ctx.roundRect(appX, appY, appW, appH, [0, 0, 8, 8]); ctx.fill();
 
-  // ── Global header (white bar with search) ──
-  var ghH = 32;
+  // ── Top bar — SF logo (left), search (center), icons + avatar (right) ──
+  var tbH = 28;
   ctx.fillStyle = c.surface || '#ffffff';
-  ctx.fillRect(appX, appY, appW, ghH);
+  ctx.fillRect(appX, appY, appW, tbH);
   ctx.strokeStyle = c.border || '#e8e8e6';
   ctx.lineWidth = 0.5;
-  ctx.beginPath(); ctx.moveTo(appX, appY + ghH); ctx.lineTo(appX + appW, appY + ghH); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(appX, appY + tbH); ctx.lineTo(appX + appW, appY + tbH); ctx.stroke();
 
-  // Waffle
+  // SF cloud logo placeholder (left)
   ctx.fillStyle = c.textSecondary || '#4a5568';
-  for (var wr = 0; wr < 3; wr++) {
-    for (var wc = 0; wc < 3; wc++) {
-      ctx.beginPath(); ctx.arc(appX + 16 + wc * 5, appY + 11 + wr * 5, 1.2, 0, Math.PI * 2); ctx.fill();
-    }
-  }
+  ctx.globalAlpha = 0.4;
+  ctx.font = '10px Inter, system-ui, sans-serif';
+  ctx.fillText('\u2601', appX + 14, appY + 18);
+  ctx.globalAlpha = 1;
 
-  // Search
-  ctx.fillStyle = c.surfaceAlt || '#eeeeed';
-  ctx.beginPath(); ctx.roundRect(appX + 38, appY + 7, 180, 18, 9); ctx.fill();
+  // Search (centered)
+  var searchW = 160, searchX = appX + (appW - searchW) / 2;
+  ctx.fillStyle = c.background || '#f7f7f5';
+  ctx.strokeStyle = c.borderInput || c.border || '#e8e8e6';
+  ctx.lineWidth = 0.6;
+  ctx.beginPath(); ctx.roundRect(searchX, appY + 5, searchW, 18, 4); ctx.fill(); ctx.stroke();
   ctx.fillStyle = c.textPlaceholder || '#9aa5b4';
   ctx.font = '9px Inter, system-ui, sans-serif';
-  ctx.fillText('Search...', appX + 54, appY + 20);
+  ctx.fillText('Search...', searchX + 18, appY + 17);
 
-  // Right-side icons
+  // Right-side icons + avatar
   var iconX = appX + appW - 20;
   ctx.fillStyle = c.accent || '#4a6fa5';
-  ctx.beginPath(); ctx.arc(iconX, appY + 16, 9, 0, Math.PI * 2); ctx.fill();
-  ctx.fillStyle = '#ffffff';
-  ctx.font = 'bold 8px Inter, system-ui, sans-serif';
+  ctx.beginPath(); ctx.arc(iconX, appY + 14, 8, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = c.buttonBrandText || '#ffffff';
+  ctx.font = 'bold 7px Inter, system-ui, sans-serif';
   ctx.textAlign = 'center';
-  ctx.fillText('N', iconX, appY + 19);
+  ctx.fillText('N', iconX, appY + 17);
   ctx.textAlign = 'left';
 
   // + icon
   ctx.strokeStyle = c.textSecondary || '#4a5568';
   ctx.lineWidth = 1;
-  ctx.beginPath(); ctx.moveTo(iconX - 30, appY + 12); ctx.lineTo(iconX - 30, appY + 20); ctx.stroke();
-  ctx.beginPath(); ctx.moveTo(iconX - 34, appY + 16); ctx.lineTo(iconX - 26, appY + 16); ctx.stroke();
+  ctx.globalAlpha = 0.5;
+  ctx.beginPath(); ctx.moveTo(iconX - 28, appY + 10); ctx.lineTo(iconX - 28, appY + 18); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(iconX - 32, appY + 14); ctx.lineTo(iconX - 24, appY + 14); ctx.stroke();
+  ctx.globalAlpha = 1;
 
-  // ── Nav bar ──
-  var navY = appY + ghH;
+  // ── App nav bar — waffle + app name + tabs ──
+  var navY = appY + tbH;
   var navH = 34;
   ctx.fillStyle = c.nav || '#4a6fa5';
   ctx.fillRect(appX, navY, appW, navH);
 
-  ctx.fillStyle = '#ffffff';
+  // Waffle dots
+  ctx.fillStyle = c.navText || '#ffffff';
+  ctx.globalAlpha = 0.5;
+  for (var wr = 0; wr < 3; wr++) {
+    for (var wc = 0; wc < 3; wc++) {
+      ctx.beginPath(); ctx.arc(appX + 16 + wc * 5, navY + 12 + wr * 5, 1.2, 0, Math.PI * 2); ctx.fill();
+    }
+  }
+  ctx.globalAlpha = 1;
+
+  ctx.fillStyle = c.navText || '#ffffff';
   ctx.font = 'bold 11px Inter, system-ui, sans-serif';
   var navItems = ['Sales', 'Home', 'Leads', 'Contacts', 'Accounts'];
+  var navStartX = appX + 36;
   navItems.forEach(function(item, i) {
-    ctx.fillText(item, appX + 20 + i * 72, navY + 22);
+    ctx.fillText(item, navStartX + i * 72, navY + 22);
   });
   // Active underline on Leads
-  ctx.fillStyle = '#ffffff';
-  ctx.fillRect(appX + 20 + 2 * 72, navY + navH - 3, 38, 3);
+  ctx.fillStyle = c.navActiveText || c.navText || '#ffffff';
+  ctx.fillRect(navStartX + 2 * 72, navY + navH - 3, 38, 3);
 
   // ── Record page content ──
   var recY = navY + navH + 6;
@@ -233,22 +248,31 @@ function renderShareImage(canvas, theme) {
   ctx.lineWidth = 0.4;
   ctx.beginPath(); ctx.moveTo(cardX + 6, tabY + 7); ctx.lineTo(cardX + cardW - 6, tabY + 7); ctx.stroke();
 
-  // Detail rows
-  var rows = [['Name', 'John Smith'], ['Email', 'john@example.com'], ['Company', 'Acme Corp'], ['Phone', '+1 (555) 123-4567']];
-  rows.forEach(function(row, i) {
-    var ry = tabY + 22 + i * 22;
+  // Detail rows — 2-column layout like real Salesforce
+  var leftCol = [['Name', 'John Smith'], ['Email', 'john@example.com'], ['Company', 'Acme Corp']];
+  var rightCol = [['Title', 'Sr. Account Exec'], ['Phone', '(415) 555-1234'], ['Industry', 'Technology']];
+  var colMid = cardX + cardW / 2;
+  for (var ri = 0; ri < leftCol.length; ri++) {
+    var ry = tabY + 22 + ri * 22;
+    // Left column
     ctx.fillStyle = c.textSecondary || '#64748b';
     ctx.font = '9px Inter, system-ui, sans-serif';
-    ctx.fillText(row[0], cardX + 14, ry);
-    ctx.fillStyle = row[0] === 'Email' ? (c.link || c.accent || '#4a6fa5') : (c.textPrimary || '#1e293b');
-    ctx.fillText(row[1], cardX + 130, ry);
+    ctx.fillText(leftCol[ri][0], cardX + 14, ry);
+    ctx.fillStyle = leftCol[ri][0] === 'Email' ? (c.link || c.accent || '#4a6fa5') : (c.textPrimary || '#1e293b');
+    ctx.fillText(leftCol[ri][1], cardX + 80, ry);
+    // Right column
+    ctx.fillStyle = c.textSecondary || '#64748b';
+    ctx.fillText(rightCol[ri][0], colMid + 14, ry);
+    ctx.fillStyle = c.textPrimary || '#1e293b';
+    ctx.fillText(rightCol[ri][1], colMid + 80, ry);
+    // Row separator
     ctx.strokeStyle = c.tableBorderRow || c.border || '#e8e8e6';
     ctx.lineWidth = 0.3;
     ctx.beginPath(); ctx.moveTo(cardX + 8, ry + 8); ctx.lineTo(cardX + cardW - 8, ry + 8); ctx.stroke();
-  });
+  }
 
   // Edit / Delete
-  var btnY = tabY + 22 + rows.length * 22 + 6;
+  var btnY = tabY + 22 + leftCol.length * 22 + 6;
   ctx.fillStyle = c.buttonNeutralBg || c.surface || '#ffffff';
   ctx.strokeStyle = c.buttonNeutralBorder || c.border || '#c4cdd6';
   ctx.lineWidth = 0.6;

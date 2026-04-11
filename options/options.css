@@ -3839,8 +3839,9 @@ body.is-premium .builder-overflow-premium-badge { display: none !important; }
 .preview-size-compact .preview-browser-bar { border-radius: var(--cx-radius-sm) var(--cx-radius-sm) 0 0; padding: 4px 8px; }
 .preview-size-compact .preview-browser-dots span { width: 5px; height: 5px; }
 .preview-size-compact .preview-highlights { display: none; }
-.preview-size-compact .preview-input-wrap { display: none; }
-.preview-size-compact .preview-table-wrap { display: none; }
+.preview-size-compact .preview-related-list { display: none; }
+.preview-size-compact .preview-card-body-2col { grid-template-columns: 1fr; }
+.preview-size-compact .preview-toast { display: none; }
 
 .preview-size-card { border-radius: var(--cx-radius-md); overflow: hidden; box-shadow: var(--cx-shadow-sm); }
 .preview-size-card .editor-preview-frame { min-height: 300px; font-size: 9px; }
@@ -4062,22 +4063,24 @@ body.is-premium .builder-overflow-premium-badge { display: none !important; }
 }
 
 /* Global header — white bar with logo, search, admin icons */
-.preview-global-header {
+/* Top bar — SF logo (left), search (center), config icons + avatar (right) */
+.preview-topbar {
   display: flex;
   align-items: center;
   gap: 10px;
   padding: 6px 14px;
   border-bottom: 1px solid;
 }
-.preview-global-header-left {
+.preview-topbar-left {
   display: flex;
   align-items: center;
-  gap: 6px;
   flex-shrink: 0;
 }
-.preview-global-waffle { display: inline-flex; opacity: 0.6; cursor: default; }
-.preview-global-search {
-  flex: 0 1 200px;
+.preview-sf-logo { opacity: 0.5; }
+.preview-topbar-search {
+  flex: 1;
+  max-width: 240px;
+  margin: 0 auto;
   display: flex;
   align-items: center;
   gap: 6px;
@@ -4086,14 +4089,14 @@ body.is-premium .builder-overflow-premium-badge { display: none !important; }
   border-radius: 4px;
   font-size: 10px;
 }
-.preview-global-actions {
+.preview-topbar-actions {
   display: flex;
   align-items: center;
   gap: 8px;
   flex-shrink: 0;
   opacity: 0.6;
 }
-.preview-global-avatar {
+.preview-topbar-avatar {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -4105,7 +4108,7 @@ body.is-premium .builder-overflow-premium-badge { display: none !important; }
   opacity: 1;
 }
 
-/* App nav bar */
+/* App nav bar — waffle + app name + tabs (below top bar) */
 .preview-nav {
   display: flex;
   align-items: center;
@@ -4113,6 +4116,7 @@ body.is-premium .builder-overflow-premium-badge { display: none !important; }
   padding: 10px 16px;
   font-weight: 500;
 }
+.preview-nav-waffle { display: inline-flex; opacity: 0.6; cursor: default; margin-right: 4px; }
 
 .preview-nav-app { font-weight: 700; font-size: 13px; }
 .preview-nav-item { font-size: 12px; opacity: 0.85; }
@@ -4189,6 +4193,11 @@ body.is-premium .builder-overflow-premium-badge { display: none !important; }
   flex-direction: column;
   gap: 8px;
 }
+.preview-card-body-2col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px 24px;
+}
 
 .preview-field {
   display: flex;
@@ -4216,25 +4225,34 @@ body.is-premium .builder-overflow-premium-badge { display: none !important; }
 
 .preview-btn-neutral { border: 1px solid; }
 
-.preview-table-wrap {
+/* Related List — replaces generic table with SF-style related list */
+.preview-related-list {
   margin: 8px 16px;
   border-radius: 8px;
   border: 1px solid;
   overflow: hidden;
 }
-
-.preview-table-header {
-  display: grid;
-  grid-template-columns: 1fr 1fr 80px;
-  gap: 8px;
+.preview-related-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   padding: 8px 12px;
-  font-size: 10px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
 }
-
-.preview-table-row {
+.preview-related-title {
+  font-size: 13px;
+  font-weight: 700;
+}
+.preview-btn-xs {
+  padding: 2px 8px;
+  font-size: 10px;
+  border-radius: 4px;
+  border: 1px solid;
+  font-weight: 600;
+}
+.preview-related-table {
+  border-top: 1px solid rgba(0, 0, 0, 0.06);
+}
+.preview-related-row {
   display: grid;
   grid-template-columns: 1fr 1fr 80px;
   gap: 8px;
@@ -4242,28 +4260,15 @@ body.is-premium .builder-overflow-premium-badge { display: none !important; }
   font-size: 12px;
   border-top: 1px solid rgba(0, 0, 0, 0.04);
 }
+.preview-related-row-header {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  border-top: none;
+}
 
 .preview-badge { font-size: 11px; font-weight: 600; }
-
-.preview-input-wrap {
-  margin: 8px 16px 16px;
-  padding: 10px 14px;
-  border-radius: 8px;
-}
-
-.preview-input-label {
-  font-size: 11px;
-  font-weight: 500;
-  margin-bottom: 4px;
-  display: block;
-}
-
-.preview-input {
-  padding: 7px 10px;
-  border-radius: 4px;
-  border: 1px solid;
-  font-size: 12px;
-}
 
 /* Record header — top row with title + action buttons */
 .preview-header-top {
