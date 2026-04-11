@@ -3022,13 +3022,6 @@
 }
 
 /* ─── Builder tab: sidebar + main pane (Option 2 layout) ─────────────── */
-/* The Builder gets a wider canvas than the rest of the options page —
-   the editor needs the breathing room. Other tabs (Guide, About, etc.)
-   stay at the standard --cx-max-width. Uses :has() so the body widens
-   only when the Builder tabpanel is the visible one. */
-body:has(.cx-tabpanel[data-tabpanel="builder"]:not([hidden])) .cx-main {
-  max-width: 1480px;
-}
 
 /* ─── Builder top bar (context bar) ───────────────────────────────────
    Figma/Webflow pattern: shows WHAT you're editing (theme dropdown),

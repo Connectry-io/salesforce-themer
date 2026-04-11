@@ -82,7 +82,7 @@
   --cx-transition-slow: 260ms cubic-bezier(0.16, 1, 0.3, 1);
 
   /* Layout */
-  --cx-max-width: 1180px;
+  --cx-max-width: 1480px;
   --cx-header-height: 64px;
 }
 
