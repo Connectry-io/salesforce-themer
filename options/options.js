@@ -471,7 +471,7 @@
     if (!enabled.length) {
       return `<div class="theme-effects-indicators is-empty"><span class="theme-effects-empty">No effects</span></div>`;
     }
-    const DOTS = { subtle: '·', medium: '··', strong: '···' };
+    const DOTS = { subtle: '•', medium: '••', strong: '•••' };
     const pills = enabled.map(e => {
       const label = EFFECT_LABELS[e] || e;
       const intensity = cfg[e + 'Intensity'] || 'medium';
@@ -3225,6 +3225,7 @@
           editorState.effects[effect.id + 'Intensity'] = btn.dataset.level;
           renderEditorEffectsGrid();
           applyEditorPreviewEffects();
+          updateMiniCard(getFullEditorTheme());
         });
       });
 
@@ -3922,16 +3923,9 @@
     // because .theme-swatch itself has overflow:hidden to clip the rounded
     // color bars — the marker would otherwise get clipped and vanish.
     //
-    // Effect pills are hard-coded (not pulled from the active theme) so
-    // the anatomy always shows a realistic multi-effect sample rather than
-    // depending on whatever theme the user has selected.
-    const anatomyPills = `
-      <div class="theme-effects-indicators">
-        <span class="theme-effect-pill">Hover lift</span>
-        <span class="theme-effect-pill">Aurora</span>
-        <span class="theme-effect-pill">Particles</span>
-      </div>
-    `;
+    // Effect pills use buildEffectIndicators for the active theme so
+    // the anatomy card matches the user's current theme and shows dots.
+    const anatomyPills = buildEffectIndicators(theme.id);
     target.innerHTML = `
       <div class="guide-anatomy-card-wrap">
         <div class="theme-card is-active" style="width: 300px; cursor: default; pointer-events: none;">
