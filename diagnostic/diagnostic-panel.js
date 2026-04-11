@@ -1091,7 +1091,10 @@
             </button>
             <button class="diag-copy-btn" data-action="copy" title="Copy scan report to clipboard">
               ${ICONS.copy}
-              <span>Copy Report</span>
+              <span>Copy</span>
+            </button>
+            <button class="diag-copy-btn diag-report-btn" data-action="viewReport" title="Open full interactive report in new tab">
+              <span>View Report</span>
             </button>
           </div>
         </div>`;
@@ -1141,6 +1144,7 @@
         else if (action === 'savePatch') this._savePatch(btn);
         else if (action === 'togglePatch') this._togglePatch(btn);
         else if (action === 'removePatch') this._removePatchAction(btn);
+        else if (action === 'viewReport') this._openHTMLReport();
         else if (action === 'copy') this._copyReport(btn);
         else if (action === 'copyDOM') this._copyDOMSnapshot(btn);
       });
@@ -1336,6 +1340,22 @@
     }
 
     // ── Copy report ───────────────────────────────────────────────────────
+
+    _openHTMLReport() {
+      if (!ns.openReport) {
+        console.warn('[SFT Diag] Report generator not loaded');
+        return;
+      }
+      ns.openReport({
+        themeName: this.currentTheme,
+        themeColors: this.themeColors,
+        scanResults: this.scanResults,
+        componentResults: this.componentResults,
+        fixReport: this.fixReport,
+        testingProgress: this.testingProgress,
+        patchSummary: this.patchSummary,
+      });
+    }
 
     async _copyReport(btn) {
       if (!this.scanResults) return;

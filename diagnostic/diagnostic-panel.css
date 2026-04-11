@@ -952,6 +952,18 @@
   height: 11px;
 }
 
+.diag-report-btn {
+  background: rgba(74, 111, 165, 0.1);
+  border-color: rgba(74, 111, 165, 0.2);
+  color: #93b5e0;
+}
+
+.diag-report-btn:hover {
+  background: rgba(74, 111, 165, 0.2) !important;
+  border-color: rgba(74, 111, 165, 0.4) !important;
+  color: #b3d0f0 !important;
+}
+
 /* ─── Minimized badge ──────────────────────────────────────────────────── */
 
 .diag-badge {

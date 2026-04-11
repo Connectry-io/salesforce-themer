@@ -62,6 +62,7 @@
         "diagnostic/fix-generator.js",
         "diagnostic/custom-patches.js",
         "diagnostic/engine-connector.js",
+        "diagnostic/report-generator.js",
         "diagnostic/diagnostic-panel.js",
         "content/content.js"
       ],
