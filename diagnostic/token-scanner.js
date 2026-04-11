@@ -167,6 +167,101 @@
     '--lwc-autoComplete',
     '--lwc-brandBand',
     '--lwc-card',                    // cardFontWeight, cardSpacing — not color
+    // ── Raw palette / gray scale tokens — not semantic, just values ──
+    '--lwc-colorGray',               // colorGray1 through colorGray13
+    // ── SF internal branding system — not user-themeable ──
+    '--lwc-brandHeader',             // brandHeader, brandHeaderContrast*, etc.
+    '--lwc-brandLight',
+    '--lwc-brandLightActive',
+    '--lwc-brandDark',
+    '--lwc-brandDarkActive',
+    '--lwc-brandTextLink',
+    '--lwc-brandPrimaryTransparent10',
+    '--lwc-brandPrimaryTransparent40',
+    // ── Semantic status colors — should stay at SF defaults ──
+    '--slds-g-color-error',
+    '--slds-g-color-warning',
+    '--slds-g-color-success',
+    '--slds-g-color-info',
+    '--slds-g-color-disabled',
+    '--slds-g-color-on-error',
+    '--slds-g-color-on-warning',
+    '--slds-g-color-on-success',
+    '--slds-g-color-on-info',
+    '--slds-g-color-on-disabled',
+    '--slds-g-color-on-accent',
+    '--slds-g-color-border-error',
+    '--slds-g-color-border-warning',
+    '--slds-g-color-border-success',
+    '--slds-g-color-border-disabled',
+    '--slds-g-color-border-accent',
+    '--slds-g-color-accent-containter', // SF typo: "containter"
+    '--slds-g-color-accent-container',
+    '--slds-g-color-accent-light',
+    '--slds-g-color-accent-dark',
+    // ── Inverse tokens — rarely visible, niche ──
+    '--slds-g-color-surface-inverse',
+    '--slds-g-color-surface-container-inverse',
+    '--slds-g-color-on-surface-inverse',
+    '--slds-g-color-border-inverse',
+    '--lwc-colorTextInverse',
+    '--lwc-colorTextPlaceholderInverse',
+    '--lwc-colorTextIconInverse',
+    '--lwc-colorTextLinkInverse',
+    '--lwc-colorTextButtonInverse',
+    '--lwc-colorBorderButtonInverse',
+    '--lwc-colorBackgroundAltInverse',
+    // ── Niche / edge-case tokens ──
+    '--lwc-colorBackgroundChromeMobile',
+    '--lwc-colorBackgroundOrgSwitcherArrow',
+    '--lwc-colorBackgroundStencil',
+    '--lwc-colorBackgroundMinimized',
+    '--lwc-colorBackgroundTempModal',
+    '--lwc-colorBackgroundNotificationBadge',
+    '--lwc-colorBorderCanvasElement',
+    '--lwc-colorBorderIconInverse',
+    '--lwc-colorTextBrowser',
+    '--lwc-colorTextCustomer',
+    '--lwc-colorBackgroundCustomer',
+    '--lwc-colorBorderCustomer',
+    '--lwc-colorTextContextBar',       // we theme nav via selectors
+    '--lwc-colorTextPill',             // we theme pills via selectors
+    '--lwc-colorContrastPrimary',
+    '--lwc-colorForegroundPrimary',
+    '--lwc-globalHeaderColorBackground', // we theme header via selectors
+    '--lwc-colorBackgroundAnchor',
+    '--lwc-colorBorderHint',
+    '--lwc-colorBorderSelectionActive',
+    '--lwc-colorBorderSelection',
+    '--lwc-colorBorderSeparatorAlt',
+    '--lwc-colorBorderSeparatorAlt2',
+    // ── Status-specific backgrounds — keep at SF defaults ──
+    '--lwc-colorBackgroundError',
+    '--lwc-colorBackgroundErrorDark',
+    '--lwc-colorBackgroundSuccess',
+    '--lwc-colorBackgroundSuccessDark',
+    '--lwc-colorBackgroundSuccessDarker',
+    '--lwc-colorBackgroundWarning',
+    '--lwc-colorBackgroundWarningDark',
+    '--lwc-colorBackgroundDestructive',
+    '--lwc-colorTextError',
+    '--lwc-colorTextSuccess',
+    '--lwc-colorTextWarning',
+    '--lwc-colorBorderError',
+    '--lwc-colorBorderInfo',
+    '--lwc-colorBorderBrandDark',
+    '--lwc-colorBackgroundToast',
+    '--lwc-colorBackgroundToastError',
+    // ── Component-level shadow/focus — not color ──
+    '--slds-c-button-shadow',
+    // ── Info base palette ──
+    '--slds-g-color-info-base',
+    // ── Tokens we set via selectors, not via custom properties ──
+    '--lwc-colorBackgroundContextBarItemHover',  // themed via .slds-context-bar:hover
+    '--lwc-colorBackgroundHighlightSearch',
+    '--lwc-colorBackgroundLight',
+    '--lwc-colorBackgroundShadeDark',
+    '--lwc-colorBackgroundShade',
   ];
 
   // Allowlist approach: a token is theme-relevant ONLY if it contains one
