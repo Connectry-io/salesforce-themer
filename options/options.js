@@ -757,6 +757,11 @@
     const customs = syncState.customThemes || [];
     menu.innerHTML = '';
 
+    if (!isPremium()) {
+      menu.innerHTML = `<div class="builder-theme-switcher-empty">Saving custom themes is a <strong>Premium</strong> feature, coming soon.</div>`;
+      return;
+    }
+
     if (!customs.length) {
       menu.innerHTML = `<div class="builder-theme-switcher-empty">No saved themes yet. Click + New to create one.</div>`;
       return;

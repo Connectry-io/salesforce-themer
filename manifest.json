@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "Salesforce Themer by Connectry",
   "version": "2.0.0",
-  "description": "Transform your Salesforce experience with stunning themes. 15 premium themes for Lightning Experience.",
+  "description": "Transform your Salesforce experience with stunning themes. 16 handcrafted themes for Lightning Experience.",
   "permissions": ["storage", "activeTab", "tabs"],
   "host_permissions": [
     "https://*.salesforce.com/*",
