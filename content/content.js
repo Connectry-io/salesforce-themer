@@ -620,12 +620,39 @@
     }
   });
 
+  // ─── SPA navigation listener (for diagnostic panel) ──────────────────────
+
+  function setupNavigationListener() {
+    if (window !== window.top) return;
+    let lastUrl = location.href;
+    const notify = () => {
+      if (location.href !== lastUrl) {
+        lastUrl = location.href;
+        if (diagnosticPanel) diagnosticPanel.onNavigate();
+      }
+    };
+    window.addEventListener('popstate', notify);
+    window.addEventListener('hashchange', notify);
+    // SF uses pushState for SPA nav — intercept it
+    const origPushState = history.pushState;
+    history.pushState = function (...args) {
+      origPushState.apply(this, args);
+      notify();
+    };
+    const origReplaceState = history.replaceState;
+    history.replaceState = function (...args) {
+      origReplaceState.apply(this, args);
+      notify();
+    };
+  }
+
   // ─── Initialisation ──────────────────────────────────────────────────────
 
   async function init() {
     injectTransitionStyles();
     startObserver();
     setupMediaQueryListener();
+    setupNavigationListener();
 
     try {
       const syncResult = await chrome.storage.sync.get({

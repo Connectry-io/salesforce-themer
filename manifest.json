@@ -57,6 +57,7 @@
         "effects/presets.js",
         "diagnostic/token-scanner.js",
         "diagnostic/component-scanner.js",
+        "diagnostic/guided-testing.js",
         "diagnostic/diagnostic-panel.js",
         "content/content.js"
       ],

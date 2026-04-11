@@ -43,7 +43,8 @@
       this.isMinimized = false;
       this.scanResults = null;        // token scan
       this.componentResults = null;   // component scan
-      this.activeTab = 'tokens';      // 'tokens' | 'components'
+      this.activeTab = 'tokens';      // 'tokens' | 'components' | 'testing'
+      this.testingProgress = null;   // guided testing progress
       this._dragState = null;
       this._cssLoaded = false;
       this._cssText = '';
@@ -108,8 +109,17 @@
 
     updateTheme(themeName) {
       this.currentTheme = themeName;
+      this.testingProgress = null; // Reset — different theme
       if (this.isOpen && !this.isMinimized) {
         this._updateInfoBar();
+      }
+    }
+
+    /** Called by content.js when SPA navigation occurs. */
+    onNavigate() {
+      if (!this.isOpen || this.isMinimized) return;
+      if (this.activeTab === 'testing') {
+        this._refreshTabContent();
       }
     }
 
@@ -202,10 +212,24 @@
         <div class="diag-tab-bar">
           <button class="diag-tab ${this.activeTab === 'tokens' ? 'is-active' : ''}" data-tab="tokens">Tokens</button>
           <button class="diag-tab ${this.activeTab === 'components' ? 'is-active' : ''}" data-tab="components">Components</button>
+          <button class="diag-tab ${this.activeTab === 'testing' ? 'is-active' : ''}" data-tab="testing">Testing</button>
         </div>`;
     }
 
     _scanBarHTML() {
+      if (this.activeTab === 'testing') {
+        const pageType = ns.detectPageType?.();
+        const label = pageType
+          ? `Scan This Page (${pageType.label})`
+          : 'Scan This Page';
+        return `
+          <div class="diag-scan-bar">
+            <button class="diag-scan-btn" data-action="scanForTesting">
+              ${ICONS.scan}
+              <span>${label}</span>
+            </button>
+          </div>`;
+      }
       const isTokenTab = this.activeTab === 'tokens';
       return `
         <div class="diag-scan-bar">
@@ -297,6 +321,9 @@
     _activeTabContent() {
       if (this.activeTab === 'components') {
         return this.componentResults ? this._componentResultsHTML() : this._emptyComponentHTML();
+      }
+      if (this.activeTab === 'testing') {
+        return this._testingTabHTML();
       }
       return this.scanResults ? this._resultsHTML() : this._emptyHTML();
     }
@@ -443,6 +470,102 @@
         </div>`;
     }
 
+    _testingTabHTML() {
+      if (!ns.PAGE_TYPES || !this.testingProgress) {
+        return `
+          <div class="diag-empty">
+            <div class="diag-empty-icon">
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none">
+                <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                <rect x="9" y="3" width="6" height="4" rx="1" stroke="currentColor" stroke-width="1.5"/>
+                <path d="M9 12l2 2 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </div>
+            <div class="diag-empty-title">Loading...</div>
+          </div>`;
+      }
+
+      const summary = ns.getCompletionSummary(this.testingProgress);
+      const currentPage = ns.detectPageType?.();
+      const nextSuggestion = ns.suggestNext(this.testingProgress);
+
+      let html = '';
+
+      // Progress bar
+      const pct = summary.total > 0 ? Math.round((summary.completed / summary.total) * 100) : 0;
+      const level = pct >= 80 ? 'good' : pct >= 40 ? 'ok' : 'bad';
+
+      html += `
+        <div class="diag-coverage">
+          <div class="diag-coverage-header">
+            <span class="diag-coverage-label">Testing Progress</span>
+            <span class="diag-coverage-pct is-${level}">${summary.completed}/${summary.total}</span>
+          </div>
+          <div class="diag-coverage-bar">
+            <div class="diag-coverage-fill is-${level}" style="width:${pct}%"></div>
+          </div>
+        </div>`;
+
+      // Current page detection
+      if (currentPage) {
+        const alreadyDone = this.testingProgress[currentPage.id]?.completed;
+        html += `
+          <div class="diag-test-current">
+            <span class="diag-test-current-label">Current page</span>
+            <span class="diag-test-current-name">${this._escapeHtml(currentPage.label)}</span>
+            ${alreadyDone
+              ? '<span class="diag-test-current-status is-done">Tested</span>'
+              : '<span class="diag-test-current-status is-pending">Not yet tested</span>'
+            }
+          </div>`;
+      }
+
+      // Next suggestion
+      if (nextSuggestion && (!currentPage || nextSuggestion.id !== currentPage.id)) {
+        html += `
+          <div class="diag-test-hint">
+            <span class="diag-test-hint-label">Next:</span>
+            <span class="diag-test-hint-text">${this._escapeHtml(nextSuggestion.hint)}</span>
+          </div>`;
+      }
+
+      // Checklist
+      html += '<div class="diag-test-checklist">';
+      for (const item of summary.items) {
+        const isCurrent = currentPage && item.id === currentPage.id;
+        const statusClass = item.completed ? 'is-done' : isCurrent ? 'is-current' : 'is-pending';
+        const tokenPct = item.result?.tokenCoverage != null ? `${Math.round(item.result.tokenCoverage * 100)}%` : '';
+        const compPct = item.result?.componentHealth != null ? `${Math.round(item.result.componentHealth)}%` : '';
+
+        html += `
+          <div class="diag-test-item ${statusClass}" data-test-id="${item.id}">
+            <span class="diag-test-check">
+              ${item.completed
+                ? '<svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2.5 6l2.5 2.5 4.5-5" stroke="#22c55e" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>'
+                : isCurrent
+                  ? '<svg width="12" height="12" viewBox="0 0 12 12" fill="none"><circle cx="6" cy="6" r="3" fill="#4a6fa5"/></svg>'
+                  : '<svg width="12" height="12" viewBox="0 0 12 12" fill="none"><circle cx="6" cy="6" r="4" stroke="rgba(255,255,255,0.15)" stroke-width="1.2"/></svg>'
+              }
+            </span>
+            <span class="diag-test-label">${this._escapeHtml(item.label)}</span>
+            ${item.manual ? '<span class="diag-test-manual">manual</span>' : ''}
+            ${tokenPct ? `<span class="diag-test-score">${tokenPct}</span>` : ''}
+            ${compPct ? `<span class="diag-test-score is-comp">${compPct}</span>` : ''}
+          </div>`;
+      }
+      html += '</div>';
+
+      // Reset button
+      if (summary.completed > 0) {
+        html += `
+          <div class="diag-test-actions">
+            <button class="diag-test-reset" data-action="resetProgress">Reset progress for this theme</button>
+          </div>`;
+      }
+
+      return html;
+    }
+
     _tokenRowHTML(t) {
       const status = t.provided ? 'pass' : t.usedByPage ? 'gap' : 'fail';
       const isColor = t.value && /^(#|rgb|hsl)/.test(t.value);
@@ -507,6 +630,8 @@
         else if (action === 'minimize') this.minimize();
         else if (action === 'scan') this._runScan(btn);
         else if (action === 'scanComponents') this._runComponentScan(btn);
+        else if (action === 'scanForTesting') this._runTestingScan(btn);
+        else if (action === 'resetProgress') this._resetTestingProgress();
         else if (action === 'copy') this._copyReport(btn);
       });
 
@@ -566,7 +691,11 @@
       if (newText) newText.textContent = 'Run Token Scan';
     }
 
-    _refreshTabContent() {
+    async _refreshTabContent() {
+      // Load testing progress if switching to testing tab
+      if (this.activeTab === 'testing' && this.testingProgress === null) {
+        this.testingProgress = await ns.getTestingProgress?.(this.currentTheme) || {};
+      }
       // Update tab bar active state
       const tabs = this.shadow?.querySelectorAll('[data-tab]');
       if (tabs) {
@@ -624,6 +753,89 @@
       if (newText) newText.textContent = 'Scan Components';
     }
 
+    async _runTestingScan(btn) {
+      btn.classList.add('is-scanning');
+      const textSpan = btn.querySelector('span');
+      const iconSpan = btn.querySelector('svg');
+      if (iconSpan) iconSpan.outerHTML = ICONS.spinner;
+      if (textSpan) textSpan.textContent = 'Scanning...';
+
+      await new Promise(r => setTimeout(r, 50));
+
+      // Determine page type (auto-detect or manual fallback)
+      let pageType = ns.detectPageType?.();
+      let pageId = pageType?.id || 'unknown';
+
+      // If no auto-detect and this is a manual type, check if user
+      // triggered from a manual checklist item
+      if (!pageType) {
+        // For manual page types (modal, dropdown), we still scan
+        // and mark the first unfinished manual type
+        const progress = this.testingProgress || {};
+        const manualTypes = ns.PAGE_TYPES?.filter(p => p.manual && !progress[p.id]?.completed);
+        if (manualTypes?.length) {
+          pageType = manualTypes[0];
+          pageId = pageType.id;
+        }
+      }
+
+      // Run both scans
+      let tokenCoverage = null;
+      let componentHealth = null;
+
+      try {
+        if (ns.scanTokens) {
+          const tokenResult = ns.scanTokens(this.currentTheme);
+          this.scanResults = tokenResult;
+          tokenCoverage = tokenResult.coverage;
+        }
+      } catch (_) {}
+
+      try {
+        if (ns.scanComponents) {
+          const compResult = ns.scanComponents();
+          this.componentResults = compResult;
+          const s = compResult.summary;
+          componentHealth = s.totalStandardFound > 0
+            ? ((s.totalStyled + s.totalPartial * 0.5) / s.totalStandardFound) * 100
+            : 100;
+        }
+      } catch (_) {}
+
+      // Save result
+      if (pageId !== 'unknown' && ns.saveTestResult) {
+        await ns.saveTestResult(this.currentTheme, pageId, {
+          tokenCoverage,
+          componentHealth,
+        });
+        // Reload progress
+        this.testingProgress = await ns.getTestingProgress?.(this.currentTheme) || {};
+      }
+
+      // Re-render testing tab
+      const resultsEl = this.shadow?.querySelector('.diag-results');
+      if (resultsEl) resultsEl.innerHTML = this._testingTabHTML();
+
+      // Reset button
+      btn.classList.remove('is-scanning');
+      const newIcon = btn.querySelector('svg');
+      const newText = btn.querySelector('span');
+      if (newIcon) newIcon.outerHTML = ICONS.scan;
+      if (newText) {
+        const pt = ns.detectPageType?.();
+        newText.textContent = pt ? `Scan This Page (${pt.label})` : 'Scan This Page';
+      }
+    }
+
+    async _resetTestingProgress() {
+      if (ns.clearTestingProgress) {
+        await ns.clearTestingProgress(this.currentTheme);
+      }
+      this.testingProgress = {};
+      const resultsEl = this.shadow?.querySelector('.diag-results');
+      if (resultsEl) resultsEl.innerHTML = this._testingTabHTML();
+    }
+
     // ── Copy report ───────────────────────────────────────────────────────
 
     async _copyReport(btn) {
@@ -655,6 +867,20 @@
         for (const t of cat.tokens) {
           const st = t.provided ? 'SET' : t.usedByPage ? 'GAP' : '—';
           report += `| ${st} | \`${t.token}\` | ${t.value || '—'} |\n`;
+        }
+        report += '\n';
+      }
+
+      // Testing progress (if available)
+      if (this.testingProgress && ns.getCompletionSummary) {
+        const ts = ns.getCompletionSummary(this.testingProgress);
+        report += `## Testing Progress (${ts.completed}/${ts.total})\n\n`;
+        for (const item of ts.items) {
+          const check = item.completed ? 'x' : ' ';
+          const scores = [];
+          if (item.result?.tokenCoverage != null) scores.push(`tokens: ${Math.round(item.result.tokenCoverage * 100)}%`);
+          if (item.result?.componentHealth != null) scores.push(`components: ${Math.round(item.result.componentHealth)}%`);
+          report += `- [${check}] ${item.label}${scores.length ? ` — ${scores.join(', ')}` : ''}\n`;
         }
         report += '\n';
       }
