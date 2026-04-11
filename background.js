@@ -95,6 +95,90 @@ function generateThemeCSS(theme) {
   --slds-c-button-brand-color-background-hover: ${c.buttonBrandHover} !important;
   --slds-c-button-neutral-color-background: ${c.buttonNeutralBg} !important;
   --slds-c-button-neutral-color-border: ${c.buttonNeutralBorder} !important;
+
+  /* ─── Gap tokens (from diagnostic scan 2026-04-11) ──────────────────── */
+
+  /* SLDS 2 surface containers */
+  --slds-g-color-surface-container-1: ${c.surface} !important;
+  --slds-g-color-surface-container-2: ${c.surfaceHover} !important;
+  --slds-g-color-surface-container-3: ${c.background} !important;
+  --slds-g-color-accent-1: ${c.accent} !important;
+  --slds-g-color-accent-2: ${c.accentHover} !important;
+  --slds-g-color-accent-3: ${c.accentActive} !important;
+
+  /* Legacy LWC: brand & text */
+  --lwc-colorBrandDark: ${c.accentActive} !important;
+  --lwc-colorBrand: ${c.accent} !important;
+  --lwc-colorTextBrand: ${c.accent} !important;
+  --lwc-colorTextPrimary: ${c.textPrimary} !important;
+  --lwc-colorBorderPrimary: ${c.border} !important;
+  --lwc-colorBorderBrand: ${c.accent} !important;
+  --lwc-colorContrastPrimary: ${c.textPrimary} !important;
+  --lwc-colorForegroundPrimary: ${c.textPrimary} !important;
+  --lwc-colorTextLinkActive: ${c.linkHover} !important;
+  --lwc-colorTextLinkDisabled: ${c.textMuted} !important;
+
+  /* Legacy LWC: backgrounds */
+  --lwc-colorBackgroundInput: ${isDark ? c.background : c.surface} !important;
+  --lwc-colorBackgroundInputActive: ${isDark ? c.background : c.surface} !important;
+  --lwc-colorBackgroundInputDisabled: ${isDark ? c.surfaceHover : '#f3f3f3'} !important;
+  --lwc-colorBackgroundInputError: ${isDark ? c.background : c.surface} !important;
+  --lwc-colorBackgroundInputSearch: ${isDark ? c.background : c.surface} !important;
+  --lwc-colorBackgroundInputCheckbox: ${isDark ? c.background : c.surface} !important;
+  --lwc-colorBackgroundInputCheckboxSelected: ${c.accent} !important;
+  --lwc-colorBackgroundAlt2: ${c.surfaceHover} !important;
+  --lwc-colorBackgroundRowActive: ${c.surfaceSelection} !important;
+  --lwc-colorBackgroundRowSelected: ${c.surfaceHighlight} !important;
+  --lwc-colorBackgroundModal: ${c.modalBg} !important;
+  --lwc-colorBackgroundPill: ${c.pillBg} !important;
+  --lwc-colorBackgroundNotification: ${c.surface} !important;
+  --lwc-colorBackgroundDark: ${isDark ? c.background : '#2d2d2d'} !important;
+  --lwc-colorBackgroundBackdropTint: ${c.modalBackdrop} !important;
+  --lwc-colorBackgroundToggleHover: ${c.surfaceHover} !important;
+
+  /* Legacy LWC: button states */
+  --lwc-colorBackgroundButtonBrandDisabled: ${c.surfaceHover} !important;
+  --lwc-colorBackgroundButtonDefaultActive: ${c.surfaceSelection} !important;
+  --lwc-colorBackgroundButtonDefaultDisabled: ${c.surfaceHover} !important;
+  --lwc-buttonColorBackgroundPrimary: ${c.buttonBrandBg} !important;
+  --lwc-buttonColorBorderPrimary: ${c.buttonBrandBorder} !important;
+  --lwc-colorBorderButtonBrand: ${c.buttonBrandBorder} !important;
+  --lwc-colorBorderButtonDefault: ${c.buttonNeutralBorder} !important;
+  --lwc-colorBorderButtonBrandDisabled: ${c.border} !important;
+
+  /* Legacy LWC: text button states */
+  --lwc-colorTextButtonDefault: ${c.textPrimary} !important;
+  --lwc-colorTextButtonDefaultHover: ${c.accent} !important;
+  --lwc-colorTextButtonDefaultHint: ${c.textMuted} !important;
+  --lwc-colorTextButtonDefaultDisabled: ${c.textMuted} !important;
+  --lwc-colorTextButtonBrandHover: ${c.buttonBrandText} !important;
+  --lwc-colorTextButtonBrandDisabled: ${c.textMuted} !important;
+  --lwc-colorTextActionLabel: ${c.textSecondary} !important;
+  --lwc-colorTextActionLabelActive: ${c.textPrimary} !important;
+
+  /* Legacy LWC: icon states */
+  --lwc-colorTextIconDefault: ${c.textSecondary} !important;
+  --lwc-colorTextIconDefaultHover: ${c.textPrimary} !important;
+  --lwc-colorTextIconDefaultActive: ${c.accent} !important;
+  --lwc-colorTextIconDefaultDisabled: ${c.textMuted} !important;
+  --lwc-colorTextInputIcon: ${c.textSecondary} !important;
+
+  /* SLDS 2 component hooks: button states */
+  --slds-c-button-text-color-hover: ${c.accent} !important;
+  --slds-c-button-text-color-active: ${c.accentActive} !important;
+  --slds-c-button-neutral-color-background-hover: ${c.buttonNeutralHover} !important;
+  --slds-c-button-neutral-color-border-hover: ${c.buttonNeutralBorder} !important;
+  --slds-c-button-neutral-color-background-active: ${c.surfaceSelection} !important;
+  --slds-c-button-neutral-color-border-active: ${c.accent} !important;
+
+  /* SLDS 2 component hooks: tabs */
+  --slds-c-tabs-item-text-color: ${c.textSecondary} !important;
+  --slds-c-tabs-item-text-color-active: ${c.accent} !important;
+  --slds-c-tabs-item-color-border-hover: ${c.accentHover} !important;
+  --slds-c-tabs-item-color-border-active: ${c.accent} !important;
+
+  /* SLDS 2 component hooks: input text */
+  --slds-c-input-text-color: ${c.textPrimary} !important;
 }
 
 /* ─── Base ───────────────────────────────────────────────────────────────── */
