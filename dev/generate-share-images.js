@@ -116,28 +116,29 @@ function renderShareImage(canvas, theme) {
   ctx.fillStyle = c.background || '#f7f7f5';
   ctx.beginPath(); ctx.roundRect(appX, appY, appW, appH, [0, 0, 8, 8]); ctx.fill();
 
-  // ── Top bar — SF logo (left), search (center), icons + avatar (right) ──
+  // ── Top bar — always white, matches real SF global header ──
   var tbH = 28;
-  ctx.fillStyle = c.surface || '#ffffff';
+  ctx.fillStyle = '#ffffff';
   ctx.fillRect(appX, appY, appW, tbH);
-  ctx.strokeStyle = c.border || '#e8e8e6';
+  ctx.strokeStyle = '#e5e5e5';
   ctx.lineWidth = 0.5;
   ctx.beginPath(); ctx.moveTo(appX, appY + tbH); ctx.lineTo(appX + appW, appY + tbH); ctx.stroke();
 
-  // SF cloud logo placeholder (left)
-  ctx.fillStyle = c.textSecondary || '#4a5568';
-  ctx.globalAlpha = 0.4;
-  ctx.font = '10px Inter, system-ui, sans-serif';
-  ctx.fillText('\u2601', appX + 14, appY + 18);
-  ctx.globalAlpha = 1;
+  // SF cloud logo (left) — Salesforce blue
+  ctx.fillStyle = '#00A1E0';
+  ctx.beginPath(); ctx.arc(appX + 18, appY + 14, 6, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = '#ffffff';
+  ctx.beginPath(); ctx.arc(appX + 18, appY + 14, 3.5, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = '#00A1E0';
+  ctx.beginPath(); ctx.arc(appX + 18, appY + 14, 2, 0, Math.PI * 2); ctx.fill();
 
   // Search (centered)
   var searchW = 160, searchX = appX + (appW - searchW) / 2;
-  ctx.fillStyle = c.background || '#f7f7f5';
-  ctx.strokeStyle = c.borderInput || c.border || '#e8e8e6';
+  ctx.fillStyle = '#f3f3f3';
+  ctx.strokeStyle = '#c9c9c9';
   ctx.lineWidth = 0.6;
   ctx.beginPath(); ctx.roundRect(searchX, appY + 5, searchW, 18, 4); ctx.fill(); ctx.stroke();
-  ctx.fillStyle = c.textPlaceholder || '#9aa5b4';
+  ctx.fillStyle = '#9aa5b4';
   ctx.font = '9px Inter, system-ui, sans-serif';
   ctx.fillText('Search...', searchX + 18, appY + 17);
 
@@ -152,7 +153,7 @@ function renderShareImage(canvas, theme) {
   ctx.textAlign = 'left';
 
   // + icon
-  ctx.strokeStyle = c.textSecondary || '#4a5568';
+  ctx.strokeStyle = '#706e6b';
   ctx.lineWidth = 1;
   ctx.globalAlpha = 0.5;
   ctx.beginPath(); ctx.moveTo(iconX - 28, appY + 10); ctx.lineTo(iconX - 28, appY + 18); ctx.stroke();
