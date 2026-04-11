@@ -403,6 +403,28 @@
     _scanBarHTML() {
       const pageType = ns.detectPageType?.();
       const pageLabel = pageType ? ` · ${pageType.label}` : '';
+
+      if (this.autoScanEnabled) {
+        // Walk-through mode — show stop button, no manual scan
+        const summary = this.testingProgress && ns.getCompletionSummary
+          ? ns.getCompletionSummary(this.testingProgress) : null;
+        const progress = summary ? `${summary.completed}/${summary.total}` : '';
+        return `
+          <div class="diag-scan-bar">
+            <div class="diag-scan-row">
+              <div class="diag-walkthrough-status">
+                <span class="diag-autoscan-dot"></span>
+                <span>Walk-through active${progress ? ` — ${progress} pages` : ''}</span>
+              </div>
+              <button class="diag-scan-btn diag-autoscan-btn is-active" data-action="toggleAutoScan">
+                <span>Stop</span>
+              </button>
+            </div>
+            <div class="diag-autoscan-hint">Navigate to each page — results update automatically</div>
+          </div>`;
+      }
+
+      // Manual mode — show scan button + walk-through start
       return `
         <div class="diag-scan-bar">
           <div class="diag-scan-row">
@@ -410,12 +432,10 @@
               ${ICONS.scan}
               <span>${this.hasScanned ? 'Re-Scan' : 'Scan'}${pageLabel}</span>
             </button>
-            <button class="diag-scan-btn diag-autoscan-btn ${this.autoScanEnabled ? 'is-active' : ''}" data-action="toggleAutoScan" title="${this.autoScanEnabled ? 'Stop auto-scanning as you navigate' : 'Auto-scan each page as you navigate through the checklist'}">
-              <span class="diag-autoscan-dot"></span>
-              <span>Auto</span>
+            <button class="diag-scan-btn diag-autoscan-btn" data-action="toggleAutoScan" title="Start walk-through: auto-scan each page as you navigate">
+              <span>Walk-Through</span>
             </button>
           </div>
-          ${this.autoScanEnabled ? '<div class="diag-autoscan-hint">Scanning each page as you navigate</div>' : ''}
         </div>`;
     }
 
@@ -611,18 +631,30 @@
         const tokenPct = item.result?.tokenCoverage != null ? `${Math.round(item.result.tokenCoverage * 100)}%` : '';
         const compPct = item.result?.componentHealth != null ? `${Math.round(item.result.componentHealth)}%` : '';
 
+        // Format last-scanned date
+        let dateStr = '';
+        if (item.result?.timestamp) {
+          const d = new Date(item.result.timestamp);
+          const now = new Date();
+          const isToday = d.toDateString() === now.toDateString();
+          dateStr = isToday
+            ? d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+            : d.toLocaleDateString([], { month: 'short', day: 'numeric' });
+        }
+
         html += `
           <div class="diag-test-item ${statusClass}" data-test-id="${item.id}">
             <span class="diag-test-check">
               ${item.completed
-                ? '<svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2.5 6l2.5 2.5 4.5-5" stroke="#22c55e" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>'
+                ? '<svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2.5 6l2.5 2.5 4.5-5" stroke="var(--dp-good, #22c55e)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>'
                 : isCurrent
-                  ? '<svg width="12" height="12" viewBox="0 0 12 12" fill="none"><circle cx="6" cy="6" r="3" fill="#4a6fa5"/></svg>'
-                  : '<svg width="12" height="12" viewBox="0 0 12 12" fill="none"><circle cx="6" cy="6" r="4" stroke="rgba(255,255,255,0.15)" stroke-width="1.2"/></svg>'
+                  ? '<svg width="12" height="12" viewBox="0 0 12 12" fill="none"><circle cx="6" cy="6" r="3" fill="var(--dp-accent, #4a6fa5)"/></svg>'
+                  : '<svg width="12" height="12" viewBox="0 0 12 12" fill="none"><circle cx="6" cy="6" r="4" stroke="var(--dp-text-3, rgba(255,255,255,0.15))" stroke-width="1.2"/></svg>'
               }
             </span>
             <span class="diag-test-label">${this._escapeHtml(item.label)}</span>
             ${item.manual ? '<span class="diag-test-manual">manual</span>' : ''}
+            ${dateStr ? `<span class="diag-test-date">${dateStr}</span>` : ''}
             ${tokenPct ? `<span class="diag-test-score">${tokenPct}</span>` : ''}
             ${compPct ? `<span class="diag-test-score is-comp">${compPct}</span>` : ''}
           </div>`;
