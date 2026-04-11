@@ -14,6 +14,9 @@
 
   // ─── Page type definitions ──────────────────────────────────────────────
 
+  // ORDER MATTERS — more specific patterns must come before generic ones.
+  // Reports/Dashboards must precede Record Detail since /lightning/r/Report/
+  // and /lightning/r/Dashboard/ would match the generic record pattern.
   const PAGE_TYPES = [
     {
       id: 'home',
@@ -25,39 +28,6 @@
       keyComponents: ['card', 'pageHeader', 'nav'],
     },
     {
-      id: 'record',
-      label: 'Record Detail',
-      icon: 'record',
-      urlPatterns: [/\/lightning\/r\/[A-Za-z0-9_]+\/[a-zA-Z0-9]+\/view/],
-      hint: 'Open any record (Account, Contact, Opportunity, etc.).',
-      scans: ['tokens', 'components'],
-      keyComponents: ['card', 'button', 'input', 'tab', 'recordLayout', 'path'],
-    },
-    {
-      id: 'listView',
-      label: 'List View',
-      icon: 'list',
-      urlPatterns: [/\/lightning\/o\/[A-Za-z0-9_]+\/list/, /\/lightning\/o\/[A-Za-z0-9_]+\/home/],
-      hint: 'Navigate to any object\'s list view (e.g., Accounts > All Accounts).',
-      scans: ['tokens', 'components'],
-      keyComponents: ['table', 'pageHeader', 'button', 'input'],
-    },
-    {
-      id: 'relatedList',
-      label: 'Related Lists',
-      icon: 'related',
-      urlPatterns: [/\/lightning\/r\/.*\/related/],
-      hint: 'On a record, click the "Related" tab to see related lists.',
-      scans: ['tokens', 'components'],
-      keyComponents: ['card', 'table', 'button'],
-      // Detect Related tab being active on a record page
-      domDetect: () => {
-        // Check if we're on a record page AND a related list container is visible
-        if (!/\/lightning\/r\//.test(location.pathname)) return false;
-        return document.querySelectorAll('.forceRelatedListContainer, [class*="relatedList"], .slds-card.forceRelatedListCardDesktop').length > 0;
-      },
-    },
-    {
       id: 'setup',
       label: 'Setup',
       icon: 'setup',
@@ -65,21 +35,6 @@
       hint: 'Click the gear icon → "Setup". Opens in a new tab — open the diagnostic there too.',
       scans: ['tokens', 'components'],
       keyComponents: ['card', 'table', 'input', 'nav'],
-    },
-    {
-      id: 'appLauncher',
-      label: 'App Launcher',
-      icon: 'launcher',
-      urlPatterns: [/\/lightning\/o\/AppLauncher/, /\/lightning\/page\/app-launcher/, /app-launcher/],
-      hint: 'Click the 9-dot waffle icon in the top-left corner.',
-      scans: ['tokens'],
-      keyComponents: ['card', 'input'],
-      // App Launcher opens as a full-page overlay — detect visible overlay
-      domDetect: () => {
-        const launcher = document.querySelector('.appLauncherMenu, .slds-app-launcher, [class*="appLauncher"]');
-        if (!launcher) return false;
-        return launcher.offsetHeight > 100; // Must be actually visible, not a tiny hidden element
-      },
     },
     {
       id: 'reports',
@@ -98,6 +53,52 @@
       hint: 'Navigate to the Dashboards tab.',
       scans: ['tokens', 'components'],
       keyComponents: ['card'],
+    },
+    {
+      id: 'appLauncher',
+      label: 'App Launcher',
+      icon: 'launcher',
+      urlPatterns: [/\/lightning\/o\/AppLauncher/, /\/lightning\/page\/app-launcher/, /app-launcher/],
+      hint: 'Click the 9-dot waffle icon in the top-left corner.',
+      scans: ['tokens'],
+      keyComponents: ['card', 'input'],
+      domDetect: () => {
+        const launcher = document.querySelector('.appLauncherMenu, .slds-app-launcher, [class*="appLauncher"]');
+        if (!launcher) return false;
+        return launcher.offsetHeight > 100;
+      },
+    },
+    {
+      id: 'listView',
+      label: 'List View',
+      icon: 'list',
+      urlPatterns: [/\/lightning\/o\/[A-Za-z0-9_]+\/list/, /\/lightning\/o\/[A-Za-z0-9_]+\/home/],
+      hint: 'Navigate to any object\'s list view (e.g., Accounts > All Accounts).',
+      scans: ['tokens', 'components'],
+      keyComponents: ['table', 'pageHeader', 'button', 'input'],
+    },
+    {
+      id: 'relatedList',
+      label: 'Related Lists',
+      icon: 'related',
+      urlPatterns: [/\/lightning\/r\/.*\/related/],
+      hint: 'On a record, click the "Related" tab to see related lists.',
+      scans: ['tokens', 'components'],
+      keyComponents: ['card', 'table', 'button'],
+      domDetect: () => {
+        if (!/\/lightning\/r\//.test(location.pathname)) return false;
+        return document.querySelectorAll('.forceRelatedListContainer, [class*="relatedList"], .slds-card.forceRelatedListCardDesktop').length > 0;
+      },
+    },
+    {
+      // Record Detail MUST come after Reports/Dashboards since /lightning/r/ is a broad match
+      id: 'record',
+      label: 'Record Detail',
+      icon: 'record',
+      urlPatterns: [/\/lightning\/r\/[A-Za-z0-9_]+\/[a-zA-Z0-9]+\/view/],
+      hint: 'Open any record (Account, Contact, Opportunity, etc.).',
+      scans: ['tokens', 'components'],
+      keyComponents: ['card', 'button', 'input', 'tab', 'recordLayout', 'path'],
     },
     {
       id: 'modal',
