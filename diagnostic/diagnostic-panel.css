@@ -20,26 +20,48 @@
   /* ─── Dark mode (default) ─────────────────────────────────────────── */
   --dp-bg: rgba(26, 29, 35, 0.95);
   --dp-surface: rgba(255, 255, 255, 0.04);
+  --dp-surface-hover: rgba(255, 255, 255, 0.06);
   --dp-border: rgba(255, 255, 255, 0.08);
+  --dp-border-row: rgba(255, 255, 255, 0.04);
   --dp-text: #e4e4e7;
   --dp-text-2: rgba(255, 255, 255, 0.65);
   --dp-text-3: rgba(255, 255, 255, 0.4);
   --dp-shadow: 0 24px 80px rgba(0,0,0,0.5), 0 8px 24px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.06);
   --dp-accent: #4a6fa5;
+  --dp-accent-bg: rgba(74, 111, 165, 0.15);
+  --dp-accent-border: rgba(74, 111, 165, 0.3);
+  --dp-accent-text: #93b5e0;
   --dp-good: #22c55e;
+  --dp-good-bg: rgba(34, 197, 94, 0.1);
   --dp-warn: #eab308;
+  --dp-warn-bg: rgba(234, 179, 8, 0.1);
   --dp-bad: #ef4444;
+  --dp-bad-bg: rgba(239, 68, 68, 0.1);
+  --dp-swatch-border: rgba(255, 255, 255, 0.12);
+  --dp-scrollbar: rgba(255, 255, 255, 0.12);
+  --dp-bar-track: rgba(255, 255, 255, 0.06);
 }
 
 /* ─── Light mode ────────────────────────────────────────────────────── */
 :host(.diag-light) {
-  --dp-bg: rgba(255, 255, 255, 0.96);
-  --dp-surface: rgba(0, 0, 0, 0.03);
-  --dp-border: rgba(0, 0, 0, 0.08);
+  --dp-bg: rgba(255, 255, 255, 0.97);
+  --dp-surface: rgba(0, 0, 0, 0.025);
+  --dp-surface-hover: rgba(0, 0, 0, 0.04);
+  --dp-border: rgba(0, 0, 0, 0.1);
+  --dp-border-row: rgba(0, 0, 0, 0.05);
   --dp-text: #1a1a1a;
-  --dp-text-2: rgba(0, 0, 0, 0.6);
-  --dp-text-3: rgba(0, 0, 0, 0.35);
-  --dp-shadow: 0 24px 80px rgba(0,0,0,0.12), 0 8px 24px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.5);
+  --dp-text-2: #4a5568;
+  --dp-text-3: #8a94a6;
+  --dp-shadow: 0 24px 80px rgba(0,0,0,0.1), 0 8px 24px rgba(0,0,0,0.06), 0 0 0 1px rgba(0,0,0,0.06);
+  --dp-accent-bg: rgba(74, 111, 165, 0.08);
+  --dp-accent-border: rgba(74, 111, 165, 0.2);
+  --dp-accent-text: #3d5e8e;
+  --dp-good-bg: rgba(34, 197, 94, 0.08);
+  --dp-warn-bg: rgba(234, 179, 8, 0.08);
+  --dp-bad-bg: rgba(239, 68, 68, 0.08);
+  --dp-swatch-border: rgba(0, 0, 0, 0.1);
+  --dp-scrollbar: rgba(0, 0, 0, 0.1);
+  --dp-bar-track: rgba(0, 0, 0, 0.06);
 }
 
 *,
@@ -205,12 +227,13 @@
   height: 28px;
   border-radius: 6px;
   overflow: hidden;
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+  box-shadow: inset 0 0 0 1px var(--dp-swatch-border);
   flex-shrink: 0;
 }
 
 .diag-swatch span {
   display: block;
+  box-shadow: inset 0 0 0 0.5px var(--dp-swatch-border);
 }
 
 .diag-minicard-name {
@@ -366,10 +389,10 @@
   justify-content: center;
   gap: 8px;
   padding: 9px 16px;
-  border: 1px solid rgba(74, 111, 165, 0.3);
+  border: 1px solid var(--dp-accent-border);
   border-radius: 9px;
-  background: linear-gradient(135deg, rgba(74, 111, 165, 0.15), rgba(74, 111, 165, 0.08));
-  color: #93b5e0;
+  background: var(--dp-accent-bg);
+  color: var(--dp-accent-text);
   font-family: inherit;
   font-size: 12px;
   font-weight: 600;
@@ -416,7 +439,7 @@
   min-height: 0;
   padding: 0;
   scrollbar-width: thin;
-  scrollbar-color: rgba(255, 255, 255, 0.12) transparent;
+  scrollbar-color: var(--dp-scrollbar) transparent;
 }
 
 .diag-results::-webkit-scrollbar {
@@ -428,7 +451,7 @@
 }
 
 .diag-results::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.12);
+  background: var(--dp-scrollbar);
   border-radius: 3px;
 }
 
@@ -436,7 +459,7 @@
 
 .diag-coverage {
   padding: 12px 14px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  border-bottom: 1px solid var(--dp-border);
 }
 
 .diag-coverage-header {
@@ -468,7 +491,7 @@
 .diag-coverage-bar {
   height: 4px;
   border-radius: 2px;
-  background: rgba(255, 255, 255, 0.06);
+  background: var(--dp-bar-track);
   overflow: hidden;
 }
 
@@ -498,7 +521,7 @@
 /* ─── Token sections ──────────────────────────────────────────────────── */
 
 .diag-section {
-  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  border-bottom: 1px solid var(--dp-border-row);
 }
 
 .diag-section:last-child {
@@ -516,7 +539,7 @@
 }
 
 .diag-section-header:hover {
-  background: rgba(255, 255, 255, 0.03);
+  background: var(--dp-surface-hover);
 }
 
 .diag-section-title {
@@ -545,22 +568,22 @@
 }
 
 .diag-section-badge-item.is-pass {
-  background: rgba(34, 197, 94, 0.1);
-  color: #4ade80;
+  background: var(--dp-good-bg);
+  color: var(--dp-good);
 }
 
 .diag-section-badge-item.is-fail {
-  background: rgba(239, 68, 68, 0.1);
-  color: #f87171;
+  background: var(--dp-bad-bg);
+  color: var(--dp-bad);
 }
 
 .diag-section-badge-item.is-gap {
-  background: rgba(234, 179, 8, 0.1);
-  color: #facc15;
+  background: var(--dp-warn-bg);
+  color: var(--dp-warn);
 }
 
 .diag-section-chevron {
-  color: rgba(255, 255, 255, 0.25);
+  color: var(--dp-text-3);
   transition: transform 200ms ease;
   flex-shrink: 0;
 }
@@ -633,7 +656,7 @@
   width: 12px;
   height: 12px;
   border-radius: 3px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid var(--dp-swatch-border);
   flex-shrink: 0;
 }
 
@@ -656,7 +679,7 @@
 
 .diag-gaps-desc {
   font-size: 10.5px;
-  color: rgba(255, 255, 255, 0.45);
+  color: var(--dp-text-3);
   line-height: 1.5;
 }
 
@@ -700,18 +723,18 @@
 }
 
 .diag-comp-count.is-styled {
-  background: rgba(34, 197, 94, 0.12);
-  color: #4ade80;
+  background: var(--dp-good-bg);
+  color: var(--dp-good);
 }
 
 .diag-comp-count.is-partial {
-  background: rgba(234, 179, 8, 0.12);
-  color: #facc15;
+  background: var(--dp-warn-bg);
+  color: var(--dp-warn);
 }
 
 .diag-comp-count.is-unstyled {
-  background: rgba(239, 68, 68, 0.12);
-  color: #f87171;
+  background: var(--dp-bad-bg);
+  color: var(--dp-bad);
 }
 
 .diag-comp-pkg {
@@ -797,7 +820,7 @@
   align-items: center;
   gap: 8px;
   padding: 6px 0;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+  border-bottom: 1px solid var(--dp-border-row);
   font-size: 11.5px;
 }
 
@@ -817,24 +840,24 @@
 .diag-test-label {
   flex: 1;
   min-width: 0;
-  color: rgba(255, 255, 255, 0.5);
+  color: var(--dp-text-3);
   transition: color 150ms ease;
 }
 
 .diag-test-item.is-done .diag-test-label {
-  color: rgba(255, 255, 255, 0.7);
+  color: var(--dp-text-2);
 }
 
 .diag-test-item.is-current .diag-test-label {
-  color: #93b5e0;
+  color: var(--dp-accent-text);
   font-weight: 600;
 }
 
 .diag-test-manual {
   padding: 1px 5px;
   border-radius: 3px;
-  background: rgba(255, 255, 255, 0.04);
-  color: rgba(255, 255, 255, 0.25);
+  background: var(--dp-surface);
+  color: var(--dp-text-3);
   font-size: 9px;
   font-weight: 600;
   text-transform: uppercase;
@@ -890,19 +913,19 @@
 
 .diag-empty-icon {
   margin-bottom: 12px;
-  color: rgba(255, 255, 255, 0.15);
+  color: var(--dp-text-3);
 }
 
 .diag-empty-title {
   font-size: 13px;
   font-weight: 600;
-  color: rgba(255, 255, 255, 0.5);
+  color: var(--dp-text-2);
   margin-bottom: 4px;
 }
 
 .diag-empty-desc {
   font-size: 11px;
-  color: rgba(255, 255, 255, 0.3);
+  color: var(--dp-text-3);
   max-width: 240px;
   margin: 0 auto;
 }

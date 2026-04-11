@@ -340,7 +340,7 @@
           </div>
           <div class="diag-header-actions">
             <button class="diag-icon-btn" data-action="togglePanelTheme" title="Toggle light/dark panel">
-              <svg viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="4" stroke="currentColor" stroke-width="1.4"/><path d="M7 1v2M7 11v2M1 7h2M11 7h2M3.05 3.05l1.4 1.4M9.55 9.55l1.4 1.4M3.05 10.95l1.4-1.4M9.55 4.45l1.4-1.4" stroke="currentColor" stroke-width="1" stroke-linecap="round"/></svg>
+              <svg viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="5" stroke="currentColor" stroke-width="1.4"/><path d="M7 2a5 5 0 0 1 0 10z" fill="currentColor"/></svg>
             </button>
             <button class="diag-icon-btn" data-action="minimize" title="Minimize">${ICONS.minimize}</button>
             <button class="diag-icon-btn" data-action="close" title="Close">${ICONS.close}</button>
