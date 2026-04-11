@@ -64,15 +64,18 @@
       if (this.isOpen) return;
       this.isOpen = true;
       this.isMinimized = false;
+      console.log('[SFT Diag] Opening panel...');
 
       if (!this._cssLoaded) {
         await this._loadCSS();
+        console.log('[SFT Diag] CSS loaded:', this._cssText.length, 'chars');
       }
 
       this._createHost();
       this._renderPanel();
       this._setupDrag();
       await this._restorePosition();
+      console.log('[SFT Diag] Panel rendered, host in DOM:', !!document.getElementById(HOST_ID));
     }
 
     close() {
@@ -129,7 +132,9 @@
       this._destroyHost();
       this.host = document.createElement('div');
       this.host.id = HOST_ID;
-      this.shadow = this.host.attachShadow({ mode: 'closed' });
+      // Inline styles as fallback — ensures visibility even if CSS fetch fails
+      this.host.style.cssText = 'position:fixed;top:16px;right:16px;z-index:2147483640;';
+      this.shadow = this.host.attachShadow({ mode: 'open' });
       document.body.appendChild(this.host);
     }
 

@@ -578,9 +578,11 @@
     }
 
     if (message.action === 'toggleDiagnostic') {
+      console.log('[SFT] toggleDiagnostic received', { isTop: window === window.top, hasDiag: !!window.__sfThemerDiag?.DiagnosticPanel });
       // Only run in top frame
       if (window !== window.top) { sendResponse({ ignored: true }); return false; }
       if (!window.__sfThemerDiag?.DiagnosticPanel) {
+        console.error('[SFT] DiagnosticPanel class not found on window.__sfThemerDiag');
         sendResponse({ error: 'Diagnostic module not loaded' });
         return false;
       }
@@ -589,12 +591,13 @@
           currentTheme,
           styleId: STYLE_ID,
         });
+        console.log('[SFT] DiagnosticPanel created');
       } else {
         diagnosticPanel.updateTheme(currentTheme);
       }
       diagnosticPanel.toggle();
       sendResponse({ success: true });
-      return false;
+      return true; // async — toggle() is async
     }
 
     if (message.action === 'diagnose') {
