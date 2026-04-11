@@ -1,0 +1,658 @@
+/* ─── Salesforce Themer Diagnostic Panel ────────────────────────────────────
+   Injected into Shadow DOM — fully isolated from SF and theme styles.
+   Dark glassy aesthetic with Connectry branding.
+   ──────────────────────────────────────────────────────────────────────────── */
+
+/* ─── Reset (shadow DOM boundary) ──────────────────────────────────────── */
+
+:host {
+  all: initial;
+  position: fixed;
+  top: 16px;
+  right: 16px;
+  z-index: 2147483640;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  font-size: 13px;
+  line-height: 1.5;
+  color: #e4e4e7;
+  pointer-events: none;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* ─── Panel shell ──────────────────────────────────────────────────────── */
+
+.diag-panel {
+  pointer-events: auto;
+  width: 380px;
+  max-height: 80vh;
+  display: flex;
+  flex-direction: column;
+  background: rgba(12, 12, 16, 0.92);
+  backdrop-filter: blur(24px) saturate(1.4);
+  -webkit-backdrop-filter: blur(24px) saturate(1.4);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+  box-shadow:
+    0 24px 80px rgba(0, 0, 0, 0.5),
+    0 8px 24px rgba(0, 0, 0, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  overflow: hidden;
+  animation: diag-slide-in 250ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.diag-panel.is-closing {
+  animation: diag-slide-out 180ms cubic-bezier(0.55, 0.06, 0.68, 0.19) both;
+}
+
+@keyframes diag-slide-in {
+  from {
+    opacity: 0;
+    transform: translateY(-12px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes diag-slide-out {
+  from {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-8px) scale(0.97);
+  }
+}
+
+/* ─── Header / drag handle ─────────────────────────────────────────────── */
+
+.diag-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px;
+  cursor: grab;
+  user-select: none;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  background: rgba(255, 255, 255, 0.02);
+  flex-shrink: 0;
+}
+
+.diag-header:active {
+  cursor: grabbing;
+}
+
+.diag-header-logo {
+  width: 26px;
+  height: 26px;
+  flex-shrink: 0;
+}
+
+.diag-header-logo svg {
+  width: 100%;
+  height: 100%;
+}
+
+.diag-header-text {
+  flex: 1;
+  min-width: 0;
+}
+
+.diag-header-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: #f4f4f5;
+  letter-spacing: -0.01em;
+}
+
+.diag-header-subtitle {
+  font-size: 10px;
+  color: rgba(255, 255, 255, 0.35);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.diag-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  flex-shrink: 0;
+}
+
+.diag-icon-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border: none;
+  border-radius: 7px;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.4);
+  cursor: pointer;
+  transition: all 150ms ease;
+}
+
+.diag-icon-btn:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.diag-icon-btn svg {
+  width: 14px;
+  height: 14px;
+}
+
+/* ─── Info bar (theme + page context) ──────────────────────────────────── */
+
+.diag-info-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  background: rgba(255, 255, 255, 0.02);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  font-size: 11px;
+  flex-shrink: 0;
+}
+
+.diag-info-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.05);
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 11px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 160px;
+}
+
+.diag-info-chip strong {
+  color: rgba(255, 255, 255, 0.85);
+  font-weight: 600;
+}
+
+.diag-info-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.diag-info-dot.is-on {
+  background: #22c55e;
+  box-shadow: 0 0 6px rgba(34, 197, 94, 0.4);
+}
+
+.diag-info-dot.is-off {
+  background: #ef4444;
+  box-shadow: 0 0 6px rgba(239, 68, 68, 0.4);
+}
+
+/* ─── Scan button ──────────────────────────────────────────────────────── */
+
+.diag-scan-bar {
+  padding: 10px 14px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  flex-shrink: 0;
+}
+
+.diag-scan-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 9px 16px;
+  border: 1px solid rgba(74, 111, 165, 0.3);
+  border-radius: 9px;
+  background: linear-gradient(135deg, rgba(74, 111, 165, 0.15), rgba(74, 111, 165, 0.08));
+  color: #93b5e0;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  transition: all 180ms ease;
+}
+
+.diag-scan-btn:hover {
+  background: linear-gradient(135deg, rgba(74, 111, 165, 0.25), rgba(74, 111, 165, 0.15));
+  border-color: rgba(74, 111, 165, 0.5);
+  color: #b5d0f0;
+  box-shadow: 0 0 20px rgba(74, 111, 165, 0.15);
+}
+
+.diag-scan-btn:active {
+  transform: scale(0.98);
+}
+
+.diag-scan-btn.is-scanning {
+  pointer-events: none;
+  opacity: 0.7;
+}
+
+.diag-scan-btn svg {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+}
+
+.diag-scan-btn.is-scanning svg {
+  animation: diag-spin 1s linear infinite;
+}
+
+@keyframes diag-spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ─── Results area ─────────────────────────────────────────────────────── */
+
+.diag-results {
+  flex: 1;
+  overflow-y: auto;
+  min-height: 0;
+  padding: 0;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.12) transparent;
+}
+
+.diag-results::-webkit-scrollbar {
+  width: 5px;
+}
+
+.diag-results::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.diag-results::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: 3px;
+}
+
+/* ─── Coverage meter ──────────────────────────────────────────────────── */
+
+.diag-coverage {
+  padding: 12px 14px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.diag-coverage-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.diag-coverage-label {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: rgba(255, 255, 255, 0.45);
+}
+
+.diag-coverage-pct {
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+}
+
+.diag-coverage-pct.is-good { color: #22c55e; }
+.diag-coverage-pct.is-ok { color: #eab308; }
+.diag-coverage-pct.is-bad { color: #ef4444; }
+
+.diag-coverage-bar {
+  height: 4px;
+  border-radius: 2px;
+  background: rgba(255, 255, 255, 0.06);
+  overflow: hidden;
+}
+
+.diag-coverage-fill {
+  height: 100%;
+  border-radius: 2px;
+  transition: width 500ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.diag-coverage-fill.is-good { background: #22c55e; }
+.diag-coverage-fill.is-ok { background: #eab308; }
+.diag-coverage-fill.is-bad { background: #ef4444; }
+
+.diag-coverage-stats {
+  display: flex;
+  gap: 12px;
+  margin-top: 8px;
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.diag-coverage-stat strong {
+  color: rgba(255, 255, 255, 0.7);
+  font-weight: 600;
+}
+
+/* ─── Token sections ──────────────────────────────────────────────────── */
+
+.diag-section {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.diag-section:last-child {
+  border-bottom: none;
+}
+
+.diag-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  cursor: pointer;
+  user-select: none;
+  transition: background 150ms ease;
+}
+
+.diag-section-header:hover {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.diag-section-title {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: rgba(255, 255, 255, 0.35);
+}
+
+.diag-section-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 10px;
+}
+
+.diag-section-badge-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 1px 6px;
+  border-radius: 4px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.diag-section-badge-item.is-pass {
+  background: rgba(34, 197, 94, 0.1);
+  color: #4ade80;
+}
+
+.diag-section-badge-item.is-fail {
+  background: rgba(239, 68, 68, 0.1);
+  color: #f87171;
+}
+
+.diag-section-badge-item.is-gap {
+  background: rgba(234, 179, 8, 0.1);
+  color: #facc15;
+}
+
+.diag-section-chevron {
+  color: rgba(255, 255, 255, 0.25);
+  transition: transform 200ms ease;
+  flex-shrink: 0;
+}
+
+.diag-section.is-open .diag-section-chevron {
+  transform: rotate(180deg);
+}
+
+.diag-section-body {
+  display: none;
+  padding: 0 14px 8px;
+}
+
+.diag-section.is-open .diag-section-body {
+  display: block;
+}
+
+/* ─── Token rows ──────────────────────────────────────────────────────── */
+
+.diag-token-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 0;
+  font-size: 11px;
+}
+
+.diag-token-status {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.diag-token-status.is-pass {
+  background: #22c55e;
+}
+
+.diag-token-status.is-fail {
+  background: #ef4444;
+}
+
+.diag-token-status.is-gap {
+  background: #eab308;
+}
+
+.diag-token-name {
+  flex: 1;
+  min-width: 0;
+  font-family: 'SF Mono', 'JetBrains Mono', 'Cascadia Code', 'Fira Code', Consolas, monospace;
+  font-size: 10.5px;
+  color: rgba(255, 255, 255, 0.6);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.diag-token-value {
+  max-width: 100px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-family: 'SF Mono', 'JetBrains Mono', 'Cascadia Code', 'Fira Code', Consolas, monospace;
+  font-size: 10.5px;
+  color: rgba(255, 255, 255, 0.35);
+  text-align: right;
+}
+
+.diag-token-swatch {
+  width: 12px;
+  height: 12px;
+  border-radius: 3px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  flex-shrink: 0;
+}
+
+/* ─── Gaps section ─────────────────────────────────────────────────────── */
+
+.diag-gaps-callout {
+  margin: 8px 14px 12px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: rgba(234, 179, 8, 0.06);
+  border: 1px solid rgba(234, 179, 8, 0.15);
+}
+
+.diag-gaps-title {
+  font-size: 11px;
+  font-weight: 600;
+  color: #facc15;
+  margin-bottom: 4px;
+}
+
+.diag-gaps-desc {
+  font-size: 10.5px;
+  color: rgba(255, 255, 255, 0.45);
+  line-height: 1.5;
+}
+
+.diag-gaps-list {
+  margin-top: 6px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.diag-gap-chip {
+  display: inline-block;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: rgba(234, 179, 8, 0.08);
+  font-family: 'SF Mono', 'JetBrains Mono', Consolas, monospace;
+  font-size: 10px;
+  color: rgba(234, 179, 8, 0.7);
+}
+
+/* ─── Empty / placeholder states ──────────────────────────────────────── */
+
+.diag-empty {
+  padding: 32px 14px;
+  text-align: center;
+}
+
+.diag-empty-icon {
+  margin-bottom: 12px;
+  color: rgba(255, 255, 255, 0.15);
+}
+
+.diag-empty-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.5);
+  margin-bottom: 4px;
+}
+
+.diag-empty-desc {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.3);
+  max-width: 240px;
+  margin: 0 auto;
+}
+
+/* ─── Footer ──────────────────────────────────────────────────────────── */
+
+.diag-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 14px;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  background: rgba(255, 255, 255, 0.01);
+  flex-shrink: 0;
+}
+
+.diag-footer-brand {
+  font-size: 9px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.2);
+}
+
+.diag-footer-brand strong {
+  color: rgba(74, 111, 165, 0.6);
+  font-weight: 700;
+}
+
+.diag-copy-btn {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.04);
+  color: rgba(255, 255, 255, 0.45);
+  font-family: inherit;
+  font-size: 10px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 150ms ease;
+}
+
+.diag-copy-btn:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.7);
+  border-color: rgba(255, 255, 255, 0.15);
+}
+
+.diag-copy-btn.is-copied {
+  color: #4ade80;
+  border-color: rgba(34, 197, 94, 0.3);
+}
+
+.diag-copy-btn svg {
+  width: 11px;
+  height: 11px;
+}
+
+/* ─── Minimized badge ──────────────────────────────────────────────────── */
+
+.diag-badge {
+  pointer-events: auto;
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  background: rgba(12, 12, 16, 0.9);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 200ms ease;
+  animation: diag-slide-in 200ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.diag-badge:hover {
+  background: rgba(20, 20, 28, 0.95);
+  border-color: rgba(74, 111, 165, 0.3);
+  box-shadow:
+    0 8px 24px rgba(0, 0, 0, 0.4),
+    0 0 16px rgba(74, 111, 165, 0.15);
+  transform: scale(1.05);
+}
+
+.diag-badge svg {
+  width: 20px;
+  height: 20px;
+  color: rgba(74, 111, 165, 0.7);
+}
+
+/* ─── Collapsed state ──────────────────────────────────────────────────── */
+
+.diag-panel.is-collapsed .diag-results,
+.diag-panel.is-collapsed .diag-scan-bar,
+.diag-panel.is-collapsed .diag-footer {
+  display: none;
+}
+
+.diag-panel.is-collapsed {
+  max-height: none;
+}

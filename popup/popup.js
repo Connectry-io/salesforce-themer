@@ -724,6 +724,20 @@
     });
   }
 
+  // ─── Diagnostic button ────────────────────────────────────────────────────
+
+  function bindDiagnosticButton() {
+    document.getElementById('diagnosticBtn')?.addEventListener('click', async () => {
+      try {
+        const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+        if (tab?.id) {
+          await chrome.tabs.sendMessage(tab.id, { action: 'toggleDiagnostic' });
+        }
+      } catch (_) {}
+      window.close();
+    });
+  }
+
   // ─── Help tooltips ────────────────────────────────────────────────────────
   //
   // All three tooltips share one pattern: a [data-tooltip="targetId"] button
@@ -977,6 +991,7 @@
     renderCustomThemesPanel();
 
     bindOptionsButton();
+    bindDiagnosticButton();
     bindHelpTooltip();
     bindScopeSelector();
     bindEffectsSelector();

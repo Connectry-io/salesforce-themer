@@ -61,6 +61,9 @@
   let cursorTrailSystem = null;
   let currentEffectsConfig = null;
 
+  // Diagnostic panel (lazy-init)
+  let diagnosticPanel = null;
+
   // Detect page type for scope filtering. Setup pages can live on any of
   // these patterns: /lightning/setup/ (modern Lightning Setup),
   // /setup/ (classic Setup, also used by VF iframes),
@@ -571,6 +574,26 @@
 
     if (message.action === 'getEffects') {
       sendResponse({ config: currentEffectsConfig });
+      return false;
+    }
+
+    if (message.action === 'toggleDiagnostic') {
+      // Only run in top frame
+      if (window !== window.top) { sendResponse({ ignored: true }); return false; }
+      if (!window.__sfThemerDiag?.DiagnosticPanel) {
+        sendResponse({ error: 'Diagnostic module not loaded' });
+        return false;
+      }
+      if (!diagnosticPanel) {
+        diagnosticPanel = new window.__sfThemerDiag.DiagnosticPanel({
+          currentTheme,
+          styleId: STYLE_ID,
+        });
+      } else {
+        diagnosticPanel.updateTheme(currentTheme);
+      }
+      diagnosticPanel.toggle();
+      sendResponse({ success: true });
       return false;
     }
 

@@ -1538,6 +1538,15 @@ chrome.commands.onCommand.addListener(async (command) => {
     await applyAndSaveTheme(next, lightIds, darkIds);
   }
 
+  if (command === 'toggle-diagnostic') {
+    const tabs = await chrome.tabs.query({ active: true, currentWindow: true });
+    for (const tab of tabs) {
+      if (!tab.id) continue;
+      chrome.tabs.sendMessage(tab.id, { action: 'toggleDiagnostic' }).catch(() => {});
+    }
+    return;
+  }
+
   if (command === 'toggle-dark-light') {
     const result = await chrome.storage.sync.get({
       theme: 'connectry',

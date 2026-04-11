@@ -34,6 +34,12 @@
         "default": "Alt+Shift+D"
       },
       "description": "Toggle between dark and light mode"
+    },
+    "toggle-diagnostic": {
+      "suggested_key": {
+        "default": "Alt+Shift+X"
+      },
+      "description": "Toggle theme diagnostic panel"
     }
   },
   "content_scripts": [
@@ -49,6 +55,8 @@
       "js": [
         "effects/effects.js",
         "effects/presets.js",
+        "diagnostic/token-scanner.js",
+        "diagnostic/diagnostic-panel.js",
         "content/content.js"
       ],
       "run_at": "document_start",
@@ -65,7 +73,8 @@
         "content/themes/*.css",
         "effects/effects.js",
         "effects/presets.js",
-        "favicons/*.svg"
+        "favicons/*.svg",
+        "diagnostic/diagnostic-panel.css"
       ],
       "matches": [
         "https://*.salesforce.com/*",
