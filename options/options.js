@@ -1343,173 +1343,147 @@
 
   // ─── Theme Manager: Share as Image ────────────────────────────────────────
 
+  function _drawConnectryLogo(ctx, cx, cy, size) {
+    const r = size * 0.29;
+    const gap = size * 0.5;
+    ctx.fillStyle = '#2D2D2D';
+    ctx.beginPath(); ctx.arc(cx - gap, cy, r, 0, Math.PI * 2); ctx.fill();
+    ctx.strokeStyle = '#4A6FA5';
+    ctx.lineWidth = size * 0.12;
+    ctx.lineCap = 'round';
+    ctx.beginPath(); ctx.moveTo(cx - gap + r, cy); ctx.lineTo(cx + gap - r, cy); ctx.stroke();
+    ctx.fillStyle = '#4A6FA5';
+    ctx.beginPath(); ctx.arc(cx + gap, cy, r, 0, Math.PI * 2); ctx.fill();
+  }
+
   function shareThemeAsImage(theme) {
     const c = (theme.isCustom ? theme.colors : theme.colors) || {};
-    const S = 1200; // square
+    const W = 1200, H = 630;
 
     const canvas = document.createElement('canvas');
-    canvas.width = S;
-    canvas.height = S;
+    canvas.width = W;
+    canvas.height = H;
     const ctx = canvas.getContext('2d');
 
-    // ─── Connectry backdrop ──────────────────────────────────────────
-    // Dark gradient background with subtle brand feel
-    const grad = ctx.createLinearGradient(0, 0, S, S);
+    // ─── Dark Connectry backdrop ──────────────────────────────────
+    const grad = ctx.createLinearGradient(0, 0, W, H);
     grad.addColorStop(0, '#0f172a');
     grad.addColorStop(1, '#1e293b');
     ctx.fillStyle = grad;
-    ctx.fillRect(0, 0, S, S);
+    ctx.fillRect(0, 0, W, H);
 
-    // Subtle grid pattern
-    ctx.strokeStyle = 'rgba(255,255,255,0.03)';
-    ctx.lineWidth = 1;
-    for (let i = 0; i < S; i += 40) {
-      ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i, S); ctx.stroke();
-      ctx.beginPath(); ctx.moveTo(0, i); ctx.lineTo(S, i); ctx.stroke();
+    // Dot grid
+    ctx.fillStyle = 'rgba(255,255,255,0.025)';
+    for (let x = 20; x < W; x += 28) {
+      for (let y = 20; y < H; y += 28) {
+        ctx.beginPath(); ctx.arc(x, y, 0.8, 0, Math.PI * 2); ctx.fill();
+      }
     }
 
-    // ─── Theme preview card (centered, 16:10 aspect) ─────────────────
-    const cardW = 920, cardH = 575;
-    const cardX = (S - cardW) / 2, cardY = 180;
-
-    // Card shadow
-    ctx.shadowColor = 'rgba(0,0,0,0.4)';
-    ctx.shadowBlur = 60;
-    ctx.shadowOffsetY = 20;
-
-    // Browser chrome bar
-    ctx.fillStyle = '#1e293b';
-    ctx.beginPath();
-    ctx.roundRect(cardX, cardY, cardW, 36, [12, 12, 0, 0]);
-    ctx.fill();
-
-    // Traffic lights
-    const dotColors = ['#ff5f57', '#ffbd2e', '#28c840'];
-    dotColors.forEach((col, i) => {
-      ctx.fillStyle = col;
-      ctx.beginPath();
-      ctx.arc(cardX + 20 + i * 18, cardY + 18, 5, 0, Math.PI * 2);
-      ctx.fill();
-    });
-
-    // Browser tab
-    ctx.fillStyle = '#334155';
-    ctx.beginPath();
-    ctx.roundRect(cardX + 72, cardY + 6, 160, 24, [5, 5, 0, 0]);
-    ctx.fill();
-    ctx.fillStyle = '#94a3b8';
-    ctx.font = '11px Inter, system-ui, sans-serif';
-    ctx.textAlign = 'left';
-    ctx.fillText('Salesforce', cardX + 82, cardY + 23);
-
-    // Reset shadow for main content
-    ctx.shadowColor = 'transparent';
-    ctx.shadowBlur = 0;
-    ctx.shadowOffsetY = 0;
-
-    // App content area
-    const contentY = cardY + 36;
-    const contentH = cardH - 36;
-    ctx.fillStyle = c.background || '#f7f7f5';
-    ctx.beginPath();
-    ctx.roundRect(cardX, contentY, cardW, contentH, [0, 0, 12, 12]);
-    ctx.fill();
-
-    // Nav bar inside app
-    ctx.fillStyle = c.nav || '#4a6fa5';
-    ctx.fillRect(cardX, contentY, cardW, 44);
-
-    // Nav text
-    ctx.fillStyle = '#ffffff';
-    ctx.font = 'bold 14px Inter, system-ui, sans-serif';
-    ctx.textAlign = 'left';
-    const navItems = ['Sales', 'Home', 'Leads', 'Contacts'];
-    navItems.forEach((item, i) => {
-      ctx.fillText(item, cardX + 24 + i * 80, contentY + 28);
-    });
-
-    // Surface card inside
-    const innerX = cardX + 40, innerY = contentY + 70;
-    const innerW = cardW - 80, innerH = contentH - 100;
-    ctx.fillStyle = c.surface || '#ffffff';
-    ctx.beginPath();
-    ctx.roundRect(innerX, innerY, innerW, innerH, 8);
-    ctx.fill();
-    ctx.strokeStyle = c.border || '#e8e8e6';
-    ctx.lineWidth = 1;
-    ctx.stroke();
-
-    // Accent button
+    // Accent blobs
+    ctx.globalAlpha = 0.07;
     ctx.fillStyle = c.accent || '#4a6fa5';
-    ctx.beginPath();
-    ctx.roundRect(innerX + innerW - 140, innerY + 30, 110, 32, 6);
-    ctx.fill();
-    ctx.fillStyle = '#ffffff';
-    ctx.font = 'bold 12px Inter, system-ui, sans-serif';
-    ctx.textAlign = 'center';
-    ctx.fillText('Convert', innerX + innerW - 85, innerY + 51);
-
-    // Detail rows
-    ctx.textAlign = 'left';
-    ctx.fillStyle = c.textSecondary || '#4a5568';
-    ctx.font = '13px Inter, system-ui, sans-serif';
-    const rows = ['Name', 'Email', 'Company', 'Phone'];
-    rows.forEach((label, i) => {
-      const rowY = innerY + 100 + i * 36;
-      ctx.fillStyle = c.textSecondary || '#64748b';
-      ctx.fillText(label, innerX + 24, rowY);
-      ctx.fillStyle = c.textPrimary || '#1e293b';
-      ctx.fillRect(innerX + 160, rowY - 8, 200, 12);
-      ctx.globalAlpha = 0.15;
-      ctx.fillRect(innerX + 160, rowY - 8, 200, 12);
-      ctx.globalAlpha = 1;
-    });
-
-    // ─── Color palette strip below card ──────────────────────────────
-    const paletteY = cardY + cardH + 40;
-    const colors = [c.nav, c.accent, c.surface, c.background, c.border].filter(Boolean);
-    const dotSize = 28, dotGap = 16;
-    const totalW = colors.length * dotSize + (colors.length - 1) * dotGap;
-    colors.forEach((col, i) => {
-      ctx.fillStyle = col;
-      ctx.beginPath();
-      ctx.arc(S / 2 - totalW / 2 + i * (dotSize + dotGap) + dotSize / 2, paletteY, dotSize / 2, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.strokeStyle = 'rgba(255,255,255,0.15)';
-      ctx.lineWidth = 1.5;
-      ctx.stroke();
-    });
-
-    // ─── Theme name ──────────────────────────────────────────────────
-    ctx.fillStyle = '#ffffff';
-    ctx.font = 'bold 42px Inter, system-ui, sans-serif';
-    ctx.textAlign = 'center';
-    ctx.fillText(theme.name, S / 2, 120);
-
-    // Tagline
-    if (theme.tagline) {
-      ctx.fillStyle = '#94a3b8';
-      ctx.font = '18px Inter, system-ui, sans-serif';
-      ctx.fillText(theme.tagline, S / 2, 155);
-    }
-
-    // ─── Connectry branding ──────────────────────────────────────────
-    ctx.fillStyle = '#64748b';
-    ctx.font = '16px Inter, system-ui, sans-serif';
-    ctx.fillText('Salesforce Themer by Connectry', S / 2, S - 40);
-
-    // Accent dots decoration
-    ctx.fillStyle = c.accent || '#4a6fa5';
-    ctx.globalAlpha = 0.15;
-    ctx.beginPath();
-    ctx.arc(80, 80, 120, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.beginPath();
-    ctx.arc(S - 80, S - 80, 80, 0, Math.PI * 2);
-    ctx.fill();
+    ctx.beginPath(); ctx.arc(60, 60, 160, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(W - 60, H - 60, 120, 0, Math.PI * 2); ctx.fill();
     ctx.globalAlpha = 1;
 
-    // ─── Download ────────────────────────────────────────────────────
+    // ─── Left: theme info ────────────────────────────────────────
+    const leftX = 56;
+    ctx.textAlign = 'left';
+    ctx.fillStyle = '#ffffff';
+    ctx.font = 'bold 38px Inter, system-ui, sans-serif';
+    ctx.fillText(theme.name, leftX, 80);
+
+    if (theme.tagline) {
+      ctx.fillStyle = '#94a3b8';
+      ctx.font = '15px Inter, system-ui, sans-serif';
+      const words = theme.tagline.split(' ');
+      let line = '', lineY = 112;
+      for (const word of words) {
+        const test = line + (line ? ' ' : '') + word;
+        if (ctx.measureText(test).width > 360) {
+          ctx.fillText(line, leftX, lineY); line = word; lineY += 20;
+        } else { line = test; }
+      }
+      if (line) ctx.fillText(line, leftX, lineY);
+    }
+
+    // Palette dots
+    const dotColors = [c.nav, c.accent, c.surface, c.background, c.textPrimary].filter(Boolean);
+    dotColors.forEach((col, i) => {
+      ctx.fillStyle = col;
+      ctx.beginPath(); ctx.arc(leftX + i * 34 + 12, 175, 12, 0, Math.PI * 2); ctx.fill();
+      ctx.strokeStyle = 'rgba(255,255,255,0.12)'; ctx.lineWidth = 1.5; ctx.stroke();
+    });
+
+    // Logo + branding
+    _drawConnectryLogo(ctx, leftX + 22, H - 52, 20);
+    ctx.fillStyle = '#e2e8f0';
+    ctx.font = 'bold 16px Inter, system-ui, sans-serif';
+    ctx.fillText('Salesforce Themer', leftX + 52, H - 46);
+    ctx.fillStyle = '#64748b';
+    ctx.font = '12px Inter, system-ui, sans-serif';
+    ctx.fillText('Built with care by Connectry', leftX + 52, H - 28);
+
+    // ─── Right: browser preview ──────────────────────────────────
+    const pX = 430, pY = 36, pW = W - pX - 36, pH = H - 72;
+
+    ctx.shadowColor = 'rgba(0,0,0,0.5)'; ctx.shadowBlur = 50; ctx.shadowOffsetY = 12;
+    ctx.fillStyle = '#1e293b';
+    ctx.beginPath(); ctx.roundRect(pX, pY, pW, 32, [10, 10, 0, 0]); ctx.fill();
+    ['#ff5f57','#ffbd2e','#28c840'].forEach((col, i) => {
+      ctx.fillStyle = col; ctx.beginPath(); ctx.arc(pX+18+i*16, pY+16, 4.5, 0, Math.PI*2); ctx.fill();
+    });
+    ctx.fillStyle = '#334155';
+    ctx.beginPath(); ctx.roundRect(pX+64, pY+6, 140, 20, [5,5,0,0]); ctx.fill();
+    ctx.fillStyle = '#94a3b8'; ctx.font = '10px Inter, system-ui, sans-serif';
+    ctx.fillText('Salesforce | Leads', pX+74, pY+20);
+    ctx.shadowColor = 'transparent'; ctx.shadowBlur = 0; ctx.shadowOffsetY = 0;
+
+    const aY = pY + 32, aH = pH - 32;
+    ctx.fillStyle = c.background || '#f7f7f5';
+    ctx.beginPath(); ctx.roundRect(pX, aY, pW, aH, [0,0,10,10]); ctx.fill();
+    ctx.fillStyle = c.nav || '#4a6fa5'; ctx.fillRect(pX, aY, pW, 38);
+    ctx.fillStyle = '#ffffff'; ctx.font = 'bold 11px Inter, system-ui, sans-serif';
+    ['Sales','Home','Leads','Contacts'].forEach((item, i) => { ctx.fillText(item, pX+20+i*68, aY+24); });
+    ctx.fillRect(pX+20+2*68, aY+32, 40, 2.5);
+
+    const hY = aY + 48;
+    ctx.fillStyle = c.textPrimary || '#2d2d2d'; ctx.font = 'bold 16px Inter, system-ui, sans-serif';
+    ctx.fillText('Lead: John Smith', pX+24, hY+20);
+    ctx.fillStyle = c.textSecondary || '#4a5568'; ctx.font = '10px Inter, system-ui, sans-serif';
+    ctx.fillText('Senior Account Executive', pX+24, hY+36);
+    ctx.fillStyle = c.buttonBrandBg || c.accent || '#4a6fa5';
+    ctx.beginPath(); ctx.roundRect(pX+pW-90, hY+8, 68, 24, 5); ctx.fill();
+    ctx.fillStyle = '#ffffff'; ctx.font = 'bold 10px Inter, system-ui, sans-serif';
+    ctx.fillText('Convert', pX+pW-78, hY+24);
+
+    const sX = pX+18, sY = hY+52, sW = pW-36, sH = aH-110;
+    ctx.fillStyle = c.surface || '#ffffff';
+    ctx.beginPath(); ctx.roundRect(sX, sY, sW, sH, 6); ctx.fill();
+    ctx.strokeStyle = c.border || '#e8e8e6'; ctx.lineWidth = 0.8; ctx.stroke();
+
+    ['New','Working','Converted'].forEach((l, i) => {
+      const px = sX+16+i*90;
+      ctx.fillStyle = i<2 ? (c.accent||'#4a6fa5') : (c.surfaceAlt||'#eee');
+      ctx.beginPath(); ctx.roundRect(px, sY+18, 82, 22, 11); ctx.fill();
+      ctx.fillStyle = i<2 ? '#fff' : (c.textSecondary||'#4a5568');
+      ctx.font = '9px Inter, system-ui, sans-serif'; ctx.fillText(l, px+(i===2?22:26), sY+32);
+    });
+
+    const tY = sY + 52;
+    ctx.fillStyle = c.tabActiveColor || c.accent || '#4a6fa5'; ctx.font = '10px Inter, system-ui, sans-serif';
+    ctx.fillText('Details', sX+16, tY+4); ctx.fillRect(sX+16, tY+8, 36, 2);
+    ctx.fillStyle = c.tabInactiveColor || c.textSecondary || '#4a5568';
+    ctx.fillText('Activity', sX+70, tY+4); ctx.fillText('Chatter', sX+126, tY+4);
+
+    [['Name','John Smith'],['Email','john@example.com'],['Company','Acme Corp'],['Phone','+1 (555) 123-4567']].forEach(([l,v], i) => {
+      const ry = tY+28+i*28;
+      ctx.fillStyle = c.textSecondary || '#64748b'; ctx.font = '10px Inter, system-ui, sans-serif'; ctx.fillText(l, sX+16, ry);
+      ctx.fillStyle = l==='Email' ? (c.link||c.accent||'#4a6fa5') : (c.textPrimary||'#1e293b'); ctx.fillText(v, sX+120, ry);
+    });
+
+    // ─── Download ────────────────────────────────────────────────
     canvas.toBlob((blob) => {
       const blobUrl = URL.createObjectURL(blob);
       const a = document.createElement('a');

@@ -4,291 +4,326 @@ async function loadThemes() {
       ? chrome.runtime.getURL('themes/themes.json')
       : '../themes/themes.json';
     const resp = await fetch(url);
-    if (!resp.ok) throw new Error(`Fetch failed: ${resp.status}`);
+    if (!resp.ok) throw new Error('Fetch failed: ' + resp.status);
     const data = await resp.json();
     return data.themes;
   } catch (err) {
-    document.getElementById('status').innerHTML = `<div style="color:#ef4444">Error loading themes: ${err.message}</div>`;
+    document.getElementById('status').innerHTML = '<div style="color:#ef4444">Error loading themes: ' + err.message + '</div>';
     throw err;
   }
 }
 
+function drawConnectryLogo(ctx, cx, cy, size) {
+  // Two connected dots — the Connectry mark
+  var r = size * 0.29;
+  var gap = size * 0.5;
+  // Left dot (graphite)
+  ctx.fillStyle = '#2D2D2D';
+  ctx.beginPath(); ctx.arc(cx - gap, cy, r, 0, Math.PI * 2); ctx.fill();
+  // Connection line (Connectry blue)
+  ctx.strokeStyle = '#4A6FA5';
+  ctx.lineWidth = size * 0.12;
+  ctx.lineCap = 'round';
+  ctx.beginPath(); ctx.moveTo(cx - gap + r, cy); ctx.lineTo(cx + gap - r, cy); ctx.stroke();
+  // Right dot (blue)
+  ctx.fillStyle = '#4A6FA5';
+  ctx.beginPath(); ctx.arc(cx + gap, cy, r, 0, Math.PI * 2); ctx.fill();
+}
+
 function renderShareImage(canvas, theme) {
-  const S = 1200;
-  canvas.width = S;
-  canvas.height = S;
-  const ctx = canvas.getContext('2d');
-  const c = theme.colors || {};
+  var W = 1200, H = 630;
+  canvas.width = W;
+  canvas.height = H;
+  var ctx = canvas.getContext('2d');
+  var c = theme.colors || {};
 
   // ─── Dark Connectry backdrop ────────────────────────────────────
-  const grad = ctx.createLinearGradient(0, 0, S, S);
+  var grad = ctx.createLinearGradient(0, 0, W, H);
   grad.addColorStop(0, '#0f172a');
   grad.addColorStop(1, '#1e293b');
   ctx.fillStyle = grad;
-  ctx.fillRect(0, 0, S, S);
+  ctx.fillRect(0, 0, W, H);
 
   // Subtle dot grid
   ctx.fillStyle = 'rgba(255,255,255,0.025)';
-  for (let x = 20; x < S; x += 32) {
-    for (let y = 20; y < S; y += 32) {
+  for (var x = 20; x < W; x += 28) {
+    for (var y = 20; y < H; y += 28) {
       ctx.beginPath();
-      ctx.arc(x, y, 1, 0, Math.PI * 2);
+      ctx.arc(x, y, 0.8, 0, Math.PI * 2);
       ctx.fill();
     }
   }
 
-  // ─── Accent glow blobs ─────────────────────────────────────────
-  const accentColor = c.accent || '#4a6fa5';
-  ctx.globalAlpha = 0.08;
-  ctx.fillStyle = accentColor;
-  ctx.beginPath(); ctx.arc(100, 100, 200, 0, Math.PI * 2); ctx.fill();
-  ctx.beginPath(); ctx.arc(S - 100, S - 120, 150, 0, Math.PI * 2); ctx.fill();
+  // Accent glow blobs
+  ctx.globalAlpha = 0.07;
+  ctx.fillStyle = c.accent || '#4a6fa5';
+  ctx.beginPath(); ctx.arc(60, 60, 160, 0, Math.PI * 2); ctx.fill();
+  ctx.beginPath(); ctx.arc(W - 60, H - 60, 120, 0, Math.PI * 2); ctx.fill();
   ctx.globalAlpha = 1;
 
-  // ─── Theme name + tagline ──────────────────────────────────────
-  ctx.textAlign = 'center';
-  ctx.fillStyle = '#ffffff';
-  ctx.font = 'bold 48px Inter, system-ui, sans-serif';
-  ctx.fillText(theme.name, S / 2, 110);
+  // ─── Left side: theme name, tagline, logo, palette ─────────────
+  var leftX = 56;
+  var leftW = 360;
 
+  // Theme name
+  ctx.textAlign = 'left';
+  ctx.fillStyle = '#ffffff';
+  ctx.font = 'bold 38px Inter, system-ui, sans-serif';
+  ctx.fillText(theme.name, leftX, 80);
+
+  // Tagline
   if (theme.tagline) {
     ctx.fillStyle = '#94a3b8';
-    ctx.font = '20px Inter, system-ui, sans-serif';
-    ctx.fillText(theme.tagline, S / 2, 150);
+    ctx.font = '15px Inter, system-ui, sans-serif';
+    // Word wrap tagline to ~40 chars
+    var words = theme.tagline.split(' ');
+    var line = '';
+    var lineY = 112;
+    for (var i = 0; i < words.length; i++) {
+      var test = line + (line ? ' ' : '') + words[i];
+      if (ctx.measureText(test).width > leftW) {
+        ctx.fillText(line, leftX, lineY);
+        line = words[i];
+        lineY += 20;
+      } else {
+        line = test;
+      }
+    }
+    if (line) ctx.fillText(line, leftX, lineY);
   }
 
-  // ─── Browser window (centered, 16:10) ──────────────────────────
-  const cardW = 960, cardH = 600;
-  const cardX = (S - cardW) / 2, cardY = 200;
+  // Color palette dots
+  var paletteY = 175;
+  var dotColors = [c.nav, c.accent, c.surface, c.background, c.textPrimary].filter(Boolean);
+  var dotR = 12, dotGap = 10;
+  dotColors.forEach(function(col, i) {
+    ctx.fillStyle = col;
+    ctx.beginPath();
+    ctx.arc(leftX + i * (dotR * 2 + dotGap) + dotR, paletteY, dotR, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = 'rgba(255,255,255,0.12)';
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+  });
+
+  // Connectry logo + wordmark at bottom-left
+  drawConnectryLogo(ctx, leftX + 22, H - 52, 20);
+  ctx.fillStyle = '#e2e8f0';
+  ctx.font = 'bold 16px Inter, system-ui, sans-serif';
+  ctx.textAlign = 'left';
+  ctx.fillText('Salesforce Themer', leftX + 52, H - 46);
+  ctx.fillStyle = '#64748b';
+  ctx.font = '12px Inter, system-ui, sans-serif';
+  ctx.fillText('Built with care by Connectry', leftX + 52, H - 28);
+
+  // ─── Right side: browser preview (fills right ~60%) ────────────
+  var previewX = 430, previewY = 36;
+  var previewW = W - previewX - 36;
+  var previewH = H - 72;
 
   // Shadow
   ctx.shadowColor = 'rgba(0,0,0,0.5)';
-  ctx.shadowBlur = 80;
-  ctx.shadowOffsetY = 24;
+  ctx.shadowBlur = 50;
+  ctx.shadowOffsetY = 12;
 
-  // Browser chrome
+  // Browser chrome bar
   ctx.fillStyle = '#1e293b';
   ctx.beginPath();
-  ctx.roundRect(cardX, cardY, cardW, 40, [14, 14, 0, 0]);
+  ctx.roundRect(previewX, previewY, previewW, 32, [10, 10, 0, 0]);
   ctx.fill();
 
   // Traffic lights
-  ['#ff5f57', '#ffbd2e', '#28c840'].forEach((col, i) => {
+  ['#ff5f57', '#ffbd2e', '#28c840'].forEach(function(col, i) {
     ctx.fillStyle = col;
     ctx.beginPath();
-    ctx.arc(cardX + 24 + i * 20, cardY + 20, 6, 0, Math.PI * 2);
+    ctx.arc(previewX + 18 + i * 16, previewY + 16, 4.5, 0, Math.PI * 2);
     ctx.fill();
   });
 
   // Tab
   ctx.fillStyle = '#334155';
   ctx.beginPath();
-  ctx.roundRect(cardX + 80, cardY + 8, 180, 26, [6, 6, 0, 0]);
+  ctx.roundRect(previewX + 64, previewY + 6, 140, 20, [5, 5, 0, 0]);
   ctx.fill();
   ctx.fillStyle = '#94a3b8';
-  ctx.font = '12px Inter, system-ui, sans-serif';
+  ctx.font = '10px Inter, system-ui, sans-serif';
   ctx.textAlign = 'left';
-  ctx.fillText('Salesforce | Leads', cardX + 92, cardY + 26);
+  ctx.fillText('Salesforce | Leads', previewX + 74, previewY + 20);
 
   // Reset shadow
   ctx.shadowColor = 'transparent';
   ctx.shadowBlur = 0;
   ctx.shadowOffsetY = 0;
 
-  // ─── App content ───────────────────────────────────────────────
-  const cy = cardY + 40;
-  const ch = cardH - 40;
+  // ─── App content area ──────────────────────────────────────────
+  var appY = previewY + 32;
+  var appH = previewH - 32;
 
   // Background
   ctx.fillStyle = c.background || '#f7f7f5';
   ctx.beginPath();
-  ctx.roundRect(cardX, cy, cardW, ch, [0, 0, 14, 14]);
+  ctx.roundRect(previewX, appY, previewW, appH, [0, 0, 10, 10]);
   ctx.fill();
 
   // Nav bar
   ctx.fillStyle = c.nav || '#4a6fa5';
-  ctx.fillRect(cardX, cy, cardW, 48);
+  ctx.fillRect(previewX, appY, previewW, 38);
 
   // Nav items
   ctx.fillStyle = '#ffffff';
-  ctx.font = 'bold 14px Inter, system-ui, sans-serif';
-  ctx.textAlign = 'left';
-  ['Sales', 'Home', 'Leads', 'Contacts', 'Accounts'].forEach((item, i) => {
-    ctx.fillText(item, cardX + 28 + i * 86, cy + 30);
+  ctx.font = 'bold 11px Inter, system-ui, sans-serif';
+  ['Sales', 'Home', 'Leads', 'Contacts'].forEach(function(item, i) {
+    ctx.fillText(item, previewX + 20 + i * 68, appY + 24);
   });
-
-  // Active tab underline
+  // Active underline
   ctx.fillStyle = '#ffffff';
-  ctx.fillRect(cardX + 28 + 2 * 86, cy + 40, 50, 3);
+  ctx.fillRect(previewX + 20 + 2 * 68, appY + 32, 40, 2.5);
 
-  // Page header area
-  const headerY = cy + 58;
+  // Page header
+  var hdrY = appY + 48;
   ctx.fillStyle = c.textPrimary || '#2d2d2d';
-  ctx.font = 'bold 20px Inter, system-ui, sans-serif';
-  ctx.fillText('Lead: John Smith', cardX + 44, headerY + 28);
-
+  ctx.font = 'bold 16px Inter, system-ui, sans-serif';
+  ctx.fillText('Lead: John Smith', previewX + 24, hdrY + 20);
   ctx.fillStyle = c.textSecondary || '#4a5568';
-  ctx.font = '13px Inter, system-ui, sans-serif';
-  ctx.fillText('Senior Account Executive', cardX + 44, headerY + 50);
+  ctx.font = '10px Inter, system-ui, sans-serif';
+  ctx.fillText('Senior Account Executive', previewX + 24, hdrY + 36);
 
-  // Action buttons
-  const btnY = headerY + 14;
-  ctx.fillStyle = c.buttonNeutralBg || c.surface || '#ffffff';
-  ctx.strokeStyle = c.buttonNeutralBorder || c.border || '#c4cdd6';
-  ctx.lineWidth = 1.5;
-  ctx.beginPath(); ctx.roundRect(cardX + cardW - 240, btnY, 80, 32, 6); ctx.fill(); ctx.stroke();
-  ctx.fillStyle = c.buttonNeutralText || c.textPrimary || '#2d2d2d';
-  ctx.font = 'bold 12px Inter, system-ui, sans-serif';
-  ctx.fillText('Clone', cardX + cardW - 218, btnY + 21);
-
+  // Brand button
   ctx.fillStyle = c.buttonBrandBg || c.accent || '#4a6fa5';
-  ctx.beginPath(); ctx.roundRect(cardX + cardW - 148, btnY, 100, 32, 6); ctx.fill();
+  ctx.beginPath(); ctx.roundRect(previewX + previewW - 90, hdrY + 8, 68, 24, 5); ctx.fill();
   ctx.fillStyle = c.buttonBrandText || '#ffffff';
-  ctx.fillText('Convert', cardX + cardW - 124, btnY + 21);
+  ctx.font = 'bold 10px Inter, system-ui, sans-serif';
+  ctx.fillText('Convert', previewX + previewW - 78, hdrY + 24);
 
-  // ─── Surface card ──────────────────────────────────────────────
-  const scX = cardX + 36, scY = headerY + 70;
-  const scW = cardW - 72, scH = ch - 148;
+  // Surface card
+  var scX = previewX + 18, scY = hdrY + 52;
+  var scW = previewW - 36, scH = appH - 110;
   ctx.fillStyle = c.surface || '#ffffff';
-  ctx.beginPath(); ctx.roundRect(scX, scY, scW, scH, 8); ctx.fill();
+  ctx.beginPath(); ctx.roundRect(scX, scY, scW, scH, 6); ctx.fill();
   ctx.strokeStyle = c.border || '#e8e8e6';
-  ctx.lineWidth = 1;
+  ctx.lineWidth = 0.8;
   ctx.stroke();
 
-  // Path breadcrumb
-  const pathY = scY + 24;
-  const pathColors = [c.accent || '#4a6fa5', c.accentHover || '#3d5e8c'];
-  ['New', 'Working', 'Converted'].forEach((label, i) => {
-    const px = scX + 24 + i * 120;
-    ctx.fillStyle = i < 2 ? (pathColors[0]) : (c.surfaceAlt || '#eee');
-    ctx.beginPath(); ctx.roundRect(px, pathY, 110, 28, 14); ctx.fill();
+  // Path breadcrumbs
+  var pathY2 = scY + 18;
+  ['New', 'Working', 'Converted'].forEach(function(label, i) {
+    var px = scX + 16 + i * 90;
+    ctx.fillStyle = i < 2 ? (c.accent || '#4a6fa5') : (c.surfaceAlt || '#eee');
+    ctx.beginPath(); ctx.roundRect(px, pathY2, 82, 22, 11); ctx.fill();
     ctx.fillStyle = i < 2 ? '#ffffff' : (c.textSecondary || '#4a5568');
-    ctx.font = '11px Inter, system-ui, sans-serif';
-    ctx.fillText(label, px + (i === 2 ? 30 : 34), pathY + 18);
+    ctx.font = '9px Inter, system-ui, sans-serif';
+    ctx.fillText(label, px + (i === 2 ? 22 : 26), pathY2 + 14);
   });
 
   // Tab strip
-  const tabY = scY + 68;
+  var tabY2 = scY + 52;
   ctx.fillStyle = c.tabActiveColor || c.accent || '#4a6fa5';
-  ctx.font = '13px Inter, system-ui, sans-serif';
-  ctx.fillText('Details', scX + 24, tabY + 4);
-  ctx.fillRect(scX + 24, tabY + 10, 48, 2.5);
+  ctx.font = '10px Inter, system-ui, sans-serif';
+  ctx.fillText('Details', scX + 16, tabY2 + 4);
+  ctx.fillRect(scX + 16, tabY2 + 8, 36, 2);
   ctx.fillStyle = c.tabInactiveColor || c.textSecondary || '#4a5568';
-  ctx.fillText('Activity', scX + 100, tabY + 4);
-  ctx.fillText('Chatter', scX + 176, tabY + 4);
+  ctx.fillText('Activity', scX + 70, tabY2 + 4);
+  ctx.fillText('Chatter', scX + 126, tabY2 + 4);
   ctx.strokeStyle = c.tabNavBorder || c.border || '#e8e8e6';
-  ctx.beginPath(); ctx.moveTo(scX, tabY + 14); ctx.lineTo(scX + scW, tabY + 14); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(scX, tabY2 + 11); ctx.lineTo(scX + scW, tabY2 + 11); ctx.stroke();
 
   // Detail rows
-  const rows = [
-    ['Name', 'John Smith'],
-    ['Email', 'john@example.com'],
-    ['Company', 'Acme Corp'],
-    ['Phone', '+1 (555) 123-4567'],
-  ];
-  rows.forEach(([label, value], i) => {
-    const ry = tabY + 36 + i * 34;
+  var rows = [['Name', 'John Smith'], ['Email', 'john@example.com'], ['Company', 'Acme Corp'], ['Phone', '+1 (555) 123-4567']];
+  rows.forEach(function(row, i) {
+    var ry = tabY2 + 28 + i * 28;
     ctx.fillStyle = c.textSecondary || '#64748b';
-    ctx.font = '12px Inter, system-ui, sans-serif';
-    ctx.fillText(label, scX + 24, ry);
-    ctx.fillStyle = label === 'Email' ? (c.link || c.accent || '#4a6fa5') : (c.textPrimary || '#1e293b');
-    ctx.font = '12px Inter, system-ui, sans-serif';
-    ctx.fillText(value, scX + 180, ry);
+    ctx.font = '10px Inter, system-ui, sans-serif';
+    ctx.fillText(row[0], scX + 16, ry);
+    ctx.fillStyle = row[0] === 'Email' ? (c.link || c.accent || '#4a6fa5') : (c.textPrimary || '#1e293b');
+    ctx.fillText(row[1], scX + 120, ry);
     ctx.strokeStyle = c.tableBorderRow || c.border || '#e8e8e6';
-    ctx.lineWidth = 0.5;
-    ctx.beginPath(); ctx.moveTo(scX + 16, ry + 14); ctx.lineTo(scX + scW - 16, ry + 14); ctx.stroke();
+    ctx.lineWidth = 0.4;
+    ctx.beginPath(); ctx.moveTo(scX + 10, ry + 10); ctx.lineTo(scX + scW - 10, ry + 10); ctx.stroke();
   });
 
-  // Edit / Delete buttons
-  const btnRowY = tabY + 36 + rows.length * 34 + 10;
+  // Edit/Delete buttons
+  var btnRow = tabY2 + 28 + rows.length * 28 + 6;
   ctx.fillStyle = c.buttonNeutralBg || c.surface || '#ffffff';
   ctx.strokeStyle = c.buttonNeutralBorder || c.border || '#c4cdd6';
-  ctx.lineWidth = 1;
-  ctx.beginPath(); ctx.roundRect(scX + 24, btnRowY, 60, 28, 5); ctx.fill(); ctx.stroke();
-  ctx.beginPath(); ctx.roundRect(scX + 96, btnRowY, 70, 28, 5); ctx.fill(); ctx.stroke();
+  ctx.lineWidth = 0.8;
+  ctx.beginPath(); ctx.roundRect(scX + 16, btnRow, 46, 20, 4); ctx.fill(); ctx.stroke();
+  ctx.beginPath(); ctx.roundRect(scX + 70, btnRow, 52, 20, 4); ctx.fill(); ctx.stroke();
   ctx.fillStyle = c.buttonNeutralText || c.textPrimary || '#2d2d2d';
-  ctx.font = 'bold 11px Inter, system-ui, sans-serif';
-  ctx.fillText('Edit', scX + 42, btnRowY + 18);
-  ctx.fillText('Delete', scX + 114, btnRowY + 18);
+  ctx.font = 'bold 9px Inter, system-ui, sans-serif';
+  ctx.fillText('Edit', scX + 30, btnRow + 13);
+  ctx.fillText('Delete', scX + 82, btnRow + 13);
 
   // Toast
-  const toastY = btnRowY + 46;
-  ctx.fillStyle = c.success || '#059669';
-  ctx.globalAlpha = 0.12;
-  ctx.beginPath(); ctx.roundRect(scX + 16, toastY, scW - 32, 32, 6); ctx.fill();
+  var toastY2 = btnRow + 30;
+  if (toastY2 + 24 < scY + scH) {
+    ctx.fillStyle = c.success || '#059669';
+    ctx.globalAlpha = 0.12;
+    ctx.beginPath(); ctx.roundRect(scX + 10, toastY2, scW - 20, 24, 4); ctx.fill();
+    ctx.globalAlpha = 1;
+    ctx.fillStyle = c.success || '#059669';
+    ctx.font = '9px Inter, system-ui, sans-serif';
+    ctx.fillText('\u2713 Lead "John Smith" was saved.', scX + 24, toastY2 + 15);
+    ctx.fillStyle = c.link || c.accent || '#4a6fa5';
+    ctx.font = 'bold 9px Inter, system-ui, sans-serif';
+    ctx.textAlign = 'right';
+    ctx.fillText('Undo', scX + scW - 20, toastY2 + 15);
+    ctx.textAlign = 'left';
+  }
+
+  // Bottom bar (footer strip)
+  ctx.fillStyle = c.nav || '#4a6fa5';
+  ctx.globalAlpha = 0.6;
+  ctx.fillRect(previewX, appY + appH - 24, previewW, 24);
   ctx.globalAlpha = 1;
-  ctx.fillStyle = c.success || '#059669';
-  ctx.font = '12px Inter, system-ui, sans-serif';
-  ctx.fillText('\u2713  Lead "John Smith" was saved.', scX + 36, toastY + 20);
-  ctx.fillStyle = c.link || c.accent || '#4a6fa5';
-  ctx.font = 'bold 12px Inter, system-ui, sans-serif';
-  ctx.textAlign = 'right';
-  ctx.fillText('Undo', scX + scW - 36, toastY + 20);
-  ctx.textAlign = 'left';
-
-  // ─── Color palette dots ────────────────────────────────────────
-  const paletteY = cardY + cardH + 50;
-  const dotColors = [c.nav, c.accent, c.surface, c.background, c.textPrimary].filter(Boolean);
-  const dotR = 16, dotGap = 18;
-  const totalDotsW = dotColors.length * dotR * 2 + (dotColors.length - 1) * dotGap;
-  ctx.textAlign = 'center';
-  dotColors.forEach((col, i) => {
-    const dx = S / 2 - totalDotsW / 2 + i * (dotR * 2 + dotGap) + dotR;
-    ctx.fillStyle = col;
-    ctx.beginPath(); ctx.arc(dx, paletteY, dotR, 0, Math.PI * 2); ctx.fill();
-    ctx.strokeStyle = 'rgba(255,255,255,0.12)';
-    ctx.lineWidth = 1.5;
-    ctx.stroke();
-  });
-
-  // ─── Bottom footer bar ─────────────────────────────────────────
-  ctx.fillStyle = '#475569';
-  ctx.font = '15px Inter, system-ui, sans-serif';
-  ctx.textAlign = 'center';
-  ctx.fillText('Salesforce Themer by Connectry', S / 2, S - 50);
-
-  ctx.fillStyle = '#64748b';
-  ctx.font = '12px Inter, system-ui, sans-serif';
-  ctx.fillText('connectry.io', S / 2, S - 28);
+  ctx.fillStyle = '#ffffff';
+  ctx.font = '8px Inter, system-ui, sans-serif';
+  ctx.globalAlpha = 0.7;
+  ctx.fillText('Notes', previewX + 20, appY + appH - 9);
+  ctx.fillText('History', previewX + 80, appY + appH - 9);
+  ctx.fillText('Open CTI', previewX + 148, appY + appH - 9);
+  ctx.globalAlpha = 1;
 }
 
-document.getElementById('generateBtn').addEventListener('click', async () => {
-  const status = document.getElementById('status');
-  const grid = document.getElementById('grid');
+document.getElementById('generateBtn').addEventListener('click', async function() {
+  var status = document.getElementById('status');
+  var grid = document.getElementById('grid');
   grid.innerHTML = '';
   status.innerHTML = '<div class="status">Loading themes...</div>';
   try {
-    const themes = await loadThemes();
+    var themes = await loadThemes();
     status.innerHTML = '<div class="status">Generating ' + themes.length + ' images...</div>';
 
-    for (const theme of themes) {
-      const card = document.createElement('div');
+    for (var t = 0; t < themes.length; t++) {
+      var theme = themes[t];
+      var card = document.createElement('div');
       card.className = 'preview';
 
-      const canvas = document.createElement('canvas');
+      var canvas = document.createElement('canvas');
       renderShareImage(canvas, theme);
       card.appendChild(canvas);
 
-      const info = document.createElement('div');
+      var info = document.createElement('div');
       info.className = 'preview-info';
 
-      const name = document.createElement('span');
+      var name = document.createElement('span');
       name.textContent = theme.name;
 
-      const dl = document.createElement('a');
+      var dl = document.createElement('a');
       dl.textContent = 'Download';
       dl.href = '#';
-      dl.addEventListener('click', (e) => {
-        e.preventDefault();
-        canvas.toBlob((blob) => {
-          const url = URL.createObjectURL(blob);
-          const a = document.createElement('a');
-          a.href = url;
-          a.download = theme.id + '.png';
-          a.click();
-          URL.revokeObjectURL(url);
-        }, 'image/png');
-      });
+      (function(c, th) {
+        dl.addEventListener('click', function(e) {
+          e.preventDefault();
+          c.toBlob(function(blob) {
+            var url = URL.createObjectURL(blob);
+            var a = document.createElement('a');
+            a.href = url;
+            a.download = th.id + '.png';
+            a.click();
+            URL.revokeObjectURL(url);
+          }, 'image/png');
+        });
+      })(canvas, theme);
 
       info.appendChild(name);
       info.appendChild(dl);
@@ -298,25 +333,27 @@ document.getElementById('generateBtn').addEventListener('click', async () => {
 
     status.innerHTML = '<div class="status">\u2713 Generated ' + themes.length + ' images. Click each to download, or use Download All below.</div>';
 
-    const dlAllBtn = document.createElement('button');
+    var dlAllBtn = document.createElement('button');
     dlAllBtn.className = 'btn-primary';
     dlAllBtn.textContent = 'Download All';
     dlAllBtn.style.marginTop = '12px';
-    dlAllBtn.addEventListener('click', () => {
-      grid.querySelectorAll('.preview').forEach((card, i) => {
-        const canvas = card.querySelector('canvas');
-        const theme = themes[i];
-        setTimeout(() => {
-          canvas.toBlob((blob) => {
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = theme.id + '.png';
-            a.click();
-            URL.revokeObjectURL(url);
-          }, 'image/png');
-        }, i * 200);
-      });
+    dlAllBtn.addEventListener('click', function() {
+      var cards = grid.querySelectorAll('.preview');
+      for (var i = 0; i < cards.length; i++) {
+        (function(idx) {
+          setTimeout(function() {
+            var cv = cards[idx].querySelector('canvas');
+            cv.toBlob(function(blob) {
+              var url = URL.createObjectURL(blob);
+              var a = document.createElement('a');
+              a.href = url;
+              a.download = themes[idx].id + '.png';
+              a.click();
+              URL.revokeObjectURL(url);
+            }, 'image/png');
+          }, idx * 200);
+        })(i);
+      }
     });
     status.appendChild(dlAllBtn);
   } catch (err) {
