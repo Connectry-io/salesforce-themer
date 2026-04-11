@@ -63,14 +63,34 @@
   white-space: nowrap;
 }
 
-/* ─── Inline hover tooltips (status bar) ─────────────────────────────── */
+/* ─── Question-mark tooltip buttons (status bar) ─────────────────────── */
 
-.opt-has-tip {
+.opt-tip-btn {
   position: relative;
-  cursor: help;
-  border-bottom: 1px dotted var(--cx-text-subtle);
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  border: 1px solid var(--cx-border);
+  background: var(--cx-surface-alt);
+  color: var(--cx-text-subtle);
+  font-size: 9px;
+  font-weight: 700;
+  font-family: var(--cx-font);
+  line-height: 1;
+  cursor: pointer;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: var(--cx-transition);
 }
-.opt-has-tip::after {
+.opt-tip-btn:hover {
+  border-color: var(--cx-accent);
+  color: var(--cx-accent);
+  background: var(--cx-accent-light);
+}
+.opt-tip-btn::after {
   content: attr(data-tip);
   position: absolute;
   left: 50%;
@@ -91,7 +111,7 @@
   transition: opacity 150ms;
   z-index: 300;
 }
-.opt-has-tip:hover::after {
+.opt-tip-btn:hover::after {
   opacity: 1;
 }
 .opt-status-bar-smart {
@@ -233,7 +253,7 @@
   max-height: calc(100vh - var(--cx-header-height) - 24px);
   overflow-y: auto;
   background: var(--cx-surface);
-  border: 1px solid var(--cx-border);
+  border: none;
   border-radius: var(--cx-radius-lg);
   box-shadow: var(--cx-shadow-md);
   animation: opt-panel-slide 220ms cubic-bezier(0.16, 1, 0.3, 1) both;
@@ -328,6 +348,11 @@
 .opt-share-menu-item:hover {
   background: var(--cx-surface-alt);
 }
+.opt-share-menu-sep {
+  height: 1px;
+  background: var(--cx-border);
+  margin: 3px 0;
+}
 
 /* ─── Detail panel: preview + body ────────────────────────────────────── */
 
@@ -421,9 +446,9 @@
   justify-content: center;
   gap: 8px;
   padding: var(--cx-space-4) var(--cx-space-5);
-  border: 1px dashed var(--cx-border);
+  border: 1px dashed #c9a227;
   border-radius: var(--cx-radius-md);
-  background: var(--cx-surface-alt);
+  background: linear-gradient(135deg, #fdf8e8 0%, #f5ecd0 100%);
 }
 .opt-premium-gate[hidden] { display: none; }
 .opt-premium-gate-text {

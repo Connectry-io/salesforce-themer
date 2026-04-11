@@ -1183,6 +1183,11 @@
         <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><rect x="1.5" y="3" width="13" height="10" rx="1.5" stroke="currentColor" stroke-width="1.2"/><path d="M1.5 4.5L8 9l6.5-4.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
         Email
       </button>
+      <div class="opt-share-menu-sep"></div>
+      <button class="opt-share-menu-item" data-share="image">
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><rect x="1.5" y="2.5" width="13" height="11" rx="1.5" stroke="currentColor" stroke-width="1.2"/><circle cx="5.5" cy="6" r="1.5" stroke="currentColor" stroke-width="1"/><path d="M1.5 11l3-3 2.5 2.5L10 8l4.5 4.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Download image
+      </button>
       <button class="opt-share-menu-item" data-share="copy">
         <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><rect x="5" y="5" width="9" height="9" rx="1.5" stroke="currentColor" stroke-width="1.2"/><path d="M11 5V3.5A1.5 1.5 0 009.5 2h-6A1.5 1.5 0 002 3.5v6A1.5 1.5 0 003.5 11H5" stroke="currentColor" stroke-width="1.2"/></svg>
         Copy link
@@ -1198,9 +1203,11 @@
       if (!item) return;
       const type = item.dataset.share;
       if (type === 'whatsapp') {
-        window.open(`https://wa.me/?text=${encodeURIComponent(fullText)}`, '_blank');
+        window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(fullText)}`, '_blank');
       } else if (type === 'email') {
         window.location.href = `mailto:?subject=${encodeURIComponent(`${theme.name} — Salesforce Themer`)}&body=${encodeURIComponent(fullText)}`;
+      } else if (type === 'image') {
+        shareThemeAsImage(theme);
       } else if (type === 'copy') {
         await navigator.clipboard.writeText(fullText);
         _flashToast('Link copied to clipboard');
@@ -1332,75 +1339,180 @@
   // ─── Theme Manager: Share as Image ────────────────────────────────────────
 
   function shareThemeAsImage(theme) {
-    const colors = theme.isCustom ? theme.colors : theme.colors;
-    const c = colors || {};
-    const W = 1200, H = 630;
+    const c = (theme.isCustom ? theme.colors : theme.colors) || {};
+    const S = 1200; // square
 
     const canvas = document.createElement('canvas');
-    canvas.width = W;
-    canvas.height = H;
+    canvas.width = S;
+    canvas.height = S;
     const ctx = canvas.getContext('2d');
 
-    // Background
-    ctx.fillStyle = c.background || '#f7f7f5';
-    ctx.fillRect(0, 0, W, H);
+    // ─── Connectry backdrop ──────────────────────────────────────────
+    // Dark gradient background with subtle brand feel
+    const grad = ctx.createLinearGradient(0, 0, S, S);
+    grad.addColorStop(0, '#0f172a');
+    grad.addColorStop(1, '#1e293b');
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, S, S);
 
-    // Nav bar
-    ctx.fillStyle = c.nav || '#4a6fa5';
-    ctx.fillRect(0, 0, W, 56);
+    // Subtle grid pattern
+    ctx.strokeStyle = 'rgba(255,255,255,0.03)';
+    ctx.lineWidth = 1;
+    for (let i = 0; i < S; i += 40) {
+      ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i, S); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(0, i); ctx.lineTo(S, i); ctx.stroke();
+    }
 
-    // Surface card
-    ctx.fillStyle = c.surface || '#ffffff';
-    const cardX = 80, cardY = 100, cardW = W - 160, cardH = 360;
+    // ─── Theme preview card (centered, 16:10 aspect) ─────────────────
+    const cardW = 920, cardH = 575;
+    const cardX = (S - cardW) / 2, cardY = 180;
+
+    // Card shadow
+    ctx.shadowColor = 'rgba(0,0,0,0.4)';
+    ctx.shadowBlur = 60;
+    ctx.shadowOffsetY = 20;
+
+    // Browser chrome bar
+    ctx.fillStyle = '#1e293b';
     ctx.beginPath();
-    ctx.roundRect(cardX, cardY, cardW, cardH, 12);
+    ctx.roundRect(cardX, cardY, cardW, 36, [12, 12, 0, 0]);
     ctx.fill();
 
-    // Card border
-    ctx.strokeStyle = c.border || '#e8e8e6';
-    ctx.lineWidth = 2;
-    ctx.stroke();
-
-    // Accent bar inside card
-    ctx.fillStyle = c.accent || '#4a6fa5';
-    ctx.fillRect(cardX, cardY, cardW, 4);
-
-    // Swatch strip at bottom
-    const swatchY = H - 80;
-    const swatchColors = [c.background, c.surface, c.accent, c.textPrimary].filter(Boolean);
-    const swatchW = 200;
-    const each = swatchW / swatchColors.length;
-    swatchColors.forEach((col, i) => {
+    // Traffic lights
+    const dotColors = ['#ff5f57', '#ffbd2e', '#28c840'];
+    dotColors.forEach((col, i) => {
       ctx.fillStyle = col;
-      ctx.fillRect(W / 2 - swatchW / 2 + i * each, swatchY, each, 24);
+      ctx.beginPath();
+      ctx.arc(cardX + 20 + i * 18, cardY + 18, 5, 0, Math.PI * 2);
+      ctx.fill();
     });
 
-    // Theme name
-    ctx.fillStyle = c.textPrimary || '#2d2d2d';
-    ctx.font = 'bold 32px Inter, system-ui, sans-serif';
+    // Browser tab
+    ctx.fillStyle = '#334155';
+    ctx.beginPath();
+    ctx.roundRect(cardX + 72, cardY + 6, 160, 24, [5, 5, 0, 0]);
+    ctx.fill();
+    ctx.fillStyle = '#94a3b8';
+    ctx.font = '11px Inter, system-ui, sans-serif';
+    ctx.textAlign = 'left';
+    ctx.fillText('Salesforce', cardX + 82, cardY + 23);
+
+    // Reset shadow for main content
+    ctx.shadowColor = 'transparent';
+    ctx.shadowBlur = 0;
+    ctx.shadowOffsetY = 0;
+
+    // App content area
+    const contentY = cardY + 36;
+    const contentH = cardH - 36;
+    ctx.fillStyle = c.background || '#f7f7f5';
+    ctx.beginPath();
+    ctx.roundRect(cardX, contentY, cardW, contentH, [0, 0, 12, 12]);
+    ctx.fill();
+
+    // Nav bar inside app
+    ctx.fillStyle = c.nav || '#4a6fa5';
+    ctx.fillRect(cardX, contentY, cardW, 44);
+
+    // Nav text
+    ctx.fillStyle = '#ffffff';
+    ctx.font = 'bold 14px Inter, system-ui, sans-serif';
+    ctx.textAlign = 'left';
+    const navItems = ['Sales', 'Home', 'Leads', 'Contacts'];
+    navItems.forEach((item, i) => {
+      ctx.fillText(item, cardX + 24 + i * 80, contentY + 28);
+    });
+
+    // Surface card inside
+    const innerX = cardX + 40, innerY = contentY + 70;
+    const innerW = cardW - 80, innerH = contentH - 100;
+    ctx.fillStyle = c.surface || '#ffffff';
+    ctx.beginPath();
+    ctx.roundRect(innerX, innerY, innerW, innerH, 8);
+    ctx.fill();
+    ctx.strokeStyle = c.border || '#e8e8e6';
+    ctx.lineWidth = 1;
+    ctx.stroke();
+
+    // Accent button
+    ctx.fillStyle = c.accent || '#4a6fa5';
+    ctx.beginPath();
+    ctx.roundRect(innerX + innerW - 140, innerY + 30, 110, 32, 6);
+    ctx.fill();
+    ctx.fillStyle = '#ffffff';
+    ctx.font = 'bold 12px Inter, system-ui, sans-serif';
     ctx.textAlign = 'center';
-    ctx.fillText(theme.name, W / 2, cardY + 60);
+    ctx.fillText('Convert', innerX + innerW - 85, innerY + 51);
+
+    // Detail rows
+    ctx.textAlign = 'left';
+    ctx.fillStyle = c.textSecondary || '#4a5568';
+    ctx.font = '13px Inter, system-ui, sans-serif';
+    const rows = ['Name', 'Email', 'Company', 'Phone'];
+    rows.forEach((label, i) => {
+      const rowY = innerY + 100 + i * 36;
+      ctx.fillStyle = c.textSecondary || '#64748b';
+      ctx.fillText(label, innerX + 24, rowY);
+      ctx.fillStyle = c.textPrimary || '#1e293b';
+      ctx.fillRect(innerX + 160, rowY - 8, 200, 12);
+      ctx.globalAlpha = 0.15;
+      ctx.fillRect(innerX + 160, rowY - 8, 200, 12);
+      ctx.globalAlpha = 1;
+    });
+
+    // ─── Color palette strip below card ──────────────────────────────
+    const paletteY = cardY + cardH + 40;
+    const colors = [c.nav, c.accent, c.surface, c.background, c.border].filter(Boolean);
+    const dotSize = 28, dotGap = 16;
+    const totalW = colors.length * dotSize + (colors.length - 1) * dotGap;
+    colors.forEach((col, i) => {
+      ctx.fillStyle = col;
+      ctx.beginPath();
+      ctx.arc(S / 2 - totalW / 2 + i * (dotSize + dotGap) + dotSize / 2, paletteY, dotSize / 2, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = 'rgba(255,255,255,0.15)';
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+    });
+
+    // ─── Theme name ──────────────────────────────────────────────────
+    ctx.fillStyle = '#ffffff';
+    ctx.font = 'bold 42px Inter, system-ui, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText(theme.name, S / 2, 120);
 
     // Tagline
     if (theme.tagline) {
-      ctx.fillStyle = c.textSecondary || '#4a5568';
+      ctx.fillStyle = '#94a3b8';
       ctx.font = '18px Inter, system-ui, sans-serif';
-      ctx.fillText(theme.tagline, W / 2, cardY + 100);
+      ctx.fillText(theme.tagline, S / 2, 155);
     }
 
-    // Watermark
-    ctx.fillStyle = c.textMuted || '#9aa5b4';
-    ctx.font = '14px Inter, system-ui, sans-serif';
-    ctx.fillText('Salesforce Themer by Connectry', W / 2, H - 24);
+    // ─── Connectry branding ──────────────────────────────────────────
+    ctx.fillStyle = '#64748b';
+    ctx.font = '16px Inter, system-ui, sans-serif';
+    ctx.fillText('Salesforce Themer by Connectry', S / 2, S - 40);
 
-    // Download
+    // Accent dots decoration
+    ctx.fillStyle = c.accent || '#4a6fa5';
+    ctx.globalAlpha = 0.15;
+    ctx.beginPath();
+    ctx.arc(80, 80, 120, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.arc(S - 80, S - 80, 80, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.globalAlpha = 1;
+
+    // ─── Download ────────────────────────────────────────────────────
     canvas.toBlob((blob) => {
-      const url = URL.createObjectURL(blob);
+      const blobUrl = URL.createObjectURL(blob);
       const a = document.createElement('a');
-      a.href = url;
+      a.href = blobUrl;
       a.download = `${theme.name || 'theme'}-salesforce-themer.png`;
       a.click();
-      URL.revokeObjectURL(url);
+      URL.revokeObjectURL(blobUrl);
+      _flashToast('Image downloaded — attach it to your message');
     }, 'image/png');
   }
 
