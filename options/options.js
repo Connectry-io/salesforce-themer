@@ -61,6 +61,12 @@
     return t ? t.category === 'dark' : false;
   }
 
+  /** Resolve a custom theme's full color map by merging base + overrides. */
+  function resolveCustomColors(ct) {
+    const base = getThemeById(ct.basedOn) || THEMES[0];
+    return { ...(base?.colors || {}), ...(ct.coreOverrides || {}), ...(ct.advancedOverrides || {}) };
+  }
+
   // ─── Swatch generation ────────────────────────────────────────────────────
 
   function buildSwatch(theme) {
@@ -98,6 +104,302 @@
       lineHeight: 1.375,
       letterSpacing: 0,
     };
+  }
+
+  // ─── Shared preview component ────────────────────────────────────────────
+  //
+  // Reusable Salesforce page mockup used by:
+  //   - Builder (full size, interactive)
+  //   - Theme Manager hero (medium size)
+  //   - Theme Manager expanded card detail (compact)
+  //   - Future: Marketplace detail view
+  //
+  // Usage: renderThemePreview(container, colors, { size, effects, interactive })
+
+  const PREVIEW_HTML_TEMPLATE = `
+    <div class="preview-browser-bar">
+      <div class="preview-browser-dots">
+        <span style="background:#ff5f57"></span>
+        <span style="background:#febc2e"></span>
+        <span style="background:#28c840"></span>
+      </div>
+      <div class="preview-browser-tabs">
+        <div class="preview-browser-tab is-active">
+          <span class="preview-browser-tab-fav">
+            <svg width="10" height="10" viewBox="0 0 32 32" fill="none"><circle cx="8" cy="16" r="4" fill="#2D2D2D"/><line x1="12" y1="16" x2="20" y2="16" stroke="#4A6FA5" stroke-width="2" stroke-linecap="round"/><circle cx="24" cy="16" r="4" fill="#4A6FA5"/></svg>
+          </span>
+          <span class="preview-browser-tab-text">Jack Popescu | Lead | S...</span>
+          <span class="preview-browser-tab-x">&times;</span>
+        </div>
+        <div class="preview-browser-tab-new">+</div>
+      </div>
+    </div>
+    <div class="editor-preview-frame">
+      <div class="preview-particles">
+        <div class="preview-particle"></div><div class="preview-particle"></div>
+        <div class="preview-particle"></div><div class="preview-particle"></div>
+        <div class="preview-particle"></div><div class="preview-particle"></div>
+        <div class="preview-particle"></div><div class="preview-particle"></div>
+      </div>
+      <div class="preview-cursor-trail"></div>
+      <div class="preview-global-header" data-bind="surface" data-bind-border-color="border">
+        <div class="preview-global-header-left">
+          <span class="preview-global-waffle" data-bind-color="textSecondary">
+            <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+              <circle cx="3" cy="3" r="1.5" fill="currentColor"/><circle cx="8" cy="3" r="1.5" fill="currentColor"/><circle cx="13" cy="3" r="1.5" fill="currentColor"/>
+              <circle cx="3" cy="8" r="1.5" fill="currentColor"/><circle cx="8" cy="8" r="1.5" fill="currentColor"/><circle cx="13" cy="8" r="1.5" fill="currentColor"/>
+              <circle cx="3" cy="13" r="1.5" fill="currentColor"/><circle cx="8" cy="13" r="1.5" fill="currentColor"/><circle cx="13" cy="13" r="1.5" fill="currentColor"/>
+            </svg>
+          </span>
+        </div>
+        <div class="preview-global-search" data-bind="background" data-bind-border-color="borderInput">
+          <svg width="11" height="11" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+            <circle cx="7" cy="7" r="5" stroke="currentColor" stroke-width="1.5" opacity="0.4"/>
+            <path d="M11 11l3.5 3.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" opacity="0.4"/>
+          </svg>
+          <span data-bind-color="textPlaceholder">Search...</span>
+        </div>
+        <div class="preview-global-actions" data-bind-color="textSecondary">
+          <svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M8 2v12M2 8h12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+          <svg width="12" height="12" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.5"/><path d="M8 5v3l2 1.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+          <svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M2 4h12M2 8h12M2 12h12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+          <span class="preview-global-avatar" data-bind="accent" data-bind-color="buttonBrandText">N</span>
+        </div>
+      </div>
+      <div class="preview-nav" data-bind="nav">
+        <span class="preview-nav-app" data-bind-color="navText">Sales</span>
+        <span class="preview-nav-item" data-bind-color="navText">Home</span>
+        <span class="preview-nav-item preview-nav-active" data-bind-color="navActiveText" data-bind-border="accent">Leads</span>
+        <span class="preview-nav-item" data-bind-color="navText">Contacts</span>
+        <span class="preview-nav-item" data-bind-color="navText">Accounts</span>
+      </div>
+      <div class="preview-header" data-bind="background">
+        <div class="preview-header-top">
+          <div>
+            <div class="preview-header-title" data-bind-color="textPrimary">Lead: John Smith</div>
+            <div class="preview-header-meta" data-bind-color="textSecondary">Senior Account Executive</div>
+          </div>
+          <div class="preview-header-actions">
+            <button class="preview-btn-neutral preview-btn-sm" data-bind="buttonNeutralBg" data-bind-color="textPrimary" data-bind-border-color="borderInput">Clone</button>
+            <button class="preview-btn-brand preview-btn-sm" data-bind="accent" data-bind-color="buttonBrandText">Convert</button>
+          </div>
+        </div>
+      </div>
+      <div class="preview-highlights" data-bind="surface" data-bind-border-color="border">
+        <div class="preview-highlight">
+          <span class="preview-highlight-label" data-bind-color="textSecondary">Phone</span>
+          <span class="preview-highlight-value" data-bind-color="link">(415) 555-1234</span>
+        </div>
+        <div class="preview-highlight">
+          <span class="preview-highlight-label" data-bind-color="textSecondary">Company</span>
+          <span class="preview-highlight-value" data-bind-color="textPrimary">Acme Corp</span>
+        </div>
+        <div class="preview-highlight">
+          <span class="preview-highlight-label" data-bind-color="textSecondary">Lead Source</span>
+          <span class="preview-highlight-value" data-bind-color="textPrimary">Web</span>
+        </div>
+        <div class="preview-highlight">
+          <span class="preview-highlight-label" data-bind-color="textSecondary">Rating</span>
+          <span class="preview-highlight-value" data-bind-color="warning">Hot</span>
+        </div>
+      </div>
+      <div class="preview-path-wrap" data-bind="surface" data-bind-border-color="border">
+        <div class="preview-path">
+          <span class="preview-path-item preview-path-complete" data-bind="accent" data-bind-color="buttonBrandText">New</span>
+          <span class="preview-path-item preview-path-current" data-bind="accent" data-bind-color="buttonBrandText">Working</span>
+          <span class="preview-path-item" data-bind="surfaceAlt" data-bind-color="textPrimary">Converted</span>
+        </div>
+      </div>
+      <div class="preview-card" data-bind="surface" data-bind-border-color="border">
+        <div class="preview-card-tabs">
+          <span class="preview-tab-active" data-bind-color="accent">Details</span>
+          <span class="preview-tab" data-bind-color="textSecondary">Activity</span>
+          <span class="preview-tab" data-bind-color="textSecondary">Chatter</span>
+        </div>
+        <div class="preview-card-body">
+          <div class="preview-field">
+            <span class="preview-field-label" data-bind-color="textSecondary">Name</span>
+            <span class="preview-field-value" data-bind-color="textPrimary">John Smith</span>
+          </div>
+          <div class="preview-field">
+            <span class="preview-field-label" data-bind-color="textSecondary">Email</span>
+            <span class="preview-field-value preview-link" data-bind-color="link">john@example.com</span>
+          </div>
+          <div class="preview-field">
+            <span class="preview-field-label" data-bind-color="textSecondary">Company</span>
+            <span class="preview-field-value" data-bind-color="textPrimary">Acme Corp</span>
+          </div>
+        </div>
+        <div class="preview-card-actions">
+          <button class="preview-btn-neutral" data-bind="buttonNeutralBg" data-bind-color="textPrimary" data-bind-border-color="borderInput">Edit</button>
+          <button class="preview-btn-neutral" data-bind="buttonNeutralBg" data-bind-color="textPrimary" data-bind-border-color="borderInput">Delete</button>
+        </div>
+      </div>
+      <div class="preview-table-wrap" data-bind="surface" data-bind-border-color="border">
+        <div class="preview-table-header" data-bind="tableHeaderBg">
+          <span data-bind-color="textSecondary">Name</span>
+          <span data-bind-color="textSecondary">Email</span>
+          <span data-bind-color="textSecondary">Status</span>
+        </div>
+        <div class="preview-table-row" data-bind="surface">
+          <span data-bind-color="link">Jane Doe</span>
+          <span data-bind-color="textPrimary">jane@acme.com</span>
+          <span class="preview-badge" data-bind-color="success">Active</span>
+        </div>
+        <div class="preview-table-row preview-table-alt" data-bind="surface">
+          <span data-bind-color="link">Bob Lee</span>
+          <span data-bind-color="textPrimary">bob@acme.com</span>
+          <span class="preview-badge" data-bind-color="warning">Pending</span>
+        </div>
+      </div>
+      <div class="preview-input-wrap" data-bind="surface">
+        <span class="preview-input-label" data-bind-color="textSecondary">Search</span>
+        <div class="preview-input" data-bind="background" data-bind-border-color="borderInput">
+          <span data-bind-color="textPlaceholder">Search leads...</span>
+        </div>
+      </div>
+      <div class="preview-toast" data-bind="surface" data-bind-border-color="border">
+        <span class="preview-toast-icon" data-bind-color="success">
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M3.5 8.5l3 3 6-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </span>
+        <span class="preview-toast-text" data-bind-color="textPrimary">Lead "John Smith" was saved.</span>
+        <span class="preview-toast-link" data-bind-color="link">Undo</span>
+      </div>
+      <div class="preview-utilbar" data-bind="nav">
+        <span class="preview-utilbar-item" data-bind-color="navText">
+          <svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M2 4h12M2 8h12M2 12h12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+          Notes
+        </span>
+        <span class="preview-utilbar-item" data-bind-color="navText">
+          <svg width="12" height="12" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.5"/><path d="M8 5v3l2 1.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+          History
+        </span>
+        <span class="preview-utilbar-item" data-bind-color="navText">
+          <svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M13 10.5V12a1.5 1.5 0 01-1.5 1.5h-7A1.5 1.5 0 013 12V4a1.5 1.5 0 011.5-1.5h7A1.5 1.5 0 0113 4v1.5M6 8h7m0 0l-2.5-2.5M13 8l-2.5 2.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Open CTI
+        </span>
+      </div>
+    </div>`;
+
+  /**
+   * Apply theme colors to a preview frame using data-bind attributes.
+   * Works on any container that holds the PREVIEW_HTML_TEMPLATE markup.
+   */
+  function applyPreviewColors(frame, colors) {
+    if (!frame || !colors) return;
+    frame.style.backgroundColor = colors.background || '';
+    frame.querySelectorAll('[data-bind]').forEach(el => {
+      const key = el.dataset.bind;
+      if (colors[key]) el.style.backgroundColor = colors[key];
+    });
+    frame.querySelectorAll('[data-bind-color]').forEach(el => {
+      const key = el.dataset.bindColor;
+      if (colors[key]) el.style.color = colors[key];
+    });
+    frame.querySelectorAll('[data-bind-border-color]').forEach(el => {
+      const key = el.dataset.bindBorderColor;
+      if (colors[key]) el.style.borderColor = colors[key];
+    });
+    frame.querySelectorAll('[data-bind-border]').forEach(el => {
+      const key = el.dataset.bindBorder;
+      if (colors[key]) el.style.borderBottomColor = colors[key];
+    });
+  }
+
+  /**
+   * Apply effects config to a preview frame via CSS custom properties
+   * and data attributes. Shared between Builder and Theme Manager.
+   */
+  function applyPreviewEffects(frame, effects, accentColor) {
+    if (!frame) return;
+    const accent = accentColor || '#4a6fa5';
+    const rgb = _hexToRgbCsv(accent);
+    frame.style.setProperty('--fx-accent', accent);
+    frame.style.setProperty('--fx-accent-rgb', rgb);
+
+    const LADDER = {
+      subtle: { mult: 0.5, speed: 1.6 },
+      medium: { mult: 1.0, speed: 1.0 },
+      strong: { mult: 1.6, speed: 0.65 },
+    };
+    const FX_KEYS = ['hoverLift', 'ambientGlow', 'borderShimmer', 'gradientBorders', 'neonFlicker', 'aurora'];
+    for (const key of FX_KEYS) {
+      const on = !!effects[key];
+      const attr = 'fx' + key.charAt(0).toUpperCase() + key.slice(1);
+      if (on) {
+        frame.dataset[attr] = 'on';
+        const level = effects[key + 'Intensity'] || 'medium';
+        const v = LADDER[level] || LADDER.medium;
+        frame.style.setProperty(`--fx-${key}-mult`, String(v.mult));
+        frame.style.setProperty(`--fx-${key}-speed`, String(v.speed));
+      } else {
+        delete frame.dataset[attr];
+      }
+    }
+    // Particles
+    if (effects.particles) {
+      frame.dataset.fxParticles = 'on';
+      const level = effects.particlesIntensity || 'medium';
+      const v = LADDER[level] || LADDER.medium;
+      frame.style.setProperty('--fx-mult', String(v.mult));
+      frame.style.setProperty('--fx-speed-mult', String(v.speed));
+    } else {
+      delete frame.dataset.fxParticles;
+    }
+    // Cursor trail
+    if (effects.cursorTrail) {
+      frame.dataset.fxCursorTrail = 'on';
+    } else {
+      delete frame.dataset.fxCursorTrail;
+    }
+    // Master intensity vars
+    const activeMults = FX_KEYS
+      .filter(k => effects[k])
+      .map(k => (LADDER[effects[k + 'Intensity']] || LADDER.medium).mult);
+    const masterMult = activeMults.length ? Math.max(...activeMults) : 1;
+    const masterSpeed = activeMults.length
+      ? Math.min(...FX_KEYS.filter(k => effects[k])
+          .map(k => (LADDER[effects[k + 'Intensity']] || LADDER.medium).speed))
+      : 1;
+    frame.style.setProperty('--fx-mult', String(masterMult));
+    frame.style.setProperty('--fx-speed-mult', String(masterSpeed));
+  }
+
+  /**
+   * Render a theme preview into a container element.
+   *
+   * @param {HTMLElement} container - Target element to render into
+   * @param {object} colors - Full theme color map (60+ keys)
+   * @param {object} [opts] - Options
+   * @param {string} [opts.size='full'] - 'full' | 'hero' | 'card'
+   * @param {object} [opts.effects] - Effects config (from getSuggestedEffectsFor or custom)
+   * @param {boolean} [opts.interactive=false] - Enable cursor trail mouse tracking
+   */
+  function renderThemePreview(container, colors, opts) {
+    const { size = 'full', effects = null, interactive = false } = opts || {};
+    container.innerHTML = PREVIEW_HTML_TEMPLATE;
+    container.classList.add(`preview-size-${size}`);
+
+    const frame = container.querySelector('.editor-preview-frame');
+    if (!frame) return;
+
+    applyPreviewColors(frame, colors);
+
+    if (effects) {
+      applyPreviewEffects(frame, effects, colors.accent);
+    }
+
+    // Cursor trail mouse tracking (Builder only)
+    if (interactive) {
+      const trail = frame.querySelector('.preview-cursor-trail');
+      if (trail) {
+        frame.addEventListener('mousemove', (e) => {
+          const rect = frame.getBoundingClientRect();
+          trail.style.left = (e.clientX - rect.left) + 'px';
+          trail.style.top = (e.clientY - rect.top) + 'px';
+        });
+      }
+    }
   }
 
   // ─── Theme grid rendering ─────────────────────────────────────────────────
@@ -494,7 +796,7 @@
     if (syncState.theme === customId) {
       await selectTheme('connectry');
     } else {
-      renderCustomThemeGrid(syncState.theme);
+      renderCollectionGrid(syncState.theme);
     }
     renderBuilderSidebar(syncState.theme);
   }
@@ -513,6 +815,565 @@
     });
   }
 
+  // ─── Theme Manager: Collection Grid ────────────────────────────────────────
+
+  let _activeCollectionFilter = 'all';
+  let _openDetailId = null;
+
+  function renderCollectionGrid(activeThemeId) {
+    const grid = document.getElementById('optCollectionGrid');
+    const empty = document.getElementById('optCollectionEmpty');
+    if (!grid) return;
+    grid.innerHTML = '';
+    _openDetailId = null;
+
+    const customs = (syncState.customThemes || []).map(ct => ({
+      ...ct,
+      isCustom: true,
+      colors: resolveCustomColors(ct),
+      category: ct.category || (_detectThemeCategory(resolveCustomColors(ct).background) === 'dark' ? 'dark' : 'light'),
+    }));
+    const allThemes = [
+      ...THEMES.map(t => ({ ...t, isCustom: false })),
+      ...customs,
+    ];
+
+    for (const theme of allThemes) {
+      const isActive = theme.id === activeThemeId;
+      const card = document.createElement('div');
+      card.className = `theme-card${isActive ? ' is-active' : ''}`;
+      card.dataset.theme = theme.id;
+      card.dataset.category = theme.isCustom ? 'custom' : theme.category;
+      card.setAttribute('role', 'option');
+      card.setAttribute('aria-selected', String(isActive));
+      card.setAttribute('tabindex', '0');
+      card.setAttribute('title', theme.name);
+
+      const c = theme.colors || {};
+      const swatchColors = [c.background, c.surface, c.accent, c.textPrimary];
+      const swatchHtml = swatchColors.map(col => `<span style="background:${col || '#ddd'}"></span>`).join('');
+
+      card.innerHTML = `
+        <div class="theme-swatch">${swatchHtml}</div>
+        <div class="theme-card-body">
+          <div class="theme-card-header">
+            <span class="theme-name">${theme.name}</span>
+            <span class="theme-category-badge ${theme.isCustom ? (theme.category || 'light') : theme.category}">${theme.isCustom ? 'Custom' : (theme.category === 'light' ? 'Light' : 'Dark')}</span>
+          </div>
+          <div class="theme-description">${theme.description || ''}</div>
+          ${theme.isCustom ? '' : buildEffectIndicators(theme.id)}
+          <div class="theme-card-type-row">
+            <span class="theme-card-type-icon">Aa</span>
+            <span class="theme-card-type-text">System Default · Md · 1.375/0</span>
+          </div>
+        </div>
+        <div class="theme-card-actions">
+          <div class="theme-card-status">
+            <span class="theme-card-status-dot"></span>
+            <span>${isActive ? 'Active' : 'Apply'}</span>
+          </div>
+        </div>
+      `;
+
+      card.addEventListener('click', (e) => {
+        // Don't handle effect pill clicks — let them bubble to guide nav
+        const effectPill = e.target.closest('[data-effect-pill]');
+        if (effectPill) {
+          e.stopPropagation();
+          const effectId = effectPill.dataset.effectPill;
+          if (_tabsInstance) _tabsInstance.activate('effects');
+          setTimeout(() => highlightGuideEffect(effectId), 80);
+          return;
+        }
+        toggleDetailPanel(theme);
+      });
+
+      card.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          toggleDetailPanel(theme);
+        }
+      });
+
+      grid.appendChild(card);
+    }
+
+    applyCollectionFilter();
+
+    // Show/hide empty state for custom filter
+    if (empty) {
+      empty.hidden = _activeCollectionFilter !== 'custom' || customs.length > 0;
+    }
+  }
+
+  function applyCollectionFilter() {
+    const grid = document.getElementById('optCollectionGrid');
+    const empty = document.getElementById('optCollectionEmpty');
+    if (!grid) return;
+
+    const cards = grid.querySelectorAll('.theme-card');
+    const customs = (syncState.customThemes || []);
+    cards.forEach(card => {
+      const cat = card.dataset.category;
+      const show = _activeCollectionFilter === 'all'
+        || cat === _activeCollectionFilter;
+      card.classList.toggle('is-hidden', !show);
+    });
+
+    // Close detail if the card is now hidden
+    if (_openDetailId) {
+      const openCard = grid.querySelector(`.theme-card[data-theme="${_openDetailId}"]`);
+      if (openCard && openCard.classList.contains('is-hidden')) {
+        closeDetailPanel();
+      }
+    }
+
+    if (empty) {
+      empty.hidden = _activeCollectionFilter !== 'custom' || customs.length > 0;
+    }
+  }
+
+  function bindCollectionFilterPills() {
+    const pills = document.querySelectorAll('#opt-collection-heading ~ .cx-section-actions .cx-pill[data-filter], .cx-section-actions .cx-pill[data-filter]');
+    // Target the collection section's pills specifically
+    const section = document.getElementById('opt-collection-heading');
+    if (!section) return;
+    const sectionEl = section.closest('.cx-section');
+    if (!sectionEl) return;
+    const filterPills = sectionEl.querySelectorAll('.cx-pill[data-filter]');
+    filterPills.forEach(pill => {
+      pill.addEventListener('click', () => {
+        _activeCollectionFilter = pill.dataset.filter;
+        filterPills.forEach(p => p.classList.remove('is-active'));
+        pill.classList.add('is-active');
+        applyCollectionFilter();
+      });
+    });
+  }
+
+  function updateCollectionActiveState(activeThemeId) {
+    const grid = document.getElementById('optCollectionGrid');
+    if (!grid) return;
+    grid.querySelectorAll('.theme-card').forEach(card => {
+      const id = card.dataset.theme;
+      const isActive = id === activeThemeId;
+      card.classList.toggle('is-active', isActive);
+      card.setAttribute('aria-selected', String(isActive));
+      const statusText = card.querySelector('.theme-card-status span:last-child');
+      if (statusText) statusText.textContent = isActive ? 'Active' : 'Apply';
+    });
+  }
+
+  // ─── Theme Manager: Inline Expand ─────────────────────────────────────────
+
+  function toggleDetailPanel(theme) {
+    const grid = document.getElementById('optCollectionGrid');
+    if (!grid) return;
+
+    // Clicking same card closes it
+    if (_openDetailId === theme.id) {
+      closeDetailPanel();
+      return;
+    }
+
+    closeDetailPanel();
+
+    // Find end of visual row for this card
+    const clickedCard = grid.querySelector(`.theme-card[data-theme="${theme.id}"]`);
+    if (!clickedCard) return;
+
+    requestAnimationFrame(() => {
+      const rowTop = clickedCard.offsetTop;
+      let lastInRow = clickedCard;
+      let next = clickedCard.nextElementSibling;
+      while (next && !next.classList.contains('opt-card-detail') && Math.abs(next.offsetTop - rowTop) < 2) {
+        if (!next.classList.contains('is-hidden')) lastInRow = next;
+        next = next.nextElementSibling;
+      }
+
+      const detail = buildDetailPanel(theme);
+      lastInRow.after(detail);
+      _openDetailId = theme.id;
+
+      // Highlight the clicked card
+      clickedCard.classList.add('is-expanded');
+
+      // Render preview
+      const previewHost = detail.querySelector('.opt-card-detail-preview');
+      const colors = theme.isCustom ? theme.colors : theme.colors;
+      const effects = theme.isCustom
+        ? (theme.effects || getSuggestedEffectsFor(theme.basedOn || 'connectry'))
+        : getSuggestedEffectsFor(theme.id);
+      renderThemePreview(previewHost, colors, { size: 'card', effects });
+
+      // Scroll into view
+      setTimeout(() => detail.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 60);
+    });
+  }
+
+  function closeDetailPanel() {
+    const grid = document.getElementById('optCollectionGrid');
+    if (!grid) return;
+    const existing = grid.querySelector('.opt-card-detail');
+    if (existing) existing.remove();
+    // Remove expanded highlight
+    grid.querySelectorAll('.theme-card.is-expanded').forEach(c => c.classList.remove('is-expanded'));
+    _openDetailId = null;
+  }
+
+  function buildDetailPanel(theme) {
+    const detail = document.createElement('div');
+    detail.className = 'opt-card-detail';
+    detail.dataset.detailFor = theme.id;
+    detail.setAttribute('role', 'region');
+    detail.setAttribute('aria-label', `${theme.name} theme details`);
+
+    const isBuiltIn = !theme.isCustom;
+    const tagline = (isBuiltIn && theme.tagline) ? `<p class="opt-card-detail-tagline">${theme.tagline}</p>` : '';
+    const bestFor = (isBuiltIn && theme.bestFor) ? `<p class="opt-card-detail-bestfor"><strong>Best for:</strong> ${theme.bestFor}</p>` : '';
+    const basedOn = !isBuiltIn ? `<p class="opt-card-detail-bestfor">Based on: ${(getThemeById(theme.basedOn) || THEMES[0]).name}</p>` : '';
+
+    // Effects section (built-in only — with volume control)
+    let effectsHtml = '';
+    if (isBuiltIn) {
+      const effectCfg = getSuggestedEffectsFor(theme.id);
+      const pills = buildEffectIndicators(theme.id);
+      effectsHtml = `
+        <div class="opt-card-detail-effects">
+          <div class="opt-card-detail-effects-label">Effects</div>
+          <div class="opt-card-detail-effects-pills">${pills}</div>
+          <div class="opt-card-detail-volume">
+            <span>Volume</span>
+            <div class="opt-scope-pills" role="radiogroup" aria-label="Effects volume">
+              <button class="opt-scope-pill${syncState.effectsVolume === 'off' ? ' is-active' : ''}" data-detail-volume="off">Off</button>
+              <button class="opt-scope-pill${syncState.effectsVolume === 'subtle' ? ' is-active' : ''}" data-detail-volume="subtle">Subtle</button>
+              <button class="opt-scope-pill${(!syncState.effectsVolume || syncState.effectsVolume === 'default') ? ' is-active' : ''}" data-detail-volume="default">Default</button>
+              <button class="opt-scope-pill${syncState.effectsVolume === 'immersive' ? ' is-active' : ''}" data-detail-volume="immersive">Immersive</button>
+            </div>
+          </div>
+        </div>`;
+    }
+
+    // Actions
+    const applyLabel = theme.id === syncState.theme ? 'Active' : 'Apply';
+    const applyDisabled = theme.id === syncState.theme ? ' disabled' : '';
+    let actionsHtml = `<button class="cx-btn cx-btn-primary cx-btn-sm" data-detail-apply="${theme.id}"${applyDisabled}>${applyLabel}</button>`;
+
+    if (isBuiltIn) {
+      actionsHtml += `<button class="cx-btn cx-btn-secondary cx-btn-sm" data-detail-clone="${theme.id}">Clone to Builder</button>`;
+    } else {
+      actionsHtml += `<button class="cx-btn cx-btn-secondary cx-btn-sm" data-detail-edit="${theme.id}">Edit in Builder</button>`;
+      actionsHtml += `<button class="cx-btn cx-btn-ghost cx-btn-sm" data-detail-export="${theme.id}">Export JSON</button>`;
+      actionsHtml += `<button class="cx-btn cx-btn-ghost cx-btn-sm opt-card-detail-delete" data-detail-delete="${theme.id}">Delete</button>`;
+    }
+
+    // Share buttons
+    const shareHtml = `
+      <div class="opt-card-detail-share">
+        <button class="cx-btn cx-btn-ghost cx-btn-sm" data-share-image="${theme.id}" title="Share as image">
+          <svg width="13" height="13" viewBox="0 0 16 16" fill="none"><rect x="2" y="3" width="12" height="10" rx="1.5" stroke="currentColor" stroke-width="1.4"/><circle cx="6" cy="7" r="1.5" stroke="currentColor" stroke-width="1.2"/><path d="M2 11l3-3 2 2 3-3 4 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <button class="cx-btn cx-btn-ghost cx-btn-sm" data-share-email="${theme.id}" title="Share via email">
+          <svg width="13" height="13" viewBox="0 0 16 16" fill="none"><rect x="1.5" y="3.5" width="13" height="9" rx="1.5" stroke="currentColor" stroke-width="1.3"/><path d="M1.5 4.5l6.5 5 6.5-5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+      </div>`;
+
+    detail.innerHTML = `
+      <div class="opt-card-detail-layout">
+        <div class="opt-card-detail-preview"></div>
+        <div class="opt-card-detail-info">
+          <h3 class="opt-card-detail-name">${theme.name}</h3>
+          ${tagline}
+          ${bestFor}
+          ${basedOn}
+          ${effectsHtml}
+          <div class="opt-card-detail-actions">
+            ${actionsHtml}
+            ${shareHtml}
+          </div>
+        </div>
+      </div>
+      <button class="opt-card-detail-close" aria-label="Close details">&times;</button>
+    `;
+
+    // Wire up action handlers
+    detail.querySelector('.opt-card-detail-close').addEventListener('click', closeDetailPanel);
+
+    const applyBtn = detail.querySelector('[data-detail-apply]');
+    if (applyBtn && !applyBtn.disabled) {
+      applyBtn.addEventListener('click', () => {
+        selectTheme(theme.id);
+        updateHero(theme.id);
+        updateCollectionActiveState(theme.id);
+        // Update apply button state
+        applyBtn.textContent = 'Active';
+        applyBtn.disabled = true;
+      });
+    }
+
+    const cloneBtn = detail.querySelector('[data-detail-clone]');
+    if (cloneBtn) {
+      cloneBtn.addEventListener('click', () => openCreationDialog(theme.id));
+    }
+
+    const editBtn = detail.querySelector('[data-detail-edit]');
+    if (editBtn) {
+      editBtn.addEventListener('click', () => {
+        // Switch to Builder tab and load this custom theme
+        chrome.storage.local.set({ openOptionsTab: 'builder', openBuilderClone: theme.id });
+        if (_tabsInstance) _tabsInstance.activate('builder');
+      });
+    }
+
+    const exportBtn = detail.querySelector('[data-detail-export]');
+    if (exportBtn) {
+      exportBtn.addEventListener('click', () => {
+        const blob = new Blob([JSON.stringify(theme, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${theme.name || 'theme'}.json`;
+        a.click();
+        URL.revokeObjectURL(url);
+      });
+    }
+
+    const deleteBtn = detail.querySelector('[data-detail-delete]');
+    if (deleteBtn) {
+      deleteBtn.addEventListener('click', async () => {
+        if (!confirm(`Delete "${theme.name}"? This cannot be undone.`)) return;
+        const customs = (syncState.customThemes || []).filter(ct => ct.id !== theme.id);
+        await chrome.storage.sync.set({ customThemes: customs });
+        syncState.customThemes = customs;
+        closeDetailPanel();
+        renderCollectionGrid(syncState.theme);
+      });
+    }
+
+    // Volume control pills (built-in themes only)
+    detail.querySelectorAll('[data-detail-volume]').forEach(pill => {
+      pill.addEventListener('click', async () => {
+        const volume = pill.dataset.detailVolume;
+        detail.querySelectorAll('[data-detail-volume]').forEach(p => p.classList.remove('is-active'));
+        pill.classList.add('is-active');
+        await chrome.storage.sync.set({ effectsVolume: volume });
+        syncState.effectsVolume = volume;
+      });
+    });
+
+    // Share handlers
+    const shareImageBtn = detail.querySelector('[data-share-image]');
+    if (shareImageBtn) {
+      shareImageBtn.addEventListener('click', () => shareThemeAsImage(theme));
+    }
+    const shareEmailBtn = detail.querySelector('[data-share-email]');
+    if (shareEmailBtn) {
+      shareEmailBtn.addEventListener('click', () => {
+        const subject = encodeURIComponent(`Check out the "${theme.name}" theme for Salesforce Themer`);
+        const body = encodeURIComponent(`I'm using the "${theme.name}" theme in Salesforce Themer by Connectry. It looks great!\n\nhttps://chrome.google.com/webstore/detail/salesforce-themer`);
+        window.open(`mailto:?subject=${subject}&body=${body}`);
+      });
+    }
+
+    return detail;
+  }
+
+  // ─── Theme Manager: Hero ──────────────────────────────────────────────────
+
+  function updateHero(activeThemeId) {
+    const builtIn = getThemeById(activeThemeId);
+    const custom = !builtIn ? (syncState.customThemes || []).find(ct => ct.id === activeThemeId) : null;
+    const theme = builtIn || custom;
+    if (!theme) return;
+
+    const isCustom = !!custom;
+    const colors = isCustom ? resolveCustomColors(custom) : theme.colors;
+
+    // Name
+    const nameEl = document.getElementById('optHeroName');
+    if (nameEl) nameEl.textContent = theme.name;
+
+    // Tagline
+    const taglineEl = document.getElementById('optHeroTagline');
+    if (taglineEl) taglineEl.textContent = theme.tagline || theme.description || '';
+
+    // Subtitle (scope summary)
+    const subtitleEl = document.getElementById('opt-hero-subtitle');
+    if (subtitleEl) {
+      const scope = syncState.themeScope === 'both' ? 'Lightning + Setup' : _capitalize(syncState.themeScope || 'lightning');
+      const cat = isCustom ? 'Custom' : _capitalize(theme.category || 'light');
+      subtitleEl.textContent = `${cat} · Applied to ${scope}`;
+    }
+
+    // Swatch
+    const swatchEl = document.getElementById('optHeroSwatch');
+    if (swatchEl) {
+      const four = [colors.background, colors.surface, colors.accent, colors.textPrimary];
+      swatchEl.innerHTML = `<div class="theme-swatch">${four.map(c => `<span style="background:${c || '#ddd'}"></span>`).join('')}</div>`;
+    }
+
+    // Details (category badge + effect pills)
+    const detailsEl = document.getElementById('optHeroDetails');
+    if (detailsEl) {
+      const badge = `<span class="theme-category-badge ${isCustom ? (theme.category || 'light') : theme.category}">${isCustom ? 'Custom' : (theme.category === 'light' ? 'Light' : 'Dark')}</span>`;
+      const pills = isCustom ? '' : buildEffectIndicators(theme.id);
+      detailsEl.innerHTML = badge + pills;
+    }
+
+    // Preview
+    const previewEl = document.getElementById('optHeroPreview');
+    if (previewEl) {
+      previewEl.innerHTML = '';
+      const effects = isCustom
+        ? (custom.effects || getSuggestedEffectsFor(custom.basedOn || 'connectry'))
+        : getSuggestedEffectsFor(theme.id);
+      renderThemePreview(previewEl, colors, { size: 'hero', effects });
+    }
+  }
+
+  // ─── Theme Manager: Smart Apply (stub) ────────────────────────────────────
+
+  function renderSmartApply() {
+    const host = document.getElementById('optSmartModes');
+    if (!host) return;
+
+    const modes = [
+      { id: 'rotation', name: 'Daily Rotation', desc: 'A different theme each day from your playlist',
+        icon: '<svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M8 1v6l4 2" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><circle cx="8" cy="8" r="7" stroke="currentColor" stroke-width="1.4"/></svg>' },
+      { id: 'timeofday', name: 'Time of Day', desc: 'Light by day, dark by night — on a schedule',
+        icon: '<svg width="14" height="14" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="3" fill="currentColor"/><path d="M8 1v2M8 13v2M1 8h2M13 8h2M3.05 3.05l1.4 1.4M11.55 11.55l1.4 1.4M3.05 12.95l1.4-1.4M11.55 4.45l1.4-1.4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>' },
+      { id: 'weather', name: 'Weather', desc: 'Match your theme to the weather outside',
+        icon: '<svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M5 12a4 4 0 1 1 6.5-3.1A3 3 0 0 1 13 12H5z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>' },
+      { id: 'season', name: 'Season', desc: 'Themes that follow the calendar',
+        icon: '<svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M8 1c0 3-3 5-3 8a3 3 0 0 0 6 0c0-3-3-5-3-8z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>' },
+      { id: 'focus', name: 'Focus Mode', desc: 'A dedicated minimal theme when you need to concentrate',
+        icon: '<svg width="14" height="14" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="3" stroke="currentColor" stroke-width="1.3"/><circle cx="8" cy="8" r="6.5" stroke="currentColor" stroke-width="1.3" stroke-dasharray="2 3"/></svg>' },
+    ];
+
+    host.innerHTML = modes.map(m => `
+      <div class="opt-smart-mode-card" data-mode="${m.id}">
+        <div class="opt-smart-mode-header">
+          <span class="opt-smart-mode-icon">${m.icon}</span>
+          <div class="opt-smart-mode-text">
+            <div class="opt-smart-mode-name">${m.name}</div>
+            <div class="opt-smart-mode-desc">${m.desc}</div>
+          </div>
+          <label class="cx-toggle">
+            <input type="checkbox" data-smart-toggle="${m.id}" disabled />
+            <span class="cx-toggle-track"><span class="cx-toggle-thumb"></span></span>
+          </label>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  // ─── Theme Manager: Smart Apply collapse ──────────────────────────────────
+
+  function bindSmartApplyCollapse() {
+    const toggle = document.getElementById('optSmartApplyToggle');
+    const body = document.getElementById('optSmartApplyBody');
+    if (!toggle || !body) return;
+    toggle.addEventListener('click', () => {
+      const expanded = toggle.getAttribute('aria-expanded') === 'true';
+      toggle.setAttribute('aria-expanded', String(!expanded));
+      body.classList.toggle('is-collapsed', expanded);
+    });
+  }
+
+  // ─── Theme Manager: Share as Image ────────────────────────────────────────
+
+  function shareThemeAsImage(theme) {
+    const colors = theme.isCustom ? theme.colors : theme.colors;
+    const c = colors || {};
+    const W = 1200, H = 630;
+
+    const canvas = document.createElement('canvas');
+    canvas.width = W;
+    canvas.height = H;
+    const ctx = canvas.getContext('2d');
+
+    // Background
+    ctx.fillStyle = c.background || '#f7f7f5';
+    ctx.fillRect(0, 0, W, H);
+
+    // Nav bar
+    ctx.fillStyle = c.nav || '#4a6fa5';
+    ctx.fillRect(0, 0, W, 56);
+
+    // Surface card
+    ctx.fillStyle = c.surface || '#ffffff';
+    const cardX = 80, cardY = 100, cardW = W - 160, cardH = 360;
+    ctx.beginPath();
+    ctx.roundRect(cardX, cardY, cardW, cardH, 12);
+    ctx.fill();
+
+    // Card border
+    ctx.strokeStyle = c.border || '#e8e8e6';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+
+    // Accent bar inside card
+    ctx.fillStyle = c.accent || '#4a6fa5';
+    ctx.fillRect(cardX, cardY, cardW, 4);
+
+    // Swatch strip at bottom
+    const swatchY = H - 80;
+    const swatchColors = [c.background, c.surface, c.accent, c.textPrimary].filter(Boolean);
+    const swatchW = 200;
+    const each = swatchW / swatchColors.length;
+    swatchColors.forEach((col, i) => {
+      ctx.fillStyle = col;
+      ctx.fillRect(W / 2 - swatchW / 2 + i * each, swatchY, each, 24);
+    });
+
+    // Theme name
+    ctx.fillStyle = c.textPrimary || '#2d2d2d';
+    ctx.font = 'bold 32px Inter, system-ui, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText(theme.name, W / 2, cardY + 60);
+
+    // Tagline
+    if (theme.tagline) {
+      ctx.fillStyle = c.textSecondary || '#4a5568';
+      ctx.font = '18px Inter, system-ui, sans-serif';
+      ctx.fillText(theme.tagline, W / 2, cardY + 100);
+    }
+
+    // Watermark
+    ctx.fillStyle = c.textMuted || '#9aa5b4';
+    ctx.font = '14px Inter, system-ui, sans-serif';
+    ctx.fillText('Salesforce Themer by Connectry', W / 2, H - 24);
+
+    // Download
+    canvas.toBlob((blob) => {
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${theme.name || 'theme'}-salesforce-themer.png`;
+      a.click();
+      URL.revokeObjectURL(url);
+    }, 'image/png');
+  }
+
+  // ─── Theme Manager: Hero customize button ─────────────────────────────────
+
+  function bindHeroCustomize() {
+    const btn = document.getElementById('optHeroCustomize');
+    if (!btn) return;
+    btn.addEventListener('click', () => {
+      const activeId = syncState.theme;
+      openCreationDialog(activeId);
+    });
+  }
+
+  function bindEmptyBuilderBtn() {
+    const btn = document.getElementById('optEmptyBuilderBtn');
+    if (!btn) return;
+    btn.addEventListener('click', () => {
+      if (_tabsInstance) _tabsInstance.activate('builder');
+    });
+  }
+
   // ─── Theme selection ──────────────────────────────────────────────────────
 
   async function selectTheme(themeId) {
@@ -526,7 +1387,8 @@
     await chrome.storage.sync.set(updates);
     syncState = { ...syncState, ...updates };
 
-    updateGridActiveState(themeId);
+    updateCollectionActiveState(themeId);
+    updateHero(themeId);
     updateHeaderMeta(themeId);
     updateEffectsContextBanner();
     renderEffectsTabForActiveTheme();
@@ -1014,12 +1876,15 @@
         : (syncState.lastLightTheme || 'connectry');
     }
 
-    // Themes tab
-    renderThemeGrid(activeTheme);
-    renderCustomThemeGrid(activeTheme);
+    // Themes tab — Theme Manager
+    renderCollectionGrid(activeTheme);
+    updateHero(activeTheme);
+    renderSmartApply();
+    bindCollectionFilterPills();
+    bindSmartApplyCollapse();
+    bindHeroCustomize();
+    bindEmptyBuilderBtn();
     renderBuilderSidebar(activeTheme);
-    bindFilterPills();
-    bindThemeGroupCollapse();
     updateHeaderMeta(activeTheme);
     syncOptSettingsCardStatus(activeTheme);
     renderOrgList(syncState.orgThemes);
@@ -1066,7 +1931,8 @@
       if (area !== 'sync') return;
       if (changes.theme) {
         syncState.theme = changes.theme.newValue;
-        updateGridActiveState(syncState.theme);
+        updateCollectionActiveState(syncState.theme);
+        updateHero(syncState.theme);
         updateHeaderMeta(syncState.theme);
         syncOptSettingsCardStatus(syncState.theme);
         updateEffectsContextBanner();
@@ -1090,7 +1956,7 @@
       }
       if (changes.customThemes) {
         syncState.customThemes = changes.customThemes.newValue || [];
-        renderCustomThemeGrid(syncState.theme);
+        renderCollectionGrid(syncState.theme);
         renderEffectsTabForActiveTheme();
       }
       if (changes.effectsVolume) {
@@ -1839,32 +2705,8 @@
     const full = getFullEditorTheme();
     const frame = document.getElementById('editorPreview');
 
-    // Background for the whole preview
-    frame.style.backgroundColor = full.background;
-
-    // data-bind="key" → set background-color
-    frame.querySelectorAll('[data-bind]').forEach(el => {
-      const key = el.dataset.bind;
-      if (full[key]) el.style.backgroundColor = full[key];
-    });
-
-    // data-bind-color="key" → set color
-    frame.querySelectorAll('[data-bind-color]').forEach(el => {
-      const key = el.dataset.bindColor;
-      if (full[key]) el.style.color = full[key];
-    });
-
-    // data-bind-border-color="key" → set border-color
-    frame.querySelectorAll('[data-bind-border-color]').forEach(el => {
-      const key = el.dataset.bindBorderColor;
-      if (full[key]) el.style.borderColor = full[key];
-    });
-
-    // data-bind-border="key" → set border-bottom-color
-    frame.querySelectorAll('[data-bind-border]').forEach(el => {
-      const key = el.dataset.bindBorder;
-      if (full[key]) el.style.borderBottomColor = full[key];
-    });
+    // Use shared color-binding function
+    applyPreviewColors(frame, full);
 
     // Apply typography to preview
     applyEditorPreviewTypography();
@@ -1988,65 +2830,8 @@
     if (!frame) return;
     const effects = editorState.effects || {};
     const full = getFullEditorTheme();
-
-    // Theme accent feeds the same vars the Guide cards use
-    const accent = full.accent || '#4a6fa5';
-    const rgb = _hexToRgbCsv(accent);
-    frame.style.setProperty('--fx-accent', accent);
-    frame.style.setProperty('--fx-accent-rgb', rgb);
-
-    const LADDER = {
-      subtle: { mult: 0.5, speed: 1.6 },
-      medium: { mult: 1.0, speed: 1.0 },
-      strong: { mult: 1.6, speed: 0.65 },
-    };
-
-    const FX_KEYS = ['hoverLift', 'ambientGlow', 'borderShimmer', 'gradientBorders', 'neonFlicker', 'aurora'];
-    for (const key of FX_KEYS) {
-      const on = !!effects[key];
-      const attr = 'fx' + key.charAt(0).toUpperCase() + key.slice(1);
-      if (on) {
-        frame.dataset[attr] = 'on';
-        const level = effects[key + 'Intensity'] || 'medium';
-        const v = LADDER[level] || LADDER.medium;
-        frame.style.setProperty(`--fx-${key}-mult`, String(v.mult));
-        frame.style.setProperty(`--fx-${key}-speed`, String(v.speed));
-      } else {
-        delete frame.dataset[attr];
-      }
-    }
-
-    // Particles (CSS falling dots overlay)
-    if (effects.particles) {
-      frame.dataset.fxParticles = 'on';
-      const level = effects.particlesIntensity || 'medium';
-      const v = LADDER[level] || LADDER.medium;
-      frame.style.setProperty('--fx-mult', String(v.mult));
-      frame.style.setProperty('--fx-speed-mult', String(v.speed));
-    } else {
-      delete frame.dataset.fxParticles;
-    }
-
-    // Cursor trail (radial glow follows mouse)
-    if (effects.cursorTrail) {
-      frame.dataset.fxCursorTrail = 'on';
-    } else {
-      delete frame.dataset.fxCursorTrail;
-    }
-
-    // The preview frame is shared by all effects, so use the maximum
-    // intensity of any "always-on" effect for the master --fx-mult vars.
-    // Hover lift is per-element so we let it use its own.
-    const activeMults = FX_KEYS
-      .filter(k => effects[k])
-      .map(k => (LADDER[effects[k + 'Intensity']] || LADDER.medium).mult);
-    const masterMult = activeMults.length ? Math.max(...activeMults) : 1;
-    const masterSpeed = activeMults.length
-      ? Math.min(...FX_KEYS.filter(k => effects[k])
-          .map(k => (LADDER[effects[k + 'Intensity']] || LADDER.medium).speed))
-      : 1;
-    frame.style.setProperty('--fx-mult', String(masterMult));
-    frame.style.setProperty('--fx-speed-mult', String(masterSpeed));
+    // Delegate to the shared effects function
+    applyPreviewEffects(frame, effects, full.accent);
   }
 
   // ─── Event Binding ────────────────────────────────────────────────────────
@@ -2642,9 +3427,9 @@
     syncState.customThemes = customThemes;
     editorState.customId = id;
 
-    // Apply the theme + refresh both the gallery grid and the builder sidebar
+    // Apply the theme + refresh both the collection grid and the builder sidebar
     await selectTheme(id);
-    renderCustomThemeGrid(id);
+    renderCollectionGrid(id);
     renderBuilderSidebar(id);
 
     // Visual feedback
@@ -2952,8 +3737,8 @@
       renderEffectsTabForActiveTheme();
       updateHeaderMeta(syncState.theme);
         syncOptSettingsCardStatus(syncState.theme);
-      // Re-render theme grid so clone button gates update too
-      renderThemeGrid(syncState.theme);
+      // Re-render collection grid so clone button gates update too
+      renderCollectionGrid(syncState.theme);
     });
 
     // ── Theme Diagnostic ────────────────────────────────────────────────
@@ -3106,7 +3891,7 @@
               await chrome.storage.sync.set({ customThemes: customs });
               syncState.customThemes = customs;
               renderEffectsTabForActiveTheme();
-              renderCustomThemeGrid(syncState.theme);
+              renderCollectionGrid(syncState.theme);
             }
           },
         },

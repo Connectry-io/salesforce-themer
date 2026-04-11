@@ -211,76 +211,81 @@
         </div>
       </section>
 
-      <!-- Built-in Themes -->
-      <section class="cx-section" aria-labelledby="ootb-heading">
+      <!-- ─── Active Theme Hero ─── -->
+      <section class="cx-section" aria-labelledby="opt-hero-heading">
         <div class="cx-section-header">
           <div>
-            <h2 class="cx-section-title" id="ootb-heading">Built-in Themes</h2>
-            <p class="cx-section-subtitle">The same gallery as the toolbar popup, just bigger. Every built-in theme is <strong>free forever</strong>.</p>
+            <h2 class="cx-section-title" id="opt-hero-heading">Active Theme</h2>
+            <p class="cx-section-subtitle" id="opt-hero-subtitle"></p>
+          </div>
+        </div>
+        <div class="opt-hero-card">
+          <div class="opt-hero-layout">
+            <div class="opt-hero-preview" id="optHeroPreview"></div>
+            <div class="opt-hero-meta">
+              <div class="opt-hero-swatch" id="optHeroSwatch"></div>
+              <h3 class="opt-hero-name" id="optHeroName"></h3>
+              <p class="opt-hero-tagline" id="optHeroTagline"></p>
+              <div class="opt-hero-details" id="optHeroDetails"></div>
+              <div class="opt-hero-actions">
+                <button class="cx-btn cx-btn-secondary cx-btn-sm" id="optHeroCustomize">
+                  <svg width="12" height="12" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+                    <path d="M10.5 1.5l2 2-8 8H2.5v-2l8-8z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/>
+                  </svg>
+                  Customize in Builder
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ─── Smart Apply (Premium, collapsed) ─── -->
+      <section class="cx-section" aria-labelledby="opt-smart-heading">
+        <div class="opt-settings-card">
+          <button class="opt-settings-card-header" id="optSmartApplyToggle"
+                  type="button" aria-expanded="false" aria-controls="optSmartApplyBody">
+            <span class="opt-settings-card-status">
+              <span class="opt-status-dot" id="optSmartDot"></span>
+              <span id="optSmartStatusText">Off</span>
+            </span>
+            <span class="opt-settings-card-spacer"></span>
+            <span class="opt-settings-card-label" id="opt-smart-heading">Smart Apply</span>
+            <span class="cx-tab-badge cx-tab-badge--premium">Premium</span>
+            <svg class="opt-settings-card-chevron" width="14" height="14" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+              <path d="M3 4.5L6 7.5L9 4.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
+          <div class="opt-settings-card-body is-collapsed" id="optSmartApplyBody">
+            <p class="opt-smart-intro">Automatically switch themes based on time, weather, or mood. One mode active at a time.</p>
+            <div class="opt-smart-modes" id="optSmartModes"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ─── Your Collection (unified grid) ─── -->
+      <section class="cx-section" aria-labelledby="opt-collection-heading">
+        <div class="cx-section-header">
+          <div>
+            <h2 class="cx-section-title" id="opt-collection-heading">Your Collection</h2>
+            <p class="cx-section-subtitle">All your themes in one place. Click any card for details.</p>
           </div>
           <div class="cx-section-actions">
-            <div class="cx-pills" role="group" aria-label="Filter themes by category">
+            <div class="cx-pills" role="group" aria-label="Filter themes">
               <button class="cx-pill is-active" data-filter="all">All</button>
               <button class="cx-pill" data-filter="light">Light</button>
               <button class="cx-pill" data-filter="dark">Dark</button>
+              <button class="cx-pill" data-filter="custom">Custom</button>
             </div>
           </div>
         </div>
 
-        <!-- Effects volume strip — sits at the top of the built-in themes section
-             because it only applies to those themes. Custom themes own their
-             per-effect intensities (managed in the Builder). -->
-        <div class="opt-themes-effects-strip" id="optThemesEffectsStrip">
-          <div class="opt-themes-effects-strip-label">
-            <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-              <path d="M8 1l1.8 4.2L14 6l-3.2 2.8L12 13 8 10.6 4 13l1.2-4.2L2 6l4.2-0.8L8 1z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/>
-            </svg>
-            <span>Effects volume</span>
-            <button class="opt-themes-effects-strip-help" data-tooltip="optEffectsTooltip" aria-label="About effects volume" type="button">
-              <svg width="12" height="12" viewBox="0 0 14 14" fill="none" aria-hidden="true">
-                <circle cx="7" cy="7" r="6" stroke="currentColor" stroke-width="1.3"/>
-                <path d="M7 6.5v3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
-                <circle cx="7" cy="4.5" r="0.65" fill="currentColor"/>
-              </svg>
-            </button>
-          </div>
-          <div class="opt-scope-pills" id="optEffectsPills" role="radiogroup" aria-label="Effects volume">
-            <button class="opt-scope-pill" data-effect-volume="off">Off</button>
-            <button class="opt-scope-pill" data-effect-volume="subtle">Subtle</button>
-            <button class="opt-scope-pill" data-effect-volume="default">Default</button>
-            <button class="opt-scope-pill" data-effect-volume="immersive">Immersive</button>
-          </div>
-        </div>
+        <div class="opt-collection-grid" id="optCollectionGrid" role="listbox" aria-label="Theme collection"></div>
 
-        <!-- Light themes group -->
-        <div class="theme-group" id="lightThemeGroup">
-          <button class="theme-group-label" type="button" data-group-toggle="light" aria-expanded="true">
-            <svg class="theme-group-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-              <circle cx="12" cy="12" r="4" fill="currentColor"/>
-              <path d="M12 2v2M12 20v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M2 12h2M20 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
-            </svg>
-            <span>Light Themes</span>
-            <span class="theme-group-count" id="lightThemeCount"></span>
-            <svg class="theme-group-chevron" width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
-              <path d="M3 4.5L6 7.5L9 4.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-          </button>
-          <div class="theme-grid" id="lightThemeGrid" role="radiogroup" aria-label="Light themes"></div>
-        </div>
-
-        <!-- Dark themes group -->
-        <div class="theme-group" id="darkThemeGroup">
-          <button class="theme-group-label" type="button" data-group-toggle="dark" aria-expanded="true">
-            <svg class="theme-group-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-              <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" fill="currentColor"/>
-            </svg>
-            <span>Dark Themes</span>
-            <span class="theme-group-count" id="darkThemeCount"></span>
-            <svg class="theme-group-chevron" width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
-              <path d="M3 4.5L6 7.5L9 4.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-          </button>
-          <div class="theme-grid" id="darkThemeGrid" role="radiogroup" aria-label="Dark themes"></div>
+        <div class="cx-empty" id="optCollectionEmpty" hidden>
+          <h3 class="cx-empty-title">No custom themes yet</h3>
+          <p class="cx-empty-body">Open the Theme Builder to create your first custom theme.</p>
+          <button class="cx-btn cx-btn-primary cx-btn-sm" id="optEmptyBuilderBtn">Open Builder</button>
         </div>
       </section>
 
