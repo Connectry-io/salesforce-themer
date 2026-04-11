@@ -410,6 +410,13 @@
     if (themeName === 'none') {
       if (animate) beginTransition();
       removeThemeStyles();
+      removeEffectsStyles();
+      destroyCanvasEffects();
+      currentEffectsConfig = null;
+      // Remove custom patches
+      if (window.__sfThemerDiag?.removePatches) {
+        try { window.__sfThemerDiag.removePatches(); } catch (_) {}
+      }
       currentTheme = 'none';
       if (animate) endTransition();
       return;
@@ -440,9 +447,16 @@
   }
 
   async function resolveTheme(syncData) {
+    // If the user explicitly turned theming off, respect that above all else.
+    // 'none' means "no theme" — don't let orgThemes or autoMode override it.
+    if (syncData.theme === 'none') {
+      return 'none';
+    }
+
     const hostname = getOrgHostname();
     const orgThemes = syncData.orgThemes || {};
 
+    // Per-org override (only if user hasn't globally disabled)
     if (orgThemes[hostname]) {
       return orgThemes[hostname];
     }
@@ -505,6 +519,7 @@
       let needsReinjection = false;
       let needsEffectsReinjection = false;
       let needsFaviconReinjection = false;
+      let needsPatchReinjection = false;
       for (const mutation of mutations) {
         for (const node of mutation.removedNodes) {
           if (node.id === STYLE_ID || node.id === 'sf-themer-transitions') {
@@ -515,6 +530,9 @@
           }
           if (node.id === FAVICON_LINK_ID) {
             needsFaviconReinjection = true;
+          }
+          if (node.id === 'sf-themer-custom-patches') {
+            needsPatchReinjection = true;
           }
         }
       }
@@ -527,6 +545,11 @@
       }
       if (needsFaviconReinjection && _currentFaviconEnabled) {
         applyFavicon(true, _currentFaviconConfig);
+      }
+      if (needsPatchReinjection && currentTheme && currentTheme !== 'none') {
+        if (window.__sfThemerDiag?.injectPatches) {
+          try { window.__sfThemerDiag.injectPatches(); } catch (_) {}
+        }
       }
     });
 
@@ -695,6 +718,11 @@
       // Load effects layer after theme is applied
       loadAndApplyEffects(themeName);
 
+      // Inject custom LWC patches (if any)
+      if (window.__sfThemerDiag?.injectPatches) {
+        try { window.__sfThemerDiag.injectPatches(); } catch (_) {}
+      }
+
       // Favicon — Connectry branding on free themes, toggleable + customizable
       applyFavicon(syncResult.faviconEnabled, syncResult.faviconConfig);
 
@@ -745,6 +773,9 @@
           console.log(`[SFT preInit] BAILED — scope='${syncData.themeScope}' excludes this frame (isSetupPage=${isSetupPage}).`);
           return;
         }
+
+        // If user explicitly disabled theming, bail immediately
+        if (syncData.theme === 'none') return;
 
         const hostname = getOrgHostname();
         const orgThemes = syncData.orgThemes || {};

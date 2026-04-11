@@ -510,6 +510,33 @@ ${fx ? `
   backdrop-filter: blur(2px) !important;` : ''}
 }
 
+/* App Launcher — uses viewport-filling overlay, not a standard modal.
+   Must NOT inherit modal container sizing. Only recolor backgrounds. */
+one-app-launcher-modal .modal-container,
+one-app-launcher-modal .slds-modal__container {
+  background-color: ${c.modalBg} !important;
+  max-height: 90vh !important;
+  height: auto !important;
+}
+
+one-app-launcher-modal .modal-body,
+one-app-launcher-modal .slds-modal__content {
+  background-color: ${c.modalBg} !important;
+  max-height: none !important;
+}
+
+one-app-launcher-modal .modal-header,
+one-app-launcher-modal .slds-modal__header {
+  background-color: ${c.modalHeaderBg} !important;
+  position: relative !important;
+}
+
+/* App Launcher backdrop — scoped to prevent full-viewport bleed */
+one-app-launcher-modal + .slds-backdrop,
+one-app-launcher-modal ~ .slds-backdrop {
+  background-color: ${c.modalBackdrop} !important;
+}
+
 /* ─── Dropdowns & Popovers ───────────────────────────────────────────────── */
 
 .slds-dropdown,

@@ -925,3 +925,126 @@
 .diag-panel.is-collapsed {
   max-height: none;
 }
+
+/* ─── Fixes tab styles ────────────────────────────────────────────────── */
+
+.diag-tab-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  margin-left: 4px;
+  font-size: 10px;
+  font-weight: 600;
+  line-height: 1;
+  color: #ffffff;
+  background: #4a6fa5;
+  border-radius: 8px;
+}
+
+.diag-fix-actions {
+  padding: 8px 0 4px;
+}
+
+.diag-copy-inline {
+  margin-left: auto;
+  padding: 2px 8px;
+  font-size: 10px;
+  font-weight: 500;
+  color: #4a6fa5;
+  background: rgba(74, 111, 165, 0.1);
+  border: 1px solid rgba(74, 111, 165, 0.2);
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.diag-copy-inline:hover {
+  background: rgba(74, 111, 165, 0.2);
+  border-color: rgba(74, 111, 165, 0.4);
+}
+
+.diag-copy-inline.is-copied {
+  color: #22c55e;
+  background: rgba(34, 197, 94, 0.1);
+  border-color: rgba(34, 197, 94, 0.3);
+}
+
+.diag-patch-row {
+  padding: 6px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.diag-patch-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.diag-patch-rules {
+  padding: 4px 0 0 20px;
+}
+
+.diag-patch-rule {
+  font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+  font-size: 10px;
+  color: rgba(255, 255, 255, 0.5);
+  line-height: 1.6;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.diag-patch-action {
+  margin-left: auto;
+  padding: 2px 8px;
+  font-size: 10px;
+  font-weight: 500;
+  color: #22c55e;
+  background: rgba(34, 197, 94, 0.1);
+  border: 1px solid rgba(34, 197, 94, 0.2);
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.diag-patch-action:hover {
+  background: rgba(34, 197, 94, 0.2);
+  border-color: rgba(34, 197, 94, 0.4);
+}
+
+.diag-patch-toggle {
+  margin-left: auto;
+  padding: 2px 8px;
+  font-size: 10px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.6);
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.diag-patch-toggle:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.diag-patch-remove {
+  padding: 2px 6px;
+  font-size: 12px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.3);
+  background: transparent;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.diag-patch-remove:hover {
+  color: #ef4444;
+  background: rgba(239, 68, 68, 0.1);
+}

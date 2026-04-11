@@ -43,7 +43,10 @@
       this.isMinimized = false;
       this.scanResults = null;        // token scan
       this.componentResults = null;   // component scan
-      this.activeTab = 'tokens';      // 'tokens' | 'components' | 'testing'
+      this.fixReport = null;          // generated CSS fixes
+      this.themeColors = null;        // active theme color config
+      this.patchSummary = null;       // custom patches summary
+      this.activeTab = 'tokens';      // 'tokens' | 'components' | 'testing' | 'fixes'
       this.testingProgress = null;   // guided testing progress
       this._dragState = null;
       this._cssLoaded = false;
@@ -68,7 +71,7 @@
       // Persist open state so panel reopens after page refresh
       try { chrome.storage.local.set({ diagnosticPanelOpen: true }); } catch (_) {}
 
-      // Load CSS and testing progress in parallel
+      // Load CSS, testing progress, theme colors, and patch summary in parallel
       const loads = [];
       if (!this._cssLoaded) loads.push(this._loadCSS());
       if (ns.getTestingProgress) {
@@ -77,6 +80,16 @@
         );
       } else {
         this.testingProgress = {};
+      }
+      if (ns.resolveThemeColors) {
+        loads.push(
+          ns.resolveThemeColors(this.currentTheme).then(c => { this.themeColors = c; })
+        );
+      }
+      if (ns.getPatchSummary) {
+        loads.push(
+          ns.getPatchSummary().then(s => { this.patchSummary = s; })
+        );
       }
       if (loads.length) await Promise.all(loads);
 
@@ -125,8 +138,15 @@
     updateTheme(themeName) {
       this.currentTheme = themeName;
       this.testingProgress = null; // Reset — different theme
+      this.themeColors = null;     // Clear — need to re-resolve for new theme
+      this.fixReport = null;       // Clear — fixes depend on theme colors
+      if (ns.clearThemeCache) ns.clearThemeCache();
       if (this.isOpen && !this.isMinimized) {
         this._updateInfoBar();
+        // Reload theme colors for the new theme
+        if (ns.resolveThemeColors) {
+          ns.resolveThemeColors(themeName).then(c => { this.themeColors = c; });
+        }
       }
     }
 
@@ -160,6 +180,20 @@
       try {
         if (ns.scanComponents) {
           this.componentResults = ns.scanComponents();
+        }
+      } catch (_) {}
+
+      // Generate fixes from scan results
+      try {
+        if (ns.generateFullFixReport && this.themeColors) {
+          this.fixReport = ns.generateFullFixReport(this.scanResults, this.componentResults, this.themeColors);
+        }
+      } catch (_) {}
+
+      // Load patch summary
+      try {
+        if (ns.getPatchSummary) {
+          this.patchSummary = await ns.getPatchSummary();
         }
       } catch (_) {}
 
@@ -272,10 +306,14 @@
     }
 
     _tabBarHTML() {
+      const fixCount = this.fixReport?.summary?.tokenGapsFixed || 0;
+      const patchCount = this.fixReport?.summary?.componentsPatched || 0;
+      const fixBadge = (fixCount + patchCount) > 0 ? ` <span class="diag-tab-badge">${fixCount + patchCount}</span>` : '';
       return `
         <div class="diag-tab-bar">
           <button class="diag-tab ${this.activeTab === 'tokens' ? 'is-active' : ''}" data-tab="tokens">Tokens</button>
           <button class="diag-tab ${this.activeTab === 'components' ? 'is-active' : ''}" data-tab="components">Components</button>
+          <button class="diag-tab ${this.activeTab === 'fixes' ? 'is-active' : ''}" data-tab="fixes">Fixes${fixBadge}</button>
           <button class="diag-tab ${this.activeTab === 'testing' ? 'is-active' : ''}" data-tab="testing">Testing</button>
         </div>`;
     }
@@ -289,6 +327,9 @@
       } else if (this.activeTab === 'components') {
         primaryAction = 'scanComponents';
         primaryLabel = 'Scan Components';
+      } else if (this.activeTab === 'fixes') {
+        primaryAction = 'generateFixes';
+        primaryLabel = 'Generate Fixes';
       } else {
         primaryAction = 'scan';
         primaryLabel = 'Run Token Scan';
@@ -388,6 +429,9 @@
     _activeTabContent() {
       if (this.activeTab === 'components') {
         return this.componentResults ? this._componentResultsHTML() : this._emptyComponentHTML();
+      }
+      if (this.activeTab === 'fixes') {
+        return this._fixesTabHTML();
       }
       if (this.activeTab === 'testing') {
         return this._testingTabHTML();
@@ -633,6 +677,168 @@
       return html;
     }
 
+    // ── Fixes tab ──────────────────────────────────────────────────────────
+
+    _fixesTabHTML() {
+      if (!this.fixReport && !this.patchSummary) {
+        return `
+          <div class="diag-empty">
+            <div class="diag-empty-icon">
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none">
+                <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </div>
+            <div class="diag-empty-title">No fixes generated yet</div>
+            <div class="diag-empty-desc">Run a scan first, then hit "Generate Fixes" to auto-generate CSS rules for any gaps found.</div>
+          </div>`;
+      }
+
+      let html = '';
+      const fr = this.fixReport;
+
+      if (fr) {
+        // Summary
+        const total = fr.summary.tokenGapsFixed + fr.summary.componentsPatched;
+        html += `
+          <div class="diag-coverage">
+            <div class="diag-coverage-header">
+              <span class="diag-coverage-label">Auto-Generated Fixes</span>
+              <span class="diag-coverage-pct is-${total > 0 ? 'ok' : 'good'}">${total}</span>
+            </div>
+            <div class="diag-coverage-stats">
+              <span class="diag-coverage-stat"><strong>${fr.summary.tokenGapsFixed}</strong> token fixes</span>
+              <span class="diag-coverage-stat"><strong>${fr.summary.componentsPatched}</strong> component patches</span>
+              <span class="diag-coverage-stat"><strong>${fr.summary.tokenGapsUnknown}</strong> unmapped</span>
+            </div>
+          </div>`;
+
+        // Token gap fixes section
+        if (fr.tokenFixes.fixes.length > 0) {
+          html += `
+            <div class="diag-section is-open" data-section="tokenFixes">
+              <div class="diag-section-header">
+                <span class="diag-section-title">Token Gap Fixes</span>
+                <span class="diag-section-badge">
+                  <span class="diag-section-badge-item is-pass">${fr.tokenFixes.fixes.length} rules</span>
+                </span>
+                <button class="diag-copy-inline" data-action="copyTokenFixes" title="Copy CSS to clipboard">Copy CSS</button>
+                <span class="diag-section-chevron">${ICONS.chevron}</span>
+              </div>
+              <div class="diag-section-body">
+                ${fr.tokenFixes.fixes.map(f => this._fixRowHTML(f)).join('')}
+              </div>
+            </div>`;
+        }
+
+        // Unknown gaps (tokens we couldn't map)
+        if (fr.tokenFixes.unknownGaps.length > 0) {
+          html += `
+            <div class="diag-section" data-section="unknownGaps">
+              <div class="diag-section-header">
+                <span class="diag-section-title">Unmapped Gaps</span>
+                <span class="diag-section-badge">
+                  <span class="diag-section-badge-item is-gap">${fr.tokenFixes.unknownGaps.length}</span>
+                </span>
+                <span class="diag-section-chevron">${ICONS.chevron}</span>
+              </div>
+              <div class="diag-section-body">
+                <div class="diag-gaps-desc" style="padding:6px 0 4px">These tokens don't have an automatic mapping yet. Copy the report for manual review.</div>
+                ${fr.tokenFixes.unknownGaps.map(g => `<div class="diag-token-row"><span class="diag-token-status is-gap"></span><span class="diag-token-name">${this._escapeHtml(g)}</span></div>`).join('')}
+              </div>
+            </div>`;
+        }
+
+        // Component patches section
+        if (fr.componentPatches.length > 0) {
+          html += `
+            <div class="diag-section is-open" data-section="componentPatches">
+              <div class="diag-section-header">
+                <span class="diag-section-title">Custom LWC Patches</span>
+                <span class="diag-section-badge">
+                  <span class="diag-section-badge-item is-pass">${fr.componentPatches.length} components</span>
+                </span>
+                <button class="diag-copy-inline" data-action="copyComponentPatches" title="Copy CSS to clipboard">Copy CSS</button>
+                <span class="diag-section-chevron">${ICONS.chevron}</span>
+              </div>
+              <div class="diag-section-body">
+                ${fr.componentPatches.map(p => this._patchRowHTML(p)).join('')}
+              </div>
+            </div>`;
+        }
+
+        // Full CSS copy button
+        if (fr.fullCSS) {
+          html += `
+            <div class="diag-fix-actions">
+              <button class="diag-scan-btn diag-scan-btn--primary" data-action="copyFullCSS" style="width:100%">
+                ${ICONS.copy}
+                <span>Copy All Fixes (${total} rules)</span>
+              </button>
+            </div>`;
+        }
+      }
+
+      // Active patches section
+      if (this.patchSummary && this.patchSummary.total > 0) {
+        html += `
+          <div class="diag-section is-open" data-section="activePatches">
+            <div class="diag-section-header">
+              <span class="diag-section-title">Active Patches</span>
+              <span class="diag-section-badge">
+                <span class="diag-section-badge-item is-pass">${this.patchSummary.enabled} on</span>
+                ${this.patchSummary.disabled > 0 ? `<span class="diag-section-badge-item is-fail">${this.patchSummary.disabled} off</span>` : ''}
+              </span>
+              <span class="diag-section-chevron">${ICONS.chevron}</span>
+            </div>
+            <div class="diag-section-body">
+              ${this.patchSummary.tags.map(t => this._activePatchRowHTML(t)).join('')}
+            </div>
+          </div>`;
+      }
+
+      return html;
+    }
+
+    _fixRowHTML(fix) {
+      const isColor = fix.value && /^(#|rgb|hsl)/.test(fix.value);
+      const swatch = isColor
+        ? `<span class="diag-token-swatch" style="background:${fix.value}"></span>`
+        : '';
+
+      return `
+        <div class="diag-token-row">
+          <span class="diag-token-status is-pass"></span>
+          <span class="diag-token-name" title="${this._escapeHtml(fix.token)}">${this._escapeHtml(fix.token)}</span>
+          ${swatch}
+          <span class="diag-token-value" title="${this._escapeHtml(fix.colorKey)}">${this._escapeHtml(fix.value)}</span>
+        </div>`;
+    }
+
+    _patchRowHTML(patch) {
+      return `
+        <div class="diag-patch-row">
+          <div class="diag-patch-header">
+            <span class="diag-token-status is-pass"></span>
+            <span class="diag-token-name">&lt;${this._escapeHtml(patch.tag)}&gt;</span>
+            <button class="diag-patch-action" data-action="savePatch" data-tag="${this._escapeHtml(patch.tag)}" title="Save & activate this patch">Enable</button>
+          </div>
+          <div class="diag-patch-rules">
+            ${patch.rules.map(r => `<div class="diag-patch-rule">${this._escapeHtml(r.property)}: ${this._escapeHtml(r.value.slice(0, 60))}</div>`).join('')}
+          </div>
+        </div>`;
+    }
+
+    _activePatchRowHTML(patch) {
+      return `
+        <div class="diag-token-row">
+          <span class="diag-token-status is-${patch.enabled ? 'pass' : 'fail'}"></span>
+          <span class="diag-token-name">&lt;${this._escapeHtml(patch.tag)}&gt;</span>
+          <span class="diag-comp-pkg">${patch.source}</span>
+          <button class="diag-patch-toggle" data-action="togglePatch" data-tag="${this._escapeHtml(patch.tag)}" data-enabled="${patch.enabled}">${patch.enabled ? 'Disable' : 'Enable'}</button>
+          <button class="diag-patch-remove" data-action="removePatch" data-tag="${this._escapeHtml(patch.tag)}" title="Remove patch">×</button>
+        </div>`;
+    }
+
     _tokenRowHTML(t) {
       const status = t.provided ? 'pass' : t.usedByPage ? 'gap' : 'fail';
       const isColor = t.value && /^(#|rgb|hsl)/.test(t.value);
@@ -705,6 +911,13 @@
         else if (action === 'scanForTesting') this._runTestingScan(btn);
         else if (action === 'scanAll') this._runScanAll(btn);
         else if (action === 'resetProgress') this._resetTestingProgress();
+        else if (action === 'generateFixes') this._runGenerateFixes(btn);
+        else if (action === 'copyTokenFixes') this._copyTokenFixes(btn);
+        else if (action === 'copyComponentPatches') this._copyComponentPatches(btn);
+        else if (action === 'copyFullCSS') this._copyFullCSS(btn);
+        else if (action === 'savePatch') this._savePatch(btn);
+        else if (action === 'togglePatch') this._togglePatch(btn);
+        else if (action === 'removePatch') this._removePatchAction(btn);
         else if (action === 'copy') this._copyReport(btn);
         else if (action === 'copyDOM') this._copyDOMSnapshot(btn);
       });
@@ -769,6 +982,10 @@
       // Load testing progress if switching to testing tab
       if (this.activeTab === 'testing' && this.testingProgress === null) {
         this.testingProgress = await ns.getTestingProgress?.(this.currentTheme) || {};
+      }
+      // Load theme colors if switching to fixes tab
+      if (this.activeTab === 'fixes' && !this.themeColors && ns.resolveThemeColors) {
+        this.themeColors = await ns.resolveThemeColors(this.currentTheme);
       }
       // Update tab bar active state
       const tabs = this.shadow?.querySelectorAll('[data-tab]');
@@ -953,6 +1170,136 @@
       this.testingProgress = {};
       const resultsEl = this.shadow?.querySelector('.diag-results');
       if (resultsEl) resultsEl.innerHTML = this._testingTabHTML();
+    }
+
+    // ── Fix generation & patch management ──────────────────────────────────
+
+    async _runGenerateFixes(btn) {
+      btn.classList.add('is-scanning');
+      const textSpan = btn.querySelector('span');
+      const iconSpan = btn.querySelector('svg');
+      if (iconSpan) iconSpan.outerHTML = ICONS.spinner;
+      if (textSpan) textSpan.textContent = 'Generating...';
+
+      await new Promise(r => setTimeout(r, 50));
+
+      // Ensure we have theme colors
+      if (!this.themeColors && ns.resolveThemeColors) {
+        this.themeColors = await ns.resolveThemeColors(this.currentTheme);
+      }
+
+      // Run scans if not done yet
+      if (!this.scanResults && ns.scanTokens) {
+        try { this.scanResults = ns.scanTokens(this.currentTheme); } catch (_) {}
+      }
+      if (!this.componentResults && ns.scanComponents) {
+        try { this.componentResults = ns.scanComponents(); } catch (_) {}
+      }
+
+      // Generate fixes
+      if (ns.generateFullFixReport && this.themeColors) {
+        this.fixReport = ns.generateFullFixReport(this.scanResults, this.componentResults, this.themeColors);
+      }
+
+      // Load patch summary
+      if (ns.getPatchSummary) {
+        this.patchSummary = await ns.getPatchSummary();
+      }
+
+      // Re-render
+      const resultsEl = this.shadow?.querySelector('.diag-results');
+      if (resultsEl) resultsEl.innerHTML = this._fixesTabHTML();
+
+      // Update tab bar (badge count may have changed)
+      const tabBar = this.shadow?.querySelector('.diag-tab-bar');
+      if (tabBar) tabBar.outerHTML = this._tabBarHTML();
+
+      btn.classList.remove('is-scanning');
+      const newIcon = btn.querySelector('svg');
+      const newText = btn.querySelector('span');
+      if (newIcon) newIcon.outerHTML = ICONS.scan;
+      if (newText) newText.textContent = 'Generate Fixes';
+    }
+
+    async _copyTokenFixes(btn) {
+      if (!this.fixReport?.tokenFixes?.css) return;
+      await this._clipboardCopy(this.fixReport.tokenFixes.css, btn, 'Copy CSS');
+    }
+
+    async _copyComponentPatches(btn) {
+      if (!this.fixReport?.componentPatches?.length) return;
+      const css = this.fixReport.componentPatches.map(p => p.css).join('\n\n');
+      await this._clipboardCopy(css, btn, 'Copy CSS');
+    }
+
+    async _copyFullCSS(btn) {
+      if (!this.fixReport?.fullCSS) return;
+      const textSpan = btn.querySelector('span');
+      await this._clipboardCopy(this.fixReport.fullCSS, btn, textSpan?.textContent || 'Copy All Fixes');
+    }
+
+    async _savePatch(btn) {
+      const tag = btn.dataset.tag;
+      if (!tag || !this.fixReport) return;
+
+      const patch = this.fixReport.componentPatches.find(p => p.tag === tag);
+      if (!patch || !ns.savePatch) return;
+
+      await ns.savePatch(tag, { css: patch.css, rules: patch.rules, source: 'auto' }, true);
+
+      // Re-inject patches
+      if (ns.injectPatches) await ns.injectPatches();
+
+      // Refresh patch summary and re-render
+      if (ns.getPatchSummary) this.patchSummary = await ns.getPatchSummary();
+      const resultsEl = this.shadow?.querySelector('.diag-results');
+      if (resultsEl) resultsEl.innerHTML = this._fixesTabHTML();
+
+      // Visual feedback
+      btn.textContent = 'Saved!';
+      setTimeout(() => { btn.textContent = 'Enable'; }, 1500);
+    }
+
+    async _togglePatch(btn) {
+      const tag = btn.dataset.tag;
+      const currentlyEnabled = btn.dataset.enabled === 'true';
+      if (!tag || !ns.togglePatch) return;
+
+      await ns.togglePatch(tag, !currentlyEnabled);
+      if (ns.injectPatches) await ns.injectPatches();
+      if (ns.getPatchSummary) this.patchSummary = await ns.getPatchSummary();
+
+      const resultsEl = this.shadow?.querySelector('.diag-results');
+      if (resultsEl) resultsEl.innerHTML = this._fixesTabHTML();
+    }
+
+    async _removePatchAction(btn) {
+      const tag = btn.dataset.tag;
+      if (!tag || !ns.removePatch) return;
+
+      await ns.removePatch(tag);
+      if (ns.injectPatches) await ns.injectPatches();
+      if (ns.getPatchSummary) this.patchSummary = await ns.getPatchSummary();
+
+      const resultsEl = this.shadow?.querySelector('.diag-results');
+      if (resultsEl) resultsEl.innerHTML = this._fixesTabHTML();
+    }
+
+    /** Shared clipboard helper with visual feedback. */
+    async _clipboardCopy(text, btn, resetLabel) {
+      try {
+        await navigator.clipboard.writeText(text);
+        btn.classList.add('is-copied');
+        const textSpan = btn.querySelector('span') || btn;
+        const original = textSpan.textContent;
+        textSpan.textContent = 'Copied!';
+        setTimeout(() => {
+          btn.classList.remove('is-copied');
+          textSpan.textContent = resetLabel || original;
+        }, 2000);
+      } catch (err) {
+        console.warn('[SFT Diag] Clipboard write failed:', err.message);
+      }
     }
 
     // ── Copy report ───────────────────────────────────────────────────────
