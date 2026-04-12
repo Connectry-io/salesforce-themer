@@ -375,8 +375,48 @@
         </div>`;
     }
 
+    _detectOrgTheme() {
+      // Detect which SF brand theme the org is running by fingerprinting
+      // a handful of :root custom properties against known values. Our
+      // temporary theme CSS uses !important and overwrites these, so this
+      // is only meaningful when theming is off. When our theme is on we
+      // still report the last detected value.
+      try {
+        const styleTag = document.getElementById(this.styleId);
+        if (styleTag) {
+          // Our theme is active — keep previously cached detection
+          return this._cachedOrgDetection || { slds: null, label: null };
+        }
+        const cs = getComputedStyle(document.documentElement);
+        const accent1 = (cs.getPropertyValue('--slds-g-color-accent-1') || '').trim();
+        const lwcBrand = (cs.getPropertyValue('--lwc-brandPrimary') || '').trim();
+        const fp = (accent1 + '|' + lwcBrand).toLowerCase().replace(/\s+/g, '');
+
+        // Fingerprints (build up as we learn them)
+        const KNOWN = [
+          { slds: 'SLDS 1', label: 'Lightning',           match: /(65,148,249|#4194f9)/ },
+          { slds: 'SLDS 2', label: 'Salesforce Cosmos',   match: /(light-dark\()/ }, // Cosmos uses light-dark()
+        ];
+        for (const k of KNOWN) {
+          if (k.match.test(fp)) {
+            const d = { slds: k.slds, label: k.label };
+            this._cachedOrgDetection = d;
+            return d;
+          }
+        }
+        // Unknown — report SLDS family based on token presence only
+        const hasSlds2 = !!cs.getPropertyValue('--slds-g-color-accent-1').trim();
+        const d = { slds: hasSlds2 ? 'SLDS 2' : 'SLDS 1', label: 'Custom brand theme' };
+        this._cachedOrgDetection = d;
+        return d;
+      } catch (_) {
+        return { slds: null, label: null };
+      }
+    }
+
     _infoBarHTML(themeName, injected) {
       const host = location.hostname.replace('.my.salesforce.com', '').replace('.lightning.force.com', '');
+      const orgDetect = this._detectOrgTheme();
 
       // Display name:
       //  - theme === 'none' but a theme is configured → "<configured> (off)"
@@ -400,6 +440,10 @@
         </div>`;
       }
 
+      const orgBadge = orgDetect.slds
+        ? `<span class="diag-org-badge" title="${this._escapeHtml(orgDetect.label || '')}">${this._escapeHtml(orgDetect.slds)}${orgDetect.label ? ' · ' + this._escapeHtml(orgDetect.label) : ''}</span>`
+        : '';
+
       return `
         <div class="diag-info-bar">
           <div class="diag-minicard">
@@ -407,6 +451,7 @@
             <span class="diag-minicard-name">${this._escapeHtml(displayName)}</span>
             <span class="diag-info-dot ${injected ? 'is-on' : 'is-off'}"></span>
             <span class="diag-minicard-org">${this._escapeHtml(host)}</span>
+            ${orgBadge}
           </div>
           <div class="diag-heartbeat" id="diagHeartbeat"></div>
         </div>`;

@@ -1309,3 +1309,15 @@
 .diag-scan-btn--secondary:hover {
   background: rgba(128, 128, 128, 0.08);
 }
+
+/* Org SLDS / brand theme detection badge */
+.diag-org-badge {
+  font-size: 10px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: var(--dp-surface);
+  border: 1px solid var(--dp-border);
+  color: var(--dp-text-2);
+  white-space: nowrap;
+  margin-left: auto;
+}
