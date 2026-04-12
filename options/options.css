@@ -6536,10 +6536,10 @@ td.upgrade-compare-col-premium,
   animation-fill-mode: backwards;
 }
 @keyframes gp-snow {
-  0%   { top: calc(var(--py) - 100%); transform: translateX(0); opacity: 0; }
+  0%   { top: calc(var(--py) - 110%); transform: translateX(0); opacity: 0; }
   10%  { opacity: 1; }
   90%  { opacity: 1; }
-  100% { top: calc(var(--py) + 10%); transform: translateX(8px); opacity: 0; }
+  100% { top: calc(var(--py) + 110%); transform: translateX(8px); opacity: 0; }
 }
 
 /* RAIN: thin streaks falling diagonally */
@@ -6552,10 +6552,10 @@ td.upgrade-compare-col-premium,
   animation-fill-mode: backwards;
 }
 @keyframes gp-rain {
-  0%   { top: calc(var(--py) - 100%); opacity: 0; }
+  0%   { top: calc(var(--py) - 110%); opacity: 0; }
   10%  { opacity: 0.9; }
   90%  { opacity: 0.9; }
-  100% { top: calc(var(--py) + 10%); opacity: 0; }
+  100% { top: calc(var(--py) + 110%); opacity: 0; }
 }
 
 /* MATRIX: green digits raining down */
@@ -6579,10 +6579,10 @@ td.upgrade-compare-col-premium,
 .guide-effect-card[data-effect="particles"] .guide-effect-preview[data-style="matrix"] .guide-particle:nth-child(3n)::before { content: '7'; }
 .guide-effect-card[data-effect="particles"] .guide-effect-preview[data-style="matrix"] .guide-particle:nth-child(5n)::before { content: '3'; }
 @keyframes gp-matrix {
-  0%   { top: calc(var(--py) - 100%); opacity: 0; }
+  0%   { top: calc(var(--py) - 110%); opacity: 0; }
   10%  { opacity: 1; }
   90%  { opacity: 1; }
-  100% { top: calc(var(--py) + 10%); opacity: 0; }
+  100% { top: calc(var(--py) + 110%); opacity: 0; }
 }
 
 /* DOTS: floating accent dots, slow drift */
