@@ -19,6 +19,84 @@
 // don't support importScripts with relative paths in all Chrome versions.
 // Keep in sync with themes/engine.js.
 
+const _FONT_STACKS = {
+  'system-ui':      'system-ui, sans-serif',
+  'neo-grotesque':  "Inter, Roboto, 'Helvetica Neue', 'Arial Nova', 'Nimbus Sans', Arial, sans-serif",
+  'humanist':       "Seravek, 'Gill Sans Nova', Ubuntu, Calibri, 'DejaVu Sans', source-sans-pro, sans-serif",
+  'geometric':      "Avenir, Montserrat, Corbel, 'URW Gothic', source-sans-pro, sans-serif",
+  'classic-serif':  "Charter, 'Bitstream Charter', 'Sitka Text', Cambria, serif",
+};
+
+function _generateTypographyCSS(typo) {
+  if (!typo) return '';
+  const bodyStack = _FONT_STACKS[typo.fontFamily] || _FONT_STACKS['system-ui'];
+  const headingStack = typo.fontFamilyHeading ? (_FONT_STACKS[typo.fontFamilyHeading] || bodyStack) : null;
+  const scale = typo.sizeScale || 1.0;
+  const isDefault = typo.fontFamily === 'system-ui' && scale === 1.0
+    && typo.weightBody === 400 && typo.weightHeading === 700
+    && typo.lineHeight === 1.375 && !typo.letterSpacing
+    && !typo.fontFamilyHeading;
+  if (isDefault) return '';
+
+  // SLDS 1 font sizes (rem values from Salesforce's token set)
+  const sizes = {
+    XSmall: 0.625, Small: 0.875, Medium: 1, Large: 1.125, XLarge: 1.25, XxLarge: 2,
+  };
+
+  let css = '\n/* ─── Typography overrides ──────────────────────────────────────────── */\n\n:root {\n';
+  css += `  --lwc-fontFamily: ${bodyStack} !important;\n`;
+  if (headingStack) css += `  --lwc-fontFamilyHeading: ${headingStack} !important;\n`;
+  css += `  --slds-g-font-family: ${bodyStack} !important;\n`;
+
+  // Weight tokens
+  if (typo.weightBody !== 400) {
+    css += `  --lwc-fontWeightRegular: ${typo.weightBody} !important;\n`;
+    css += `  --slds-g-font-weight-4: ${typo.weightBody} !important;\n`;
+  }
+  if (typo.weightHeading !== 700) {
+    css += `  --lwc-fontWeightBold: ${typo.weightHeading} !important;\n`;
+    css += `  --slds-g-font-weight-7: ${typo.weightHeading} !important;\n`;
+  }
+
+  // Line height
+  if (typo.lineHeight !== 1.375) {
+    css += `  --lwc-lineHeightText: ${typo.lineHeight} !important;\n`;
+    css += `  --lwc-lineHeightHeading: ${Math.max(1.1, typo.lineHeight - 0.125)} !important;\n`;
+  }
+
+  // Size scaling — multiply each SLDS 1 fontSize token
+  if (scale !== 1.0) {
+    for (const [suffix, rem] of Object.entries(sizes)) {
+      const scaled = (rem * scale).toFixed(4).replace(/0+$/, '').replace(/\.$/, '');
+      css += `  --lwc-fontSize${suffix}: ${scaled}rem !important;\n`;
+    }
+    css += `  --slds-g-font-size-base: ${(1 * scale).toFixed(3).replace(/0+$/, '').replace(/\.$/, '')}rem !important;\n`;
+  }
+
+  css += '}\n';
+
+  // Font-family fallback on body (some elements don't inherit from tokens)
+  css += `\nbody, .desktop, .oneContent, .slds-scope {\n  font-family: ${bodyStack} !important;\n`;
+  if (typo.letterSpacing) css += `  letter-spacing: ${typo.letterSpacing}em !important;\n`;
+  css += '}\n';
+
+  // Heading font-family override if different from body
+  if (headingStack) {
+    css += `\n.slds-text-heading_large, .slds-text-heading_medium, .slds-text-heading_small,\n.slds-page-header__title, h1, h2, h3 {\n  font-family: ${headingStack} !important;\n}\n`;
+  }
+
+  // SLDS utility class size overrides (safety net — these use hardcoded values, not tokens)
+  if (scale !== 1.0) {
+    css += `\n.slds-text-heading_large { font-size: ${(1.5 * scale).toFixed(3)}rem !important; }\n`;
+    css += `.slds-text-heading_medium { font-size: ${(1.25 * scale).toFixed(3)}rem !important; }\n`;
+    css += `.slds-text-heading_small { font-size: ${(0.875 * scale).toFixed(3)}rem !important; }\n`;
+    css += `.slds-text-body_regular { font-size: ${(0.875 * scale).toFixed(3)}rem !important; }\n`;
+    css += `.slds-text-body_small { font-size: ${(0.75 * scale).toFixed(3)}rem !important; }\n`;
+  }
+
+  return css;
+}
+
 function generateThemeCSS(theme) {
   const c = theme.colors;
   const isDark = c.colorScheme === 'dark';

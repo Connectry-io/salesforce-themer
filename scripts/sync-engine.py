@@ -20,15 +20,16 @@ with open(ENGINE_PATH) as f:
 with open(BG_PATH) as f:
     bg = f.read()
 
-# Extract from engine.js: everything from 'function generateThemeCSS'
-# up to (but NOT including) the module.exports block or EOF marker
+# Extract from engine.js: everything from 'const _FONT_STACKS' (or first helper)
+# up to (but NOT including) the module.exports block or EOF marker.
+# This includes _FONT_STACKS, _generateTypographyCSS, generateThemeCSS, hexToRgb.
 match = re.search(
-    r'(function generateThemeCSS\(theme\).*?)(?=\n// Export for use|\nif \(typeof module)',
+    r'(const _FONT_STACKS.*?)(?=\n// Export for use|\nif \(typeof module)',
     engine,
     re.DOTALL
 )
 if not match:
-    print('ERROR: Could not find generateThemeCSS in engine.js')
+    print('ERROR: Could not find _FONT_STACKS/generateThemeCSS in engine.js')
     sys.exit(1)
 
 engine_code = match.group(1).rstrip()
@@ -38,10 +39,10 @@ if 'module.exports' in engine_code or 'typeof module' in engine_code:
     print('ERROR: Engine code contains module.exports — extraction boundary is wrong')
     sys.exit(1)
 
-# Replace in background.js: from 'function generateThemeCSS'
+# Replace in background.js: from either 'const _FONT_STACKS' or 'function generateThemeCSS'
 # up to '// ─── Inline: derivation engine'
 bg_match = re.search(
-    r'function generateThemeCSS\(theme\).*?(?=\n// ─── Inline: derivation engine)',
+    r'(const _FONT_STACKS|function generateThemeCSS\(theme\)).*?(?=\n// ─── Inline: derivation engine)',
     bg,
     re.DOTALL
 )
