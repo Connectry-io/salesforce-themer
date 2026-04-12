@@ -384,9 +384,11 @@
     // Cursor trail — JS trail history
     if (effects.cursorTrail) {
       frame.dataset.fxCursorTrail = 'on';
-      _initBuilderCursorTrail(frame, accent);
+      frame.dataset.fxCursorTrailStyle = effects.cursorTrailStyle || 'glow';
+      _initBuilderCursorTrail(frame, accent, effects.cursorTrailStyle || 'glow');
     } else {
       delete frame.dataset.fxCursorTrail;
+      delete frame.dataset.fxCursorTrailStyle;
       _destroyBuilderCursorTrail(frame);
     }
     // Background pattern
@@ -3402,6 +3404,19 @@
         </div>
       ` : '';
 
+      const cursorTrailStyle = config.cursorTrailStyle || 'glow';
+      const cursorTrailSelectRow = effect.id === 'cursorTrail' ? `
+        <div class="effect-slider-row">
+          <span class="effect-select-label">Style</span>
+          <select class="effect-select" data-effect-select="cursorTrailStyle">
+            <option value="glow"    ${cursorTrailStyle === 'glow'    ? 'selected' : ''}>Glow</option>
+            <option value="comet"   ${cursorTrailStyle === 'comet'   ? 'selected' : ''}>Comet</option>
+            <option value="sparkle" ${cursorTrailStyle === 'sparkle' ? 'selected' : ''}>Sparkle</option>
+            <option value="line"    ${cursorTrailStyle === 'line'    ? 'selected' : ''}>Line</option>
+          </select>
+        </div>
+      ` : '';
+
       const intensityButtons = ['subtle', 'medium', 'strong'].map(level => `
         <button type="button"
                 class="intensity-btn${intensity === level ? ' is-active' : ''}"
@@ -3434,6 +3449,7 @@
             </div>
           </div>
           ${particleSelectRow}
+          ${cursorTrailSelectRow}
         </div>` : ''}
       `;
 
@@ -3465,6 +3481,17 @@
       pSelect?.addEventListener('change', () => {
         if (editorState.effects.particles) {
           editorState.effects.particles = pSelect.value;
+        }
+      });
+
+      // Cursor trail style select
+      const ctSelect = card.querySelector('[data-effect-select="cursorTrailStyle"]');
+      ctSelect?.addEventListener('change', () => {
+        editorState.effects.cursorTrailStyle = ctSelect.value;
+        // Re-apply so the Builder preview picks up the new style immediately
+        if (typeof applyPreviewEffects === 'function') {
+          const frame = document.querySelector('.editor-preview-frame');
+          if (frame) applyPreviewEffects(frame, editorState.effects, editorState.colors?.brandPrimary || '#4a6fa5');
         }
       });
 
@@ -4953,6 +4980,19 @@
         </div>
       ` : '';
 
+      const cursorTrailStyle = config.cursorTrailStyle || 'glow';
+      const cursorTrailSelectRow = effect.id === 'cursorTrail' ? `
+        <div class="effect-slider-row">
+          <span class="effect-select-label">Style</span>
+          <select class="effect-select" data-effect-select="cursorTrailStyle" ${locked ? 'disabled' : ''}>
+            <option value="glow"    ${cursorTrailStyle === 'glow'    ? 'selected' : ''}>Glow</option>
+            <option value="comet"   ${cursorTrailStyle === 'comet'   ? 'selected' : ''}>Comet</option>
+            <option value="sparkle" ${cursorTrailStyle === 'sparkle' ? 'selected' : ''}>Sparkle</option>
+            <option value="line"    ${cursorTrailStyle === 'line'    ? 'selected' : ''}>Line</option>
+          </select>
+        </div>
+      ` : '';
+
       const intensityButtons = ['subtle', 'medium', 'strong'].map(level => `
         <button type="button"
                 class="intensity-btn${intensity === level ? ' is-active' : ''}"
@@ -5001,6 +5041,7 @@
             </div>
           </div>
           ${particleSelectRow}
+          ${cursorTrailSelectRow}
         </div>
       `;
 
@@ -5048,6 +5089,14 @@
           const { config: current } = resolveEffectsEditingTarget();
           const next = { ...current, preset: 'custom' };
           if (next.particles) next.particles = pSelect.value;
+          await saveEffectsConfig(next);
+        });
+
+        // Cursor trail style select
+        const ctSelect = card.querySelector('[data-effect-select="cursorTrailStyle"]');
+        ctSelect?.addEventListener('change', async () => {
+          const { config: current } = resolveEffectsEditingTarget();
+          const next = { ...current, preset: 'custom', cursorTrailStyle: ctSelect.value };
           await saveEffectsConfig(next);
         });
       }
@@ -5147,8 +5196,9 @@
   // ─── Builder cursor trail (JS trail history) ─────────────────────────────
   const _builderTrailState = new WeakMap();
 
-  function _initBuilderCursorTrail(frame, accent) {
-    if (_builderTrailState.has(frame)) return; // already initialized
+  function _initBuilderCursorTrail(frame, accent, style) {
+    // If already initialized, tear down so we can re-init with new style/accent
+    if (_builderTrailState.has(frame)) _destroyBuilderCursorTrail(frame);
     const trailPoints = [];
     const MAX_POINTS = 15;
     const container = document.createElement('div');
@@ -5157,6 +5207,24 @@
     frame.appendChild(container);
 
     const rgb = _hexToRgbCsv(accent);
+    const activeStyle = style || 'glow';
+
+    // For line style, use an SVG path instead of dots
+    let svg = null, pathEl = null;
+    if (activeStyle === 'line') {
+      svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+      svg.setAttribute('width', '100%');
+      svg.setAttribute('height', '100%');
+      svg.style.cssText = 'position:absolute;inset:0;pointer-events:none;';
+      pathEl = document.createElementNS('http://www.w3.org/2000/svg', 'polyline');
+      pathEl.setAttribute('fill', 'none');
+      pathEl.setAttribute('stroke', `rgb(${rgb})`);
+      pathEl.setAttribute('stroke-width', '3');
+      pathEl.setAttribute('stroke-linecap', 'round');
+      pathEl.setAttribute('stroke-linejoin', 'round');
+      svg.appendChild(pathEl);
+      container.appendChild(svg);
+    }
 
     function onMove(e) {
       const rect = frame.getBoundingClientRect();
@@ -5168,15 +5236,37 @@
     }
 
     function renderTrail() {
-      container.innerHTML = '';
       const now = Date.now();
-      trailPoints.forEach((pt, i) => {
-        const age = (now - pt.t) / 400; // fade over 400ms
-        if (age > 1) return;
-        const opacity = (1 - age) * 0.6 * (i / trailPoints.length);
-        const size = 4 + (i / trailPoints.length) * 12;
+      const alive = trailPoints.filter(pt => (now - pt.t) / 400 < 1);
+
+      if (activeStyle === 'line') {
+        const pts = alive.map(p => `${p.x},${p.y}`).join(' ');
+        pathEl.setAttribute('points', pts);
+        pathEl.setAttribute('opacity', alive.length ? '0.7' : '0');
+        return;
+      }
+
+      container.querySelectorAll('.sf-trail-dot').forEach(n => n.remove());
+      alive.forEach((pt, i) => {
+        const age = (now - pt.t) / 400;
+        const progress = i / Math.max(1, alive.length);
         const dot = document.createElement('div');
-        dot.style.cssText = `position:absolute;left:${pt.x}px;top:${pt.y}px;width:${size}px;height:${size}px;border-radius:50%;background:radial-gradient(circle,rgba(${rgb},${opacity.toFixed(2)}) 0%,transparent 70%);transform:translate(-50%,-50%);pointer-events:none;`;
+        dot.className = 'sf-trail-dot';
+        if (activeStyle === 'comet') {
+          const size = 3 + progress * 22;
+          const opacity = (1 - age) * 0.85 * progress;
+          dot.style.cssText = `position:absolute;left:${pt.x}px;top:${pt.y}px;width:${size}px;height:${size}px;border-radius:50%;background:radial-gradient(circle,rgba(${rgb},${opacity.toFixed(2)}) 0%,rgba(${rgb},${(opacity * 0.4).toFixed(2)}) 40%,transparent 80%);transform:translate(-50%,-50%);`;
+        } else if (activeStyle === 'sparkle') {
+          const size = 6 + progress * 8;
+          const halo = size * 3;
+          const opacity = (1 - age) * 0.9 * progress;
+          dot.style.cssText = `position:absolute;left:${pt.x}px;top:${pt.y}px;width:${halo}px;height:${halo}px;border-radius:50%;background:radial-gradient(circle,#fff ${(size/halo*100).toFixed(0)}%,rgba(${rgb},${opacity.toFixed(2)}) ${((size*1.5)/halo*100).toFixed(0)}%,transparent 100%);transform:translate(-50%,-50%);mix-blend-mode:screen;`;
+        } else {
+          // glow (default)
+          const size = 4 + progress * 12;
+          const opacity = (1 - age) * 0.6 * progress;
+          dot.style.cssText = `position:absolute;left:${pt.x}px;top:${pt.y}px;width:${size}px;height:${size}px;border-radius:50%;background:radial-gradient(circle,rgba(${rgb},${opacity.toFixed(2)}) 0%,transparent 70%);transform:translate(-50%,-50%);`;
+        }
         container.appendChild(dot);
       });
     }

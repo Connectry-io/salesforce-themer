@@ -838,6 +838,7 @@ class SFThemerCursorTrail {
       length: 20,
       size: 4,
       opacity: 0.5,
+      style: 'glow', // glow | comet | sparkle | line
       ...config,
     };
     this.points = [];
@@ -893,22 +894,80 @@ class SFThemerCursorTrail {
     if (!this.active || !this.ctx) return;
     const { ctx, canvas, points } = this;
     ctx.clearRect(0, 0, canvas.width, canvas.height);
+    const style = this.config.style || 'glow';
 
-    for (let i = 0; i < points.length; i++) {
-      const p = points[i];
-      const progress = (i + 1) / points.length;
-      const size = this.config.size * progress;
-      const alpha = progress * this.config.opacity;
+    if (style === 'line' && points.length > 1) {
+      // LINE: continuous stroke through points, tapered by progress
+      for (let i = 1; i < points.length; i++) {
+        const p0 = points[i - 1], p1 = points[i];
+        const progress = i / points.length;
+        ctx.beginPath();
+        ctx.moveTo(p0.x, p0.y);
+        ctx.lineTo(p1.x, p1.y);
+        ctx.strokeStyle = this.config.color;
+        ctx.lineWidth = this.config.size * progress;
+        ctx.lineCap = 'round';
+        ctx.globalAlpha = progress * this.config.opacity;
+        ctx.stroke();
+      }
+    } else {
+      for (let i = 0; i < points.length; i++) {
+        const p = points[i];
+        const progress = (i + 1) / points.length;
 
-      ctx.beginPath();
-      ctx.arc(p.x, p.y, size, 0, Math.PI * 2);
-      ctx.fillStyle = this.config.color;
-      ctx.globalAlpha = alpha;
-      ctx.fill();
+        if (style === 'comet') {
+          // COMET: elongated teardrop growing toward the head
+          const size = this.config.size * progress * 2.2;
+          const alpha = progress * this.config.opacity;
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, size, 0, Math.PI * 2);
+          ctx.fillStyle = this.config.color;
+          ctx.globalAlpha = alpha;
+          ctx.fill();
+          // Connect with a line to the previous point for streak effect
+          if (i > 0) {
+            const prev = points[i - 1];
+            ctx.beginPath();
+            ctx.moveTo(prev.x, prev.y);
+            ctx.lineTo(p.x, p.y);
+            ctx.strokeStyle = this.config.color;
+            ctx.lineWidth = size * 0.9;
+            ctx.lineCap = 'round';
+            ctx.globalAlpha = alpha * 0.7;
+            ctx.stroke();
+          }
+        } else if (style === 'sparkle') {
+          // SPARKLE: small bright core + radiating glow halo
+          const size = this.config.size * (0.5 + progress * 0.7);
+          const alpha = progress * this.config.opacity;
+          const grad = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, size * 4);
+          grad.addColorStop(0, this.config.color);
+          grad.addColorStop(0.3, this.config.color);
+          grad.addColorStop(1, 'rgba(255,255,255,0)');
+          ctx.fillStyle = grad;
+          ctx.globalAlpha = alpha;
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, size * 4, 0, Math.PI * 2);
+          ctx.fill();
+        } else {
+          // GLOW (default): original soft dot behavior
+          const size = this.config.size * progress;
+          const alpha = progress * this.config.opacity;
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, size, 0, Math.PI * 2);
+          ctx.fillStyle = this.config.color;
+          ctx.globalAlpha = alpha;
+          ctx.fill();
+        }
 
-      p.life -= 0.02;
+        p.life -= 0.02;
+      }
     }
 
+    // Life decrement for line/other modes not in the inner loop
+    if (style === 'line') {
+      for (const p of points) p.life -= 0.02;
+    }
     this.points = this.points.filter(p => p.life > 0);
     ctx.globalAlpha = 1;
     this.raf = requestAnimationFrame(() => this._draw());
@@ -994,6 +1053,7 @@ function buildCursorTrailRuntimeConfig(effectsConfig, themeColors) {
     length: Math.round(20 * m),
     size: Math.round(4 * m),
     opacity: 0.4 + (m - 1) * 0.2,
+    style: effectsConfig.cursorTrailStyle || 'glow',
   };
 }
 
