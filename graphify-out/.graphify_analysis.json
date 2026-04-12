@@ -1,0 +1,504 @@
+{
+  "communities": {
+    "0": [
+      "popup",
+      "popup_activatethemetab",
+      "popup_applypremiumstatetopopup",
+      "popup_applythemetotab",
+      "popup_bindeffectsselector",
+      "popup_bindhelptooltip",
+      "popup_bindoptionsbutton",
+      "popup_bindperorgtoggle",
+      "popup_bindresetsettings",
+      "popup_bindscopeselector",
+      "popup_bindsettingscollapse",
+      "popup_bindthemeontoggle",
+      "popup_bindthemetabs",
+      "popup_bindupgradecta",
+      "popup_buildcustomthemecard",
+      "popup_buildpopupeffectpills",
+      "popup_buildswatchcolors",
+      "popup_detectcurrentorg",
+      "popup_getactivethemetab",
+      "popup_getallthemeids",
+      "popup_handleautomodetoggle",
+      "popup_hidealltooltips",
+      "popup_init",
+      "popup_isgroupcollapsed",
+      "popup_loadthemes",
+      "popup_openoptionsontab",
+      "popup_popuptyperow",
+      "popup_positiontooltipbelow",
+      "popup_rendercustomthemespanel",
+      "popup_renderthemessection",
+      "popup_renderupsellhtml",
+      "popup_resetorgtheme",
+      "popup_selecttheme",
+      "popup_setactivethemetab",
+      "popup_setactiveui",
+      "popup_setautomodeui",
+      "popup_seteffectsui",
+      "popup_setgroupcollapsed",
+      "popup_setorgtheme",
+      "popup_setscopeui",
+      "popup_updateorgrow"
+    ],
+    "1": [
+      "options",
+      "options_applygroupcollapse",
+      "options_bindbuildercreatemenu",
+      "options_bindchatdrawer",
+      "options_binddevpanel",
+      "options_bindfavicontoggle",
+      "options_bindfilterpills",
+      "options_bindopteffectspills",
+      "options_bindoptresetsettings",
+      "options_bindoptsettingscardcollapse",
+      "options_bindoptthemeapplicationtooltips",
+      "options_bindoptthemeontoggle",
+      "options_bindthemegroupcollapse",
+      "options_bindthemeswitcher",
+      "options_bindtypographycontrols",
+      "options_bindupgradeplanctas",
+      "options_closeeditor",
+      "options_closethemeswitcher",
+      "options_embededitorinbuilder",
+      "options_faviconplaceholdersvg",
+      "options_getdarkthemes",
+      "options_getlightthemes",
+      "options_hideallopttooltips",
+      "options_highlightguideeffect",
+      "options_importthemejson",
+      "options_init",
+      "options_loadthemes",
+      "options_positionopttooltipbelow",
+      "options_renderpresetgrid",
+      "options_setversion",
+      "options_showcheckoutplaceholder",
+      "options_syncoptsettingscardstatus",
+      "options_updatepreviewfavicon"
+    ],
+    "2": [
+      "background",
+      "background_alpha",
+      "background_applyandsavetheme",
+      "background_broadcasteffectstoactivetabs",
+      "background_broadcastthemetoactivetabs",
+      "background_cacheallthemes",
+      "background_cachecustomthemecss",
+      "background_cachethemecss",
+      "background_contrast",
+      "background_darken",
+      "background_derivefulltheme",
+      "background_extractcorevalues",
+      "background_generatethemecss",
+      "background_getallthemeids",
+      "background_getdarkthemeids",
+      "background_getlightthemeids",
+      "background_hextorgb",
+      "background_hsltorgb",
+      "background_lighten",
+      "background_loadthemeregistry",
+      "background_migratecustomthemeeffects",
+      "background_migratedefaultsforexistinginstall",
+      "background_mix",
+      "background_parsecolor",
+      "background_resolvecustomtheme",
+      "background_rgbtohex",
+      "background_rgbtohsl",
+      "background_suggestedeffectsfor"
+    ],
+    "3": [
+      "content",
+      "content_applyeffects",
+      "content_applyfavicon",
+      "content_applytheme",
+      "content_applythemefast",
+      "content_begintransition",
+      "content_buildfaviconsvg",
+      "content_destroycanvaseffects",
+      "content_endtransition",
+      "content_ensurethemepresent",
+      "content_fetchthemecss",
+      "content_getorghostname",
+      "content_handledeadcontext",
+      "content_init",
+      "content_injectcsstext",
+      "content_injecteffectscss",
+      "content_injecttransitionstyles",
+      "content_isextensioncontextdead",
+      "content_loadandapplyeffects",
+      "content_preinit",
+      "content_removeeffectsstyles",
+      "content_removefavicon",
+      "content_removethemestyles",
+      "content_resolvetheme",
+      "content_saveoriginalfavicons",
+      "content_setupmediaquerylistener",
+      "content_shouldapplytopage",
+      "content_startobserver"
+    ],
+    "4": [
+      "effects",
+      "effects_applyeffectsclasses",
+      "effects_buildbackgroundpatterncss",
+      "effects_buildcursortrailruntimeconfig",
+      "effects_buildparticleruntimeconfig",
+      "effects_deriveauroracolors",
+      "effects_generateeffectscss",
+      "effects_hextorgb",
+      "effects_hsltohex",
+      "effects_intensitymult",
+      "effects_parsehex",
+      "effects_rgbtohsl",
+      "effects_sfthemercursortrail",
+      "effects_sfthemercursortrail_constructor",
+      "effects_sfthemercursortrail_destroy",
+      "effects_sfthemercursortrail_draw",
+      "effects_sfthemercursortrail_init",
+      "effects_sfthemerparticles",
+      "effects_sfthemerparticles_constructor",
+      "effects_sfthemerparticles_createparticle",
+      "effects_sfthemerparticles_destroy",
+      "effects_sfthemerparticles_detectbattery",
+      "effects_sfthemerparticles_draw",
+      "effects_sfthemerparticles_getdensity",
+      "effects_sfthemerparticles_init",
+      "effects_sfthemerparticles_loop",
+      "effects_sfthemerparticles_spawn"
+    ],
+    "5": [
+      "options_buildminiswatch",
+      "options_containsprofanity",
+      "options_deletecustomtheme",
+      "options_flashtoast",
+      "options_handleautomodetoggle",
+      "options_pushthemetoallsftabs",
+      "options_renderbuildersidebar",
+      "options_rendercustomthemegrid",
+      "options_resolvethemeformeta",
+      "options_savecustomtheme",
+      "options_selecttheme",
+      "options_showsaveupgradeprompt",
+      "options_updategridactivestate",
+      "options_updateheadermeta",
+      "options_updatethemeswitchertrigger"
+    ],
+    "6": [
+      "options_capitalize",
+      "options_getthemebyid",
+      "options_isdarktheme",
+      "options_islighttheme",
+      "options_openeffectsresetmenu",
+      "options_previewlabel",
+      "options_rendereffectsgrid",
+      "options_renderorglist",
+      "options_resolveeffectseditingtarget",
+      "options_spawnminicursortrail",
+      "options_spawnminiparticles",
+      "options_starteffectpreviews",
+      "options_stopeffectpreviews",
+      "options_updateeffectscontextbanner"
+    ],
+    "7": [
+      "derive",
+      "derive_alpha",
+      "derive_contrast",
+      "derive_darken",
+      "derive_derivefulltheme",
+      "derive_extractcorevalues",
+      "derive_hsltorgb",
+      "derive_lighten",
+      "derive_mix",
+      "derive_parsecolor",
+      "derive_resolvecustomtheme",
+      "derive_rgbtohex",
+      "derive_rgbtohsl"
+    ],
+    "8": [
+      "connectry_settings",
+      "connectry_settings_cxdialog",
+      "connectry_settings_cxdialog_close",
+      "connectry_settings_cxdialog_constructor",
+      "connectry_settings_cxdialog_open",
+      "connectry_settings_cxtabs",
+      "connectry_settings_cxtabs_activate",
+      "connectry_settings_cxtabs_constructor",
+      "connectry_settings_cxtabs_getactive",
+      "connectry_settings_cxtabs_handlekey",
+      "connectry_settings_cxtabs_init",
+      "connectry_settings_escape"
+    ],
+    "9": [
+      "options_applyeditorprevieweffects",
+      "options_applyeditorpreviewtypography",
+      "options_applypreviewvars",
+      "options_derivefulltheme",
+      "options_exportthemejson",
+      "options_geteditorcorevalues",
+      "options_getfulleditortheme",
+      "options_hextorgbcsv",
+      "options_oneditorchange",
+      "options_populateeditorfields",
+      "options_updatepreview"
+    ],
+    "10": [
+      "color_utils",
+      "color_utils_alpha",
+      "color_utils_contrast",
+      "color_utils_darken",
+      "color_utils_hextorgb",
+      "color_utils_hsltorgb",
+      "color_utils_lighten",
+      "color_utils_mix",
+      "color_utils_parsecolor",
+      "color_utils_rgbtohex",
+      "color_utils_rgbtohsl"
+    ],
+    "11": [
+      "presets",
+      "presets_applyvolume",
+      "presets_geteffectdescription",
+      "presets_geteffectkeys",
+      "presets_getpresetdisplayinfo",
+      "presets_getpresetnames",
+      "presets_getsuggestedconfig",
+      "presets_getsuggestedpreset",
+      "presets_getthemeeffects",
+      "presets_initialcustomthemeeffects",
+      "presets_resolveactiveeffects"
+    ],
+    "12": [
+      "options_alpha",
+      "options_bindadvancedevents",
+      "options_contrast",
+      "options_darken",
+      "options_fromhsl",
+      "options_hex",
+      "options_lighten",
+      "options_mix",
+      "options_pc",
+      "options_renderadvancedpanel",
+      "options_tohsl"
+    ],
+    "13": [
+      "options_applythemefilter",
+      "options_bindguideanatomyinteractions",
+      "options_buildeffectindicators",
+      "options_buildswatch",
+      "options_connectrydotsvg",
+      "options_detectthemecategory",
+      "options_renderguideanatomydiagram",
+      "options_renderthemegrid",
+      "options_updateminicard"
+    ],
+    "14": [
+      "options_applyguideplaygroundintensity",
+      "options_bindguidecolorsinteractions",
+      "options_bindguidetypedemo",
+      "options_rendereffectstabforactivetheme",
+      "options_renderguidecolorsmock",
+      "options_renderguideeffectsgrid",
+      "options_renderguidetab",
+      "options_saveeffectsconfig",
+      "options_selectpreset"
+    ],
+    "15": [
+      "options_defaulttypography",
+      "options_ensureeditorloaded",
+      "options_getsuggestedeffectsfor",
+      "options_opencreationdialog",
+      "options_openeditor",
+      "options_populatetypographyui",
+      "options_rendereditoreffectsgrid",
+      "options_switcheditorsubtab"
+    ],
+    "16": [
+      "options_bindeditorevents",
+      "options_bindtopbaractions",
+      "options_guardpremium",
+      "options_ispremium",
+      "options_openupgradedialog",
+      "options_syncpremiumbodyclass"
+    ],
+    "17": [
+      "options_bindeditorfaviconpopout",
+      "options_bindguidefavicondemo",
+      "options_loadeditorfaviconstate",
+      "options_renderfaviconsvg",
+      "options_updateeditorfaviconpreview",
+      "options_updateguidefaviconpreview"
+    ],
+    "18": [
+      "engine",
+      "engine_generatethemecss",
+      "engine_generatetypographycss",
+      "engine_hextorgb"
+    ],
+    "19": [
+      "storage"
+    ],
+    "20": [
+      "sync_engine"
+    ]
+  },
+  "cohesion": {
+    "0": 0.1,
+    "1": 0.1,
+    "2": 0.13,
+    "3": 0.16,
+    "4": 0.12,
+    "5": 0.17,
+    "6": 0.18,
+    "7": 0.33,
+    "8": 0.23,
+    "9": 0.22,
+    "10": 0.42,
+    "11": 0.27,
+    "12": 0.27,
+    "13": 0.25,
+    "14": 0.22,
+    "15": 0.29,
+    "16": 0.33,
+    "17": 0.47,
+    "18": 0.83,
+    "19": 1.0,
+    "20": 1.0
+  },
+  "gods": [
+    {
+      "id": "options_init",
+      "label": "init()",
+      "edges": 28
+    },
+    {
+      "id": "options_getthemebyid",
+      "label": "getThemeById()",
+      "edges": 21
+    },
+    {
+      "id": "popup_init",
+      "label": "init()",
+      "edges": 21
+    },
+    {
+      "id": "options_openeditor",
+      "label": "openEditor()",
+      "edges": 14
+    },
+    {
+      "id": "options_savecustomtheme",
+      "label": "saveCustomTheme()",
+      "edges": 13
+    },
+    {
+      "id": "content_init",
+      "label": "init()",
+      "edges": 13
+    },
+    {
+      "id": "options_selecttheme",
+      "label": "selectTheme()",
+      "edges": 10
+    },
+    {
+      "id": "options_getfulleditortheme",
+      "label": "getFullEditorTheme()",
+      "edges": 10
+    },
+    {
+      "id": "effects_sfthemerparticles",
+      "label": "SFThemerParticles",
+      "edges": 10
+    },
+    {
+      "id": "content_applytheme",
+      "label": "applyTheme()",
+      "edges": 10
+    }
+  ],
+  "surprises": [
+    {
+      "source": "openEditor()",
+      "target": "isPremium()",
+      "source_files": [
+        "options/options.js",
+        "options/options.js"
+      ],
+      "confidence": "EXTRACTED",
+      "relation": "calls",
+      "note": "Bridges community 16 \u2192 community 15"
+    },
+    {
+      "source": "saveCustomTheme()",
+      "target": "isPremium()",
+      "source_files": [
+        "options/options.js",
+        "options/options.js"
+      ],
+      "confidence": "EXTRACTED",
+      "relation": "calls",
+      "note": "Bridges community 16 \u2192 community 5"
+    },
+    {
+      "source": "renderEffectsGrid()",
+      "target": "isPremium()",
+      "source_files": [
+        "options/options.js",
+        "options/options.js"
+      ],
+      "confidence": "EXTRACTED",
+      "relation": "calls",
+      "note": "Bridges community 16 \u2192 community 6"
+    },
+    {
+      "source": "renderCustomThemeGrid()",
+      "target": "getThemeById()",
+      "source_files": [
+        "options/options.js",
+        "options/options.js"
+      ],
+      "confidence": "EXTRACTED",
+      "relation": "calls",
+      "note": "Bridges community 6 \u2192 community 5"
+    },
+    {
+      "source": "openCreationDialog()",
+      "target": "getThemeById()",
+      "source_files": [
+        "options/options.js",
+        "options/options.js"
+      ],
+      "confidence": "EXTRACTED",
+      "relation": "calls",
+      "note": "Bridges community 6 \u2192 community 15"
+    }
+  ],
+  "questions": [
+    {
+      "type": "bridge_node",
+      "question": "Why does `init()` connect `Community 1` to `Community 5`, `Community 6`, `Community 13`, `Community 14`, `Community 15`, `Community 16`, `Community 17`?",
+      "why": "High betweenness centrality (0.004) - this node is a cross-community bridge."
+    },
+    {
+      "type": "low_cohesion",
+      "question": "Should `Community 0` be split into smaller, more focused modules?",
+      "why": "Cohesion score 0.1 - nodes in this community are weakly interconnected."
+    },
+    {
+      "type": "low_cohesion",
+      "question": "Should `Community 1` be split into smaller, more focused modules?",
+      "why": "Cohesion score 0.1 - nodes in this community are weakly interconnected."
+    },
+    {
+      "type": "low_cohesion",
+      "question": "Should `Community 2` be split into smaller, more focused modules?",
+      "why": "Cohesion score 0.13 - nodes in this community are weakly interconnected."
+    },
+    {
+      "type": "low_cohesion",
+      "question": "Should `Community 4` be split into smaller, more focused modules?",
+      "why": "Cohesion score 0.12 - nodes in this community are weakly interconnected."
+    }
+  ]
+}
