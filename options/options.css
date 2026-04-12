@@ -4075,6 +4075,7 @@ body.is-premium .builder-overflow-premium-badge { display: none !important; }
   box-shadow: 0 0 4px rgba(255, 255, 255, 0.5);
   animation: bp-snow calc(4s * var(--fx-speed-mult, 1)) linear infinite;
   animation-delay: var(--pd);
+  animation-fill-mode: backwards;
 }
 @keyframes bp-snow {
   0%   { top: -6px; transform: translateX(0); opacity: 0; }
@@ -4090,6 +4091,7 @@ body.is-premium .builder-overflow-premium-badge { display: none !important; }
   background: linear-gradient(180deg, transparent 0%, rgba(170, 200, 255, 0.9) 100%);
   animation: bp-rain calc(0.9s * var(--fx-speed-mult, 1)) linear infinite;
   animation-delay: var(--pd);
+  animation-fill-mode: backwards;
 }
 @keyframes bp-rain {
   0%   { top: -14px; opacity: 0; }
@@ -4110,6 +4112,7 @@ body.is-premium .builder-overflow-premium-badge { display: none !important; }
   text-shadow: 0 0 4px rgba(0, 255, 102, 0.85);
   animation: bp-matrix calc(2s * var(--fx-speed-mult, 1)) linear infinite;
   animation-delay: var(--pd);
+  animation-fill-mode: backwards;
 }
 .editor-preview-frame[data-fx-particles-style="matrix"] .preview-particle::before { content: '1'; }
 .editor-preview-frame[data-fx-particles-style="matrix"] .preview-particle:nth-child(2n)::before { content: '0'; }
@@ -4131,6 +4134,7 @@ body.is-premium .builder-overflow-premium-badge { display: none !important; }
   box-shadow: 0 0 5px rgba(var(--fx-accent-rgb, 74,111,165), 0.6);
   animation: bp-dots calc(6s * var(--fx-speed-mult, 1)) ease-in-out infinite;
   animation-delay: var(--pd);
+  animation-fill-mode: backwards;
 }
 @keyframes bp-dots {
   0%, 100% { top: 80%; transform: translateX(0); opacity: calc(0.3 * var(--fx-mult, 1)); }
@@ -4146,6 +4150,7 @@ body.is-premium .builder-overflow-premium-badge { display: none !important; }
   box-shadow: 0 0 4px rgba(255, 126, 62, 0.8);
   animation: bp-embers calc(3s * var(--fx-speed-mult, 1)) ease-out infinite;
   animation-delay: var(--pd);
+  animation-fill-mode: backwards;
 }
 @keyframes bp-embers {
   0%   { top: 110%; transform: translateX(0) scale(1); opacity: 0; }
