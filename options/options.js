@@ -5252,11 +5252,14 @@
     function renderTrail() {
       const now = Date.now();
       const alive = trailPoints.filter(pt => (now - pt.t) / 400 < 1);
+      // Read --fx-mult from nearest ancestor that has it set (pills live on card)
+      const mult = parseFloat(getComputedStyle(frame).getPropertyValue('--fx-mult')) || 1;
 
       if (activeStyle === 'line') {
         const pts = alive.map(p => `${p.x},${p.y}`).join(' ');
         pathEl.setAttribute('points', pts);
-        pathEl.setAttribute('opacity', alive.length ? '0.7' : '0');
+        pathEl.setAttribute('stroke-width', String(Math.max(1, 3 * mult)));
+        pathEl.setAttribute('opacity', alive.length ? String(Math.min(1, 0.5 + 0.25 * mult)) : '0');
         return;
       }
 
@@ -5267,17 +5270,17 @@
         const dot = document.createElement('div');
         dot.className = 'sf-trail-dot';
         if (activeStyle === 'comet') {
-          const size = 3 + progress * 22;
+          const size = (3 + progress * 22) * mult;
           const opacity = (1 - age) * 0.85 * progress;
           dot.style.cssText = `position:absolute;left:${pt.x}px;top:${pt.y}px;width:${size}px;height:${size}px;border-radius:50%;background:radial-gradient(circle,rgba(${rgb},${opacity.toFixed(2)}) 0%,rgba(${rgb},${(opacity * 0.4).toFixed(2)}) 40%,transparent 80%);transform:translate(-50%,-50%);`;
         } else if (activeStyle === 'sparkle') {
-          const size = 6 + progress * 8;
+          const size = (6 + progress * 8) * mult;
           const halo = size * 3;
           const opacity = (1 - age) * 0.9 * progress;
           dot.style.cssText = `position:absolute;left:${pt.x}px;top:${pt.y}px;width:${halo}px;height:${halo}px;border-radius:50%;background:radial-gradient(circle,#fff ${(size/halo*100).toFixed(0)}%,rgba(${rgb},${opacity.toFixed(2)}) ${((size*1.5)/halo*100).toFixed(0)}%,transparent 100%);transform:translate(-50%,-50%);mix-blend-mode:screen;`;
         } else {
           // glow (default)
-          const size = 4 + progress * 12;
+          const size = (4 + progress * 12) * mult;
           const opacity = (1 - age) * 0.6 * progress;
           dot.style.cssText = `position:absolute;left:${pt.x}px;top:${pt.y}px;width:${size}px;height:${size}px;border-radius:50%;background:radial-gradient(circle,rgba(${rgb},${opacity.toFixed(2)}) 0%,transparent 70%);transform:translate(-50%,-50%);`;
         }

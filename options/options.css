@@ -6514,7 +6514,12 @@ td.upgrade-compare-col-premium,
   display: block;
   /* Spread particles across the width — 30 particles * 3.3% ≈ 99% */
   left: calc(var(--i) * 3.3%);
-  /* animation-fill-mode: backwards on each style rule handles initial position */
+  /* Static fallback: particles sit offscreen-top and invisible until the
+     animation's first frame takes over. Prevents a brief horizontal-row
+     flash on first paint (animation-fill-mode: backwards doesn't apply
+     when animation-delay is negative). */
+  top: -30%;
+  opacity: 0;
 }
 
 /* SNOW: small white circles drifting down */
