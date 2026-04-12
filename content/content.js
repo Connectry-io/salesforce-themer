@@ -174,6 +174,18 @@
     target.appendChild(style);
   }
 
+  // Atomic page-wide cross-fade when available; falls back to per-element
+  // transition class (see beginTransition/endTransition).
+  function swapThemeCSS(css) {
+    if (typeof document.startViewTransition === 'function') {
+      try {
+        document.startViewTransition(() => injectCSSText(css));
+        return true;
+      } catch (_) { /* fall through */ }
+    }
+    return false;
+  }
+
   async function fetchThemeCSS(themeName) {
     const url = chrome.runtime.getURL(`content/themes/${themeName}.css`);
     const response = await fetch(url);
@@ -407,17 +419,24 @@
   async function applyTheme(themeName, animate = true) {
     if (contextDead) return;
     if (themeName === 'none') {
-      if (animate) beginTransition();
-      removeThemeStyles();
-      removeEffectsStyles();
-      destroyCanvasEffects();
-      currentEffectsConfig = null;
-      // Remove custom patches
-      if (window.__sfThemerDiag?.removePatches) {
-        try { window.__sfThemerDiag.removePatches(); } catch (_) {}
+      const stripTheme = () => {
+        removeThemeStyles();
+        removeEffectsStyles();
+        destroyCanvasEffects();
+        currentEffectsConfig = null;
+        if (window.__sfThemerDiag?.removePatches) {
+          try { window.__sfThemerDiag.removePatches(); } catch (_) {}
+        }
+      };
+      if (animate && typeof document.startViewTransition === 'function') {
+        try { document.startViewTransition(stripTheme); }
+        catch (_) { beginTransition(); stripTheme(); endTransition(); }
+      } else {
+        if (animate) beginTransition();
+        stripTheme();
+        if (animate) endTransition();
       }
       currentTheme = 'none';
-      if (animate) endTransition();
       return;
     }
 
@@ -426,10 +445,14 @@
       const cached = await chrome.storage.local.get(`themeCSS_${themeName}`);
       const css = cached[`themeCSS_${themeName}`] || await fetchThemeCSS(themeName);
 
-      if (animate) beginTransition();
-      injectCSSText(css);
-      currentTheme = themeName;
-      if (animate) endTransition();
+      if (animate && swapThemeCSS(css)) {
+        currentTheme = themeName;
+      } else {
+        if (animate) beginTransition();
+        injectCSSText(css);
+        currentTheme = themeName;
+        if (animate) endTransition();
+      }
     } catch (err) {
       if (isExtensionContextDead(err)) {
         handleDeadContext();
