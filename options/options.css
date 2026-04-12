@@ -4040,12 +4040,32 @@ body.is-premium .builder-overflow-premium-badge { display: none !important; }
 }
 .preview-particle {
   position: absolute;
-  /* left and --pd set inline per-particle in the DOM template */
-  /* Pre-animation fallback: sit at a spread-out --py so there's no
-     horizontal-row flash before the animation's first keyframe paints */
+  /* Pre-animation fallback: --py is per-particle (spread vertically) so
+     the first paint doesn't flash a horizontal row */
   top: var(--py, -30%);
   opacity: 0;
 }
+/* Distribute 20 particles: explicit left + delay + pre-anim --py per child */
+.preview-particle:nth-child(1)  { left: 0%;  --pd: 0s;   --py: 4%;  }
+.preview-particle:nth-child(2)  { left: 5%;  --pd: 0.3s; --py: 45%; }
+.preview-particle:nth-child(3)  { left: 10%; --pd: 0.7s; --py: 82%; }
+.preview-particle:nth-child(4)  { left: 15%; --pd: 1.0s; --py: 23%; }
+.preview-particle:nth-child(5)  { left: 20%; --pd: 0.2s; --py: 64%; }
+.preview-particle:nth-child(6)  { left: 25%; --pd: 1.5s; --py: 12%; }
+.preview-particle:nth-child(7)  { left: 30%; --pd: 0.5s; --py: 53%; }
+.preview-particle:nth-child(8)  { left: 35%; --pd: 1.8s; --py: 90%; }
+.preview-particle:nth-child(9)  { left: 40%; --pd: 0.1s; --py: 31%; }
+.preview-particle:nth-child(10) { left: 45%; --pd: 1.3s; --py: 72%; }
+.preview-particle:nth-child(11) { left: 50%; --pd: 0.6s; --py: 17%; }
+.preview-particle:nth-child(12) { left: 55%; --pd: 2.0s; --py: 58%; }
+.preview-particle:nth-child(13) { left: 60%; --pd: 0.4s; --py: 38%; }
+.preview-particle:nth-child(14) { left: 65%; --pd: 1.6s; --py: 79%; }
+.preview-particle:nth-child(15) { left: 70%; --pd: 0.8s; --py: 26%; }
+.preview-particle:nth-child(16) { left: 75%; --pd: 2.2s; --py: 67%; }
+.preview-particle:nth-child(17) { left: 80%; --pd: 0.9s; --py: 10%; }
+.preview-particle:nth-child(18) { left: 85%; --pd: 1.1s; --py: 51%; }
+.preview-particle:nth-child(19) { left: 90%; --pd: 1.4s; --py: 84%; }
+.preview-particle:nth-child(20) { left: 95%; --pd: 1.7s; --py: 35%; }
 
 /* Default / Snow style */
 .editor-preview-frame[data-fx-particles-style="snow"] .preview-particle,
@@ -6516,10 +6536,10 @@ td.upgrade-compare-col-premium,
   animation-fill-mode: backwards;
 }
 @keyframes gp-snow {
-  0%   { top: -10%; transform: translateX(0); opacity: 0; }
+  0%   { top: calc(var(--py) - 100%); transform: translateX(0); opacity: 0; }
   10%  { opacity: 1; }
   90%  { opacity: 1; }
-  100% { top: 110%; transform: translateX(8px); opacity: 0; }
+  100% { top: calc(var(--py) + 10%); transform: translateX(8px); opacity: 0; }
 }
 
 /* RAIN: thin streaks falling diagonally */
@@ -6532,10 +6552,10 @@ td.upgrade-compare-col-premium,
   animation-fill-mode: backwards;
 }
 @keyframes gp-rain {
-  0%   { top: -20%; opacity: 0; }
+  0%   { top: calc(var(--py) - 100%); opacity: 0; }
   10%  { opacity: 0.9; }
   90%  { opacity: 0.9; }
-  100% { top: 110%; opacity: 0; }
+  100% { top: calc(var(--py) + 10%); opacity: 0; }
 }
 
 /* MATRIX: green digits raining down */
@@ -6559,10 +6579,10 @@ td.upgrade-compare-col-premium,
 .guide-effect-card[data-effect="particles"] .guide-effect-preview[data-style="matrix"] .guide-particle:nth-child(3n)::before { content: '7'; }
 .guide-effect-card[data-effect="particles"] .guide-effect-preview[data-style="matrix"] .guide-particle:nth-child(5n)::before { content: '3'; }
 @keyframes gp-matrix {
-  0%   { top: -10%; opacity: 0; }
+  0%   { top: calc(var(--py) - 100%); opacity: 0; }
   10%  { opacity: 1; }
   90%  { opacity: 1; }
-  100% { top: 110%; opacity: 0; }
+  100% { top: calc(var(--py) + 10%); opacity: 0; }
 }
 
 /* DOTS: floating accent dots, slow drift */
