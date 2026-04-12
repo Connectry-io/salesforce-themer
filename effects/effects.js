@@ -524,55 +524,9 @@ body.sf-themer-fx-background .slds-modal__container {
   return css;
 }
 
-/**
- * Build the CSS rules for a specific background pattern. Returns a string
- * of `background-*` declarations to append inside the ::after rule. Each
- * pattern is tinted by the theme accent and scaled by the intensity-driven
- * baseOpacity.
- */
-function _buildBackgroundPatternCss(pattern, accentRgb, baseOpacity) {
-  const a = baseOpacity.toFixed(3);
-  const a2 = (baseOpacity * 1.6).toFixed(3);
-  switch (pattern) {
-    case 'dot-grid':
-      return `
-  background-image: radial-gradient(rgba(${accentRgb}, ${a2}) 1px, transparent 1px) !important;
-  background-size: 22px 22px !important;`;
-    case 'line-grid':
-      return `
-  background-image:
-    linear-gradient(to right, rgba(${accentRgb}, ${a}) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(${accentRgb}, ${a}) 1px, transparent 1px) !important;
-  background-size: 32px 32px !important;`;
-    case 'hatch':
-      return `
-  background-image: repeating-linear-gradient(
-    45deg,
-    rgba(${accentRgb}, ${a}) 0,
-    rgba(${accentRgb}, ${a}) 1px,
-    transparent 1px,
-    transparent 9px
-  ) !important;`;
-    case 'noise':
-      // SVG noise via data URI — fast, tiny, inlined
-      return `
-  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='240'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2'/><feColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 ${a2} 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>") !important;`;
-    case 'subway':
-      return `
-  background-image:
-    linear-gradient(rgba(${accentRgb}, ${a}) 2px, transparent 2px),
-    linear-gradient(90deg, rgba(${accentRgb}, ${a}) 2px, transparent 2px) !important;
-  background-size: 60px 30px !important;
-  background-position: 0 0, 30px 15px !important;`;
-    case 'crosshatch':
-      return `
-  background-image:
-    repeating-linear-gradient(45deg, rgba(${accentRgb}, ${a}) 0, rgba(${accentRgb}, ${a}) 1px, transparent 1px, transparent 9px),
-    repeating-linear-gradient(-45deg, rgba(${accentRgb}, ${a}) 0, rgba(${accentRgb}, ${a}) 1px, transparent 1px, transparent 9px) !important;`;
-    default:
-      return '';
-  }
-}
+// backgroundPattern CSS generation migrated to core/effects/engine.js
+// (see renderRules + buildBackgroundPatternDeclarations). Enforced by
+// scripts/check-effects-drift.js.
 
 
 // ─── Particle System ──────────────────────────────────────────────────────────
