@@ -4556,7 +4556,21 @@
           e.stopPropagation();
           const previewEl = card.querySelector('.guide-effect-preview');
           if (previewEl) previewEl.dataset.style = styleSelect.value;
+          // Cursor trail: re-init JS trail with new style
+          if (eff.id === 'cursorTrail') {
+            const themeAccent = getThemeById(syncState.theme)?.colors?.brandPrimary || '#4a6fa5';
+            _initBuilderCursorTrail(previewEl, themeAccent, styleSelect.value);
+          }
         });
+      }
+
+      // Cursor trail card: attach JS mouse-follow trail (reuse Builder's renderer)
+      if (eff.id === 'cursorTrail') {
+        const previewEl = card.querySelector('.guide-effect-preview');
+        if (previewEl) {
+          const themeAccent = getThemeById(syncState.theme)?.colors?.brandPrimary || '#4a6fa5';
+          _initBuilderCursorTrail(previewEl, themeAccent, initialStyle || 'glow');
+        }
       }
 
       // Apply the active theme's accent so previews match

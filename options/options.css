@@ -6514,9 +6514,7 @@ td.upgrade-compare-col-premium,
   display: block;
   /* Spread particles across the width — 30 particles * 3.3% ≈ 99% */
   left: calc(var(--i) * 3.3%);
-  /* Default offscreen-top so the pre-animation frame doesn't flash a horizontal row */
-  top: -20%;
-  opacity: 0;
+  /* animation-fill-mode: backwards on each style rule handles initial position */
 }
 
 /* SNOW: small white circles drifting down */
@@ -6529,6 +6527,7 @@ td.upgrade-compare-col-premium,
   box-shadow: 0 0 calc(4px * var(--fx-mult)) rgba(255, 255, 255, 0.5);
   animation: gp-snow calc((4s + (var(--i) * 0.13s)) * var(--fx-speed-mult)) linear infinite;
   animation-delay: calc(var(--i) * -0.18s);
+  animation-fill-mode: backwards;
 }
 @keyframes gp-snow {
   0%   { top: -10%; transform: translateX(0); opacity: 0; }
@@ -6544,6 +6543,7 @@ td.upgrade-compare-col-premium,
   background: linear-gradient(180deg, transparent 0%, rgba(170, 200, 255, 0.9) 100%);
   animation: gp-rain calc((0.9s + (var(--i) * 0.025s)) * var(--fx-speed-mult)) linear infinite;
   animation-delay: calc(var(--i) * -0.05s);
+  animation-fill-mode: backwards;
 }
 @keyframes gp-rain {
   0%   { top: -20%; opacity: 0; }
@@ -6564,6 +6564,7 @@ td.upgrade-compare-col-premium,
   text-shadow: 0 0 calc(6px * var(--fx-mult)) rgba(0, 255, 102, 0.85);
   animation: gp-matrix calc((2s + (var(--i) * 0.07s)) * var(--fx-speed-mult)) linear infinite;
   animation-delay: calc(var(--i) * -0.1s);
+  animation-fill-mode: backwards;
 }
 .guide-effect-card[data-effect="particles"] .guide-effect-preview[data-style="matrix"] .guide-particle::before {
   content: '1';
@@ -6588,6 +6589,7 @@ td.upgrade-compare-col-premium,
   box-shadow: 0 0 calc(6px * var(--fx-mult)) rgba(var(--fx-accent-rgb), 0.6);
   animation: gp-dots calc((6s + (var(--i) * 0.18s)) * var(--fx-speed-mult)) ease-in-out infinite;
   animation-delay: calc(var(--i) * -0.3s);
+  animation-fill-mode: backwards;
 }
 @keyframes gp-dots {
   0%, 100% { top: 80%; transform: translateX(0); opacity: 0.4; }
@@ -6603,6 +6605,7 @@ td.upgrade-compare-col-premium,
   box-shadow: 0 0 calc(6px * var(--fx-mult)) rgba(255, 126, 62, 0.8);
   animation: gp-embers calc((3s + (var(--i) * 0.1s)) * var(--fx-speed-mult)) ease-out infinite;
   animation-delay: calc(var(--i) * -0.15s);
+  animation-fill-mode: backwards;
 }
 @keyframes gp-embers {
   0%   { top: 110%; transform: translateX(0) scale(1); opacity: 0; }
@@ -6618,6 +6621,12 @@ td.upgrade-compare-col-premium,
 .guide-effect-card[data-effect="cursorTrail"] .guide-effect-preview {
   background: var(--cx-surface);
   overflow: hidden;
+  cursor: crosshair;
+}
+/* Suppress the canned orbit ::before/::after when JS mouse-follow trail takes over */
+.guide-effect-card[data-effect="cursorTrail"] .guide-effect-preview:has(.preview-cursor-trail-container)::before,
+.guide-effect-card[data-effect="cursorTrail"] .guide-effect-preview:has(.preview-cursor-trail-container)::after {
+  display: none !important;
 }
 
 /* COMET: trailing tail behind the dot */
