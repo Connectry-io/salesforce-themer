@@ -44,7 +44,7 @@
       'formula-', 'analytics-', 'content-', 'app_', 'appnav-',
       'console-', 'workspace-', 'chatter-', 'feed-', 'publisher-',
       'global-', 'globalheader-', 'profile-', 'user-', 'notification-',
-      'picklist-', 'lookup-', 'listview', 'list-', 'output-', 'input-',
+      'picklist-', 'lookup-', 'listview', 'list-', 'lst-', 'output-', 'input-',
       'detail-', 'related-', 'report-', 'dashboard-', 'wave-', 'tableau-',
       'data-', 'datatable-', 'calendar-', 'event-', 'task-', 'activity-',
       'approval-', 'workflow-', 'quip-', 'base-', 'sfa-', 'sfc-',
