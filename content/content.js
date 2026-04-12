@@ -124,6 +124,17 @@
     const style = document.createElement('style');
     style.id = 'sf-themer-transitions';
     style.textContent = `
+      ::view-transition-old(root),
+      ::view-transition-new(root) {
+        animation-duration: 150ms;
+        animation-timing-function: ease;
+      }
+      @media (prefers-reduced-motion: reduce) {
+        ::view-transition-old(root),
+        ::view-transition-new(root) {
+          animation-duration: 0.01ms;
+        }
+      }
       .sf-themer-transitioning,
       .sf-themer-transitioning *,
       .sf-themer-transitioning *::before,
