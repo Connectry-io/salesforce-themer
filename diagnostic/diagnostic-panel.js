@@ -415,7 +415,18 @@
     }
 
     _infoBarHTML(themeName, injected) {
-      const host = location.hostname.replace('.my.salesforce.com', '').replace('.lightning.force.com', '');
+      // Compact org label: drop SF domain suffixes, then take first segment
+      // ("connectry.lightning.force.com" → "connectry";
+      //  "orgfarm-bb7d6e1c20-dev.my.salesforce-setup.com" → "orgfarm-bb7…-dev")
+      const fullHost = location.hostname;
+      let host = fullHost
+        .replace(/\.my\.salesforce(-setup)?\.com$/i, '')
+        .replace(/\.lightning\.force\.com$/i, '')
+        .replace(/\.develop\.my\.salesforce(-setup)?\.com$/i, '')
+        .split('.')[0];
+      if (host.length > 18) {
+        host = host.slice(0, 10) + '…' + host.slice(-4);
+      }
       const orgDetect = this._detectOrgTheme();
 
       // Display name:
@@ -450,7 +461,7 @@
             ${swatchHTML}
             <span class="diag-minicard-name">${this._escapeHtml(displayName)}</span>
             <span class="diag-info-dot ${injected ? 'is-on' : 'is-off'}"></span>
-            <span class="diag-minicard-org">${this._escapeHtml(host)}</span>
+            <span class="diag-minicard-org" title="${this._escapeHtml(fullHost)}">${this._escapeHtml(host)}</span>
             ${orgBadge}
           </div>
           <div class="diag-heartbeat" id="diagHeartbeat"></div>

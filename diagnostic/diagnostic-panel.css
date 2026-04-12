@@ -246,12 +246,12 @@
 }
 
 .diag-minicard-org {
-  margin-left: auto;
   font-size: 11px;
   color: var(--dp-text-3);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  max-width: 140px;
 }
 
 /* ─── Heartbeat / scanning indicator ────────────────────────────────────── */
