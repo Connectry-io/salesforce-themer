@@ -942,7 +942,17 @@ function applyEffectsClasses(config) {
   const existing = [...body.classList].filter(c => c.startsWith('sf-themer-fx'));
   existing.forEach(c => body.classList.remove(c));
 
-  if (!config || config.preset === 'none') return;
+  if (!config) return;
+
+  // Only bail if ALL effects are actually off — don't gate on preset name
+  // because individual effects can be toggled on even with preset 'none'.
+  const hasAnyEffect = !!(
+    config.hoverLift || config.ambientGlow || config.borderShimmer ||
+    config.gradientBorders || config.aurora || config.neonFlicker ||
+    config.particles || config.cursorTrail ||
+    (config.backgroundPattern && config.backgroundPattern !== 'none')
+  );
+  if (!hasAnyEffect) return;
 
   if (config.hoverLift) body.classList.add('sf-themer-fx-hover');
   if (config.ambientGlow) body.classList.add('sf-themer-fx-glow');

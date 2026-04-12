@@ -140,6 +140,12 @@
         <div class="preview-particle"></div><div class="preview-particle"></div>
         <div class="preview-particle"></div><div class="preview-particle"></div>
         <div class="preview-particle"></div><div class="preview-particle"></div>
+        <div class="preview-particle"></div><div class="preview-particle"></div>
+        <div class="preview-particle"></div><div class="preview-particle"></div>
+        <div class="preview-particle"></div><div class="preview-particle"></div>
+        <div class="preview-particle"></div><div class="preview-particle"></div>
+        <div class="preview-particle"></div><div class="preview-particle"></div>
+        <div class="preview-particle"></div><div class="preview-particle"></div>
       </div>
       <div class="preview-cursor-trail"></div>
       <div class="preview-topbar" data-bind="surface" data-bind-border-color="border">
@@ -344,37 +350,59 @@
       const attr = 'fx' + key.charAt(0).toUpperCase() + key.slice(1);
       if (on) {
         frame.dataset[attr] = 'on';
-        const level = effects[key + 'Intensity'] || 'medium';
-        const v = LADDER[level] || LADDER.medium;
-        frame.style.setProperty(`--fx-${key}-mult`, String(v.mult));
-        frame.style.setProperty(`--fx-${key}-speed`, String(v.speed));
       } else {
         delete frame.dataset[attr];
       }
     }
-    // Particles
+    // Aurora complementary colors — derive 2 extra hues via HSL rotation
+    if (effects.aurora) {
+      const parsed = _parseHexRgb(accent);
+      if (parsed) {
+        const hsl = _rgbToHslSimple(parsed.r, parsed.g, parsed.b);
+        const h2 = (hsl.h + 60) % 360, h3 = (hsl.h + 180) % 360;
+        const s = Math.max(40, hsl.s);
+        const aurora2 = _hslToRgbCsv(h2, s, 55);
+        const aurora3 = _hslToRgbCsv(h3, s, 55);
+        frame.style.setProperty('--fx-aurora2-rgb', aurora2);
+        frame.style.setProperty('--fx-aurora3-rgb', aurora3);
+      }
+    }
+    // Particles — pass style as data attribute
     if (effects.particles) {
       frame.dataset.fxParticles = 'on';
+      // Resolve particle style: boolean true defaults to 'snow', string value is the style
+      const pStyle = typeof effects.particles === 'string' ? effects.particles : 'snow';
+      frame.dataset.fxParticlesStyle = pStyle;
       const level = effects.particlesIntensity || 'medium';
       const v = LADDER[level] || LADDER.medium;
       frame.style.setProperty('--fx-mult', String(v.mult));
       frame.style.setProperty('--fx-speed-mult', String(v.speed));
     } else {
       delete frame.dataset.fxParticles;
+      delete frame.dataset.fxParticlesStyle;
     }
-    // Cursor trail
+    // Cursor trail — JS trail history
     if (effects.cursorTrail) {
       frame.dataset.fxCursorTrail = 'on';
+      _initBuilderCursorTrail(frame, accent);
     } else {
       delete frame.dataset.fxCursorTrail;
+      _destroyBuilderCursorTrail(frame);
+    }
+    // Background pattern
+    if (effects.backgroundPattern && effects.backgroundPattern !== 'none') {
+      frame.dataset.fxBackgroundPattern = effects.backgroundPattern;
+    } else {
+      delete frame.dataset.fxBackgroundPattern;
     }
     // Master intensity vars
-    const activeMults = FX_KEYS
+    const allFxKeys = [...FX_KEYS, 'particles', 'cursorTrail'];
+    const activeMults = allFxKeys
       .filter(k => effects[k])
       .map(k => (LADDER[effects[k + 'Intensity']] || LADDER.medium).mult);
     const masterMult = activeMults.length ? Math.max(...activeMults) : 1;
     const masterSpeed = activeMults.length
-      ? Math.min(...FX_KEYS.filter(k => effects[k])
+      ? Math.min(...allFxKeys.filter(k => effects[k])
           .map(k => (LADDER[effects[k + 'Intensity']] || LADDER.medium).speed))
       : 1;
     frame.style.setProperty('--fx-mult', String(masterMult));
@@ -5049,6 +5077,103 @@
     const g = parseInt(expand.slice(2, 4), 16);
     const b = parseInt(expand.slice(4, 6), 16);
     return `${r}, ${g}, ${b}`;
+  }
+
+  function _parseHexRgb(hex) {
+    if (!hex) return null;
+    const clean = hex.replace('#', '');
+    const expand = clean.length === 3 ? clean.split('').map(c => c + c).join('') : clean;
+    if (expand.length < 6) return null;
+    return {
+      r: parseInt(expand.slice(0, 2), 16),
+      g: parseInt(expand.slice(2, 4), 16),
+      b: parseInt(expand.slice(4, 6), 16),
+    };
+  }
+
+  function _rgbToHslSimple(r, g, b) {
+    r /= 255; g /= 255; b /= 255;
+    const max = Math.max(r, g, b), min = Math.min(r, g, b);
+    const l = (max + min) / 2;
+    let h = 0, s = 0;
+    if (max !== min) {
+      const d = max - min;
+      s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+      if (max === r) h = ((g - b) / d + (g < b ? 6 : 0)) / 6;
+      else if (max === g) h = ((b - r) / d + 2) / 6;
+      else h = ((r - g) / d + 4) / 6;
+    }
+    return { h: h * 360, s: s * 100, l: l * 100 };
+  }
+
+  function _hslToRgbCsv(h, s, l) {
+    h /= 360; s /= 100; l /= 100;
+    let r, g, b;
+    if (s === 0) { r = g = b = l; } else {
+      const hue2rgb = (p, q, t) => {
+        if (t < 0) t += 1; if (t > 1) t -= 1;
+        if (t < 1/6) return p + (q - p) * 6 * t;
+        if (t < 1/2) return q;
+        if (t < 2/3) return p + (q - p) * (2/3 - t) * 6;
+        return p;
+      };
+      const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+      const p = 2 * l - q;
+      r = hue2rgb(p, q, h + 1/3);
+      g = hue2rgb(p, q, h);
+      b = hue2rgb(p, q, h - 1/3);
+    }
+    return `${Math.round(r * 255)}, ${Math.round(g * 255)}, ${Math.round(b * 255)}`;
+  }
+
+  // ─── Builder cursor trail (JS trail history) ─────────────────────────────
+  const _builderTrailState = new WeakMap();
+
+  function _initBuilderCursorTrail(frame, accent) {
+    if (_builderTrailState.has(frame)) return; // already initialized
+    const trailPoints = [];
+    const MAX_POINTS = 15;
+    const container = document.createElement('div');
+    container.className = 'preview-cursor-trail-container';
+    container.style.cssText = 'position:absolute;inset:0;pointer-events:none;z-index:50;overflow:hidden;';
+    frame.appendChild(container);
+
+    const rgb = _hexToRgbCsv(accent);
+
+    function onMove(e) {
+      const rect = frame.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      trailPoints.push({ x, y, t: Date.now() });
+      if (trailPoints.length > MAX_POINTS) trailPoints.shift();
+      renderTrail();
+    }
+
+    function renderTrail() {
+      container.innerHTML = '';
+      const now = Date.now();
+      trailPoints.forEach((pt, i) => {
+        const age = (now - pt.t) / 400; // fade over 400ms
+        if (age > 1) return;
+        const opacity = (1 - age) * 0.6 * (i / trailPoints.length);
+        const size = 4 + (i / trailPoints.length) * 12;
+        const dot = document.createElement('div');
+        dot.style.cssText = `position:absolute;left:${pt.x}px;top:${pt.y}px;width:${size}px;height:${size}px;border-radius:50%;background:radial-gradient(circle,rgba(${rgb},${opacity.toFixed(2)}) 0%,transparent 70%);transform:translate(-50%,-50%);pointer-events:none;`;
+        container.appendChild(dot);
+      });
+    }
+
+    frame.addEventListener('mousemove', onMove);
+    _builderTrailState.set(frame, { container, onMove, interval: setInterval(renderTrail, 50) });
+  }
+
+  function _destroyBuilderCursorTrail(frame) {
+    const state = _builderTrailState.get(frame);
+    if (!state) return;
+    frame.removeEventListener('mousemove', state.onMove);
+    clearInterval(state.interval);
+    state.container.remove();
+    _builderTrailState.delete(frame);
   }
 
   function _previewLabel(effectId) {
