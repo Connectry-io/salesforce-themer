@@ -337,9 +337,8 @@
     _renderPanel() {
       if (!this.shadow) return;
 
-      const styleTag = document.getElementById(this.styleId);
-      const injected = !!styleTag;
       const themeName = this.currentTheme || 'none';
+      const injected = themeName !== 'none';
 
       this.shadow.innerHTML = `
         <style>${this._cssText}</style>
@@ -1297,9 +1296,11 @@
     _updateInfoBar() {
       const bar = this.shadow?.querySelector('.diag-info-bar');
       if (!bar) return;
-      const styleTag = document.getElementById(this.styleId);
-      // Replace the entire info bar with a fresh render
-      bar.outerHTML = this._infoBarHTML(this.currentTheme || 'none', !!styleTag);
+      // "on" = a theme is active. Don't use style-tag presence — flickers
+      // during view transitions and gives the wrong signal.
+      const themeName = this.currentTheme || 'none';
+      const injected = themeName !== 'none';
+      bar.outerHTML = this._infoBarHTML(themeName, injected);
     }
 
     // ── Event binding ─────────────────────────────────────────────────────
