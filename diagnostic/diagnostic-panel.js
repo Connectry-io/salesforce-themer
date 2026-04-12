@@ -373,11 +373,12 @@
 
       // Display name:
       //  - theme === 'none' but a theme is configured → "<configured> (off)"
-      //  - theme set but CSS not injected (theming toggled off) → "<theme> (off)"
-      //  - otherwise the active theme name
+      //  - theme === 'none' and no configured theme → "Theme off"
+      //  - otherwise the active theme name (don't rely on injected, which
+      //    briefly flickers false during view transitions)
       const displayName = (themeName === 'none')
         ? (this._configuredThemeName ? `${this._configuredThemeName} (off)` : 'Theme off')
-        : (injected ? themeName : `${themeName} (off)`);
+        : themeName;
 
       // Build 2x2 swatch grid from theme colors (bg, surface, accent, text)
       let swatchHTML = '';

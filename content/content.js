@@ -601,6 +601,8 @@
       applyTheme(message.theme, true).then(() => {
         // Re-apply effects for new theme (colors may differ)
         loadAndApplyEffects(message.theme);
+        // Keep diagnostic panel in sync with active theme
+        if (diagnosticPanel) diagnosticPanel.updateTheme(message.theme);
         sendResponse({ success: true, theme: message.theme });
       }).catch((err) => {
         sendResponse({ success: false, error: err.message });
