@@ -376,41 +376,43 @@
     }
 
     _detectOrgTheme() {
-      // Detect which SF brand theme the org is running by fingerprinting
-      // a handful of :root custom properties against known values. Our
-      // temporary theme CSS uses !important and overwrites these, so this
-      // is only meaningful when theming is off. When our theme is on we
-      // still report the last detected value.
+      // Detects SLDS version reliably (1 vs 2) from DOM signals.
+      // The specific brand-theme name (Lightning / Cosmos / Einstein /
+      // custom) CANNOT be reliably inferred from CSS alone — any org can
+      // customize colors. So we only report SLDS version with confidence.
+      // A "likely" tentative name is included when brand colors exactly
+      // match a factory default, but it's a hint, not a claim.
       try {
         const styleTag = document.getElementById(this.styleId);
         if (styleTag) {
-          // Our theme is active — keep previously cached detection
-          return this._cachedOrgDetection || { slds: null, label: null };
+          return this._cachedOrgDetection || { slds: null, likely: null };
         }
         const cs = getComputedStyle(document.documentElement);
+
+        // SLDS version detection — SLDS 2 uses light-dark() token values
+        // and the --slds-g-* family with specific surface markers.
+        const surface1 = (cs.getPropertyValue('--slds-g-color-surface-1') || '').trim();
+        const usesLightDark = /light-dark\(/i.test(surface1);
+        const slds = usesLightDark ? 'SLDS 2' : 'SLDS 1';
+
+        // Tentative name guess — factory color fingerprints only
         const accent1 = (cs.getPropertyValue('--slds-g-color-accent-1') || '').trim();
         const lwcBrand = (cs.getPropertyValue('--lwc-brandPrimary') || '').trim();
         const fp = (accent1 + '|' + lwcBrand).toLowerCase().replace(/\s+/g, '');
-
-        // Fingerprints (build up as we learn them)
-        const KNOWN = [
-          { slds: 'SLDS 1', label: 'Lightning',           match: /(65,148,249|#4194f9)/ },
-          { slds: 'SLDS 2', label: 'Salesforce Cosmos',   match: /(light-dark\()/ }, // Cosmos uses light-dark()
+        const FACTORY = [
+          { slds: 'SLDS 1', likely: 'Lightning', match: /(65,148,249|#4194f9)/ },
+          { slds: 'SLDS 2', likely: 'Cosmos',    match: /light-dark\(/ },
         ];
-        for (const k of KNOWN) {
-          if (k.match.test(fp)) {
-            const d = { slds: k.slds, label: k.label };
-            this._cachedOrgDetection = d;
-            return d;
-          }
+        let likely = null;
+        for (const f of FACTORY) {
+          if (f.slds === slds && f.match.test(fp)) { likely = f.likely; break; }
         }
-        // Unknown — report SLDS family based on token presence only
-        const hasSlds2 = !!cs.getPropertyValue('--slds-g-color-accent-1').trim();
-        const d = { slds: hasSlds2 ? 'SLDS 2' : 'SLDS 1', label: 'Custom brand theme' };
+
+        const d = { slds, likely };
         this._cachedOrgDetection = d;
         return d;
       } catch (_) {
-        return { slds: null, label: null };
+        return { slds: null, likely: null };
       }
     }
 
@@ -452,7 +454,7 @@
       }
 
       const orgBadge = orgDetect.slds
-        ? `<span class="diag-org-badge" title="${this._escapeHtml(orgDetect.label || '')}">${this._escapeHtml(orgDetect.slds)}${orgDetect.label ? ' · ' + this._escapeHtml(orgDetect.label) : ''}</span>`
+        ? `<span class="diag-org-badge" title="${orgDetect.likely ? 'Brand colors match ' + orgDetect.likely + ' factory defaults — admins can still customize, so this is a hint, not a guarantee' : 'SLDS version detected from :root tokens'}">${this._escapeHtml(orgDetect.slds)}${orgDetect.likely ? ' · ~' + this._escapeHtml(orgDetect.likely) : ''}</span>`
         : '';
 
       return `
