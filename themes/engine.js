@@ -257,6 +257,7 @@ function generateThemeCSS(theme) {
   /* Kebab-case aliases SF uses alongside camelCase */
   --lwc-color-background: ${c.background} !important;
   --lwc-color-background-alt: ${c.surface} !important;
+  --lwc-colorBackgroundDark: ${c.nav} !important;
 
   /* Component hooks — tabs */
   --slds-c-tabs-item-text-color: ${c.tabInactiveColor} !important;

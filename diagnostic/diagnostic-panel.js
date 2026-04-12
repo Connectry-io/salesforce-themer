@@ -437,7 +437,7 @@
           </div>`;
       }
 
-      // Manual mode — show scan button + walk-through start
+      // Manual mode — show scan button + walk-through + scan all themes
       return `
         <div class="diag-scan-bar">
           <div class="diag-scan-row">
@@ -447,6 +447,17 @@
             </button>
             <button class="diag-scan-btn diag-autoscan-btn" data-action="toggleAutoScan" title="Start walk-through: auto-scan each page as you navigate">
               <span>Walk-Through</span>
+            </button>
+          </div>
+          <div class="diag-scan-row" style="margin-top:6px">
+            <button class="diag-scan-btn diag-scan-btn--secondary" data-action="scanThemesPresets" title="Scan this page against every preset theme">
+              <span>Scan Presets</span>
+            </button>
+            <button class="diag-scan-btn diag-scan-btn--secondary" data-action="scanThemesMine" title="Scan this page against your custom themes">
+              <span>My Themes</span>
+            </button>
+            <button class="diag-scan-btn diag-scan-btn--secondary" data-action="scanThemesAll" title="Scan this page against every preset + custom theme">
+              <span>All</span>
             </button>
           </div>
         </div>`;
@@ -1306,6 +1317,9 @@
         else if (action === 'minimize') this.minimize();
         else if (action === 'togglePanelTheme') this._togglePanelTheme();
         else if (action === 'scanAll') this._runScanAll(btn);
+        else if (action === 'scanThemesPresets') this._runMultiThemeScan('presets');
+        else if (action === 'scanThemesMine') this._runMultiThemeScan('custom');
+        else if (action === 'scanThemesAll') this._runMultiThemeScan('all');
         else if (action === 'toggleAutoScan') this._toggleAutoScan();
         else if (action === 'resetProgress') this._resetTestingProgress();
         else if (action === 'copyTokenFixes') this._copyTokenFixes(btn);
@@ -1442,6 +1456,170 @@
       }
 
       this._scanning = false;
+    }
+
+    // ── Multi-theme scan ───────────────────────────────────────────────────
+    // Cycles through N themes, applies each, scans tokens+components, then
+    // restores the user's original theme. Non-destructive: no state saved.
+
+    async _runMultiThemeScan(mode) {
+      if (this._scanning || this._multiScanning) return;
+      this._multiScanning = true;
+      this._multiScanAborted = false;
+
+      // Build theme list based on mode
+      const presets = (await ns.listPresetThemes?.()) || [];
+      const customs = (await ns.listCustomThemes?.()) || [];
+      let themes;
+      if (mode === 'presets') themes = presets;
+      else if (mode === 'custom') themes = customs;
+      else themes = [...presets, ...customs];
+
+      if (!themes.length) {
+        this._multiScanning = false;
+        this._showMultiScanEmpty(mode);
+        return;
+      }
+
+      const originalTheme = this.currentTheme;
+      const results = [];
+
+      // Replace results area with progress view
+      const resultsEl = this.shadow?.querySelector('.diag-results');
+      if (resultsEl) resultsEl.innerHTML = this._multiScanProgressHTML(0, themes.length, themes[0]?.name || '');
+
+      for (let i = 0; i < themes.length; i++) {
+        if (this._multiScanAborted) break;
+        const theme = themes[i];
+
+        // Update progress
+        if (resultsEl) resultsEl.innerHTML = this._multiScanProgressHTML(i, themes.length, theme.name);
+
+        // Apply theme (fire-and-wait)
+        try {
+          await new Promise((resolve) => {
+            chrome.runtime.sendMessage({ action: 'setTheme', theme: theme.id }, () => resolve());
+          });
+        } catch (_) {}
+
+        // Let the view transition + CSS inject settle
+        await new Promise(r => setTimeout(r, 500));
+
+        // Scan this theme
+        let tokenResults = null, componentResults = null;
+        try { tokenResults = ns.scanTokens?.(theme.id); } catch (_) {}
+        try { componentResults = ns.scanComponents?.(); } catch (_) {}
+
+        const coverage = tokenResults?.coverage ?? null;
+        const gaps = tokenResults?.summary?.gaps ?? null;
+        const cs = componentResults?.summary;
+        const totalFound = cs?.totalStandardFound || 0;
+        const componentHealth = totalFound > 0
+          ? ((cs.totalStyled + cs.totalPartial * 0.5) / totalFound) * 100
+          : null;
+
+        results.push({
+          id: theme.id,
+          name: theme.name,
+          coverage: coverage != null ? Math.round(coverage * 100) : null,
+          gaps,
+          componentHealth: componentHealth != null ? Math.round(componentHealth) : null,
+          styled: cs?.totalStyled ?? 0,
+          partial: cs?.totalPartial ?? 0,
+          unstyled: cs?.totalUnstyled ?? 0,
+          total: totalFound,
+        });
+      }
+
+      // Restore user's original theme
+      try {
+        await new Promise((resolve) => {
+          chrome.runtime.sendMessage({ action: 'setTheme', theme: originalTheme }, () => resolve());
+        });
+      } catch (_) {}
+
+      this._multiScanning = false;
+      this._multiScanResults = { mode, results, ranAt: new Date() };
+
+      // Render the matrix
+      const el = this.shadow?.querySelector('.diag-results');
+      if (el) el.innerHTML = this._multiScanResultsHTML();
+    }
+
+    _multiScanProgressHTML(done, total, currentName) {
+      const pct = Math.round((done / total) * 100);
+      return `
+        <div class="diag-card" style="padding:14px">
+          <div style="font-weight:600;margin-bottom:8px">Scanning ${total} themes…</div>
+          <div style="font-size:12px;opacity:0.7;margin-bottom:6px">
+            ${done} / ${total} — currently: <strong>${this._escapeHtml(currentName || '')}</strong>
+          </div>
+          <div style="height:6px;background:rgba(128,128,128,0.15);border-radius:4px;overflow:hidden">
+            <div style="width:${pct}%;height:100%;background:var(--diag-accent,#4a6fa5);transition:width 200ms"></div>
+          </div>
+          <div style="font-size:11px;opacity:0.6;margin-top:8px">Your original theme will be restored when done.</div>
+        </div>`;
+    }
+
+    _multiScanResultsHTML() {
+      const { mode, results } = this._multiScanResults || {};
+      if (!results?.length) return '<div class="diag-card" style="padding:14px">No themes scanned.</div>';
+
+      // Sort: best coverage first, then component health
+      const sorted = [...results].sort((a, b) => {
+        if ((b.coverage ?? -1) !== (a.coverage ?? -1)) return (b.coverage ?? -1) - (a.coverage ?? -1);
+        return (b.componentHealth ?? -1) - (a.componentHealth ?? -1);
+      });
+
+      const modeLabel = mode === 'presets' ? 'Presets' : mode === 'custom' ? 'My Themes' : 'All Themes';
+      const avgCoverage = Math.round(
+        sorted.reduce((s, r) => s + (r.coverage || 0), 0) / sorted.length
+      );
+
+      const rows = sorted.map(r => {
+        const covClass = r.coverage >= 100 ? 'pass' : r.coverage >= 95 ? 'warn' : 'fail';
+        const healthClass = r.componentHealth >= 80 ? 'pass' : r.componentHealth >= 50 ? 'warn' : 'fail';
+        return `
+          <tr>
+            <td style="padding:6px 8px;font-weight:500">${this._escapeHtml(r.name)}</td>
+            <td style="padding:6px 8px;text-align:right" class="diag-cov-${covClass}">${r.coverage != null ? r.coverage + '%' : '—'}</td>
+            <td style="padding:6px 8px;text-align:right;opacity:0.8">${r.gaps != null ? r.gaps : '—'}</td>
+            <td style="padding:6px 8px;text-align:right" class="diag-cov-${healthClass}">${r.componentHealth != null ? r.componentHealth + '%' : '—'}</td>
+            <td style="padding:6px 8px;text-align:right;opacity:0.7;font-size:11px">${r.styled}/${r.total}</td>
+          </tr>`;
+      }).join('');
+
+      return `
+        <div class="diag-card" style="padding:12px">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+            <div>
+              <div style="font-weight:600">${modeLabel} scan — ${sorted.length} themes</div>
+              <div style="font-size:11px;opacity:0.7;margin-top:2px">Avg coverage: ${avgCoverage}% · ${location.pathname.slice(0,60)}</div>
+            </div>
+            <button class="diag-scan-btn" data-action="scanThemesPresets" style="font-size:11px;padding:4px 10px">Re-run</button>
+          </div>
+          <table style="width:100%;border-collapse:collapse;font-size:12px">
+            <thead>
+              <tr style="border-bottom:1px solid rgba(128,128,128,0.2);opacity:0.7;font-size:11px">
+                <th style="padding:6px 8px;text-align:left">Theme</th>
+                <th style="padding:6px 8px;text-align:right">Tokens</th>
+                <th style="padding:6px 8px;text-align:right">Gaps</th>
+                <th style="padding:6px 8px;text-align:right">Health</th>
+                <th style="padding:6px 8px;text-align:right">Styled</th>
+              </tr>
+            </thead>
+            <tbody>${rows}</tbody>
+          </table>
+        </div>`;
+    }
+
+    _showMultiScanEmpty(mode) {
+      const el = this.shadow?.querySelector('.diag-results');
+      if (!el) return;
+      const msg = mode === 'custom'
+        ? 'No custom themes yet. Create one in the Builder to include it in scans.'
+        : 'No themes found.';
+      el.innerHTML = `<div class="diag-card" style="padding:14px">${msg}</div>`;
     }
 
     async _resetTestingProgress() {

@@ -1293,3 +1293,19 @@
   color: #ef4444;
   background: rgba(239, 68, 68, 0.1);
 }
+
+/* Multi-theme scan results */
+.diag-cov-pass { color: #16a34a; font-weight: 600; }
+.diag-cov-warn { color: #eab308; font-weight: 600; }
+.diag-cov-fail { color: #ef4444; font-weight: 600; }
+.diag-scan-btn--secondary {
+  background: transparent;
+  border: 1px solid rgba(128, 128, 128, 0.25);
+  color: inherit;
+  font-size: 11px;
+  padding: 4px 10px;
+  flex: 1;
+}
+.diag-scan-btn--secondary:hover {
+  background: rgba(128, 128, 128, 0.08);
+}

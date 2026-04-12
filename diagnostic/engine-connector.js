@@ -90,6 +90,25 @@
   };
 
   /**
+   * List all preset themes (id + name) — used by multi-theme scan.
+   */
+  ns.listPresetThemes = async function listPresetThemes() {
+    const data = await loadThemesData();
+    if (!data) return [];
+    return data.themes.map(t => ({ id: t.id, name: t.name || t.id }));
+  };
+
+  /**
+   * List the user's custom themes (from chrome.storage.sync).
+   */
+  ns.listCustomThemes = async function listCustomThemes() {
+    try {
+      const syncData = await chrome.storage.sync.get({ customThemes: [] });
+      return (syncData.customThemes || []).map(t => ({ id: t.id, name: t.name || t.id }));
+    } catch (_) { return []; }
+  };
+
+  /**
    * Resolve the display name of a theme (e.g. "Connectry Light") from its id.
    * Falls back to the id if the theme isn't found.
    */
