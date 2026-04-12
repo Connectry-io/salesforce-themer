@@ -136,16 +136,12 @@
     </div>
     <div class="editor-preview-frame">
       <div class="preview-particles">
-        <div class="preview-particle"></div><div class="preview-particle"></div>
-        <div class="preview-particle"></div><div class="preview-particle"></div>
-        <div class="preview-particle"></div><div class="preview-particle"></div>
-        <div class="preview-particle"></div><div class="preview-particle"></div>
-        <div class="preview-particle"></div><div class="preview-particle"></div>
-        <div class="preview-particle"></div><div class="preview-particle"></div>
-        <div class="preview-particle"></div><div class="preview-particle"></div>
-        <div class="preview-particle"></div><div class="preview-particle"></div>
-        <div class="preview-particle"></div><div class="preview-particle"></div>
-        <div class="preview-particle"></div><div class="preview-particle"></div>
+        ${Array.from({ length: 20 }).map((_, i) => {
+          const delays = [0,0.3,0.7,1.0,0.2,1.5,0.5,1.8,0.1,1.3,0.6,2.0,0.4,1.6,0.8,2.2,0.9,1.1,1.4,1.7];
+          // Pseudo-random vertical spread for pre-animation paint
+          const py = ((i * 41) % 100);
+          return `<div class="preview-particle" style="left:${i * 5}%; --pd:${delays[i]}s; --py:${py}%;"></div>`;
+        }).join('')}
       </div>
       <div class="preview-cursor-trail"></div>
       <div class="preview-topbar" data-bind="surface" data-bind-border-color="border">
