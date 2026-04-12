@@ -3482,6 +3482,8 @@
         if (editorState.effects.particles) {
           editorState.effects.particles = pSelect.value;
         }
+        const frame = document.querySelector('.editor-preview-frame');
+        if (frame) applyPreviewEffects(frame, editorState.effects, editorState.colors?.brandPrimary || '#4a6fa5');
       });
 
       // Cursor trail style select
