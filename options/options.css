@@ -6716,23 +6716,23 @@ td.upgrade-compare-col-premium,
 }
 
 .guide-effect-card[data-effect="backgroundPattern"] .guide-effect-preview[data-style="dotGrid"] {
-  background-image: radial-gradient(rgba(var(--fx-accent-rgb), calc(0.45 * var(--fx-mult))) 1.2px, transparent 1.2px);
+  background-image: radial-gradient(rgba(var(--fx-accent-rgb), calc(0.55 * var(--fx-mult))) calc(1.2px * var(--fx-mult)), transparent calc(1.2px * var(--fx-mult)));
   background-size: 14px 14px;
 }
 
 .guide-effect-card[data-effect="backgroundPattern"] .guide-effect-preview[data-style="lineGrid"] {
   background-image:
-    linear-gradient(rgba(var(--fx-accent-rgb), calc(0.18 * var(--fx-mult))) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(var(--fx-accent-rgb), calc(0.18 * var(--fx-mult))) 1px, transparent 1px);
+    linear-gradient(rgba(var(--fx-accent-rgb), calc(0.35 * var(--fx-mult))) calc(1px * var(--fx-mult)), transparent calc(1px * var(--fx-mult))),
+    linear-gradient(90deg, rgba(var(--fx-accent-rgb), calc(0.35 * var(--fx-mult))) calc(1px * var(--fx-mult)), transparent calc(1px * var(--fx-mult)));
   background-size: 16px 16px;
 }
 
 .guide-effect-card[data-effect="backgroundPattern"] .guide-effect-preview[data-style="hatch"] {
   background-image: repeating-linear-gradient(
     45deg,
-    rgba(var(--fx-accent-rgb), calc(0.22 * var(--fx-mult))) 0,
-    rgba(var(--fx-accent-rgb), calc(0.22 * var(--fx-mult))) 1px,
-    transparent 1px,
+    rgba(var(--fx-accent-rgb), calc(0.45 * var(--fx-mult))) 0,
+    rgba(var(--fx-accent-rgb), calc(0.45 * var(--fx-mult))) calc(1px * var(--fx-mult)),
+    transparent calc(1px * var(--fx-mult)),
     transparent 8px
   );
 }
