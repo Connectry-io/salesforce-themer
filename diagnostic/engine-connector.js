@@ -90,6 +90,24 @@
   };
 
   /**
+   * Resolve the display name of a theme (e.g. "Connectry Light") from its id.
+   * Falls back to the id if the theme isn't found.
+   */
+  ns.resolveThemeName = async function resolveThemeName(themeId) {
+    if (!themeId || themeId === 'none') return null;
+    const data = await loadThemesData();
+    if (!data) return themeId;
+    const ootb = data.themes.find(t => t.id === themeId);
+    if (ootb) return ootb.name || themeId;
+    try {
+      const syncData = await chrome.storage.sync.get({ customThemes: [] });
+      const custom = syncData.customThemes.find(t => t.id === themeId);
+      if (custom) return custom.name || themeId;
+    } catch (_) {}
+    return themeId;
+  };
+
+  /**
    * Clear the cache (call when theme changes).
    */
   ns.clearThemeCache = function clearThemeCache() {

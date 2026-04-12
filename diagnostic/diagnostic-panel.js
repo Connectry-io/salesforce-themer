@@ -151,14 +151,22 @@
       this.currentTheme = themeName;
       this.testingProgress = null; // Reset — different theme
       this.themeColors = null;     // Clear — need to re-resolve for new theme
+      this.themeDisplayName = null; // Clear — need to re-resolve label
       this.fixReport = null;       // Clear — fixes depend on theme colors
       if (ns.clearThemeCache) ns.clearThemeCache();
       if (this.isOpen && !this.isMinimized) {
         this._updateInfoBar();
-        // Reload theme colors for the new theme
+        // Reload theme colors + display name for the new theme, then re-render
+        const pending = [];
         if (ns.resolveThemeColors) {
-          ns.resolveThemeColors(themeName).then(c => { this.themeColors = c; });
+          pending.push(ns.resolveThemeColors(themeName).then(c => { this.themeColors = c; }));
         }
+        if (ns.resolveThemeName) {
+          pending.push(ns.resolveThemeName(themeName).then(n => { this.themeDisplayName = n; }));
+        }
+        Promise.all(pending).then(() => {
+          if (this.isOpen && !this.isMinimized) this._updateInfoBar();
+        });
       }
     }
 
@@ -376,9 +384,10 @@
       //  - theme === 'none' and no configured theme → "Theme off"
       //  - otherwise the active theme name (don't rely on injected, which
       //    briefly flickers false during view transitions)
+      const themeLabel = this.themeDisplayName || themeName;
       const displayName = (themeName === 'none')
         ? (this._configuredThemeName ? `${this._configuredThemeName} (off)` : 'Theme off')
-        : themeName;
+        : themeLabel;
 
       // Build 2x2 swatch grid from theme colors (bg, surface, accent, text)
       let swatchHTML = '';
