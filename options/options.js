@@ -4512,7 +4512,12 @@
       // data-style on the preview wrapper.
       const particleLayer = eff.id === 'particles'
         ? `<div class="guide-particle-layer" aria-hidden="true">${
-            Array.from({ length: 30 }).map((_, i) => `<span class="guide-particle" style="--i: ${i};"></span>`).join('')
+            Array.from({ length: 30 }).map((_, i) => {
+              // Pseudo-random vertical spread so the pre-animation paint
+              // doesn't flash as a horizontal row at the top.
+              const py = ((i * 37) % 100);
+              return `<span class="guide-particle" style="--i: ${i}; --py: ${py}%;"></span>`;
+            }).join('')
           }</div>`
         : '';
 

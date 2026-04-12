@@ -6340,22 +6340,21 @@ td.upgrade-compare-col-premium,
   content: '';
   position: absolute;
   top: 0;
-  left: 0;
-  right: 0;
+  left: -50%;
+  width: 50%;
   height: calc(2px * var(--fx-mult));
   background: linear-gradient(
     90deg,
-    transparent 0%, transparent 40%,
+    transparent 0%,
     rgba(var(--fx-accent-rgb), calc(0.9 * var(--fx-mult))) 50%,
-    transparent 60%, transparent 100%
+    transparent 100%
   );
-  background-size: 200% 100%;
   filter: blur(calc(0.3px * var(--fx-mult)));
   animation: guide-fx-shimmer calc(3s * var(--fx-speed-mult)) ease-in-out infinite;
 }
 @keyframes guide-fx-shimmer {
-  0%   { background-position: -200% center; }
-  100% { background-position: 200% center; }
+  0%   { left: -50%; }
+  100% { left: 100%; }
 }
 
 /* Gradient border */
@@ -6514,11 +6513,10 @@ td.upgrade-compare-col-premium,
   display: block;
   /* Spread particles across the width — 30 particles * 3.3% ≈ 99% */
   left: calc(var(--i) * 3.3%);
-  /* Static fallback: particles sit offscreen-top and invisible until the
-     animation's first frame takes over. Prevents a brief horizontal-row
-     flash on first paint (animation-fill-mode: backwards doesn't apply
-     when animation-delay is negative). */
-  top: -30%;
+  /* Static fallback for the pre-animation paint: vertically spread using
+     the per-particle --py set in JS. Prevents the horizontal-row flash
+     (animation-fill-mode: backwards doesn't apply with negative delay). */
+  top: var(--py, -30%);
   opacity: 0;
 }
 
