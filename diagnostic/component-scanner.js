@@ -1,15 +1,18 @@
 /**
  * Component Scanner — Salesforce Themer Diagnostic
  *
- * Walks the live DOM to inventory Salesforce components, custom LWCs,
- * and managed-package elements. For each component found, checks whether
- * the active theme's CSS is reaching it or if it uses hardcoded colors
- * that bypass the token system.
+ * Auto-discovers every Salesforce standard component, custom LWC, and
+ * managed-package element on the page. No curated registry — identity is
+ * derived from namespace prefixes on tag names and classes.
  *
- * Three detection modes:
- *  1. Standard SLDS components (cards, buttons, tables, etc.)
- *  2. Custom LWCs (customer-built, identified by tag name pattern)
- *  3. Managed package components (namespaced tag names like nCino-*)
+ * Designed as the data feed for the self-learning loop (see VISION.md §5):
+ *   live scan → diffs → backend → AI fix → next scan confirms → loop
+ *
+ * Output shape is designed to be diff-stable:
+ *   - components keyed by stable signature (tag + primary class)
+ *   - deterministic field order, sorted results
+ *   - per-component: identity, namespace class, instances, computed styles,
+ *     DOM structure, hardcoded-color issues
  *
  * Registered on window.__sfThemerDiag — inert until called.
  */
@@ -18,444 +21,205 @@
 
   const ns = (window.__sfThemerDiag = window.__sfThemerDiag || {});
 
-  // ─── Component registry ─────────────────────────────────────────────────
-  // Maps SF component types to the selectors and CSS properties we check.
-  // cssProps are the properties we read via getComputedStyle to determine
-  // if the theme is reaching the component.
+  // ─── Namespace classification ───────────────────────────────────────────
+  // Every SF and managed-package element belongs to one of these namespaces.
+  // The first matching prefix wins. Prefixes match against tag name OR classes.
 
-  const COMPONENT_REGISTRY = {
-    card: {
-      label: 'Cards',
-      selectors: ['.slds-card', '.forceRecordCard'],
-      cssProps: ['background-color', 'border-color', 'color'],
-    },
-    button: {
-      label: 'Buttons',
-      selectors: ['.slds-button_brand', '.slds-button--brand', '.slds-button_neutral', '.slds-button--neutral'],
-      cssProps: ['background-color', 'border-color', 'color'],
-    },
-    input: {
-      label: 'Form Inputs',
-      selectors: ['.slds-input', '.slds-textarea', '.slds-select', '.slds-combobox__form-element'],
-      cssProps: ['background-color', 'border-color', 'color'],
-    },
-    table: {
-      label: 'Tables',
-      selectors: ['.slds-table'],
-      cssProps: ['background-color', 'border-color'],
-    },
-    modal: {
-      label: 'Modals',
-      selectors: ['.slds-modal__container'],
-      cssProps: ['background-color', 'border-color', 'color'],
-    },
-    tab: {
-      label: 'Tabs',
-      selectors: ['.slds-tabs_default__item', '.slds-tabs--default__item'],
-      cssProps: ['color', 'border-bottom-color'],
-    },
-    dropdown: {
-      label: 'Dropdowns',
-      selectors: ['.slds-dropdown'],
-      cssProps: ['background-color', 'border-color'],
-    },
-    pageHeader: {
-      label: 'Page Headers',
-      selectors: ['.slds-page-header', '[class*="pageHeader"]'],
-      cssProps: ['background-color', 'border-bottom-color'],
-    },
-    nav: {
-      label: 'Navigation',
-      selectors: ['.slds-context-bar', '.oneGlobalNav', 'one-app-nav-bar'],
-      cssProps: ['background-color', 'border-bottom-color'],
-    },
-    popover: {
-      label: 'Popovers',
-      selectors: ['.slds-popover'],
-      cssProps: ['background-color', 'border-color', 'color'],
-    },
-    pill: {
-      label: 'Pills',
-      selectors: ['.slds-pill'],
-      cssProps: ['background-color', 'border-color', 'color'],
-    },
-    badge: {
-      label: 'Badges',
-      selectors: ['.slds-badge'],
-      cssProps: ['background-color', 'color'],
-    },
-    panel: {
-      label: 'Panels',
-      selectors: ['.slds-panel', '.slds-split-view_container'],
-      cssProps: ['background-color', 'border-color'],
-    },
-    path: {
-      label: 'Path',
-      selectors: ['.slds-path__item'],
-      cssProps: ['background-color'],
-    },
-    recordLayout: {
-      label: 'Record Layout',
-      selectors: ['.forceRecordLayout', '.forceHighlightsPanel', '.slds-page-header_record-home'],
-      cssProps: ['background-color', 'color'],
-    },
-  };
+  const STANDARD_NAMESPACES = [
+    // Most specific first
+    { id: 'slds',       label: 'SLDS',             prefixes: ['slds-'] },
+    { id: 'force',      label: 'Force (Aura)',     prefixes: ['force'] }, // forceRecordLayout, forceEntityIcon
+    { id: 'lightning',  label: 'Lightning (LWC)',  prefixes: ['lightning-', 'lwc-'] },
+    { id: 'records',    label: 'Records (LWC)',    prefixes: ['records-'] },
+    { id: 'flexipage',  label: 'Flexipage',        prefixes: ['flexipage'] },
+    { id: 'one',        label: 'One (shell)',      prefixes: ['one-', 'oneGlobal', 'oneConsole'] },
+    { id: 'aura',       label: 'Aura',             prefixes: ['aura-', 'ui-'] },
+    { id: 'runtime',    label: 'Runtime',          prefixes: ['runtime_', 'runtime-', 'laf-'] },
+    { id: 'setup',      label: 'Setup',            prefixes: ['setup-', 'setup_', 'setup_discovery-', 'setup_home-', 'setup_service-'] },
+    { id: 'comm',       label: 'Communities',      prefixes: ['comm-', 'comm_', 'community_', 'community-', 'cms-'] },
+    { id: 'navex',      label: 'Nav-Ex',           prefixes: ['navex-', 'navex_'] },
+    { id: 'sf-chrome',  label: 'SF Chrome',        prefixes: [
+      'navigation-', 'record_', 'record-', 'emailui-', 'email-',
+      'sales_', 'sales-', 'dnd-', 'builder_', 'interactions-',
+      'formula-', 'analytics-', 'content-', 'app_', 'appnav-',
+      'console-', 'workspace-', 'chatter-', 'feed-', 'publisher-',
+      'global-', 'globalheader-', 'profile-', 'user-', 'notification-',
+      'picklist-', 'lookup-', 'listview', 'list-', 'output-', 'input-',
+      'detail-', 'related-', 'report-', 'dashboard-', 'wave-', 'tableau-',
+      'data-', 'datatable-', 'calendar-', 'event-', 'task-', 'activity-',
+      'approval-', 'workflow-', 'quip-', 'base-', 'sfa-', 'sfc-',
+      'lbpm-', 'lbs-', 'mob-', 'mobile-', 'platform-', 'quick-', 'action-',
+      'schema-', 'soql-', 'sobject-', 'util-', 'utils-', 'webruntimedesign-',
+      'slot-', 'search-', 'search_dialog-', 'search_input-',
+      'forceSearch', 'highlights-', 'flow'
+    ] },
+    { id: 'sf-themer',  label: '(ours)',           prefixes: ['sf-themer-'] }, // excluded from reports
+  ];
 
-  // Maximum elements to scan per component type (performance guard)
-  const MAX_PER_TYPE = 150;
+  // Known managed packages — tag/class prefix → human label.
+  const MANAGED_PACKAGES = [
+    { prefix: 'ncino',         label: 'nCino' },
+    { prefix: 'nforcecredit',  label: 'nCino' },
+    { prefix: 'vlocity',       label: 'Vlocity/Omnistudio' },
+    { prefix: 'omnistudio',    label: 'Omnistudio' },
+    { prefix: 'copado',        label: 'Copado' },
+    { prefix: 'conga',         label: 'Conga' },
+    { prefix: 'drawloop',      label: 'Conga (Drawloop)' },
+    { prefix: 'docusign',      label: 'DocuSign' },
+    { prefix: 'dsfs',          label: 'DocuSign' },
+    { prefix: 'sb_',           label: 'Salesforce CPQ' },
+    { prefix: 'sbqq',          label: 'Salesforce CPQ' },
+    { prefix: 'sfa_',          label: 'Salesforce Advanced' },
+    { prefix: 'maps',          label: 'Salesforce Maps' },
+    { prefix: 'taskray',       label: 'TaskRay' },
+    { prefix: 'formassembly',  label: 'FormAssembly' },
+    { prefix: 'mholt',         label: 'Matt Holt (AppExchange)' },
+  ];
 
-  // ─── Known SF default colors ────────────────────────────────────────────
-  // These are Salesforce's standard/default computed values. If a component
-  // still shows these after theming, it means our theme didn't reach it.
-
-  const SF_DEFAULTS = new Set([
-    'rgb(255, 255, 255)',       // #ffffff — default white bg
-    'rgb(243, 243, 243)',       // #f3f3f3 — default page bg
-    'rgb(244, 246, 249)',       // #f4f6f9 — default setup bg
-    'rgb(22, 50, 92)',          // #16325c — default text
-    'rgb(0, 112, 210)',         // #0070d2 — default brand blue
-    'rgb(221, 219, 218)',       // #dddbda — default border
-    'rgb(201, 199, 197)',       // #c9c7c5 — default input border
-    'rgb(84, 105, 141)',        // #54698d — default label color
-    'rgb(24, 24, 24)',          // #181818 — default text primary
-    'rgb(68, 68, 68)',          // #444444 — default text secondary
+  // Classes that identify semantically distinct standard components. Used
+  // to pick a stable "identity class" per element even when many slds-
+  // classes are present. Anything outside this set is treated as a modifier.
+  // This list is narrow by intent — extending it is how we tell the catalog
+  // about a new "kind of thing".
+  const KNOWN_COMPONENT_CLASSES = new Set([
+    // SLDS 1
+    'slds-card', 'slds-table', 'slds-modal', 'slds-dropdown', 'slds-popover',
+    'slds-pill', 'slds-badge', 'slds-panel', 'slds-path', 'slds-path__item',
+    'slds-page-header', 'slds-context-bar', 'slds-avatar', 'slds-button',
+    'slds-button_brand', 'slds-button_neutral', 'slds-button_icon',
+    'slds-tabs_default', 'slds-tabs_default__item', 'slds-tabs_scoped',
+    'slds-input', 'slds-textarea', 'slds-select', 'slds-combobox',
+    'slds-combobox__form-element', 'slds-form-element',
+    'slds-checkbox', 'slds-radio', 'slds-toggle', 'slds-progress',
+    'slds-notification', 'slds-tooltip', 'slds-spinner', 'slds-tile',
+    'slds-media', 'slds-icon', 'slds-breadcrumb', 'slds-tree',
+    'slds-picklist', 'slds-lookup', 'slds-listbox',
+    // Force / records
+    'forceRecordLayout', 'forceHighlightsPanel', 'forceHighlightsStencilDesktop',
+    'forceEntityIcon', 'forceRecordCard', 'forceActionsContainer',
+    'forceRelatedListCardHeader', 'forceChatterMessage',
+    'records-highlights', 'records-highlights-details-item',
+    // Page-level
+    'slds-page-header_record-home',
+    // Nav
+    'oneGlobalNav', 'oneAppNavContainer', 'navexConsoleTabBar',
   ]);
 
-  // ─── Hardcoded color detection ──────────────────────────────────────────
-  // Detects elements that use hardcoded colors instead of CSS custom props,
-  // which means the theme can't style them.
+  // Standard SF default computed values — a component still showing these
+  // after theming indicates the theme didn't reach it.
+  const SF_DEFAULTS = new Set([
+    'rgb(255, 255, 255)',
+    'rgb(243, 243, 243)',
+    'rgb(244, 246, 249)',
+    'rgb(22, 50, 92)',
+    'rgb(0, 112, 210)',
+    'rgb(221, 219, 218)',
+    'rgb(201, 199, 197)',
+    'rgb(84, 105, 141)',
+    'rgb(24, 24, 24)',
+    'rgb(68, 68, 68)',
+  ]);
 
-  /**
-   * Check if an element's inline styles or stylesheet rules use hardcoded
-   * color values instead of var(--token) references.
-   */
-  function detectHardcodedColors(el) {
-    const issues = [];
+  // Caps to keep scans cheap. Scanner must be safe to run often (see VISION).
+  const MAX_ELEMENTS_WALKED = 8000;
+  const MAX_INSTANCES_PER_COMPONENT = 150;
 
-    // Check inline styles
-    const inlineStyle = el.getAttribute('style');
-    if (inlineStyle) {
-      const colorProps = ['color', 'background-color', 'background', 'border-color', 'border'];
-      for (const prop of colorProps) {
-        const re = new RegExp(`${prop}\\s*:\\s*(#[0-9a-fA-F]{3,8}|rgb[a]?\\([^)]+\\))`, 'i');
-        const match = inlineStyle.match(re);
-        if (match) {
-          issues.push({
-            property: prop,
-            value: match[1],
-            source: 'inline',
-            element: describeElement(el),
-          });
+  // ─── Namespace classification ───────────────────────────────────────────
+
+  function classifyToken(token) {
+    for (const mp of MANAGED_PACKAGES) {
+      if (token.startsWith(mp.prefix)) {
+        return { source: 'managed', namespace: mp.prefix, label: mp.label };
+      }
+    }
+    for (const ns of STANDARD_NAMESPACES) {
+      for (const p of ns.prefixes) {
+        if (token.startsWith(p)) {
+          return { source: 'standard', namespace: ns.id, label: ns.label };
         }
       }
     }
-
-    return issues;
+    return null;
   }
 
-  // ─── Custom LWC detection ──────────────────────────────────────────────
+  // Returns the "identity" for an element: the stable class or tag we use
+  // to group it in the catalog. null means unclassified (not reported).
+  function identifyElement(el) {
+    const tag = el.tagName.toLowerCase();
 
-  /** Detect custom (non-standard) LWC components on the page. */
-  function scanCustomLWCs() {
-    const customComponents = [];
-    const seen = new Set();
-
-    // LWCs use tag names with a namespace-component pattern containing a hyphen
-    // Standard Salesforce ones start with 'lightning-' or 'force' or 'one-'
-    // Custom ones use customer namespaces like 'c-', 'myns-', etc.
-    const SF_PREFIXES = [
-      'lightning-', 'force', 'one-', 'slds-',
-      'aura-', 'ui-', 'runtime_', 'laf-',
-      'records-', 'flexipage', 'forceSearch',
-      'lst-', 'search-', 'highlights-',
-      'setup-', 'comm-', 'flow',
-      'navex-', 'navex_', 'navigation-',
-      'record_', 'record-',
-      'emailui-', 'email-',
-      'sales_', 'sales-',
-      'dnd-', 'builder_',
-      'interactions-',
-      'formula-', 'analytics-',
-      'community_', 'community-',
-      'cms-', 'content-',
-      'app_', 'appnav-',
-      'console-', 'workspace-',
-      'chatter-', 'feed-', 'publisher-',
-      'global-', 'globalheader-',
-      'profile-', 'user-',
-      'notification-',
-      'picklist-', 'lookup-',
-      'listview', 'list-',
-      'output-', 'input-',
-      'detail-', 'related-',
-      'report-', 'dashboard-',
-      'wave-', 'tableau-',
-      'data-', 'datatable-',
-      'calendar-', 'event-',
-      'task-', 'activity-',
-      'approval-', 'workflow-',
-      'quip-',
-      'base-',
-      'sfa-', 'sfc-',
-      'lbpm-', 'lbs-',
-      'mob-', 'mobile-',
-      'platform-',
-      'quick-', 'action-',
-      'schema-',
-      'soql-', 'sobject-',
-      'util-', 'utils-',
-      'webruntimedesign-',
-      'slot-',
-      'search_dialog-', 'search_input-',
-      'setup_discovery-', 'setup_home-', 'setup_service-',
-      'sf-themer-',  // Our own — skip
-    ];
-
-    // Known managed packages
-    const MANAGED_PREFIXES = [
-      { prefix: 'ncino', label: 'nCino' },
-      { prefix: 'nforcecredit', label: 'nCino' },
-      { prefix: 'vlocity', label: 'Vlocity/Omnistudio' },
-      { prefix: 'omnistudio', label: 'Omnistudio' },
-      { prefix: 'copado', label: 'Copado' },
-      { prefix: 'conga', label: 'Conga' },
-      { prefix: 'drawloop', label: 'Conga (Drawloop)' },
-      { prefix: 'docusign', label: 'DocuSign' },
-      { prefix: 'dsfs', label: 'DocuSign' },
-      { prefix: 'sb_', label: 'Salesforce CPQ' },
-      { prefix: 'sbqq', label: 'Salesforce CPQ' },
-      { prefix: 'sfa_', label: 'Salesforce Advanced' },
-      { prefix: 'maps', label: 'Salesforce Maps' },
-      { prefix: 'taskray', label: 'TaskRay' },
-      { prefix: 'formassembly', label: 'FormAssembly' },
-      { prefix: 'mholt', label: 'Matt Holt (AppExchange)' },
-    ];
-
-    const allCustomEls = document.querySelectorAll('*');
-    let count = 0;
-
-    for (const el of allCustomEls) {
-      if (count >= 500) break; // Hard cap
-
-      const tag = el.tagName.toLowerCase();
-      if (!tag.includes('-')) continue; // Not a custom element
-
-      // Skip standard SF components
-      if (SF_PREFIXES.some(p => tag.startsWith(p))) continue;
-
-      // Deduplicate by tag name
-      if (seen.has(tag)) continue;
-      seen.add(tag);
-      count++;
-
-      // Classify: managed package or customer custom
-      let source = 'custom';
-      let packageName = null;
-      for (const mp of MANAGED_PREFIXES) {
-        if (tag.startsWith(mp.prefix)) {
-          source = 'managed';
-          packageName = mp.label;
-          break;
-        }
-      }
-
-      // Count instances
-      const instances = document.querySelectorAll(tag);
-      const instanceCount = Math.min(instances.length, MAX_PER_TYPE);
-
-      // Sample styling from first visible instance
-      let styling = null;
-      for (const inst of instances) {
-        if (inst.offsetParent === null && inst.tagName !== 'BODY') continue; // hidden
-        const cs = getComputedStyle(inst);
-        const bg = cs.backgroundColor;
-        const fg = cs.color;
-        const border = cs.borderColor;
-
-        styling = {
-          backgroundColor: bg,
-          color: fg,
-          borderColor: border,
-          usesDefaults: SF_DEFAULTS.has(bg) || SF_DEFAULTS.has(fg),
-          hardcodedIssues: detectHardcodedColors(inst),
-        };
-        break;
-      }
-
-      customComponents.push({
-        tag,
-        source,
-        packageName,
-        count: instanceCount,
-        styling,
-      });
+    // Custom-element tag names (contain hyphen) are themselves identity keys
+    if (tag.includes('-')) {
+      const cls = classifyToken(tag);
+      if (cls) return { identityKey: tag, tag, identityClass: null, ...cls };
+      // Unknown namespaced tag → treat as custom LWC
+      return { identityKey: tag, tag, identityClass: null, source: 'custom', namespace: 'c-*', label: 'Custom' };
     }
 
-    // Sort: managed packages first, then custom, then by count
-    customComponents.sort((a, b) => {
-      if (a.source !== b.source) return a.source === 'managed' ? -1 : 1;
-      return b.count - a.count;
-    });
+    // Plain tag (div/span/etc) — identity comes from classes
+    const classes = typeof el.className === 'string'
+      ? el.className.trim().split(/\s+/).filter(Boolean)
+      : [];
+    if (!classes.length) return null;
 
-    return customComponents;
+    // Prefer KNOWN_COMPONENT_CLASSES; otherwise first namespaced class.
+    let identityClass = classes.find(c => KNOWN_COMPONENT_CLASSES.has(c));
+    if (!identityClass) {
+      identityClass = classes.find(c => classifyToken(c));
+    }
+    if (!identityClass) return null;
+
+    const cls = classifyToken(identityClass);
+    if (!cls) return null;
+    return { identityKey: identityClass, tag, identityClass, ...cls };
   }
 
-  // ─── Standard component scan ───────────────────────────────────────────
+  // ─── Style + structure capture ──────────────────────────────────────────
 
-  /**
-   * Scan standard SLDS components on the page.
-   * For each type, counts instances and checks if theme colors are applied.
-   */
-  ns.scanComponents = function scanComponents(themeColors) {
-    const results = {};
-
-    for (const [type, config] of Object.entries(COMPONENT_REGISTRY)) {
-      const selector = config.selectors.join(',');
-      const elements = document.querySelectorAll(selector);
-
-      if (elements.length === 0) {
-        results[type] = {
-          label: config.label,
-          found: 0,
-          styled: 0,
-          partial: 0,
-          unstyled: 0,
-          hardcodedIssues: [],
-        };
-        continue;
-      }
-
-      let styled = 0;
-      let partial = 0;
-      let unstyled = 0;
-      const allHardcoded = [];
-      const limit = Math.min(elements.length, MAX_PER_TYPE);
-
-      for (let i = 0; i < limit; i++) {
-        const el = elements[i];
-        // Skip hidden/off-screen elements
-        if (el.offsetParent === null && el.tagName !== 'BODY') continue;
-
-        const cs = getComputedStyle(el);
-        let themedProps = 0;
-        let defaultProps = 0;
-
-        for (const prop of config.cssProps) {
-          const val = cs.getPropertyValue(prop).trim();
-          if (SF_DEFAULTS.has(val)) {
-            defaultProps++;
-          } else {
-            themedProps++;
-          }
-        }
-
-        if (defaultProps === 0) styled++;
-        else if (themedProps > 0) partial++;
-        else unstyled++;
-
-        // Check for hardcoded colors
-        const hc = detectHardcodedColors(el);
-        if (hc.length) allHardcoded.push(...hc);
-      }
-
-      results[type] = {
-        label: config.label,
-        found: elements.length,
-        styled,
-        partial,
-        unstyled,
-        hardcodedIssues: allHardcoded.slice(0, 10), // Cap at 10
-      };
-    }
-
-    // Custom / managed package components
-    const customLWCs = scanCustomLWCs();
-
-    return {
-      standard: results,
-      custom: customLWCs.filter(c => c.source === 'custom'),
-      managed: customLWCs.filter(c => c.source === 'managed'),
-      summary: buildSummary(results, customLWCs),
-    };
-  };
-
-  // ─── Summary builder ──────────────────────────────────────────────────
-
-  function buildSummary(standardResults, customLWCs) {
-    let totalFound = 0;
-    let totalStyled = 0;
-    let totalPartial = 0;
-    let totalUnstyled = 0;
-    let totalHardcoded = 0;
-
-    for (const r of Object.values(standardResults)) {
-      totalFound += r.found;
-      totalStyled += r.styled;
-      totalPartial += r.partial;
-      totalUnstyled += r.unstyled;
-      totalHardcoded += r.hardcodedIssues.length;
-    }
-
-    const managedPackages = new Set(
-      customLWCs.filter(c => c.source === 'managed').map(c => c.packageName)
-    );
-
-    return {
-      standardTypes: Object.keys(standardResults).filter(k => standardResults[k].found > 0).length,
-      totalStandardFound: totalFound,
-      totalStyled,
-      totalPartial,
-      totalUnstyled,
-      totalHardcoded,
-      customLWCCount: customLWCs.filter(c => c.source === 'custom').length,
-      managedPackages: Array.from(managedPackages),
-      managedComponentCount: customLWCs.filter(c => c.source === 'managed').length,
-    };
-  }
-
-  // ─── Helpers ────────────────────────────────────────────────────────────
-
-  /** Build a short human-readable description of an element. */
   function describeElement(el) {
     const tag = el.tagName.toLowerCase();
     const id = el.id ? `#${el.id}` : '';
-    const cls = el.className && typeof el.className === 'string'
+    const cls = typeof el.className === 'string'
       ? '.' + el.className.trim().split(/\s+/).slice(0, 2).join('.')
       : '';
     return `${tag}${id}${cls}`.slice(0, 80);
   }
 
-  // ─── DOM Structure Capture ──────────────────────────────────────────────
-  // Captures the actual HTML hierarchy of components for the knowledge base.
-  // This is what replaces manual copy-paste from the inspector.
+  function captureComputedStyles(el) {
+    const cs = getComputedStyle(el);
+    const out = {
+      backgroundColor: cs.backgroundColor,
+      color: cs.color,
+      borderColor: cs.borderColor,
+      borderTopColor: cs.borderTopColor,
+      borderBottomColor: cs.borderBottomColor,
+    };
+    if (cs.boxShadow !== 'none') out.boxShadow = cs.boxShadow;
+    return out;
+  }
 
-  /**
-   * Capture the DOM structure of an element up to a given depth.
-   * Returns a compact structural representation.
-   */
   function captureDOMStructure(el, maxDepth = 3) {
     function walk(node, depth) {
-      if (depth > maxDepth) return null;
-      if (node.nodeType !== 1) return null; // Element nodes only
-
+      if (depth > maxDepth || node.nodeType !== 1) return null;
       const tag = node.tagName.toLowerCase();
-      const classes = node.className && typeof node.className === 'string'
-        ? node.className.trim().split(/\s+/).filter(c => c.startsWith('slds-') || c.startsWith('force') || c.startsWith('lwc-')).slice(0, 5)
+      const classes = typeof node.className === 'string'
+        ? node.className.trim().split(/\s+/).filter(c =>
+            c.startsWith('slds-') || c.startsWith('force') ||
+            c.startsWith('lwc-') || c.startsWith('lightning-') ||
+            c.startsWith('records-')
+          ).slice(0, 5)
         : [];
       const attrs = {};
       if (node.getAttribute('role')) attrs.role = node.getAttribute('role');
       if (node.getAttribute('data-aura-rendered-by')) attrs.aura = true;
-
       const children = [];
       for (const child of node.children) {
-        if (children.length >= 8) { // Cap child count
+        if (children.length >= 8) {
           children.push({ tag: '...', truncated: node.children.length - 8 });
           break;
         }
-        const childStruct = walk(child, depth + 1);
-        if (childStruct) children.push(childStruct);
+        const c = walk(child, depth + 1);
+        if (c) children.push(c);
       }
-
       return {
         tag,
         classes: classes.length ? classes : undefined,
@@ -463,78 +227,244 @@
         children: children.length ? children : undefined,
       };
     }
-
     return walk(el, 0);
   }
 
-  /**
-   * Capture computed styles for a component element.
-   * Returns only theme-relevant CSS properties.
-   */
-  function captureComputedStyles(el) {
-    const cs = getComputedStyle(el);
-    return {
-      backgroundColor: cs.backgroundColor,
-      color: cs.color,
-      borderColor: cs.borderColor,
-      borderTopColor: cs.borderTopColor,
-      borderBottomColor: cs.borderBottomColor,
-      boxShadow: cs.boxShadow !== 'none' ? cs.boxShadow : undefined,
-    };
+  function detectHardcodedColors(el) {
+    const issues = [];
+    const inlineStyle = el.getAttribute('style');
+    if (!inlineStyle) return issues;
+    const colorProps = ['color', 'background-color', 'background', 'border-color', 'border'];
+    for (const prop of colorProps) {
+      const re = new RegExp(`${prop}\\s*:\\s*(#[0-9a-fA-F]{3,8}|rgb[a]?\\([^)]+\\))`, 'i');
+      const match = inlineStyle.match(re);
+      if (match) {
+        issues.push({
+          property: prop,
+          value: match[1],
+          source: 'inline',
+          element: describeElement(el),
+        });
+      }
+    }
+    return issues;
   }
 
-  /**
-   * Scan and capture DOM structures for all component types on the page.
-   * Returns a structured snapshot that can be saved to the knowledge base.
-   */
-  ns.captureDOMSnapshot = function captureDOMSnapshot() {
-    const snapshot = {
-      url: location.href,
-      timestamp: new Date().toISOString(),
-      components: {},
-    };
+  // ─── Discovery walk ─────────────────────────────────────────────────────
 
-    // Standard components
-    for (const [type, config] of Object.entries(COMPONENT_REGISTRY)) {
-      const selector = config.selectors.join(',');
-      const el = document.querySelector(selector);
-      if (!el) continue;
+  // Walks the DOM, buckets every classifiable element by its identity key.
+  // Deduplicates by identity. Returns an ordered catalog entry per identity.
+  function discover() {
+    const byIdentity = new Map(); // identityKey → entry
+    const all = document.body ? document.body.getElementsByTagName('*') : [];
+    const walkLimit = Math.min(all.length, MAX_ELEMENTS_WALKED);
 
-      // Find a visible instance
-      let target = el;
-      if (target.offsetParent === null) {
-        const all = document.querySelectorAll(selector);
-        for (const candidate of all) {
-          if (candidate.offsetParent !== null) { target = candidate; break; }
+    for (let i = 0; i < walkLimit; i++) {
+      const el = all[i];
+      const identity = identifyElement(el);
+      if (!identity) continue;
+      if (identity.namespace === 'sf-themer') continue; // our own overlay
+
+      let entry = byIdentity.get(identity.identityKey);
+      if (!entry) {
+        entry = {
+          identity: identity.identityKey,
+          tag: identity.tag,
+          identityClass: identity.identityClass,
+          source: identity.source,          // 'standard' | 'managed' | 'custom'
+          namespace: identity.namespace,    // e.g. 'slds', 'force', 'ncino'
+          namespaceLabel: identity.label,   // e.g. 'SLDS', 'nCino'
+          instances: 0,
+          visibleInstances: 0,
+          firstVisibleSample: null,
+        };
+        byIdentity.set(identity.identityKey, entry);
+      }
+      entry.instances++;
+      if (entry.instances > MAX_INSTANCES_PER_COMPONENT) continue;
+
+      const visible = el.offsetParent !== null || el.tagName === 'BODY';
+      if (visible) {
+        entry.visibleInstances++;
+        if (!entry.firstVisibleSample) entry.firstVisibleSample = el;
+      }
+    }
+
+    // Build output entries from samples
+    const entries = [];
+    for (const entry of byIdentity.values()) {
+      const sample = entry.firstVisibleSample || null;
+      const styles = sample ? captureComputedStyles(sample) : null;
+      const structure = sample ? captureDOMStructure(sample) : null;
+      const hardcoded = sample ? detectHardcodedColors(sample) : [];
+
+      // Styled classification: any computed color value not in SF_DEFAULTS
+      // counts as "themed". All defaults = "unstyled". Mixed = "partial".
+      let styled = 'unknown';
+      if (styles) {
+        const vals = [styles.backgroundColor, styles.color, styles.borderColor].filter(v => v && v !== 'rgba(0, 0, 0, 0)');
+        if (vals.length) {
+          const themed = vals.filter(v => !SF_DEFAULTS.has(v)).length;
+          const defaults = vals.length - themed;
+          if (defaults === 0) styled = 'styled';
+          else if (themed === 0) styled = 'unstyled';
+          else styled = 'partial';
         }
       }
 
-      snapshot.components[type] = {
-        label: config.label,
-        matchedSelector: describeElement(target),
-        domStructure: captureDOMStructure(target),
-        computedStyles: captureComputedStyles(target),
-        instanceCount: document.querySelectorAll(selector).length,
-      };
+      entries.push({
+        identity: entry.identity,
+        tag: entry.tag,
+        identityClass: entry.identityClass,
+        source: entry.source,
+        namespace: entry.namespace,
+        namespaceLabel: entry.namespaceLabel,
+        instances: entry.instances,
+        visibleInstances: entry.visibleInstances,
+        styled,
+        computedStyles: styles,
+        domStructure: structure,
+        hardcodedIssues: hardcoded,
+      });
     }
 
-    // Custom LWCs — capture structure of each unique custom element
-    const customEls = scanCustomLWCs();
-    for (const comp of customEls) {
-      const el = document.querySelector(comp.tag);
-      if (!el) continue;
-      snapshot.components[`custom:${comp.tag}`] = {
-        label: `Custom: <${comp.tag}>`,
-        source: comp.source,
-        packageName: comp.packageName,
-        matchedSelector: comp.tag,
-        domStructure: captureDOMStructure(el, 2), // Shallower for custom
-        computedStyles: captureComputedStyles(el),
-        instanceCount: comp.count,
-      };
+    // Deterministic order for diff stability: source, namespace, identity
+    entries.sort((a, b) => {
+      const sourceRank = { standard: 0, managed: 1, custom: 2 };
+      if (a.source !== b.source) return sourceRank[a.source] - sourceRank[b.source];
+      if (a.namespace !== b.namespace) return a.namespace.localeCompare(b.namespace);
+      return a.identity.localeCompare(b.identity);
+    });
+
+    return entries;
+  }
+
+  // ─── Public API — back-compat with diagnostic-panel.js ─────────────────
+
+  // Matches the shape used by diagnostic-panel.js today, but computed from
+  // the auto-discovery entries. Legacy component "types" are derived by
+  // grouping on identity class.
+  ns.scanComponents = function scanComponents(_themeColors) {
+    const entries = discover();
+    const visibleEntries = entries.filter(e => e.visibleInstances > 0);
+
+    // Legacy "standard" bucket — grouped by identity for the existing panel UI.
+    const standard = {};
+    for (const e of visibleEntries) {
+      if (e.source !== 'standard') continue;
+      const key = e.identity;
+      if (!standard[key]) {
+        standard[key] = {
+          label: e.identity,
+          namespace: e.namespaceLabel,
+          found: 0, styled: 0, partial: 0, unstyled: 0,
+          hardcodedIssues: [],
+        };
+      }
+      standard[key].found += e.visibleInstances;
+      if (e.styled === 'styled') standard[key].styled += e.visibleInstances;
+      else if (e.styled === 'partial') standard[key].partial += e.visibleInstances;
+      else if (e.styled === 'unstyled') standard[key].unstyled += e.visibleInstances;
+      if (e.hardcodedIssues.length) {
+        standard[key].hardcodedIssues.push(...e.hardcodedIssues.slice(0, 10));
+      }
     }
 
-    return snapshot;
+    const custom = visibleEntries
+      .filter(e => e.source === 'custom')
+      .map(e => ({
+        tag: e.tag,
+        source: 'custom',
+        packageName: null,
+        count: e.visibleInstances,
+        styling: e.computedStyles ? {
+          backgroundColor: e.computedStyles.backgroundColor,
+          color: e.computedStyles.color,
+          borderColor: e.computedStyles.borderColor,
+          usesDefaults: SF_DEFAULTS.has(e.computedStyles.backgroundColor) ||
+                        SF_DEFAULTS.has(e.computedStyles.color),
+          hardcodedIssues: e.hardcodedIssues,
+        } : null,
+      }));
+
+    const managed = visibleEntries
+      .filter(e => e.source === 'managed')
+      .map(e => ({
+        tag: e.tag,
+        source: 'managed',
+        packageName: e.namespaceLabel,
+        count: e.visibleInstances,
+        styling: e.computedStyles ? {
+          backgroundColor: e.computedStyles.backgroundColor,
+          color: e.computedStyles.color,
+          borderColor: e.computedStyles.borderColor,
+          usesDefaults: SF_DEFAULTS.has(e.computedStyles.backgroundColor) ||
+                        SF_DEFAULTS.has(e.computedStyles.color),
+          hardcodedIssues: e.hardcodedIssues,
+        } : null,
+      }));
+
+    return {
+      standard,
+      custom,
+      managed,
+      summary: buildSummary(standard, [...custom, ...managed]),
+      // New: full auto-discovered catalog (diff-ready). Consumers that know
+      // the new shape use this directly.
+      catalog: visibleEntries,
+    };
+  };
+
+  function buildSummary(standardResults, customAndManaged) {
+    let totalFound = 0, totalStyled = 0, totalPartial = 0, totalUnstyled = 0, totalHardcoded = 0;
+    for (const r of Object.values(standardResults)) {
+      totalFound += r.found;
+      totalStyled += r.styled;
+      totalPartial += r.partial;
+      totalUnstyled += r.unstyled;
+      totalHardcoded += r.hardcodedIssues.length;
+    }
+    const managedPackages = new Set(
+      customAndManaged.filter(c => c.source === 'managed').map(c => c.packageName)
+    );
+    return {
+      standardTypes: Object.keys(standardResults).length,
+      totalStandardFound: totalFound,
+      totalStyled,
+      totalPartial,
+      totalUnstyled,
+      totalHardcoded,
+      customLWCCount: customAndManaged.filter(c => c.source === 'custom').length,
+      managedPackages: Array.from(managedPackages),
+      managedComponentCount: customAndManaged.filter(c => c.source === 'managed').length,
+    };
+  }
+
+  // Full snapshot — DOM structure + styles keyed by identity. Diff-ready:
+  // same URL across scans produces comparable output.
+  ns.captureDOMSnapshot = function captureDOMSnapshot() {
+    const entries = discover();
+    const components = {};
+    for (const e of entries) {
+      if (e.visibleInstances === 0) continue;
+      components[e.identity] = {
+        label: e.identity,
+        source: e.source,
+        namespace: e.namespace,
+        namespaceLabel: e.namespaceLabel,
+        identityClass: e.identityClass,
+        matchedSelector: e.identityClass ? `.${e.identityClass}` : e.tag,
+        instanceCount: e.instances,
+        visibleCount: e.visibleInstances,
+        domStructure: e.domStructure,
+        computedStyles: e.computedStyles,
+        hardcodedIssues: e.hardcodedIssues,
+      };
+    }
+    return {
+      url: location.href,
+      timestamp: new Date().toISOString(),
+      components,
+    };
   };
 })();
-

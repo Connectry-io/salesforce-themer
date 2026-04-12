@@ -245,6 +245,19 @@ function generateThemeCSS(theme) {
   --slds-c-button-text-color-hover: ${c.textPrimary} !important;
   --slds-c-button-text-color-active: ${c.textPrimary} !important;
 
+  /* Legacy LWC — gap tokens discovered 2026-04-12 */
+  --lwc-colorBackgroundAlt2: ${c.surfaceAlt || c.background} !important;
+  --lwc-colorBackgroundRowActive: ${c.surfaceSelection} !important;
+  --lwc-colorBackgroundRowSelected: ${c.surfaceSelection} !important;
+  --lwc-colorBackgroundNotification: ${c.surfaceHighlight} !important;
+  --lwc-colorBackgroundToggleHover: ${c.surfaceHover} !important;
+  --lwc-colorTextPrimary: ${c.textPrimary} !important;
+  --lwc-colorTextLinkDisabled: ${c.textMuted} !important;
+  --lwc-colorTextLinkActive: ${c.accentActive} !important;
+  /* Kebab-case aliases SF uses alongside camelCase */
+  --lwc-color-background: ${c.background} !important;
+  --lwc-color-background-alt: ${c.surface} !important;
+
   /* Component hooks — tabs */
   --slds-c-tabs-item-text-color: ${c.tabInactiveColor} !important;
   --slds-c-tabs-item-text-color-active: ${c.tabActiveColor} !important;
