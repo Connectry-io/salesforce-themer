@@ -54,7 +54,7 @@
   const STYLE_ID = 'sf-themer-styles';
   const EFFECTS_STYLE_ID = 'sf-themer-effects';
   const TRANSITION_CLASS = 'sf-themer-transitioning';
-  const TRANSITION_DURATION = 300;
+  const TRANSITION_DURATION = 150;
 
   // Effects state
   let particleSystem = null;
@@ -131,8 +131,7 @@
         transition:
           background-color ${TRANSITION_DURATION}ms ease,
           color ${TRANSITION_DURATION}ms ease,
-          border-color ${TRANSITION_DURATION}ms ease,
-          box-shadow ${TRANSITION_DURATION}ms ease !important;
+          border-color ${TRANSITION_DURATION}ms ease !important;
       }
       @media (prefers-reduced-motion: reduce) {
         .sf-themer-transitioning,
