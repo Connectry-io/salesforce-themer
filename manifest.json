@@ -54,6 +54,7 @@
         "https://*.cloudforce.com/*"
       ],
       "js": [
+        "core/effects/engine.js",
         "effects/effects.js",
         "effects/presets.js",
         "diagnostic/token-scanner.js",

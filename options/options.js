@@ -391,11 +391,31 @@
       delete frame.dataset.fxCursorTrailStyle;
       _destroyBuilderCursorTrail(frame);
     }
-    // Background pattern
+    // Background pattern — delegated to core engine
+    // (core/effects/engine.js is the single source of truth for magnitudes,
+    // thickness scaling, and opacity math across all surfaces)
     if (effects.backgroundPattern && effects.backgroundPattern !== 'none') {
       frame.dataset.fxBackgroundPattern = effects.backgroundPattern;
+      const engine = window.SFThemerEffectsEngine;
+      if (engine && window.__EFFECTS_ENGINE_V2 !== false) {
+        const ir = engine.renderRules('backgroundPattern', effects, accent);
+        const rule = ir && ir.cssRules && ir.cssRules.find(r => r.selectorRole === 'bodyWrapper');
+        if (rule) {
+          // Declarations are applied via CSS custom properties that the
+          // editor-preview-frame::after rule reads. This lets us keep
+          // positioning/z-index in the stylesheet while the engine owns the
+          // visual properties.
+          const d = rule.declarations;
+          frame.style.setProperty('--fx-bg-pattern-image', d['background-image'] || 'none');
+          frame.style.setProperty('--fx-bg-pattern-size', d['background-size'] || 'auto');
+          frame.style.setProperty('--fx-bg-pattern-position', d['background-position'] || '0 0');
+        }
+      }
     } else {
       delete frame.dataset.fxBackgroundPattern;
+      frame.style.removeProperty('--fx-bg-pattern-image');
+      frame.style.removeProperty('--fx-bg-pattern-size');
+      frame.style.removeProperty('--fx-bg-pattern-position');
     }
     // Master intensity vars
     const allFxKeys = [...FX_KEYS, 'particles', 'cursorTrail'];
@@ -1632,6 +1652,7 @@
       neonFlicker: false, neonFlickerIntensity: 'medium',
       particles: false, particlesIntensity: 'medium',
       cursorTrail: false, cursorTrailIntensity: 'medium',
+      backgroundPattern: 'none', backgroundPatternIntensity: 'medium',
     };
     const SUBTLE = { ...NONE, preset: 'subtle', hoverLift: true, hoverLiftIntensity: 'subtle' };
     const ALIVE = {
@@ -3383,7 +3404,10 @@
     const config = editorState.effects || { ...NONE_EFFECTS };
 
     for (const effect of EFFECT_CATALOG) {
-      const isOn = !!config[effect.id];
+      // backgroundPattern is ON when its value is a valid style string (not 'none' or false)
+      const isOn = effect.id === 'backgroundPattern'
+        ? (config[effect.id] && config[effect.id] !== 'none')
+        : !!config[effect.id];
       const intensity = config[effect.id + 'Intensity'] || 'medium';
 
       const card = document.createElement('div');
@@ -3413,6 +3437,23 @@
             <option value="comet"   ${cursorTrailStyle === 'comet'   ? 'selected' : ''}>Comet</option>
             <option value="sparkle" ${cursorTrailStyle === 'sparkle' ? 'selected' : ''}>Sparkle</option>
             <option value="line"    ${cursorTrailStyle === 'line'    ? 'selected' : ''}>Line</option>
+          </select>
+        </div>
+      ` : '';
+
+      // backgroundPattern style dropdown — 6 styles driven by engine metadata
+      const bgPatternStyle = (typeof config.backgroundPattern === 'string' && config.backgroundPattern !== 'none')
+        ? config.backgroundPattern : 'dotGrid';
+      const backgroundPatternSelectRow = effect.id === 'backgroundPattern' ? `
+        <div class="effect-slider-row">
+          <span class="effect-select-label">Style</span>
+          <select class="effect-select" data-effect-select="backgroundPattern">
+            <option value="dotGrid"    ${bgPatternStyle === 'dotGrid'    ? 'selected' : ''}>Dot Grid</option>
+            <option value="lineGrid"   ${bgPatternStyle === 'lineGrid'   ? 'selected' : ''}>Line Grid</option>
+            <option value="hatch"      ${bgPatternStyle === 'hatch'      ? 'selected' : ''}>Hatch</option>
+            <option value="noise"      ${bgPatternStyle === 'noise'      ? 'selected' : ''}>Noise</option>
+            <option value="subway"     ${bgPatternStyle === 'subway'     ? 'selected' : ''}>Subway Tile</option>
+            <option value="crosshatch" ${bgPatternStyle === 'crosshatch' ? 'selected' : ''}>Crosshatch</option>
           </select>
         </div>
       ` : '';
@@ -3450,6 +3491,7 @@
           </div>
           ${particleSelectRow}
           ${cursorTrailSelectRow}
+          ${backgroundPatternSelectRow}
         </div>` : ''}
       `;
 
@@ -3458,6 +3500,8 @@
       toggle?.addEventListener('change', () => {
         if (effect.id === 'particles') {
           editorState.effects.particles = toggle.checked ? (particleType || 'snow') : false;
+        } else if (effect.id === 'backgroundPattern') {
+          editorState.effects.backgroundPattern = toggle.checked ? bgPatternStyle : 'none';
         } else {
           editorState.effects[effect.id] = toggle.checked;
         }
@@ -3495,6 +3539,14 @@
           const frame = document.querySelector('.editor-preview-frame');
           if (frame) applyPreviewEffects(frame, editorState.effects, editorState.colors?.brandPrimary || '#4a6fa5');
         }
+      });
+
+      // Background pattern style select — delegates to engine via applyPreviewEffects
+      const bgSelect = card.querySelector('[data-effect-select="backgroundPattern"]');
+      bgSelect?.addEventListener('change', () => {
+        editorState.effects.backgroundPattern = bgSelect.value;
+        const frame = document.querySelector('.editor-preview-frame');
+        if (frame) applyPreviewEffects(frame, editorState.effects, editorState.colors?.brandPrimary || '#4a6fa5');
       });
 
       grid.appendChild(card);
@@ -3756,6 +3808,7 @@
     { id: 'neonFlicker',     name: 'Neon Flicker',      short: 'Glowing text with flicker',       long: 'Page titles and active navigation gain a neon text glow with occasional flicker, like a sign.' },
     { id: 'particles',       name: 'Particles',         short: 'Snow, rain, matrix, dots, embers', long: 'Animated background particles. Pick from snow, rain, matrix rain, floating dots, or rising embers.' },
     { id: 'cursorTrail',     name: 'Cursor Trail',      short: 'Light trail follows your mouse',  long: 'A short glowing trail follows your mouse pointer, fading as it goes.' },
+    { id: 'backgroundPattern', name: 'Background Pattern', short: 'Subtle pattern behind all content', long: 'A subtle structural pattern behind all content. Six styles: dot grid, line grid, hatch, noise, subway tile, crosshatch.' },
   ];
 
   const NONE_EFFECTS = {
@@ -3768,6 +3821,7 @@
     neonFlicker: false, neonFlickerIntensity: 'medium',
     particles: false, particlesIntensity: 'medium',
     cursorTrail: false, cursorTrailIntensity: 'medium',
+    backgroundPattern: 'none', backgroundPatternIntensity: 'medium',
   };
 
   const PRESET_CONFIGS = {
@@ -4568,6 +4622,12 @@
             const themeAccent = getThemeById(syncState.theme)?.colors?.brandPrimary || '#4a6fa5';
             _initBuilderCursorTrail(previewEl, themeAccent, styleSelect.value);
           }
+          // Background pattern: re-apply engine-computed declarations
+          if (eff.id === 'backgroundPattern') {
+            const activePill = card.querySelector('.guide-effect-playground-pill.is-active');
+            const level = activePill?.dataset.intensity || 'medium';
+            _applyGuideBackgroundPattern(card, level);
+          }
         });
       }
 
@@ -4625,7 +4685,10 @@
    * playground previews behave like the real thing.
    */
   function _applyGuidePlaygroundIntensity(card, level) {
-    const LADDER = {
+    // Pull from core engine when available (feature flag allows legacy fallback)
+    const engine = window.SFThemerEffectsEngine;
+    const useEngine = engine && window.__EFFECTS_ENGINE_V2 !== false;
+    const LADDER = useEngine ? engine.INTENSITY_LADDER : {
       subtle: { mult: 0.5, speed: 1.6 },
       medium: { mult: 1.0, speed: 1.0 },
       strong: { mult: 1.6, speed: 0.65 },
@@ -4633,6 +4696,41 @@
     const v = LADDER[level] || LADDER.medium;
     card.style.setProperty('--fx-mult', String(v.mult));
     card.style.setProperty('--fx-speed-mult', String(v.speed));
+
+    // If this card is backgroundPattern, re-derive the pattern declarations
+    // from the engine so thickness+opacity scale correctly with intensity.
+    const effectId = card.dataset.effect;
+    if (useEngine && effectId === 'backgroundPattern') {
+      _applyGuideBackgroundPattern(card, level);
+    }
+  }
+
+  /**
+   * Apply backgroundPattern CSS custom properties to a Guide card preview.
+   * Delegates all magnitude math to core/effects/engine.js so Guide stays in
+   * lock-step with Builder and Salesforce content script.
+   */
+  function _applyGuideBackgroundPattern(card, intensityLevel) {
+    const engine = window.SFThemerEffectsEngine;
+    if (!engine) return;
+    const previewEl = card.querySelector('.guide-effect-preview');
+    if (!previewEl) return;
+    const style = previewEl.dataset.style || 'dotGrid';
+    const themeAccent = (getThemeById(syncState.theme) || getThemeById('connectry'))?.colors?.accent || '#4a6fa5';
+    const ir = engine.renderRules('backgroundPattern',
+      { backgroundPattern: style, backgroundPatternIntensity: intensityLevel },
+      themeAccent);
+    const rule = ir && ir.cssRules && ir.cssRules.find(r => r.selectorRole === 'bodyWrapper');
+    if (rule) {
+      const d = rule.declarations;
+      previewEl.style.setProperty('--fx-bg-pattern-image', d['background-image'] || 'none');
+      previewEl.style.setProperty('--fx-bg-pattern-size', d['background-size'] || 'auto');
+      previewEl.style.setProperty('--fx-bg-pattern-position', d['background-position'] || '0 0');
+    } else {
+      previewEl.style.removeProperty('--fx-bg-pattern-image');
+      previewEl.style.removeProperty('--fx-bg-pattern-size');
+      previewEl.style.removeProperty('--fx-bg-pattern-position');
+    }
   }
 
   /**

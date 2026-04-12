@@ -484,17 +484,21 @@ body.sf-themer-fx-neon .slds-card__header-title {
 `;
   }
 
-  // ─── Background Patterns (theme-accent tinted, intensity-scaled) ──────────
-  // 6 presets: dot-grid, line-grid, hatch, noise, subway, crosshatch
-  // Each pattern uses CSS gradients only (no images), tinted by accent.
-  // Sits behind ALL content via a fixed pseudo-element on body.
+  // ─── Background Patterns ──────────────────────────────────────────────────
+  // Delegates to core engine (core/effects/engine.js). This is the first
+  // effect migrated to the primitives+adapters architecture. Adapter here
+  // maps IR role `bodyWrapper` → `body` and emits !important CSS to override
+  // Salesforce inline styles.
   if (config.backgroundPattern && config.backgroundPattern !== 'none') {
-    const m = _intensityMult(config, 'backgroundPattern');
-    const baseOpacity = 0.05 * m;
-    const patternCss = _buildBackgroundPatternCss(config.backgroundPattern, accentRgb, baseOpacity);
-    if (patternCss) {
-      css += `
-/* ─── Background Pattern: ${config.backgroundPattern} ─── */
+    const engine = (typeof self !== 'undefined' && self.SFThemerEffectsEngine) ||
+                   (typeof window !== 'undefined' && window.SFThemerEffectsEngine);
+    const ir = engine && engine.renderRules('backgroundPattern', config, accent);
+    if (ir && ir.cssRules && ir.cssRules.length) {
+      const rule = ir.cssRules.find(r => r.selectorRole === 'bodyWrapper');
+      if (rule) {
+        const decls = engine.cssFromDeclarations(rule.declarations, { important: true });
+        css += `
+/* ─── Background Pattern: ${config.backgroundPattern} (via core engine) ─── */
 
 body.sf-themer-fx-background::after {
   content: '' !important;
@@ -502,7 +506,7 @@ body.sf-themer-fx-background::after {
   inset: 0 !important;
   pointer-events: none !important;
   z-index: 0 !important;
-  ${patternCss}
+${decls}
 }
 
 body.sf-themer-fx-background .oneContent,
@@ -513,6 +517,7 @@ body.sf-themer-fx-background .slds-modal__container {
   z-index: 1 !important;
 }
 `;
+      }
     }
   }
 
