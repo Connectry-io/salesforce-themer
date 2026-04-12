@@ -3950,9 +3950,9 @@ body.is-premium .builder-overflow-premium-badge { display: none !important; }
 .editor-preview-frame[data-fx-gradient-borders="on"] .preview-card::after {
   content: '';
   position: absolute;
-  inset: calc(-1px * var(--fx-mult));
+  inset: calc(-1.5px * var(--fx-mult));
   border-radius: 9px;
-  padding: calc(1.5px * var(--fx-mult));
+  padding: calc(2px * var(--fx-mult));
   background: conic-gradient(
     from var(--editor-fx-border-angle),
     rgba(var(--fx-accent-rgb), 1) 0%,
@@ -6337,15 +6337,15 @@ td.upgrade-compare-col-premium,
   top: 0;
   left: 0;
   right: 0;
-  height: calc(3px * var(--fx-mult));
+  height: calc(2px * var(--fx-mult));
   background: linear-gradient(
     90deg,
     transparent 0%, transparent 40%,
-    rgba(var(--fx-accent-rgb), calc(0.95 * var(--fx-mult))) 50%,
+    rgba(var(--fx-accent-rgb), calc(0.9 * var(--fx-mult))) 50%,
     transparent 60%, transparent 100%
   );
   background-size: 200% 100%;
-  filter: blur(calc(0.5px * var(--fx-mult)));
+  filter: blur(calc(0.3px * var(--fx-mult)));
   animation: guide-fx-shimmer calc(3s * var(--fx-speed-mult)) ease-in-out infinite;
 }
 @keyframes guide-fx-shimmer {
@@ -6370,7 +6370,7 @@ td.upgrade-compare-col-premium,
   content: '';
   position: absolute;
   inset: 0;
-  padding: calc(3px * var(--fx-mult));
+  padding: calc(2px * var(--fx-mult));
   border-radius: inherit;
   background: conic-gradient(
     from var(--guide-fx-angle),
