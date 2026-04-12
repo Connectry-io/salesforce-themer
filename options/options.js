@@ -4422,7 +4422,19 @@
       ],
       defaultStyle: 'snow',
     },
-    { id: 'cursorTrail',     name: 'Cursor Trail',      desc: 'A short glowing trail follows your mouse pointer, fading as it goes. Hover the preview to see it.', preview: 'Hover me' },
+    {
+      id: 'cursorTrail',
+      name: 'Cursor Trail',
+      desc: 'A short glowing trail follows your mouse pointer, fading as it goes. Hover the preview to see it.',
+      preview: 'Hover me',
+      styles: [
+        { value: 'glow',    label: 'Glow' },
+        { value: 'comet',   label: 'Comet' },
+        { value: 'sparkle', label: 'Sparkle' },
+        { value: 'line',    label: 'Line' },
+      ],
+      defaultStyle: 'glow',
+    },
     {
       id: 'backgroundPattern',
       name: 'Background Pattern',
@@ -4547,6 +4559,12 @@
         if (e.target.closest('.guide-effect-playground')) return;
         if (e.target.closest('.guide-effect-style-row')) return;
         if (_tabsInstance) _tabsInstance.activate('builder');
+        // Scroll to top of Builder — otherwise browser restores last scroll
+        requestAnimationFrame(() => {
+          window.scrollTo({ top: 0, behavior: 'auto' });
+          const fxSection = document.getElementById(`builder-effect-${eff.id}`);
+          if (fxSection) fxSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        });
       });
 
       grid.appendChild(card);

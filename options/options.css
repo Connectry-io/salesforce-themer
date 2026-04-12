@@ -6337,14 +6337,15 @@ td.upgrade-compare-col-premium,
   top: 0;
   left: 0;
   right: 0;
-  height: calc(1px * var(--fx-mult));
+  height: calc(3px * var(--fx-mult));
   background: linear-gradient(
     90deg,
     transparent 0%, transparent 40%,
-    rgba(var(--fx-accent-rgb), calc(0.85 * var(--fx-mult))) 50%,
+    rgba(var(--fx-accent-rgb), calc(0.95 * var(--fx-mult))) 50%,
     transparent 60%, transparent 100%
   );
   background-size: 200% 100%;
+  filter: blur(calc(0.5px * var(--fx-mult)));
   animation: guide-fx-shimmer calc(3s * var(--fx-speed-mult)) ease-in-out infinite;
 }
 @keyframes guide-fx-shimmer {
@@ -6369,7 +6370,7 @@ td.upgrade-compare-col-premium,
   content: '';
   position: absolute;
   inset: 0;
-  padding: calc(1.5px * var(--fx-mult));
+  padding: calc(3px * var(--fx-mult));
   border-radius: inherit;
   background: conic-gradient(
     from var(--guide-fx-angle),
@@ -6508,6 +6509,9 @@ td.upgrade-compare-col-premium,
   display: block;
   /* Spread particles across the width — 30 particles * 3.3% ≈ 99% */
   left: calc(var(--i) * 3.3%);
+  /* Default offscreen-top so the pre-animation frame doesn't flash a horizontal row */
+  top: -20%;
+  opacity: 0;
 }
 
 /* SNOW: small white circles drifting down */
@@ -6610,6 +6614,38 @@ td.upgrade-compare-col-premium,
   background: var(--cx-surface);
   overflow: hidden;
 }
+
+/* COMET: trailing tail behind the dot */
+.guide-effect-card[data-effect="cursorTrail"] .guide-effect-preview[data-style="comet"]::before {
+  background: linear-gradient(90deg, transparent 0%, rgba(var(--fx-accent-rgb), 0.8) 100%) !important;
+  width: calc(40px * var(--fx-mult)) !important;
+  height: calc(4px * var(--fx-mult)) !important;
+  border-radius: 2px !important;
+  filter: blur(calc(1px * var(--fx-mult))) !important;
+  margin-top: calc(-2px * var(--fx-mult)) !important;
+  margin-left: calc(-20px * var(--fx-mult)) !important;
+}
+/* SPARKLE: star-shaped dot with radiating glow */
+.guide-effect-card[data-effect="cursorTrail"] .guide-effect-preview[data-style="sparkle"]::after {
+  background: radial-gradient(circle, #fff 0%, rgba(var(--fx-accent-rgb), 0.9) 40%, transparent 80%) !important;
+  box-shadow: 0 0 calc(20px * var(--fx-mult)) rgba(var(--fx-accent-rgb), 0.9),
+              0 0 calc(40px * var(--fx-mult)) rgba(var(--fx-accent-rgb), 0.5) !important;
+  width: calc(10px * var(--fx-mult)) !important;
+  height: calc(10px * var(--fx-mult)) !important;
+  margin-top: calc(-5px * var(--fx-mult)) !important;
+  margin-left: calc(-5px * var(--fx-mult)) !important;
+}
+/* LINE: thin continuous line tracing the orbit */
+.guide-effect-card[data-effect="cursorTrail"] .guide-effect-preview[data-style="line"]::before {
+  background: var(--fx-accent) !important;
+  width: calc(3px * var(--fx-mult)) !important;
+  height: calc(30px * var(--fx-mult)) !important;
+  border-radius: 2px !important;
+  filter: blur(calc(0.5px * var(--fx-mult))) !important;
+  margin-top: calc(-15px * var(--fx-mult)) !important;
+  margin-left: calc(-1.5px * var(--fx-mult)) !important;
+}
+
 .guide-effect-card[data-effect="cursorTrail"] .guide-effect-preview::before {
   content: '';
   position: absolute;
