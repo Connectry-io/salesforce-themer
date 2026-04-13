@@ -368,6 +368,9 @@
             <div class="diag-header-subtitle">Powered by Connectry AI</div>
           </div>
           <div class="diag-header-actions">
+            <button class="diag-icon-btn" data-action="toggleAdvancedMode" title="Advanced mode: rich enrichment + screenshot for AI suggestions" style="font-size:9px;font-weight:600;letter-spacing:0.04em;width:auto;padding:0 8px;">
+              <span data-advanced-label>ADV</span>
+            </button>
             <button class="diag-icon-btn" data-action="togglePanelTheme" title="Toggle light/dark panel">
               <svg viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="5" stroke="currentColor" stroke-width="1.4"/><path d="M7 2a5 5 0 0 1 0 10z" fill="currentColor"/></svg>
             </button>
@@ -861,8 +864,8 @@
       // ── 1. Health summary (token coverage + component health combined) ──
       html += this._healthSummaryHTML();
 
-      // ── 1b. AI suggestion card (if present) ──
-      if (this.aiSuggestion) html += this._aiSuggestionHTML();
+      // ── 1b. AI suggestion card (if present or in progress) ──
+      if (this.aiSuggestion || this.aiBusy) html += this._aiSuggestionHTML();
 
       // ── 2. Issues: token gaps with inline fixes ──
       if (this.fixReport?.tokenFixes?.fixes?.length > 0) {
@@ -1372,6 +1375,9 @@
     _bindEvents() {
       if (!this.shadow) return;
 
+      // Initial advanced-mode chip state.
+      this._refreshAdvancedChip().catch(() => {});
+
       // Action buttons
       this.shadow.addEventListener('click', (e) => {
         const btn = e.target.closest('[data-action]');
@@ -1381,6 +1387,7 @@
         if (action === 'close') this.close();
         else if (action === 'minimize') this.minimize();
         else if (action === 'togglePanelTheme') this._togglePanelTheme();
+        else if (action === 'toggleAdvancedMode') this._toggleAdvancedMode(btn);
         else if (action === 'scanAll') this._runScanAll(btn);
         else if (action === 'scanThemesPresets') this._runMultiThemeScan('presets');
         else if (action === 'scanThemesMine') this._runMultiThemeScan('custom');
@@ -1728,6 +1735,13 @@
 
     _aiSuggestionHTML() {
       const s = this.aiSuggestion;
+      if (!s && this.aiBusy) {
+        return `
+          <div class="diag-card" style="padding:14px;border-left:3px solid #4A6FA5;margin-bottom:10px">
+            <div style="font-weight:600;margin-bottom:4px">AI suggestion in progress…</div>
+            <div style="font-size:11px;opacity:0.7">${this._escapeHtml(this.aiProgress || 'Working…')}</div>
+          </div>`;
+      }
       if (!s) return '';
       if (s.error) {
         return `
@@ -1765,8 +1779,54 @@
         </div>`;
     }
 
-    async _suggestAIFix(btn) {
+    async _refreshAdvancedChip() {
       const intel = window.ConnectryIntel;
+      if (!intel) return;
+      const on = await intel.getAdvancedMode();
+      const btn = this.shadow?.querySelector('[data-action="toggleAdvancedMode"]');
+      if (btn) {
+        btn.style.background = on ? 'rgba(124,58,237,0.25)' : '';
+        btn.style.color = on ? '#a78bfa' : '';
+        btn.title = on
+          ? 'Advanced mode ON — sends DOM + computed styles + screenshot to AI'
+          : 'Advanced mode OFF — sends only token names. Click to enable rich AI suggestions.';
+      }
+    }
+
+    async _toggleAdvancedMode(btn) {
+      const intel = window.ConnectryIntel;
+      if (!intel) return;
+      const cur = await intel.getAdvancedMode();
+      await intel.setAdvancedMode(!cur);
+      this._refreshAdvancedChip();
+    }
+
+    _setAIProgress(stage) {
+      this.aiProgress = stage;
+      this._rerender();
+    }
+
+    /**
+     * Classify a scan as 'standard' | 'managed' | 'custom' based on the
+     * component-scanner output. Used to route the accept action:
+     *   custom  → save locally via ns.savePatch (per-user)
+     *   standard|managed → publish to app_configs (all users get on next load)
+     */
+    _classifyScanSource() {
+      const cr = this.componentResults;
+      if (!cr) return 'standard';
+      if (cr.managed?.length && (!cr.summary?.totalUnstyled && !cr.summary?.totalPartial)) return 'managed';
+      // Heuristic: if the only issues are custom LWCs, route local.
+      const standardIssues = (cr.summary?.totalUnstyled || 0) + (cr.summary?.totalPartial || 0);
+      const customIssues = (this.fixReport?.componentPatches?.length || 0);
+      if (!standardIssues && !cr.managed?.length && customIssues > 0) return 'custom';
+      if (cr.managed?.length) return 'managed';
+      return 'standard';
+    }
+
+    async _suggestAIFix(_btn) {
+      const intel = window.ConnectryIntel;
+      const enrich = window.__sfThemerEnrichment;
       if (!intel) {
         this.aiSuggestion = { error: 'ConnectryIntel client not loaded' };
         this._rerender();
@@ -1775,7 +1835,13 @@
       const consent = await intel.getConsent();
       if (!consent) {
         const ok = window.confirm(
-          'AI Suggest Fix sends your scan findings (token gaps, sample DOM snippets, theme tokens) to the Connectry Intelligence Layer. Enable telemetry consent?'
+          'AI Suggest Fix sends your scan findings to the Connectry Intelligence Layer.\n\n' +
+          'Advanced mode (your local default) also sends:\n' +
+          '  • DOM structure of affected elements (text content stripped)\n' +
+          '  • Computed styles\n' +
+          '  • A screenshot of the visible viewport\n' +
+          '  • Your active theme tokens\n\n' +
+          'Enable?'
         );
         if (!ok) return;
         await intel.setConsent(true);
@@ -1788,31 +1854,78 @@
         return;
       }
 
+      const advanced = await intel.getAdvancedMode();
+      const source = this._classifyScanSource();
       this.aiBusy = true;
       this.aiSuggestion = null;
-      this._rerender();
+      this._setAIProgress(advanced ? 'Capturing screenshot…' : 'Building findings…');
 
-      const findings = {
-        gaps: gaps.map((g, i) => ({
-          id: `gap-${i + 1}`,
-          token: g,
-          issue: `Token ${g} is used by Salesforce on this page but not provided by the active theme.`,
-        })),
-      };
+      let findingsPayload;
+      let screenshotDataUrl = null;
+      if (advanced && enrich) {
+        const built = await enrich.buildAdvancedFindings({
+          gaps,
+          themeColors: this.themeColors || {},
+          includeScreenshot: true,
+        });
+        findingsPayload = built.payload;
+        screenshotDataUrl = built.screenshotDataUrl;
+      } else {
+        findingsPayload = {
+          mode: 'silent',
+          gaps: gaps.map((g, i) => ({ id: `gap-${i + 1}`, token: g })),
+        };
+      }
+
+      this._setAIProgress('Calling Claude (10–30s)…');
+
       const context = {
         themeId: this.currentTheme?.id || this._configuredThemeName || null,
         page: location.pathname,
+        scan_source: source,
         activeTokens: this.themeColors || {},
       };
 
-      const r = await intel.suggestFix({ intent: 'gap_to_patch', findings, context });
+      const r = await intel.suggestFix({
+        intent: 'gap_to_patch',
+        findings: findingsPayload,
+        context,
+        screenshotDataUrl,
+        mode: advanced ? 'advanced' : 'silent',
+      });
+
       this.aiBusy = false;
+      this.aiProgress = null;
       if (r?.error) {
-        this.aiSuggestion = { error: r.error };
+        this.aiSuggestion = { error: r.error, source };
       } else {
-        this.aiSuggestion = { id: r.suggestion_id, output: r.output, status: 'pending' };
+        this.aiSuggestion = {
+          id: r.suggestion_id,
+          output: r.output,
+          status: 'pending',
+          source,
+          mode: advanced ? 'advanced' : 'silent',
+        };
       }
       this._rerender();
+    }
+
+    /**
+     * Live-inject CSS into the current SF tab so accepted patches are visible
+     * without a page refresh. Persists for next load via patch-loader.js
+     * (which fetches the now-published config at document_start).
+     */
+    _liveInjectAcceptedCSS(css) {
+      if (!css) return;
+      const STYLE_ID = 'sf-themer-intel-patch';
+      let el = document.getElementById(STYLE_ID);
+      if (!el) {
+        el = document.createElement('style');
+        el.id = STYLE_ID;
+        document.head.appendChild(el);
+      }
+      el.dataset.intelSource = 'live-accepted';
+      el.textContent = (el.textContent || '') + '\n\n' + css;
     }
 
     async _decideAISuggestion(decision) {
@@ -1821,15 +1934,42 @@
       const reason = decision === 'rejected'
         ? (window.prompt('Reject reason (optional)') || null)
         : null;
-      const r = await intel.decideSuggestion(this.aiSuggestion.id, {
+
+      const sugg = this.aiSuggestion;
+      const isCustom = sugg.source === 'custom';
+      // For custom: don't publish to server — save locally instead.
+      const publish = decision === 'accepted' && !isCustom;
+
+      const r = await intel.decideSuggestion(sugg.id, {
         decision,
         rejectReason: reason,
-        publish: decision === 'accepted',
+        publish,
       });
+
       if (r?.error) {
         this.aiSuggestion.error = r.error;
-      } else {
-        this.aiSuggestion.status = decision;
+        this._rerender();
+        return;
+      }
+
+      this.aiSuggestion.status = decision;
+
+      if (decision === 'accepted') {
+        const css = sugg.output?.patch_css || '';
+        if (isCustom) {
+          // Save into the local patch store so it persists per-user.
+          if (ns.savePatch) {
+            const tag = `ai-${sugg.id}`;
+            await ns.savePatch(tag, { css, rules: [], source: 'ai' }, true);
+            if (ns.injectPatches) await ns.injectPatches();
+            if (ns.getPatchSummary) this.patchSummary = await ns.getPatchSummary();
+          } else {
+            this._liveInjectAcceptedCSS(css);
+          }
+        } else {
+          // Standard/managed: server published; also live-inject so it shows now.
+          this._liveInjectAcceptedCSS(css);
+        }
       }
       this._rerender();
     }

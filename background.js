@@ -1782,3 +1782,17 @@ async function broadcastThemeToActiveTabs(themeId) {
     }
   } catch (_) {}
 }
+
+// ─── Connectry Intelligence Layer — screenshot capture ────────────────────────
+// Content scripts can't call chrome.tabs.captureVisibleTab. Diagnostic panel
+// posts { action: 'intel.captureScreenshot' } and we return a base64 PNG of
+// the visible viewport for the active tab.
+
+chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
+  if (msg?.action !== 'intel.captureScreenshot') return false;
+  const windowId = sender.tab?.windowId;
+  chrome.tabs.captureVisibleTab(windowId, { format: 'png' })
+    .then((dataUrl) => sendResponse({ ok: true, dataUrl }))
+    .catch((err) => sendResponse({ ok: false, error: String(err) }));
+  return true; // async response
+});

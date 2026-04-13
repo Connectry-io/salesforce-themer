@@ -35,6 +35,8 @@ async function handleSuggest(req: Request): Promise<Response> {
     findings?: unknown;
     context?: unknown;
     anon_user_id?: string | null;
+    mode?: string;
+    screenshot_data_url?: string | null;
   };
   try {
     body = await req.json();
@@ -65,10 +67,25 @@ async function handleSuggest(req: Request): Promise<Response> {
   const anthropicKey = Deno.env.get("ANTHROPIC_API_KEY");
   if (!anthropicKey) return json({ error: "ANTHROPIC_API_KEY not set" }, 500);
 
-  const userMsg = renderTemplate(tmpl.user_template, {
+  const mode = body.mode ?? "silent";
+  const userText = renderTemplate(tmpl.user_template, {
+    mode,
     findings: JSON.stringify(findings, null, 2),
     context: JSON.stringify(body.context ?? {}, null, 2),
   });
+
+  // Build content blocks — attach the screenshot as a vision input when present.
+  const userContent: Array<Record<string, unknown>> = [];
+  if (body.screenshot_data_url && typeof body.screenshot_data_url === "string") {
+    const m = body.screenshot_data_url.match(/^data:(image\/[a-z]+);base64,(.+)$/i);
+    if (m) {
+      userContent.push({
+        type: "image",
+        source: { type: "base64", media_type: m[1], data: m[2] },
+      });
+    }
+  }
+  userContent.push({ type: "text", text: userText });
 
   const client = new Anthropic({ apiKey: anthropicKey });
   const params = tmpl.params ?? {};
@@ -79,7 +96,7 @@ async function handleSuggest(req: Request): Promise<Response> {
       max_tokens: params.max_tokens ?? 2048,
       temperature: params.temperature ?? 0.2,
       system: tmpl.system_prompt,
-      messages: [{ role: "user", content: userMsg }],
+      messages: [{ role: "user", content: userContent }],
     });
   } catch (e) {
     return json({ error: `anthropic: ${(e as Error).message}` }, 502);
@@ -99,7 +116,12 @@ async function handleSuggest(req: Request): Promise<Response> {
       namespace: body.namespace ?? "default",
       intent,
       template_id: tmpl.id,
-      input_payload: { findings, context: body.context ?? null },
+      input_payload: {
+        findings,
+        context: body.context ?? null,
+        mode,
+        screenshot_attached: !!body.screenshot_data_url,
+      },
       output_payload: parsed,
       model: tmpl.model,
       tokens_input: modelResp.usage?.input_tokens ?? null,
