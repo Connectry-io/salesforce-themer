@@ -368,6 +368,9 @@
             <div class="diag-header-subtitle">Powered by Connectry AI</div>
           </div>
           <div class="diag-header-actions">
+            <button class="diag-icon-btn" data-action="toggleQAMode" title="QA mode: load qa-tier patches in this tab (Connectry HQ only)" style="font-size:9px;font-weight:600;letter-spacing:0.04em;width:auto;padding:0 8px;">
+              <span data-qa-label>QA</span>
+            </button>
             <button class="diag-icon-btn" data-action="toggleAdvancedMode" title="Advanced mode: rich enrichment + screenshot for AI suggestions" style="font-size:9px;font-weight:600;letter-spacing:0.04em;width:auto;padding:0 8px;">
               <span data-advanced-label>ADV</span>
             </button>
@@ -1393,8 +1396,9 @@
     _bindEvents() {
       if (!this.shadow) return;
 
-      // Initial advanced-mode chip state.
+      // Initial advanced-mode + QA-mode chip state.
       this._refreshAdvancedChip().catch(() => {});
+      this._refreshQAChip().catch(() => {});
 
       // Action buttons
       this.shadow.addEventListener('click', (e) => {
@@ -1406,6 +1410,7 @@
         else if (action === 'minimize') this.minimize();
         else if (action === 'togglePanelTheme') this._togglePanelTheme();
         else if (action === 'toggleAdvancedMode') this._toggleAdvancedMode(btn);
+        else if (action === 'toggleQAMode') this._toggleQAMode(btn);
         else if (action === 'scanAll') this._runScanAll(btn);
         else if (action === 'scanThemesPresets') this._runMultiThemeScan('presets');
         else if (action === 'scanThemesMine') this._runMultiThemeScan('custom');
@@ -1819,6 +1824,28 @@
       this._refreshAdvancedChip();
     }
 
+    async _refreshQAChip() {
+      const intel = window.ConnectryIntel;
+      if (!intel) return;
+      const on = await intel.getQAMode();
+      const btn = this.shadow?.querySelector('[data-action="toggleQAMode"]');
+      if (btn) {
+        btn.style.background = on ? 'rgba(34,197,94,0.25)' : '';
+        btn.style.color = on ? '#86efac' : '';
+        btn.title = on
+          ? 'QA mode ON — qa-tier patches load in this tab (HQ only). Refresh SF tab to apply.'
+          : 'QA mode OFF — only globally published patches load. Click to enable Connectry HQ QA loading.';
+      }
+    }
+
+    async _toggleQAMode(_btn) {
+      const intel = window.ConnectryIntel;
+      if (!intel) return;
+      const cur = await intel.getQAMode();
+      await intel.setQAMode(!cur);
+      this._refreshQAChip();
+    }
+
     _setAIProgress(stage) {
       this.aiProgress = stage;
       this._rerender();
@@ -1973,10 +2000,14 @@
       // For custom: don't publish to server — save locally instead.
       const publish = decision === 'accepted' && !isCustom;
 
+      // SECURITY: default tier on accept is 'qa'. Promotion to 'global' is
+      // a separate manual step (SQL flip or future UI button) that requires
+      // the PUBLISH_SECRET. See SECURITY.md.
       const r = await intel.decideSuggestion(sugg.id, {
         decision,
         rejectReason: reason,
         publish,
+        tier: 'qa',
       });
 
       if (r?.error) {

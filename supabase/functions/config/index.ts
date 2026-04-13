@@ -32,12 +32,21 @@ Deno.serve(async (req) => {
   // patches exist without hardcoding keys in the client.
   if (key === "_index") {
     const prefix = url.searchParams.get("prefix") ?? "";
+    // SECURITY (T4): tier filter. Default 'global' — public callers without
+    // ?tier= only ever see globally published patches. QA mode in the
+    // extension explicitly requests ?tier=global,qa to also see internal.
+    // 'engine' rows are excluded from the loader's view by design (engine wins).
+    const tierParam = url.searchParams.get("tier") ?? "global";
+    const tiers = tierParam.split(",").map((t) => t.trim()).filter(Boolean);
+    const validTiers = tiers.filter((t) => ["qa", "global"].includes(t));
+    if (validTiers.length === 0) validTiers.push("global");
     let q = db
       .from("app_configs")
-      .select("key, version, etag, content_type, created_at")
+      .select("key, version, etag, content_type, created_at, tier")
       .eq("product_id", product)
       .eq("namespace", namespace)
       .eq("is_active", true)
+      .in("tier", validTiers)
       .order("key", { ascending: true });
     if (prefix) q = q.like("key", `${prefix}%`);
     const { data, error } = await q;

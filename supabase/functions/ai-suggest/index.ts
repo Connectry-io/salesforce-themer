@@ -9,6 +9,7 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.4";
 import Anthropic from "https://esm.sh/@anthropic-ai/sdk@0.32.1";
 import { checkSharedSecret, handleCors, json, supabaseAdmin } from "../_shared/auth.ts";
+import { validatePatchCSS } from "../_shared/css-validator.ts";
 
 Deno.serve(async (req) => {
   const cors = handleCors(req);
@@ -142,7 +143,13 @@ async function handleSuggest(req: Request): Promise<Response> {
 }
 
 async function handleDecide(req: Request, id: string): Promise<Response> {
-  let body: { decision?: string; reject_reason?: string; decided_by?: string; publish?: boolean };
+  let body: {
+    decision?: string;
+    reject_reason?: string;
+    decided_by?: string;
+    publish?: boolean;
+    tier?: string;
+  };
   try {
     body = await req.json();
   } catch {
@@ -152,6 +159,31 @@ async function handleDecide(req: Request, id: string): Promise<Response> {
   const decision = body.decision;
   if (decision !== "accepted" && decision !== "rejected") {
     return json({ error: "decision must be 'accepted' or 'rejected'" }, 400);
+  }
+
+  // Resolve tier: explicit > default 'qa'.
+  // Only 'qa' and 'global' are valid here. 'engine' is set manually after
+  // graduation; 'local' lives in the extension's local store, never here.
+  const tier = (body.tier ?? "qa").toLowerCase();
+  if (!["qa", "global"].includes(tier)) {
+    return json({ error: `tier must be 'qa' or 'global' (got '${tier}')` }, 400);
+  }
+
+  // SECURITY (T2): publishing to 'global' requires the PUBLISH_SECRET on top
+  // of the dev shared secret. Without it, an accept lands in 'qa' tier only.
+  const wantsPublish = decision === "accepted" && body.publish === true;
+  if (wantsPublish && tier === "global") {
+    const expected = Deno.env.get("PUBLISH_SECRET");
+    if (!expected) {
+      return json({ error: "server misconfigured: PUBLISH_SECRET unset" }, 500);
+    }
+    const got = req.headers.get("x-connectry-publish-secret");
+    if (got !== expected) {
+      return json(
+        { error: "publish-forbidden: x-connectry-publish-secret missing or wrong" },
+        403,
+      );
+    }
   }
 
   const { url, serviceKey } = supabaseAdmin();
@@ -173,47 +205,67 @@ async function handleDecide(req: Request, id: string): Promise<Response> {
   };
   if (decision === "rejected") update.reject_reason = body.reject_reason ?? null;
 
-  // Optionally publish the suggested patch to app_configs when accepted + publish=true
+  // Publish to app_configs when accepted + publish=true.
   let appliedConfigId: number | null = null;
-  if (decision === "accepted" && body.publish) {
+  if (wantsPublish) {
     const out = sugg.output_payload as { patch_css?: string; config_key?: string };
-    if (out?.patch_css && out?.config_key) {
-      const etag = await sha256(out.patch_css);
-      const { data: latest } = await db
-        .from("app_configs")
-        .select("version")
-        .eq("product_id", sugg.product_id)
-        .eq("namespace", sugg.namespace)
-        .eq("key", out.config_key)
-        .order("version", { ascending: false })
-        .limit(1)
-        .maybeSingle();
-      const nextVersion = (latest?.version ?? 0) + 1;
-      const { data: cfg, error: cfgErr } = await db
-        .from("app_configs")
-        .insert({
-          product_id: sugg.product_id,
-          namespace: sugg.namespace,
-          key: out.config_key,
-          version: nextVersion,
-          content_type: "text/css",
-          content: out.patch_css,
-          etag,
-          is_active: true,
-          created_by: `ai-suggest:${sugg.id}`,
-        })
-        .select("id")
-        .single();
-      if (cfgErr) return json({ error: `publish failed: ${cfgErr.message}` }, 500);
-      appliedConfigId = cfg.id;
-      update.applied_config_id = appliedConfigId;
+    if (!out?.patch_css || !out?.config_key) {
+      return json({ error: "publish failed: suggestion has no patch_css/config_key" }, 422);
     }
+
+    // SECURITY (T1): server-side CSS allowlist. Run for every publish,
+    // regardless of tier — qa entries can graduate to global later.
+    const validation = validatePatchCSS(out.patch_css);
+    if (!validation.ok) {
+      // Mark the suggestion rejected with the validator's reason for audit.
+      await db.from("ai_suggestions").update({
+        status: "rejected",
+        reject_reason: `css-allowlist-violation: ${validation.reason}`,
+        decided_by: body.decided_by ?? null,
+        decided_at: new Date().toISOString(),
+      }).eq("id", id);
+      return json(
+        { error: "css-allowlist", reason: validation.reason, suggestion_status: "rejected" },
+        422,
+      );
+    }
+
+    const etag = await sha256(out.patch_css);
+    const { data: latest } = await db
+      .from("app_configs")
+      .select("version")
+      .eq("product_id", sugg.product_id)
+      .eq("namespace", sugg.namespace)
+      .eq("key", out.config_key)
+      .order("version", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    const nextVersion = (latest?.version ?? 0) + 1;
+    const { data: cfg, error: cfgErr } = await db
+      .from("app_configs")
+      .insert({
+        product_id: sugg.product_id,
+        namespace: sugg.namespace,
+        key: out.config_key,
+        version: nextVersion,
+        content_type: "text/css",
+        content: out.patch_css,
+        etag,
+        is_active: true,
+        tier,
+        created_by: `ai-suggest:${sugg.id}`,
+      })
+      .select("id")
+      .single();
+    if (cfgErr) return json({ error: `publish failed: ${cfgErr.message}` }, 500);
+    appliedConfigId = cfg.id;
+    update.applied_config_id = appliedConfigId;
   }
 
   const { error: updErr } = await db.from("ai_suggestions").update(update).eq("id", id);
   if (updErr) return json({ error: updErr.message }, 500);
 
-  return json({ ok: true, id, status: decision, applied_config_id: appliedConfigId });
+  return json({ ok: true, id, status: decision, applied_config_id: appliedConfigId, tier: wantsPublish ? tier : null });
 }
 
 function renderTemplate(tpl: string, vars: Record<string, string>): string {
