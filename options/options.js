@@ -3659,12 +3659,12 @@
     const { customThemes = [] } = await chrome.storage.sync.get('customThemes');
     const existing = customThemes.find(t => t.id === id);
 
-    // Determine the effects snapshot for this custom theme
-    //   - Update: preserve existing effects (edit flow shouldn't wipe them)
-    //   - New from creation dialog: use the staged _pendingCreateEffects
-    //   - New without dialog (edge case): use base theme's suggested effects
+    // Effects snapshot: prefer the live editor state (user's in-flight edits),
+    // fall back to stored, staged creation effects, or base-theme suggestions.
     let effects;
-    if (existing && existing.effects) {
+    if (editorState.effects) {
+      effects = editorState.effects;
+    } else if (existing && existing.effects) {
       effects = existing.effects;
     } else if (_pendingCreateEffects) {
       effects = _pendingCreateEffects;
