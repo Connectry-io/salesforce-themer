@@ -1833,8 +1833,8 @@
         btn.style.background = on ? 'rgba(34,197,94,0.25)' : '';
         btn.style.color = on ? '#86efac' : '';
         btn.title = on
-          ? 'QA mode ON — you see drafts + published patches; accepts land in DRAFT for review.'
-          : 'QA mode OFF — you see what customers see; accepts auto-PUBLISH to all customers (needs publish secret).';
+          ? 'QA mode ON — you see drafts + published patches in this tab.'
+          : 'QA mode OFF — you see what customers see (published only). Accepts always land as drafts regardless.';
       }
     }
 
@@ -2000,18 +2000,17 @@
       // For custom: don't publish to server — save locally instead.
       const publish = decision === 'accepted' && !isCustom;
 
-      // SECURITY: tier on accept is driven by the QA chip.
-      //   QA ON  → 'draft'      (HQ reviews, customers don't see it yet)
-      //   QA OFF → 'published'  (auto-publish to all customers — needs PUBLISH_SECRET)
-      // Customer installs never have QA on and never have the publish secret,
-      // so in practice customer accepts fall back to local-only save paths.
-      const qaOn = await intel.getQAMode();
-      const targetTier = qaOn ? 'draft' : 'published';
+      // SECURITY: every accept writes to 'draft' tier. Period.
+      // Promotion to 'published' is a deliberate, separate step — done
+      // today via SQL flip, tomorrow by the auto-review agent (Haiku+Opus
+      // reading REVIEW-HEURISTICS.md). The QA chip is VIEW-ONLY: it
+      // controls whether drafts show up in the loader for HQ preview.
+      // Never auto-publish from the panel — that's a footgun.
       const r = await intel.decideSuggestion(sugg.id, {
         decision,
         rejectReason: reason,
         publish,
-        tier: targetTier,
+        tier: 'draft',
       });
 
       if (r?.error) {
