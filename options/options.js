@@ -332,12 +332,18 @@
    * Apply effects config to a preview frame via CSS custom properties
    * and data attributes. Shared between Builder and Theme Manager.
    */
-  function applyPreviewEffects(frame, effects, accentColor) {
+  function applyPreviewEffects(frame, effects, accentColor, surfaceColor) {
     if (!frame) return;
     const accent = accentColor || '#4a6fa5';
     const rgb = _hexToRgbCsv(accent);
     frame.style.setProperty('--fx-accent', accent);
     frame.style.setProperty('--fx-accent-rgb', rgb);
+    // Background color used as the "content mat" behind the bg pattern frame.
+    // Lets the pattern show only at outer edges, matching real SF behavior
+    // where pattern frames the chrome and the content canvas covers the middle.
+    if (surfaceColor) {
+      frame.style.setProperty('--fx-preview-surface', surfaceColor);
+    }
 
     const LADDER = {
       subtle: { mult: 0.5, speed: 1.6 },
@@ -452,7 +458,7 @@
     applyPreviewColors(frame, colors);
 
     if (effects) {
-      applyPreviewEffects(frame, effects, colors.accent);
+      applyPreviewEffects(frame, effects, colors.accent, colors.background);
     }
 
     // Cursor trail mouse tracking (Builder only)
@@ -1227,7 +1233,7 @@
           const scaled = (typeof applyVolume === 'function')
             ? applyVolume(baseEffects, volume)
             : baseEffects;
-          applyPreviewEffects(frame, scaled, (theme.colors || {}).accent);
+          applyPreviewEffects(frame, scaled, (theme.colors || {}).accent, (theme.colors || {}).background);
         }
       });
     });
@@ -3056,7 +3062,7 @@
     const effects = editorState.effects || {};
     const full = getFullEditorTheme();
     // Delegate to the shared effects function
-    applyPreviewEffects(frame, effects, full.accent);
+    applyPreviewEffects(frame, effects, full.accent, full.background);
   }
 
   // ─── Event Binding ────────────────────────────────────────────────────────
@@ -3808,7 +3814,7 @@
     { id: 'neonFlicker',     name: 'Neon Flicker',      short: 'Glowing text with flicker',       long: 'Page titles and active navigation gain a neon text glow with occasional flicker, like a sign.' },
     { id: 'particles',       name: 'Particles',         short: 'Snow, rain, matrix, dots, embers', long: 'Animated background particles. Pick from snow, rain, matrix rain, floating dots, or rising embers.' },
     { id: 'cursorTrail',     name: 'Cursor Trail',      short: 'Light trail follows your mouse',  long: 'A short glowing trail follows your mouse pointer, fading as it goes.' },
-    { id: 'backgroundPattern', name: 'Background Pattern', short: 'Subtle pattern behind all content', long: 'A subtle structural pattern behind all content. Six styles: dot grid, line grid, hatch, noise, subway tile, crosshatch.' },
+    { id: 'backgroundPattern', name: 'Background Border', short: 'Textured frame around the page chrome', long: 'A textured frame visible at the outer edges of Salesforce, around the content canvas. Six pattern styles: dot grid, line grid, hatch, noise, subway tile, crosshatch.' },
   ];
 
   const NONE_EFFECTS = {
@@ -4520,8 +4526,8 @@
     },
     {
       id: 'backgroundPattern',
-      name: 'Background Pattern',
-      desc: 'A subtle structural pattern behind all content. Six styles available.',
+      name: 'Background Border',
+      desc: 'A textured frame around the page chrome — visible at the outer edges of Salesforce, behind the content canvas. Six pattern styles.',
       preview: '',
       styles: [
         { value: 'dotGrid',    label: 'Dot Grid' },
