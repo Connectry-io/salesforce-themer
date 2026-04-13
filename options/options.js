@@ -3716,11 +3716,17 @@
     renderCollectionGrid(id);
     renderBuilderSidebar(id);
 
-    // Visual feedback
-    const btn = document.getElementById('editorSaveBtn');
-    if (btn) {
-      btn.textContent = 'Saved!';
-      setTimeout(() => { btn.textContent = 'Save Theme'; }, 1500);
+    // Visual feedback — topbar button flashes, toast confirms
+    _flashToast(`Saved "${name}"`);
+    const topbarBtn = document.getElementById('builderTopbarSave');
+    if (topbarBtn) {
+      const origText = topbarBtn.textContent;
+      topbarBtn.textContent = 'Saved!';
+      topbarBtn.classList.add('is-saved');
+      setTimeout(() => {
+        topbarBtn.textContent = origText;
+        topbarBtn.classList.remove('is-saved');
+      }, 1500);
     }
   }
 
