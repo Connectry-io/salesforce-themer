@@ -368,7 +368,7 @@
             <div class="diag-header-subtitle">Powered by Connectry AI</div>
           </div>
           <div class="diag-header-actions">
-            <button class="diag-icon-btn" data-action="toggleQAMode" title="QA mode: load qa-tier patches in this tab (Connectry HQ only)" style="font-size:9px;font-weight:600;letter-spacing:0.04em;width:auto;padding:0 8px;">
+            <button class="diag-icon-btn" data-action="toggleQAMode" title="QA mode: also load draft-tier engine patches in this tab (Connectry HQ only)" style="font-size:9px;font-weight:600;letter-spacing:0.04em;width:auto;padding:0 8px;">
               <span data-qa-label>QA</span>
             </button>
             <button class="diag-icon-btn" data-action="toggleAdvancedMode" title="Advanced mode: rich enrichment + screenshot for AI suggestions" style="font-size:9px;font-weight:600;letter-spacing:0.04em;width:auto;padding:0 8px;">
@@ -1833,8 +1833,8 @@
         btn.style.background = on ? 'rgba(34,197,94,0.25)' : '';
         btn.style.color = on ? '#86efac' : '';
         btn.title = on
-          ? 'QA mode ON — qa-tier patches load in this tab (HQ only). Refresh SF tab to apply.'
-          : 'QA mode OFF — only globally published patches load. Click to enable Connectry HQ QA loading.';
+          ? 'QA mode ON — draft + published engine patches load here (HQ only). Refresh SF tab to apply.'
+          : 'QA mode OFF — only published engine patches load (what customers see). Click to also preview drafts.';
       }
     }
 
@@ -2000,14 +2000,14 @@
       // For custom: don't publish to server — save locally instead.
       const publish = decision === 'accepted' && !isCustom;
 
-      // SECURITY: default tier on accept is 'qa'. Promotion to 'global' is
-      // a separate manual step (SQL flip or future UI button) that requires
-      // the PUBLISH_SECRET. See SECURITY.md.
+      // SECURITY: default tier on accept is 'draft' (HQ preview only).
+      // Promotion to 'published' is a separate step (SQL flip or future UI
+      // button) that requires the PUBLISH_SECRET. See SECURITY.md.
       const r = await intel.decideSuggestion(sugg.id, {
         decision,
         rejectReason: reason,
         publish,
-        tier: 'qa',
+        tier: 'draft',
       });
 
       if (r?.error) {

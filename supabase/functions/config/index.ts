@@ -36,10 +36,10 @@ Deno.serve(async (req) => {
     // ?tier= only ever see globally published patches. QA mode in the
     // extension explicitly requests ?tier=global,qa to also see internal.
     // 'engine' rows are excluded from the loader's view by design (engine wins).
-    const tierParam = url.searchParams.get("tier") ?? "global";
+    const tierParam = url.searchParams.get("tier") ?? "published";
     const tiers = tierParam.split(",").map((t) => t.trim()).filter(Boolean);
-    const validTiers = tiers.filter((t) => ["qa", "global"].includes(t));
-    if (validTiers.length === 0) validTiers.push("global");
+    const validTiers = tiers.filter((t) => ["draft", "published"].includes(t));
+    if (validTiers.length === 0) validTiers.push("published");
     let q = db
       .from("app_configs")
       .select("key, version, etag, content_type, created_at, tier")

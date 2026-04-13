@@ -164,15 +164,15 @@ async function handleDecide(req: Request, id: string): Promise<Response> {
   // Resolve tier: explicit > default 'qa'.
   // Only 'qa' and 'global' are valid here. 'engine' is set manually after
   // graduation; 'local' lives in the extension's local store, never here.
-  const tier = (body.tier ?? "qa").toLowerCase();
-  if (!["qa", "global"].includes(tier)) {
-    return json({ error: `tier must be 'qa' or 'global' (got '${tier}')` }, 400);
+  const tier = (body.tier ?? "draft").toLowerCase();
+  if (!["draft", "published"].includes(tier)) {
+    return json({ error: `tier must be 'draft' or 'published' (got '${tier}')` }, 400);
   }
 
   // SECURITY (T2): publishing to 'global' requires the PUBLISH_SECRET on top
   // of the dev shared secret. Without it, an accept lands in 'qa' tier only.
   const wantsPublish = decision === "accepted" && body.publish === true;
-  if (wantsPublish && tier === "global") {
+  if (wantsPublish && tier === "published") {
     const expected = Deno.env.get("PUBLISH_SECRET");
     if (!expected) {
       return json({ error: "server misconfigured: PUBLISH_SECRET unset" }, 500);
