@@ -1833,8 +1833,8 @@
         btn.style.background = on ? 'rgba(34,197,94,0.25)' : '';
         btn.style.color = on ? '#86efac' : '';
         btn.title = on
-          ? 'QA mode ON — draft + published engine patches load here (HQ only). Refresh SF tab to apply.'
-          : 'QA mode OFF — only published engine patches load (what customers see). Click to also preview drafts.';
+          ? 'QA mode ON — you see drafts + published patches; accepts land in DRAFT for review.'
+          : 'QA mode OFF — you see what customers see; accepts auto-PUBLISH to all customers (needs publish secret).';
       }
     }
 
@@ -2000,14 +2000,18 @@
       // For custom: don't publish to server — save locally instead.
       const publish = decision === 'accepted' && !isCustom;
 
-      // SECURITY: default tier on accept is 'draft' (HQ preview only).
-      // Promotion to 'published' is a separate step (SQL flip or future UI
-      // button) that requires the PUBLISH_SECRET. See SECURITY.md.
+      // SECURITY: tier on accept is driven by the QA chip.
+      //   QA ON  → 'draft'      (HQ reviews, customers don't see it yet)
+      //   QA OFF → 'published'  (auto-publish to all customers — needs PUBLISH_SECRET)
+      // Customer installs never have QA on and never have the publish secret,
+      // so in practice customer accepts fall back to local-only save paths.
+      const qaOn = await intel.getQAMode();
+      const targetTier = qaOn ? 'draft' : 'published';
       const r = await intel.decideSuggestion(sugg.id, {
         decision,
         rejectReason: reason,
         publish,
-        tier: 'draft',
+        tier: targetTier,
       });
 
       if (r?.error) {
