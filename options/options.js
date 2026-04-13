@@ -183,6 +183,7 @@
         <span class="preview-nav-item" data-bind-color="navText">Contacts</span>
         <span class="preview-nav-item" data-bind-color="navText">Accounts</span>
       </div>
+      <div class="preview-content">
       <div class="preview-header" data-bind="background">
         <div class="preview-header-top">
           <div>
@@ -286,6 +287,7 @@
         </span>
         <span class="preview-toast-text" data-bind-color="textPrimary">Lead "John Smith" was saved.</span>
         <span class="preview-toast-link" data-bind-color="link">Undo</span>
+      </div>
       </div>
       <div class="preview-utilbar" data-bind="nav">
         <span class="preview-utilbar-item" data-bind-color="navText">
@@ -402,6 +404,11 @@
     // thickness scaling, and opacity math across all surfaces)
     if (effects.backgroundPattern && effects.backgroundPattern !== 'none') {
       frame.dataset.fxBackgroundPattern = effects.backgroundPattern;
+      // Mirror the data attribute onto .preview-content so the pattern can
+      // frame the record content area (excluding the preview topbar, nav,
+      // and utility bar).
+      const content = frame.querySelector('.preview-content');
+      if (content) content.dataset.fxBackgroundPattern = effects.backgroundPattern;
       const engine = window.SFThemerEffectsEngine;
       if (engine && window.__EFFECTS_ENGINE_V2 !== false) {
         const ir = engine.renderRules('backgroundPattern', effects, accent);
@@ -419,6 +426,8 @@
       }
     } else {
       delete frame.dataset.fxBackgroundPattern;
+      const content = frame.querySelector('.preview-content');
+      if (content) delete content.dataset.fxBackgroundPattern;
       frame.style.removeProperty('--fx-bg-pattern-image');
       frame.style.removeProperty('--fx-bg-pattern-size');
       frame.style.removeProperty('--fx-bg-pattern-position');
