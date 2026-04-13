@@ -110,6 +110,26 @@ async function handleSuggest(req: Request): Promise<Response> {
 
   const parsed = parseSuggestion(text);
 
+  // SECURITY: validate CSS before we auto-write the draft. On failure,
+  // store the suggestion as 'rejected' with the reason so future sessions
+  // can see why it never made it to draft.
+  const patchCss = (parsed as { patch_css?: string })?.patch_css;
+  const configKey = (parsed as { config_key?: string })?.config_key;
+  let validation: { ok: true } | { ok: false, reason: string } | null = null;
+  if (patchCss && configKey) {
+    validation = validatePatchCSS(patchCss);
+  }
+
+  const status = validation?.ok
+    ? "previewing"   // auto-written as draft, awaiting human verdict in-tab
+    : "rejected";    // either no patch_css/config_key, or allowlist violation
+
+  const rejectReason = validation && !validation.ok
+    ? `css-allowlist-violation: ${validation.reason}`
+    : !patchCss || !configKey
+      ? "no patch_css/config_key in output"
+      : null;
+
   const { data: row, error: insErr } = await db
     .from("ai_suggestions")
     .insert({
@@ -127,17 +147,61 @@ async function handleSuggest(req: Request): Promise<Response> {
       model: tmpl.model,
       tokens_input: modelResp.usage?.input_tokens ?? null,
       tokens_output: modelResp.usage?.output_tokens ?? null,
-      status: "pending",
+      status,
+      reject_reason: rejectReason,
       decided_by: body.anon_user_id ?? null,
     })
     .select("id")
     .single();
   if (insErr) return json({ error: insErr.message }, 500);
 
+  // If CSS passes the allowlist, auto-write it to app_configs at tier=draft
+  // so the extension can live-inject and patch-loader will pick it up on
+  // next page load for HQ tabs with QA mode on.
+  let appliedConfigId: number | null = null;
+  if (validation?.ok && patchCss && configKey) {
+    const etag = await sha256(patchCss);
+    const { data: latest } = await db
+      .from("app_configs")
+      .select("version")
+      .eq("product_id", product_id)
+      .eq("namespace", body.namespace ?? "default")
+      .eq("key", configKey)
+      .order("version", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    const nextVersion = (latest?.version ?? 0) + 1;
+    const { data: cfg, error: cfgErr } = await db
+      .from("app_configs")
+      .insert({
+        product_id,
+        namespace: body.namespace ?? "default",
+        key: configKey,
+        version: nextVersion,
+        content_type: "text/css",
+        content: patchCss,
+        etag,
+        is_active: true,
+        tier: "draft",
+        created_by: `ai-suggest:${row.id}`,
+      })
+      .select("id")
+      .single();
+    if (!cfgErr && cfg) {
+      appliedConfigId = cfg.id;
+      await db.from("ai_suggestions").update({
+        applied_config_id: appliedConfigId,
+      }).eq("id", row.id);
+    }
+  }
+
   return json({
     suggestion_id: row.id,
     model: tmpl.model,
     template_version: tmpl.version,
+    status,
+    reject_reason: rejectReason,
+    applied_config_id: appliedConfigId,
     output: parsed,
   });
 }
@@ -147,8 +211,6 @@ async function handleDecide(req: Request, id: string): Promise<Response> {
     decision?: string;
     reject_reason?: string;
     decided_by?: string;
-    publish?: boolean;
-    tier?: string;
   };
   try {
     body = await req.json();
@@ -156,23 +218,20 @@ async function handleDecide(req: Request, id: string): Promise<Response> {
     return json({ error: "invalid json" }, 400);
   }
 
+  // New preview-first vocabulary:
+  //   approved  → promote the linked draft in app_configs to tier='published'
+  //   reverted  → set the linked draft is_active=false (un-ship it)
+  //   dismissed → leave the draft where it is, mark suggestion dismissed
+  // Legacy: 'accepted' and 'rejected' are still accepted for back-compat
+  // (pre-preview-flow callers) and treated as dismissed (no tier change).
   const decision = body.decision;
-  if (decision !== "accepted" && decision !== "rejected") {
-    return json({ error: "decision must be 'accepted' or 'rejected'" }, 400);
+  const validDecisions = new Set(["approved", "reverted", "dismissed", "accepted", "rejected"]);
+  if (!decision || !validDecisions.has(decision)) {
+    return json({ error: "decision must be 'approved' | 'reverted' | 'dismissed'" }, 400);
   }
 
-  // Resolve tier: explicit > default 'qa'.
-  // Only 'qa' and 'global' are valid here. 'engine' is set manually after
-  // graduation; 'local' lives in the extension's local store, never here.
-  const tier = (body.tier ?? "draft").toLowerCase();
-  if (!["draft", "published"].includes(tier)) {
-    return json({ error: `tier must be 'draft' or 'published' (got '${tier}')` }, 400);
-  }
-
-  // SECURITY (T2): publishing to 'global' requires the PUBLISH_SECRET on top
-  // of the dev shared secret. Without it, an accept lands in 'qa' tier only.
-  const wantsPublish = decision === "accepted" && body.publish === true;
-  if (wantsPublish && tier === "published") {
+  // Promotion to 'published' requires PUBLISH_SECRET.
+  if (decision === "approved") {
     const expected = Deno.env.get("PUBLISH_SECRET");
     if (!expected) {
       return json({ error: "server misconfigured: PUBLISH_SECRET unset" }, 500);
@@ -196,76 +255,45 @@ async function handleDecide(req: Request, id: string): Promise<Response> {
     .maybeSingle();
   if (fetchErr) return json({ error: fetchErr.message }, 500);
   if (!sugg) return json({ error: "suggestion not found" }, 404);
-  if (sugg.status !== "pending") return json({ error: `already ${sugg.status}` }, 409);
+  if (!["previewing", "pending"].includes(sugg.status)) {
+    return json({ error: `already ${sugg.status}` }, 409);
+  }
 
   const update: Record<string, unknown> = {
     status: decision,
     decided_by: body.decided_by ?? null,
     decided_at: new Date().toISOString(),
   };
-  if (decision === "rejected") update.reject_reason = body.reject_reason ?? null;
-
-  // Publish to app_configs when accepted + publish=true.
-  let appliedConfigId: number | null = null;
-  if (wantsPublish) {
-    const out = sugg.output_payload as { patch_css?: string; config_key?: string };
-    if (!out?.patch_css || !out?.config_key) {
-      return json({ error: "publish failed: suggestion has no patch_css/config_key" }, 422);
-    }
-
-    // SECURITY (T1): server-side CSS allowlist. Run for every publish,
-    // regardless of tier — qa entries can graduate to global later.
-    const validation = validatePatchCSS(out.patch_css);
-    if (!validation.ok) {
-      // Mark the suggestion rejected with the validator's reason for audit.
-      await db.from("ai_suggestions").update({
-        status: "rejected",
-        reject_reason: `css-allowlist-violation: ${validation.reason}`,
-        decided_by: body.decided_by ?? null,
-        decided_at: new Date().toISOString(),
-      }).eq("id", id);
-      return json(
-        { error: "css-allowlist", reason: validation.reason, suggestion_status: "rejected" },
-        422,
-      );
-    }
-
-    const etag = await sha256(out.patch_css);
-    const { data: latest } = await db
-      .from("app_configs")
-      .select("version")
-      .eq("product_id", sugg.product_id)
-      .eq("namespace", sugg.namespace)
-      .eq("key", out.config_key)
-      .order("version", { ascending: false })
-      .limit(1)
-      .maybeSingle();
-    const nextVersion = (latest?.version ?? 0) + 1;
-    const { data: cfg, error: cfgErr } = await db
-      .from("app_configs")
-      .insert({
-        product_id: sugg.product_id,
-        namespace: sugg.namespace,
-        key: out.config_key,
-        version: nextVersion,
-        content_type: "text/css",
-        content: out.patch_css,
-        etag,
-        is_active: true,
-        tier,
-        created_by: `ai-suggest:${sugg.id}`,
-      })
-      .select("id")
-      .single();
-    if (cfgErr) return json({ error: `publish failed: ${cfgErr.message}` }, 500);
-    appliedConfigId = cfg.id;
-    update.applied_config_id = appliedConfigId;
+  if (decision === "reverted" || decision === "rejected") {
+    update.reject_reason = body.reject_reason ?? null;
   }
+
+  // Act on the linked draft in app_configs based on the decision.
+  // applied_config_id was set by /ai-suggest when the draft was auto-written.
+  const appliedConfigId = sugg.applied_config_id as number | null;
+
+  if (decision === "approved" && appliedConfigId) {
+    // Promote the linked draft to tier='published'.
+    const { error: promoteErr } = await db
+      .from("app_configs")
+      .update({ tier: "published" })
+      .eq("id", appliedConfigId);
+    if (promoteErr) return json({ error: `promote failed: ${promoteErr.message}` }, 500);
+  } else if (decision === "reverted" && appliedConfigId) {
+    // Un-ship the draft. Loader will stop returning it on the next fetch.
+    const { error: revertErr } = await db
+      .from("app_configs")
+      .update({ is_active: false })
+      .eq("id", appliedConfigId);
+    if (revertErr) return json({ error: `revert failed: ${revertErr.message}` }, 500);
+  }
+  // 'dismissed' and legacy 'accepted'/'rejected': no tier change — the draft
+  // stays as-is (is_active=true, tier='draft'). Suggestion is closed out.
 
   const { error: updErr } = await db.from("ai_suggestions").update(update).eq("id", id);
   if (updErr) return json({ error: updErr.message }, 500);
 
-  return json({ ok: true, id, status: decision, applied_config_id: appliedConfigId, tier: wantsPublish ? tier : null });
+  return json({ ok: true, id, status: decision, applied_config_id: appliedConfigId });
 }
 
 function renderTemplate(tpl: string, vars: Record<string, string>): string {

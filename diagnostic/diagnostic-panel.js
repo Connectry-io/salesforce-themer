@@ -54,8 +54,9 @@
       this._dragState = null;
       this._cssLoaded = false;
       this._cssText = '';
-      this.aiSuggestion = null;  // { id, output, status, error }
+      this.aiSuggestion = null;  // { id, output, status, error, applied_config_id }
       this.aiBusy = false;
+      this._liveInjectedCss = '';  // tracks what's currently live-injected from previews
     }
 
     // ── Lifecycle ─────────────────────────────────────────────────────────
@@ -1419,8 +1420,8 @@
         else if (action === 'resetProgress') this._resetTestingProgress();
         else if (action === 'copyTokenFixes') this._copyTokenFixes(btn);
         else if (action === 'suggestAIFix') this._suggestAIFix(btn);
-        else if (action === 'acceptAISuggestion') this._decideAISuggestion('accepted');
-        else if (action === 'rejectAISuggestion') this._decideAISuggestion('rejected');
+        else if (action === 'approveAISuggestion') this._decideAISuggestion('approved');
+        else if (action === 'revertAISuggestion') this._decideAISuggestion('reverted');
         else if (action === 'dismissAISuggestion') { this.aiSuggestion = null; this._rerender(); }
         else if (action === 'copyComponentPatches') this._copyComponentPatches(btn);
         else if (action === 'copyFullCSS') this._copyFullCSS(btn);
@@ -1776,28 +1777,46 @@
       }
       const out = s.output || {};
       const css = out.patch_css || '';
-      const isPending = s.status === 'pending';
-      const statusBadge = s.status === 'accepted'
-        ? '<span class="diag-section-badge-item is-pass">accepted</span>'
-        : s.status === 'rejected'
-          ? '<span class="diag-section-badge-item is-fail">rejected</span>'
-          : '<span class="diag-section-badge-item is-gap">pending review</span>';
+      // Preview-first statuses:
+      //   previewing → live on screen, awaiting verdict
+      //   approved   → promoted to published
+      //   reverted   → un-shipped
+      //   dismissed  → closed without verdict
+      //   rejected   → allowlist blocked before preview (or legacy)
+      let banner;
+      if (s.status === 'previewing') {
+        banner = '<span class="diag-section-badge-item is-gap">LIVE PREVIEW — does it look right?</span>';
+      } else if (s.status === 'approved') {
+        banner = '<span class="diag-section-badge-item is-pass">approved → published</span>';
+      } else if (s.status === 'reverted') {
+        banner = '<span class="diag-section-badge-item is-fail">reverted</span>';
+      } else if (s.status === 'rejected') {
+        banner = `<span class="diag-section-badge-item is-fail">rejected by allowlist</span>`;
+      } else {
+        banner = `<span class="diag-section-badge-item">${this._escapeHtml(s.status || 'pending')}</span>`;
+      }
+
+      const showActions = s.status === 'previewing';
       return `
         <div class="diag-card" style="padding:14px;border-left:3px solid #4A6FA5;margin-bottom:10px">
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
-            <div style="font-weight:600">AI suggestion #${s.id} ${statusBadge}</div>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;gap:8px">
+            <div style="font-weight:600">AI preview #${s.id} ${banner}</div>
             <div style="font-size:11px;opacity:0.6">${this._escapeHtml(out.risk || '')} risk · ${(out.affected_components || []).join(', ')}</div>
           </div>
+          ${s.reject_reason ? `<div style="font-size:11px;color:#fca5a5;margin-bottom:6px">${this._escapeHtml(s.reject_reason)}</div>` : ''}
           ${out.notes ? `<div style="font-size:11px;opacity:0.75;margin-bottom:8px">${this._escapeHtml(out.notes)}</div>` : ''}
-          <pre style="background:#0a0a0a;color:#d4d4d8;padding:8px;border-radius:4px;font-size:10px;max-height:220px;overflow:auto;white-space:pre-wrap;word-break:break-word">${this._escapeHtml(css)}</pre>
-          ${isPending ? `
-            <div style="display:flex;gap:6px;margin-top:8px">
-              <button class="diag-scan-btn diag-scan-btn--primary" data-action="acceptAISuggestion">Accept &amp; publish</button>
-              <button class="diag-copy-inline" data-action="rejectAISuggestion">Reject</button>
-              <button class="diag-copy-inline" data-action="dismissAISuggestion">Dismiss</button>
+          <details style="margin-bottom:8px">
+            <summary style="font-size:11px;opacity:0.6;cursor:pointer">Show CSS (${css.split(/\r?\n/).length} lines)</summary>
+            <pre style="background:#0a0a0a;color:#d4d4d8;padding:8px;border-radius:4px;font-size:10px;max-height:220px;overflow:auto;white-space:pre-wrap;word-break:break-word;margin-top:6px">${this._escapeHtml(css)}</pre>
+          </details>
+          ${showActions ? `
+            <div style="display:flex;gap:6px;margin-top:4px">
+              <button class="diag-scan-btn diag-scan-btn--primary" data-action="approveAISuggestion" title="Promote to 'published' — live for all customers (requires publish secret)">Approve &amp; publish</button>
+              <button class="diag-copy-inline" data-action="revertAISuggestion" title="Un-ship: set draft is_active=false + remove from current tab">Revert</button>
+              <button class="diag-copy-inline" data-action="dismissAISuggestion" title="Leave draft in place for later, close this card">Dismiss</button>
             </div>` : `
-            <div style="margin-top:8px">
-              <button class="diag-copy-inline" data-action="dismissAISuggestion">Dismiss</button>
+            <div style="margin-top:4px">
+              <button class="diag-copy-inline" data-action="dismissAISuggestion">Close</button>
             </div>`}
         </div>`;
     }
@@ -1962,12 +1981,28 @@
         this.aiSuggestion = {
           id: r.suggestion_id,
           output: r.output,
-          status: 'pending',
+          status: r.status || 'previewing',
+          reject_reason: r.reject_reason || null,
+          applied_config_id: r.applied_config_id || null,
           source,
           mode: advanced ? 'advanced' : 'silent',
         };
+        // Live-inject the preview CSS immediately so Noland can see the
+        // result without refreshing the SF tab. If allowlist rejected it,
+        // there's nothing to inject and the card will display the reason.
+        if (r.status === 'previewing' && r.output?.patch_css) {
+          this._liveInjectAcceptedCSS(r.output.patch_css);
+          this._liveInjectedCss = r.output.patch_css;
+        }
       }
       this._rerender();
+    }
+
+    _removeLiveInjectedCSS(css) {
+      if (!css) return;
+      const el = document.getElementById('sf-themer-intel-patch');
+      if (!el) return;
+      el.textContent = (el.textContent || '').split(css).join('').replace(/\n{3,}/g, '\n\n');
     }
 
     /**
@@ -1991,26 +2026,15 @@
     async _decideAISuggestion(decision) {
       const intel = window.ConnectryIntel;
       if (!intel || !this.aiSuggestion?.id) return;
-      const reason = decision === 'rejected'
-        ? (window.prompt('Reject reason (optional)') || null)
+      const reason = decision === 'reverted'
+        ? (window.prompt('Revert reason (so the review-heuristics agent learns):') || null)
         : null;
 
       const sugg = this.aiSuggestion;
-      const isCustom = sugg.source === 'custom';
-      // For custom: don't publish to server — save locally instead.
-      const publish = decision === 'accepted' && !isCustom;
 
-      // SECURITY: every accept writes to 'draft' tier. Period.
-      // Promotion to 'published' is a deliberate, separate step — done
-      // today via SQL flip, tomorrow by the auto-review agent (Haiku+Opus
-      // reading REVIEW-HEURISTICS.md). The QA chip is VIEW-ONLY: it
-      // controls whether drafts show up in the loader for HQ preview.
-      // Never auto-publish from the panel — that's a footgun.
       const r = await intel.decideSuggestion(sugg.id, {
         decision,
         rejectReason: reason,
-        publish,
-        tier: 'draft',
       });
 
       if (r?.error) {
@@ -2021,23 +2045,12 @@
 
       this.aiSuggestion.status = decision;
 
-      if (decision === 'accepted') {
-        const css = sugg.output?.patch_css || '';
-        if (isCustom) {
-          // Save into the local patch store so it persists per-user.
-          if (ns.savePatch) {
-            const tag = `ai-${sugg.id}`;
-            await ns.savePatch(tag, { css, rules: [], source: 'ai' }, true);
-            if (ns.injectPatches) await ns.injectPatches();
-            if (ns.getPatchSummary) this.patchSummary = await ns.getPatchSummary();
-          } else {
-            this._liveInjectAcceptedCSS(css);
-          }
-        } else {
-          // Standard/managed: server published; also live-inject so it shows now.
-          this._liveInjectAcceptedCSS(css);
-        }
+      // On revert: pull the CSS back out of the live <style> tag.
+      if (decision === 'reverted' && this._liveInjectedCss) {
+        this._removeLiveInjectedCSS(this._liveInjectedCss);
+        this._liveInjectedCss = '';
       }
+
       this._rerender();
     }
 
