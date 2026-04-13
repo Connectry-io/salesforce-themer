@@ -515,7 +515,13 @@ ${decls}
 body.sf-themer-fx-background .oneContent,
 body.sf-themer-fx-background .slds-card,
 body.sf-themer-fx-background .slds-page-header,
-body.sf-themer-fx-background .slds-modal__container {
+body.sf-themer-fx-background .slds-modal__container,
+body.sf-themer-fx-background .slds-global-header,
+body.sf-themer-fx-background .slds-global-header_container,
+body.sf-themer-fx-background .slds-context-bar,
+body.sf-themer-fx-background .oneAppNavContainer,
+body.sf-themer-fx-background .forceBrandBand,
+body.sf-themer-fx-background .desktop {
   position: relative !important;
   z-index: 1 !important;
 }
