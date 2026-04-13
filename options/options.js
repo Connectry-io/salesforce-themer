@@ -3526,27 +3526,21 @@
         if (editorState.effects.particles) {
           editorState.effects.particles = pSelect.value;
         }
-        const frame = document.querySelector('.editor-preview-frame');
-        if (frame) applyPreviewEffects(frame, editorState.effects, editorState.colors?.brandPrimary || '#4a6fa5');
+        applyEditorPreviewEffects();
       });
 
       // Cursor trail style select
       const ctSelect = card.querySelector('[data-effect-select="cursorTrailStyle"]');
       ctSelect?.addEventListener('change', () => {
         editorState.effects.cursorTrailStyle = ctSelect.value;
-        // Re-apply so the Builder preview picks up the new style immediately
-        if (typeof applyPreviewEffects === 'function') {
-          const frame = document.querySelector('.editor-preview-frame');
-          if (frame) applyPreviewEffects(frame, editorState.effects, editorState.colors?.brandPrimary || '#4a6fa5');
-        }
+        applyEditorPreviewEffects();
       });
 
-      // Background pattern style select — delegates to engine via applyPreviewEffects
+      // Background pattern style select
       const bgSelect = card.querySelector('[data-effect-select="backgroundPattern"]');
       bgSelect?.addEventListener('change', () => {
         editorState.effects.backgroundPattern = bgSelect.value;
-        const frame = document.querySelector('.editor-preview-frame');
-        if (frame) applyPreviewEffects(frame, editorState.effects, editorState.colors?.brandPrimary || '#4a6fa5');
+        applyEditorPreviewEffects();
       });
 
       grid.appendChild(card);
