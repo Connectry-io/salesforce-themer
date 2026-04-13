@@ -582,12 +582,24 @@
             ${compPct !== null ? `<span class="diag-coverage-stat"><strong>${compPct}%</strong> components</span>` : ''}
             <span class="diag-coverage-stat"><strong>${issueCount}</strong> issue${issueCount !== 1 ? 's' : ''}</span>
           </div>
-          ${this.hasScanned ? `
-            <div style="display:flex;gap:6px;margin-top:10px">
-              <button class="diag-scan-btn diag-scan-btn--primary" data-action="suggestAIFix" style="flex:1">
-                ${this.aiBusy ? 'Thinking…' : '✨ Suggest Fix with AI'}
-              </button>
-            </div>` : ''}
+          ${this.hasScanned ? (() => {
+            const hasIssues = issueCount > 0;
+            const disabled = !hasIssues || this.aiBusy;
+            const label = this.aiBusy
+              ? 'Thinking…'
+              : hasIssues
+                ? `✨ Suggest Fix with AI (${issueCount})`
+                : '✨ All clean — nothing to suggest';
+            return `
+              <div style="display:flex;gap:6px;margin-top:10px">
+                <button class="diag-scan-btn diag-scan-btn--primary"
+                        ${disabled ? 'disabled' : `data-action="suggestAIFix"`}
+                        style="flex:1;${disabled ? 'opacity:0.45;cursor:not-allowed' : ''}"
+                        title="${hasIssues ? 'Send these gaps to Claude for a CSS patch' : 'No gaps detected on this page — try another page'}">
+                  ${label}
+                </button>
+              </div>`;
+          })() : ''}
         </div>`;
     }
 
