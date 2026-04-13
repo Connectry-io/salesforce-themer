@@ -1,0 +1,8 @@
+/* Connectry Intelligence Layer — bundled fallback patches.
+ * Loaded when the remote /config endpoint is unreachable so the extension
+ * keeps shipping a working baseline offline.
+ *
+ * Phase 0: empty. Patches accumulate here as Noland accepts AI suggestions
+ * (the publish step writes to app_configs; we periodically snapshot the
+ * active version into this file as the offline floor).
+ */

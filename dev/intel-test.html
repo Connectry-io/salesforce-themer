@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Connectry Intelligence Layer — dev tester</title>
+  <style>
+    :root { color-scheme: dark; }
+    body { font: 14px/1.5 system-ui, sans-serif; background: #0e0e10; color: #e4e4e7; padding: 24px; max-width: 920px; margin: 0 auto; }
+    h1 { font-size: 18px; margin: 0 0 4px; }
+    .sub { color: #a1a1aa; margin-bottom: 24px; }
+    section { background: #18181b; border: 1px solid #27272a; border-radius: 8px; padding: 16px; margin-bottom: 16px; }
+    section h2 { font-size: 14px; margin: 0 0 12px; color: #fafafa; }
+    button { background: #4A6FA5; color: white; border: 0; padding: 8px 14px; border-radius: 6px; font-size: 13px; cursor: pointer; margin-right: 8px; }
+    button:hover { background: #3a5a8a; }
+    button.alt { background: #27272a; color: #e4e4e7; }
+    button.danger { background: #7f1d1d; }
+    pre { background: #0a0a0a; border: 1px solid #27272a; border-radius: 6px; padding: 12px; max-height: 320px; overflow: auto; font-size: 11px; color: #a1a1aa; white-space: pre-wrap; word-break: break-word; }
+    label { display: flex; align-items: center; gap: 8px; color: #d4d4d8; }
+    .pill { display: inline-block; padding: 2px 8px; background: #27272a; border-radius: 4px; font-size: 11px; color: #a1a1aa; margin-left: 6px; }
+    textarea { width: 100%; min-height: 100px; background: #0a0a0a; color: #e4e4e7; border: 1px solid #27272a; border-radius: 6px; padding: 8px; font-family: ui-monospace, monospace; font-size: 12px; }
+  </style>
+</head>
+<body>
+  <h1>Connectry Intelligence Layer — dev tester</h1>
+  <div class="sub">Phase 0 verification harness. Open via <code>chrome-extension://&lt;id&gt;/dev/intel-test.html</code>.</div>
+
+  <section>
+    <h2>1. Privacy / consent <span class="pill" id="consent-state">unknown</span></h2>
+    <label><input type="checkbox" id="consent" /> Send anonymous diagnostic findings to the Connectry Intelligence Layer</label>
+    <p class="sub" style="margin: 8px 0 0; font-size: 12px;">
+      Required before <strong>POST /events</strong> or <strong>POST /ai-suggest</strong> calls fire. Stored locally per-extension in <code>chrome.storage.local</code>.
+    </p>
+  </section>
+
+  <section>
+    <h2>2. GET /config/themer/patches/global</h2>
+    <button id="btn-config">Fetch config (with bundled fallback)</button>
+    <pre id="out-config">—</pre>
+  </section>
+
+  <section>
+    <h2>3. POST /events</h2>
+    <button id="btn-event">Send sample scan.findings event</button>
+    <pre id="out-event">—</pre>
+  </section>
+
+  <section>
+    <h2>4. POST /ai-suggest (themer.gap_to_patch)</h2>
+    <p class="sub" style="margin: 0 0 8px;">Sends a fake gap finding to the LLM and shows the parsed suggestion.</p>
+    <button id="btn-suggest">Request AI suggestion</button>
+    <pre id="out-suggest">—</pre>
+    <div id="decide-controls" style="display:none; margin-top:12px;">
+      <button id="btn-accept">Accept &amp; publish patch</button>
+      <button id="btn-reject" class="danger">Reject</button>
+      <input id="reject-reason" placeholder="reject reason (optional)" style="width: 60%; padding: 6px; background: #0a0a0a; color: #e4e4e7; border: 1px solid #27272a; border-radius: 4px;" />
+      <pre id="out-decide">—</pre>
+    </div>
+  </section>
+
+  <section>
+    <h2>5. Offline-fallback test</h2>
+    <p class="sub" style="margin: 0 0 8px;">Disable network in DevTools (Network → Offline) and click the config button again. It must return <code>source: "bundled"</code> or <code>source: "cache"</code>, never error.</p>
+  </section>
+
+  <script src="../lib/intelligence-client.js"></script>
+  <script>
+    const intel = self.ConnectryIntel;
+    const $ = (id) => document.getElementById(id);
+    let lastSuggestionId = null;
+
+    async function refreshConsentState() {
+      const c = await intel.getConsent();
+      $('consent').checked = c;
+      $('consent-state').textContent = c ? 'granted' : 'denied';
+    }
+    refreshConsentState();
+
+    $('consent').addEventListener('change', async (e) => {
+      await intel.setConsent(e.target.checked);
+      refreshConsentState();
+    });
+
+    $('btn-config').addEventListener('click', async () => {
+      $('out-config').textContent = '...';
+      const bundled = chrome.runtime.getURL('intelligence/bundled/global.css');
+      const r = await intel.fetchConfig('patches/global', { bundledFallbackUrl: bundled });
+      $('out-config').textContent = JSON.stringify(r, null, 2);
+    });
+
+    $('btn-event').addEventListener('click', async () => {
+      $('out-event').textContent = '...';
+      const r = await intel.sendEvent('scan.findings', {
+        sampleGaps: ['--slds-c-button-brand-color-background', '--slds-g-color-accent-1'],
+        page: 'dev-tester',
+        themeId: 'cosmos',
+      });
+      $('out-event').textContent = JSON.stringify(r, null, 2);
+    });
+
+    $('btn-suggest').addEventListener('click', async () => {
+      $('out-suggest').textContent = '...';
+      const r = await intel.suggestFix({
+        intent: 'gap_to_patch',
+        findings: {
+          gaps: [
+            {
+              id: 'gap-001',
+              component: 'slds-path__item',
+              issue: 'unstyled — falls back to default SLDS gray',
+              dom_snippet: '<li class="slds-path__item slds-is-current"><a class="slds-path__link">Step 2</a></li>',
+            },
+          ],
+        },
+        context: {
+          themeId: 'cosmos',
+          activeTokens: {
+            '--theme-accent': '#7c3aed',
+            '--theme-accent-fg': '#ffffff',
+          },
+        },
+      });
+      $('out-suggest').textContent = JSON.stringify(r, null, 2);
+      if (r?.suggestion_id) {
+        lastSuggestionId = r.suggestion_id;
+        $('decide-controls').style.display = 'block';
+      }
+    });
+
+    $('btn-accept').addEventListener('click', async () => {
+      if (!lastSuggestionId) return;
+      const r = await intel.decideSuggestion(lastSuggestionId, { decision: 'accepted', publish: true });
+      $('out-decide').textContent = JSON.stringify(r, null, 2);
+    });
+    $('btn-reject').addEventListener('click', async () => {
+      if (!lastSuggestionId) return;
+      const r = await intel.decideSuggestion(lastSuggestionId, {
+        decision: 'rejected',
+        rejectReason: $('reject-reason').value || null,
+      });
+      $('out-decide').textContent = JSON.stringify(r, null, 2);
+    });
+  </script>
+</body>
+</html>

@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Salesforce Themer by Connectry",
-  "version": "2.2.12",
+  "version": "2.3.0",
   "description": "Transform your Salesforce experience with stunning themes. 16 handcrafted themes for Lightning Experience.",
   "permissions": ["storage", "activeTab", "tabs"],
   "host_permissions": [
@@ -10,7 +10,8 @@
     "https://*.my.salesforce.com/*",
     "https://*.visualforce.com/*",
     "https://*.salesforce-setup.com/*",
-    "https://*.cloudforce.com/*"
+    "https://*.cloudforce.com/*",
+    "https://pemofbbniuzogxzzioyp.supabase.co/*"
   ],
   "action": {
     "default_popup": "popup/popup.html",
@@ -54,6 +55,8 @@
         "https://*.cloudforce.com/*"
       ],
       "js": [
+        "lib/intelligence-client.js",
+        "lib/patch-loader.js",
         "core/effects/engine.js",
         "effects/effects.js",
         "effects/presets.js",
@@ -82,7 +85,10 @@
         "effects/effects.js",
         "effects/presets.js",
         "favicons/*.svg",
-        "diagnostic/diagnostic-panel.css"
+        "diagnostic/diagnostic-panel.css",
+        "intelligence/bundled/global.css",
+        "dev/intel-test.html",
+        "lib/intelligence-client.js"
       ],
       "matches": [
         "https://*.salesforce.com/*",
