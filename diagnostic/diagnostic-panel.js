@@ -582,6 +582,12 @@
             ${compPct !== null ? `<span class="diag-coverage-stat"><strong>${compPct}%</strong> components</span>` : ''}
             <span class="diag-coverage-stat"><strong>${issueCount}</strong> issue${issueCount !== 1 ? 's' : ''}</span>
           </div>
+          ${this.hasScanned ? `
+            <div style="display:flex;gap:6px;margin-top:10px">
+              <button class="diag-scan-btn diag-scan-btn--primary" data-action="suggestAIFix" style="flex:1">
+                ${this.aiBusy ? 'Thinking…' : '✨ Suggest Fix with AI'}
+              </button>
+            </div>` : ''}
         </div>`;
     }
 
@@ -1847,9 +1853,24 @@
         await intel.setConsent(true);
       }
 
-      const gaps = (this.scanResults?.gaps || []).slice(0, 12);
+      // Combine token gaps + unstyled/partial component issues so we can run
+      // even when token coverage is clean but components have issues.
+      const tokenGaps = this.scanResults?.gaps || [];
+      const componentGaps = [];
+      const cr = this.componentResults;
+      if (cr) {
+        for (const [type, data] of Object.entries(cr.standard || {})) {
+          if (data.unstyled > 0 || data.partial > 0) {
+            componentGaps.push(`component:${type} (${data.unstyled} unstyled, ${data.partial} partial)`);
+          }
+        }
+        for (const m of cr.managed || []) {
+          componentGaps.push(`managed:${m.tag || m.packageName}`);
+        }
+      }
+      const gaps = [...tokenGaps, ...componentGaps].slice(0, 12);
       if (!gaps.length) {
-        this.aiSuggestion = { error: 'No token gaps to fix on this scan.' };
+        this.aiSuggestion = { error: 'No issues to fix on this scan.' };
         this._rerender();
         return;
       }
