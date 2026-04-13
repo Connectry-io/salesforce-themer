@@ -24,7 +24,8 @@
   }
 
   function getAllThemeIds() {
-    return THEMES.map(t => t.id);
+    const customIds = (syncState.customThemes || []).map(ct => ct.id);
+    return [...THEMES.map(t => t.id), ...customIds];
   }
 
   // ─── Popup rendering ──────────────────────────────────────────────────────
@@ -1108,6 +1109,7 @@
         orgThemes: {},
         themeScope: 'lightning',
         effectsVolume: 'default',
+        customThemes: [],
       }),
       detectCurrentOrg(),
     ]);
