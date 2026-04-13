@@ -26,6 +26,32 @@ Deno.serve(async (req) => {
   const { url: sbUrl, serviceKey } = supabaseAdmin();
   const db = createClient(sbUrl, serviceKey, { auth: { persistSession: false } });
 
+  // Index route: GET /config/:product/_index?prefix=patches/
+  // Returns JSON list of active (key, version, etag) for the product+namespace,
+  // optionally filtered by key prefix. Lets the extension discover which
+  // patches exist without hardcoding keys in the client.
+  if (key === "_index") {
+    const prefix = url.searchParams.get("prefix") ?? "";
+    let q = db
+      .from("app_configs")
+      .select("key, version, etag, content_type, created_at")
+      .eq("product_id", product)
+      .eq("namespace", namespace)
+      .eq("is_active", true)
+      .order("key", { ascending: true });
+    if (prefix) q = q.like("key", `${prefix}%`);
+    const { data, error } = await q;
+    if (error) return json({ error: error.message }, 500);
+    // Deduplicate to the highest active version per key (should already be the
+    // case since publish sets is_active only on the latest, but defensive).
+    const byKey = new Map<string, typeof data[number]>();
+    for (const row of data ?? []) {
+      const cur = byKey.get(row.key);
+      if (!cur || row.version > cur.version) byKey.set(row.key, row);
+    }
+    return json({ product, namespace, prefix, entries: Array.from(byKey.values()) });
+  }
+
   const { data, error } = await db
     .from("app_configs")
     .select("version, content_type, content, etag, created_at")

@@ -54,6 +54,8 @@
       this._dragState = null;
       this._cssLoaded = false;
       this._cssText = '';
+      this.aiSuggestion = null;  // { id, output, status, error }
+      this.aiBusy = false;
     }
 
     // ── Lifecycle ─────────────────────────────────────────────────────────
@@ -591,6 +593,7 @@
             <span class="diag-section-badge">
               <span class="diag-section-badge-item is-gap">${fr.tokenFixes.fixes.length}</span>
             </span>
+            <button class="diag-copy-inline" data-action="suggestAIFix" title="Ask Claude to generate a patch from these gaps">${this.aiBusy ? 'Thinking…' : 'Suggest Fix with AI'}</button>
             <button class="diag-copy-inline" data-action="copyTokenFixes" title="Copy CSS for Connectry to fix in engine">Copy for Connectry</button>
             <span class="diag-section-chevron">${ICONS.chevron}</span>
           </div>
@@ -857,6 +860,9 @@
 
       // ── 1. Health summary (token coverage + component health combined) ──
       html += this._healthSummaryHTML();
+
+      // ── 1b. AI suggestion card (if present) ──
+      if (this.aiSuggestion) html += this._aiSuggestionHTML();
 
       // ── 2. Issues: token gaps with inline fixes ──
       if (this.fixReport?.tokenFixes?.fixes?.length > 0) {
@@ -1382,6 +1388,10 @@
         else if (action === 'toggleAutoScan') this._toggleAutoScan();
         else if (action === 'resetProgress') this._resetTestingProgress();
         else if (action === 'copyTokenFixes') this._copyTokenFixes(btn);
+        else if (action === 'suggestAIFix') this._suggestAIFix(btn);
+        else if (action === 'acceptAISuggestion') this._decideAISuggestion('accepted');
+        else if (action === 'rejectAISuggestion') this._decideAISuggestion('rejected');
+        else if (action === 'dismissAISuggestion') { this.aiSuggestion = null; this._rerender(); }
         else if (action === 'copyComponentPatches') this._copyComponentPatches(btn);
         else if (action === 'copyFullCSS') this._copyFullCSS(btn);
         else if (action === 'savePatch') this._savePatch(btn);
@@ -1707,6 +1717,121 @@
       if (!this.fixReport?.fullCSS) return;
       const textSpan = btn.querySelector('span');
       await this._clipboardCopy(this.fixReport.fullCSS, btn, textSpan?.textContent || 'Copy All Fixes');
+    }
+
+    // ── AI suggestion (Connectry Intelligence Layer) ─────────────────────
+
+    _rerender() {
+      const resultsEl = this.shadow?.querySelector('.diag-results');
+      if (resultsEl) resultsEl.innerHTML = this._unifiedResultsHTML();
+    }
+
+    _aiSuggestionHTML() {
+      const s = this.aiSuggestion;
+      if (!s) return '';
+      if (s.error) {
+        return `
+          <div class="diag-card" style="padding:14px;border-left:3px solid #b91c1c;margin-bottom:10px">
+            <div style="font-weight:600;margin-bottom:4px">AI suggestion failed</div>
+            <div style="font-size:11px;opacity:0.7">${this._escapeHtml(s.error)}</div>
+            <button class="diag-copy-inline" data-action="dismissAISuggestion" style="margin-top:8px">Dismiss</button>
+          </div>`;
+      }
+      const out = s.output || {};
+      const css = out.patch_css || '';
+      const isPending = s.status === 'pending';
+      const statusBadge = s.status === 'accepted'
+        ? '<span class="diag-section-badge-item is-pass">accepted</span>'
+        : s.status === 'rejected'
+          ? '<span class="diag-section-badge-item is-fail">rejected</span>'
+          : '<span class="diag-section-badge-item is-gap">pending review</span>';
+      return `
+        <div class="diag-card" style="padding:14px;border-left:3px solid #4A6FA5;margin-bottom:10px">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+            <div style="font-weight:600">AI suggestion #${s.id} ${statusBadge}</div>
+            <div style="font-size:11px;opacity:0.6">${this._escapeHtml(out.risk || '')} risk · ${(out.affected_components || []).join(', ')}</div>
+          </div>
+          ${out.notes ? `<div style="font-size:11px;opacity:0.75;margin-bottom:8px">${this._escapeHtml(out.notes)}</div>` : ''}
+          <pre style="background:#0a0a0a;color:#d4d4d8;padding:8px;border-radius:4px;font-size:10px;max-height:220px;overflow:auto;white-space:pre-wrap;word-break:break-word">${this._escapeHtml(css)}</pre>
+          ${isPending ? `
+            <div style="display:flex;gap:6px;margin-top:8px">
+              <button class="diag-scan-btn diag-scan-btn--primary" data-action="acceptAISuggestion">Accept &amp; publish</button>
+              <button class="diag-copy-inline" data-action="rejectAISuggestion">Reject</button>
+              <button class="diag-copy-inline" data-action="dismissAISuggestion">Dismiss</button>
+            </div>` : `
+            <div style="margin-top:8px">
+              <button class="diag-copy-inline" data-action="dismissAISuggestion">Dismiss</button>
+            </div>`}
+        </div>`;
+    }
+
+    async _suggestAIFix(btn) {
+      const intel = window.ConnectryIntel;
+      if (!intel) {
+        this.aiSuggestion = { error: 'ConnectryIntel client not loaded' };
+        this._rerender();
+        return;
+      }
+      const consent = await intel.getConsent();
+      if (!consent) {
+        const ok = window.confirm(
+          'AI Suggest Fix sends your scan findings (token gaps, sample DOM snippets, theme tokens) to the Connectry Intelligence Layer. Enable telemetry consent?'
+        );
+        if (!ok) return;
+        await intel.setConsent(true);
+      }
+
+      const gaps = (this.scanResults?.gaps || []).slice(0, 12);
+      if (!gaps.length) {
+        this.aiSuggestion = { error: 'No token gaps to fix on this scan.' };
+        this._rerender();
+        return;
+      }
+
+      this.aiBusy = true;
+      this.aiSuggestion = null;
+      this._rerender();
+
+      const findings = {
+        gaps: gaps.map((g, i) => ({
+          id: `gap-${i + 1}`,
+          token: g,
+          issue: `Token ${g} is used by Salesforce on this page but not provided by the active theme.`,
+        })),
+      };
+      const context = {
+        themeId: this.currentTheme?.id || this._configuredThemeName || null,
+        page: location.pathname,
+        activeTokens: this.themeColors || {},
+      };
+
+      const r = await intel.suggestFix({ intent: 'gap_to_patch', findings, context });
+      this.aiBusy = false;
+      if (r?.error) {
+        this.aiSuggestion = { error: r.error };
+      } else {
+        this.aiSuggestion = { id: r.suggestion_id, output: r.output, status: 'pending' };
+      }
+      this._rerender();
+    }
+
+    async _decideAISuggestion(decision) {
+      const intel = window.ConnectryIntel;
+      if (!intel || !this.aiSuggestion?.id) return;
+      const reason = decision === 'rejected'
+        ? (window.prompt('Reject reason (optional)') || null)
+        : null;
+      const r = await intel.decideSuggestion(this.aiSuggestion.id, {
+        decision,
+        rejectReason: reason,
+        publish: decision === 'accepted',
+      });
+      if (r?.error) {
+        this.aiSuggestion.error = r.error;
+      } else {
+        this.aiSuggestion.status = decision;
+      }
+      this._rerender();
     }
 
     async _savePatch(btn) {
