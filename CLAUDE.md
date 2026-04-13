@@ -4,6 +4,9 @@
 
 ## Required reading (brain/knowledge/projects/salesforce-themer/)
 
+- [`WORKFLOW.md`](/opt/connectry/brain/knowledge/projects/salesforce-themer/WORKFLOW.md) — End-to-end scan→patch→live flow + secret/flag reference. Read when touching the Intelligence Layer or explaining the pipeline.
+- [`SECURITY.md`](/opt/connectry/brain/knowledge/projects/salesforce-themer/SECURITY.md) — Threat catalog + CSS allowlist + tier model. **Mini security review required before editing any Intel Layer critical component** (rule: `feedback_intel_security_review.md`).
+- [`REVIEW-HEURISTICS.md`](/opt/connectry/brain/knowledge/projects/salesforce-themer/REVIEW-HEURISTICS.md) — Accumulating patterns from Noland's draft-patch reviews. **After any review batch, prompt Noland for his reasoning and fold it in** (rule: `feedback_intel_review_workflow.md`). Training data for the eventual auto-review agent.
 - [`VISION.md`](/opt/connectry/brain/knowledge/projects/salesforce-themer/VISION.md) — Product north star: AI-powered, self-healing, multi-platform theming. Self-learning loop spec. Read before engine/backend/scanner changes.
 - [`ARCHITECTURE.md`](/opt/connectry/brain/knowledge/projects/salesforce-themer/ARCHITECTURE.md) — V1→V5 structural plan. V4 moves SF code to `platforms/salesforce/`. Don't pre-emptively restructure before the milestone that introduces it.
 - [`ROADMAP.md`](/opt/connectry/brain/knowledge/projects/salesforce-themer/ROADMAP.md) — Sequencing. V1/V2 are committed; V3+ is directional.
