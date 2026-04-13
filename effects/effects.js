@@ -486,11 +486,12 @@ body.sf-themer-fx-neon .slds-card__header-title {
 
   // ─── Background Patterns ──────────────────────────────────────────────────
   // Delegates to core engine (core/effects/engine.js). Adapter maps IR role
-  // `bodyWrapper` → `.oneContent::before` so the pattern paints inside the
-  // record-page canvas (behind cards) rather than only framing the outer
-  // chrome. `.oneContent` is the stable Lightning page-host wrapper that sits
-  // beneath the global nav; painting there eliminates the fullscreen flash
-  // that occurred when attaching to `body::after` before SF layout settled.
+  // `bodyWrapper` → `body::after`. This paints the pattern behind SF's
+  // layered content surfaces, showing through only in the outer chrome /
+  // scaffold between those surfaces. Tried painting inside the content
+  // canvas (.oneContent, flexipage template) — SF composes multiple opaque
+  // layers per page type, so wrapper-chasing wasn't tractable. Chrome-only
+  // is intentional: subtle framing that complements SF's flat surfaces.
   if (config.backgroundPattern && config.backgroundPattern !== 'none') {
     const engine = (typeof self !== 'undefined' && self.SFThemerEffectsEngine) ||
                    (typeof window !== 'undefined' && window.SFThemerEffectsEngine);
@@ -502,24 +503,21 @@ body.sf-themer-fx-neon .slds-card__header-title {
         css += `
 /* ─── Background Pattern: ${config.backgroundPattern} (via core engine) ─── */
 
-body.sf-themer-fx-background .oneContent,
-body.sf-themer-fx-background flexipage-record-home-template-desktop2,
-body.sf-themer-fx-background flexipage-record-home-template-desktop2 > .slds-grid {
-  position: relative !important;
-}
-
-body.sf-themer-fx-background flexipage-record-home-template-desktop2 > .slds-grid::before {
+body.sf-themer-fx-background::after {
   content: '' !important;
-  position: absolute !important;
+  position: fixed !important;
   inset: 0 !important;
   pointer-events: none !important;
   z-index: 0 !important;
 ${decls}
 }
 
-body.sf-themer-fx-background flexipage-record-home-template-desktop2 > .slds-grid > * {
-  position: relative;
-  z-index: 1;
+body.sf-themer-fx-background .oneContent,
+body.sf-themer-fx-background .slds-card,
+body.sf-themer-fx-background .slds-page-header,
+body.sf-themer-fx-background .slds-modal__container {
+  position: relative !important;
+  z-index: 1 !important;
 }
 `;
       }
