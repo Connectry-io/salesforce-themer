@@ -4181,6 +4181,14 @@ body.is-premium .builder-overflow-premium-badge { display: none !important; }
 .preview-content {
   position: relative;
 }
+/* Padding creates the ring area where the pattern is visible — without it,
+   child elements paint edge-to-edge and cover the whole pattern. */
+.preview-content[data-fx-background-pattern] {
+  padding: 10px;
+}
+.preview-size-compact .preview-content[data-fx-background-pattern] {
+  padding: 6px;
+}
 .preview-content[data-fx-background-pattern]::after {
   content: '';
   position: absolute;
