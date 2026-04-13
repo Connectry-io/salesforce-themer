@@ -502,11 +502,13 @@ body.sf-themer-fx-neon .slds-card__header-title {
         css += `
 /* ─── Background Pattern: ${config.backgroundPattern} (via core engine) ─── */
 
-body.sf-themer-fx-background .oneContent {
+body.sf-themer-fx-background .oneContent,
+body.sf-themer-fx-background flexipage-record-home-template-desktop2,
+body.sf-themer-fx-background flexipage-record-home-template-desktop2 > .slds-grid {
   position: relative !important;
 }
 
-body.sf-themer-fx-background .oneContent::before {
+body.sf-themer-fx-background flexipage-record-home-template-desktop2 > .slds-grid::before {
   content: '' !important;
   position: absolute !important;
   inset: 0 !important;
@@ -515,7 +517,7 @@ body.sf-themer-fx-background .oneContent::before {
 ${decls}
 }
 
-body.sf-themer-fx-background .oneContent > * {
+body.sf-themer-fx-background flexipage-record-home-template-desktop2 > .slds-grid > * {
   position: relative;
   z-index: 1;
 }
