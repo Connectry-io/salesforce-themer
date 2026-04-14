@@ -2038,10 +2038,26 @@
         return;
       }
       this._explainPickerActive = true;
+      // Mark the button active
+      const btn = document.querySelector('[data-action="explainPicker"]');
+      if (btn) {
+        btn.dataset.explainActive = 'true';
+        btn.style.background = '#00bcd4';
+        btn.style.color = '#000';
+        btn.style.borderColor = '#00bcd4';
+      }
+      // Floating hint so the user knows picker is live
+      const hint = document.createElement('div');
+      hint.id = 'sf-themer-explain-hint';
+      hint.style.cssText = 'position:fixed;top:20px;left:50%;transform:translateX(-50%);z-index:2147483646;background:#00bcd4;color:#000;padding:8px 16px;border-radius:20px;font-family:system-ui;font-size:12px;font-weight:600;box-shadow:0 4px 20px rgba(0,0,0,.3);pointer-events:none';
+      hint.textContent = '🔍 Click any element to explain — Esc to cancel';
+      document.documentElement.appendChild(hint);
+
       const outline = document.createElement('div');
       outline.id = 'sf-themer-explain-outline';
-      outline.style.cssText = 'position:fixed;pointer-events:none;z-index:2147483646;border:2px solid #00bcd4;background:rgba(0,188,212,.08);transition:all 60ms ease;display:none';
+      outline.style.cssText = 'position:fixed;pointer-events:none;z-index:2147483646;border:2px solid #00bcd4;background:rgba(0,188,212,.12);transition:all 60ms ease;display:none';
       document.documentElement.appendChild(outline);
+      document.body.style.cursor = 'crosshair';
 
       const host = document.getElementById('sf-themer-diagnostic-host');
 
@@ -2082,6 +2098,15 @@
       if (onClick) document.removeEventListener('click', onClick, true);
       if (onKey) document.removeEventListener('keydown', onKey, true);
       if (outline) outline.remove();
+      document.getElementById('sf-themer-explain-hint')?.remove();
+      document.body.style.cursor = '';
+      const btn = document.querySelector('[data-action="explainPicker"]');
+      if (btn) {
+        delete btn.dataset.explainActive;
+        btn.style.background = '';
+        btn.style.color = '';
+        btn.style.borderColor = '';
+      }
       this._explainHandlers = null;
     }
 
