@@ -6954,3 +6954,103 @@ body.is-premium .theme-card-clone-badge {
   color: var(--cx-text-subtle);
   margin-left: 2px;
 }
+
+/* ─── Builder state pill (Unsaved / Edited) ─────────────────────────────── */
+.builder-state-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: 8px;
+  padding: 2px 8px 2px 6px;
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 1.4;
+  border-radius: 999px;
+  border: 1px solid var(--cx-border);
+  background: var(--cx-surface);
+  color: var(--cx-text-subtle);
+}
+.builder-state-pill[data-state="unsaved"] {
+  background: #fff4e5;
+  border-color: #ffc98a;
+  color: #a85b00;
+}
+.builder-state-pill[data-state="unsaved"] .builder-state-pill-dot {
+  background: #ff9b2e;
+}
+.builder-state-pill[data-state="edited"] {
+  background: #e8f1ff;
+  border-color: #a8c8ff;
+  color: #1f4ca8;
+}
+.builder-state-pill[data-state="edited"] .builder-state-pill-dot {
+  background: #3b82f6;
+}
+.builder-state-pill-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+/* ─── Danger menu item (Delete in save dropdown) ────────────────────────── */
+.builder-create-menu-item-danger .builder-startfrom-name {
+  color: #b42318;
+}
+.builder-create-menu-item-danger:hover {
+  background: #fef3f2;
+}
+.builder-create-menu-item-danger:hover .builder-startfrom-icon {
+  color: #b42318;
+}
+
+/* ─── Unsaved-draft row in theme switcher dropdown ──────────────────────── */
+.builder-theme-switcher-item.is-draft {
+  cursor: default;
+  background: #fff8ec;
+  border: 1px dashed #e4b872;
+}
+.builder-theme-switcher-item-pill {
+  margin-left: auto;
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 1px 7px;
+  border-radius: 999px;
+  background: #ff9b2e;
+  color: #fff;
+}
+
+/* ─── Custom theme card delete button (hover-to-reveal) ─────────────────── */
+.theme-card { position: relative; }
+.theme-card-delete-btn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 24px;
+  height: 24px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  border: 1px solid transparent;
+  background: rgba(255, 255, 255, 0.85);
+  color: var(--cx-text-subtle);
+  cursor: pointer;
+  opacity: 0;
+  transform: translateY(-2px);
+  transition: opacity 120ms ease, transform 120ms ease, color 120ms ease, background 120ms ease, border-color 120ms ease;
+  z-index: 2;
+}
+.theme-card:hover .theme-card-delete-btn,
+.theme-card:focus-within .theme-card-delete-btn,
+.theme-card-delete-btn:focus {
+  opacity: 1;
+  transform: translateY(0);
+}
+.theme-card-delete-btn:hover {
+  background: #fef3f2;
+  border-color: #fecaca;
+  color: #b42318;
+}

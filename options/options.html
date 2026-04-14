@@ -217,6 +217,10 @@
               <!-- 4-color swatch populated by JS -->
             </span>
             <span class="builder-theme-switcher-name" id="builderThemeSwitcherName">My Custom Theme</span>
+            <span class="builder-state-pill" id="builderStatePill" data-state="clean" hidden>
+              <span class="builder-state-pill-dot" aria-hidden="true"></span>
+              <span class="builder-state-pill-text">Unsaved</span>
+            </span>
             <svg width="10" height="10" viewBox="0 0 12 12" fill="none" aria-hidden="true">
               <path d="M3 4.5L6 7.5L9 4.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
             </svg>
@@ -359,6 +363,29 @@
               <span class="builder-startfrom-body">
                 <span class="builder-startfrom-name">Export JSON</span>
                 <span class="builder-startfrom-desc">Download this theme as a shareable file</span>
+              </span>
+            </button>
+            <button type="button" class="builder-create-menu-item" id="topbarDuplicateBtn" role="menuitem">
+              <span class="builder-startfrom-icon">
+                <svg width="14" height="14" viewBox="0 0 22 22" fill="none" aria-hidden="true">
+                  <rect x="7" y="7" width="12" height="12" rx="2" stroke="currentColor" stroke-width="1.6"/>
+                  <path d="M15 7V5a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2h2" stroke="currentColor" stroke-width="1.6"/>
+                </svg>
+              </span>
+              <span class="builder-startfrom-body">
+                <span class="builder-startfrom-name">Duplicate</span>
+                <span class="builder-startfrom-desc">Save as a new theme with the current edits</span>
+              </span>
+            </button>
+            <button type="button" class="builder-create-menu-item builder-create-menu-item-danger" id="topbarDeleteBtn" role="menuitem">
+              <span class="builder-startfrom-icon">
+                <svg width="14" height="14" viewBox="0 0 22 22" fill="none" aria-hidden="true">
+                  <path d="M3 6h16M8 6V3h6v3M6 6l1 13a2 2 0 002 2h4a2 2 0 002-2l1-13" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </span>
+              <span class="builder-startfrom-body">
+                <span class="builder-startfrom-name">Delete theme</span>
+                <span class="builder-startfrom-desc">Permanently remove this custom theme</span>
               </span>
             </button>
           </div>

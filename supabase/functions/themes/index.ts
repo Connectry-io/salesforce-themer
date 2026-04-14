@@ -41,6 +41,32 @@ Deno.serve(async (req) => {
     return json({ themes: data ?? [] });
   }
 
+  // DELETE /themes/<slug>?owner=<owner>
+  // Removes the `themes` row and deactivates the corresponding app_configs
+  // row. Ownership is enforced server-side (RPC raises 42501 → HTTP 403).
+  if (req.method === "DELETE") {
+    const delAuthFail = checkSharedSecret(req);
+    if (delAuthFail) return delAuthFail;
+
+    const url = new URL(req.url);
+    const parts = url.pathname.replace(/^\/+/, "").split("/");
+    const slug = parts[1] ?? "";
+    const owner = url.searchParams.get("owner") ?? "";
+    if (!slug || !SLUG_RE.test(slug)) return json({ error: "invalid slug" }, 400);
+    if (!owner) return json({ error: "owner required" }, 400);
+
+    const { url: sbUrl, serviceKey } = supabaseAdmin();
+    const db = createClient(sbUrl, serviceKey, { auth: { persistSession: false } });
+    const { data, error } = await db.rpc("delete_theme", { p_slug: slug, p_owner: owner });
+    if (error) {
+      if ((error as { code?: string }).code === "42501") {
+        return json({ error: "forbidden: theme owned by another user" }, 403);
+      }
+      return json({ error: error.message }, 500);
+    }
+    return json(data, 200);
+  }
+
   if (req.method !== "POST") return json({ error: "method not allowed" }, 405);
 
   const authFail = checkSharedSecret(req);

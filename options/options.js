@@ -848,6 +848,26 @@
       return;
     }
 
+    // Unsaved draft — show at the top if the current editor session is a new
+    // theme that hasn't been saved yet. Makes it obvious the live preview
+    // isn't in My Themes.
+    if (editorState.active && !editorState.customId) {
+      const draftLabel = document.createElement('div');
+      draftLabel.className = 'builder-theme-switcher-menu-label';
+      draftLabel.textContent = 'Current draft';
+      menu.appendChild(draftLabel);
+
+      const draftName = document.getElementById('editorName')?.value || 'Untitled draft';
+      const draftItem = document.createElement('div');
+      draftItem.className = 'builder-theme-switcher-item is-draft is-active';
+      draftItem.innerHTML = `
+        <span class="builder-theme-switcher-item-swatch"></span>
+        <span><em>${Connectry.Settings.escape(draftName)}</em></span>
+        <span class="builder-theme-switcher-item-pill">Unsaved</span>
+      `;
+      menu.appendChild(draftItem);
+    }
+
     const label = document.createElement('div');
     label.className = 'builder-theme-switcher-menu-label';
     label.textContent = 'My Themes';
@@ -870,7 +890,9 @@
       `;
 
       item.addEventListener('click', () => {
-        // Close the dropdown and switch editor target
+        // Guard against silently losing in-flight edits when the user jumps
+        // between themes in the switcher.
+        if (!_confirmDiscardIfDirty()) return;
         _closeThemeSwitcher();
         openEditor(ct.basedOn, ct);
       });
@@ -964,7 +986,16 @@
     const swatchColors = [c.background, c.surface, c.accent, c.textPrimary];
     const swatchHtml = swatchColors.map(col => `<span style="background:${col || '#ddd'}"></span>`).join('');
 
+    const deleteBtnHtml = theme.isCustom
+      ? `<button type="button" class="theme-card-delete-btn" data-theme-delete title="Delete theme" aria-label="Delete ${Connectry.Settings.escape(theme.name)}">
+           <svg width="12" height="12" viewBox="0 0 22 22" fill="none" aria-hidden="true">
+             <path d="M3 6h16M8 6V3h6v3M6 6l1 13a2 2 0 002 2h4a2 2 0 002-2l1-13" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+           </svg>
+         </button>`
+      : '';
+
     card.innerHTML = `
+      ${deleteBtnHtml}
       <div class="theme-swatch">${swatchHtml}</div>
       <div class="theme-card-body">
         <div class="theme-card-header">
@@ -981,7 +1012,16 @@
       </div>
     `;
 
-    card.addEventListener('click', (e) => {
+    card.addEventListener('click', async (e) => {
+      const delBtn = e.target.closest('[data-theme-delete]');
+      if (delBtn) {
+        e.stopPropagation();
+        if (!confirm(`Delete "${theme.name}"? This cannot be undone.`)) return;
+        await deleteCustomTheme(theme.id);
+        renderCollectionGrid(syncState.theme);
+        _flashToast('Theme deleted.');
+        return;
+      }
       const effectPill = e.target.closest('[data-effect-pill]');
       if (effectPill) {
         e.stopPropagation();
@@ -1211,9 +1251,7 @@
     if (deleteBtn) {
       deleteBtn.addEventListener('click', async () => {
         if (!confirm(`Delete "${theme.name}"? This cannot be undone.`)) return;
-        const customs = (syncState.customThemes || []).filter(ct => ct.id !== theme.id);
-        await chrome.storage.sync.set({ customThemes: customs });
-        syncState.customThemes = customs;
+        await deleteCustomTheme(theme.id);
         closeDetailPanel();
         renderCollectionGrid(syncState.theme);
       });
@@ -2411,9 +2449,124 @@
       exportThemeJSON();
     });
 
+    document.getElementById('topbarDuplicateBtn')?.addEventListener('click', () => {
+      if (saveDropMenu) saveDropMenu.hidden = true;
+      if (!isPremium()) { _showSaveUpgradePrompt(); return; }
+      // Duplicate = forget the current id so saveCustomTheme mints a new slug
+      // and keeps all current edits. Also prepend "Copy of " to the name.
+      editorState.customId = null;
+      const nameEl = document.getElementById('editorName');
+      if (nameEl && !nameEl.value.toLowerCase().startsWith('copy of ')) {
+        nameEl.value = `Copy of ${nameEl.value}`;
+      }
+      refreshBuilderState();
+      _flashToast('Duplicated — save to keep this copy.');
+    });
+
+    document.getElementById('topbarDeleteBtn')?.addEventListener('click', async () => {
+      if (saveDropMenu) saveDropMenu.hidden = true;
+      if (!editorState.customId) {
+        _flashToast('Nothing to delete — this draft was never saved.');
+        return;
+      }
+      const nameEl = document.getElementById('editorName');
+      const niceName = nameEl?.value || 'this theme';
+      if (!confirm(`Delete "${niceName}"? This cannot be undone.`)) return;
+      const deletedId = editorState.customId;
+      await deleteCustomTheme(deletedId);
+      // Reset the editor to a clean state on the base theme so the user isn't
+      // looking at the ghost of the deleted theme's edits.
+      openEditor(editorState.basedOn || 'connectry', null);
+      renderCollectionGrid(syncState.theme);
+      renderBuilderSidebar(syncState.theme);
+      _flashToast('Theme deleted.');
+    });
+
     // Free notice visibility
     const freeNotice = document.getElementById('builderTopbarFreeNotice');
     if (freeNotice) freeNotice.hidden = isPremium();
+  }
+
+  // ─── Builder state pill + Save button copy (Unsaved / Edited / clean) ────
+
+  let _editorBaseline = '';
+
+  function _serializeEditorState() {
+    return JSON.stringify({
+      basedOn: editorState.basedOn,
+      coreOverrides: editorState.coreOverrides,
+      advancedOverrides: editorState.advancedOverrides,
+      effects: editorState.effects,
+      typography: editorState.typography,
+      name: document.getElementById('editorName')?.value || '',
+      description: document.getElementById('editorDescription')?.value || '',
+      favicon: _editorFaviconState,
+    });
+  }
+
+  function snapshotEditorBaseline() {
+    _editorBaseline = _serializeEditorState();
+    refreshBuilderState();
+  }
+
+  function refreshBuilderState() {
+    const pill = document.getElementById('builderStatePill');
+    const saveBtn = document.getElementById('builderTopbarSave');
+    if (!pill || !saveBtn) return;
+    if (!editorState.active) { pill.hidden = true; return; }
+
+    const isNew = !editorState.customId;
+    const isDirty = _serializeEditorState() !== _editorBaseline;
+    const pillText = pill.querySelector('.builder-state-pill-text');
+
+    if (isNew) {
+      pill.hidden = false;
+      pill.dataset.state = 'unsaved';
+      if (pillText) pillText.textContent = 'Unsaved';
+      saveBtn.textContent = 'Save as new';
+    } else if (isDirty) {
+      pill.hidden = false;
+      pill.dataset.state = 'edited';
+      if (pillText) pillText.textContent = 'Edited';
+      saveBtn.textContent = 'Save changes';
+    } else {
+      pill.hidden = true;
+      saveBtn.textContent = 'Save Theme';
+    }
+  }
+
+  function _confirmDiscardIfDirty() {
+    if (!editorState.active) return true;
+    const isNew = !editorState.customId;
+    const isDirty = _serializeEditorState() !== _editorBaseline;
+    if (!isNew && !isDirty) return true;
+    const msg = isNew
+      ? 'Discard this unsaved draft?'
+      : 'You have unsaved changes. Discard them?';
+    return confirm(msg);
+  }
+
+  // Fire refreshBuilderState whenever the user interacts with the editor.
+  // Delegated on document — cheap and captures everything without threading
+  // refresh calls through every setter.
+  function _bindBuilderDirtyTracking() {
+    const handler = () => {
+      if (editorState.active) refreshBuilderState();
+    };
+    document.addEventListener('input', handler);
+    document.addEventListener('change', handler);
+    // beforeunload guard: warn on tab close / reload when a draft has unsaved
+    // work. Chrome ignores custom text in modern versions but still shows the
+    // default "Leave site?" prompt.
+    window.addEventListener('beforeunload', (e) => {
+      if (!editorState.active) return;
+      const isNew = !editorState.customId;
+      const isDirty = _serializeEditorState() !== _editorBaseline;
+      if (isNew || isDirty) {
+        e.preventDefault();
+        e.returnValue = '';
+      }
+    });
   }
 
   function _bindBuilderCreateMenu() {
@@ -2844,6 +2997,10 @@
     // Sync the top bar theme switcher trigger — the swatch + name need
     // to reflect whatever we just loaded into the editor.
     _updateThemeSwitcherTrigger();
+
+    // Snapshot the baseline so dirty-tracking knows what "unchanged" means
+    // for this editing session.
+    snapshotEditorBaseline();
   }
 
   /**
@@ -3129,6 +3286,7 @@
 
     // Top bar actions — Reset, Save dropdown, free notice
     _bindTopbarActions();
+    _bindBuilderDirtyTracking();
 
     document.getElementById('editorImportFile')?.addEventListener('change', importThemeJSON);
 
@@ -3654,6 +3812,31 @@
     return `theme_${s}`;
   }
 
+  // Delete a custom theme everywhere it lives: chrome.storage.sync (so Google
+  // sync propagates the removal), chrome.storage.local (cached CSS blobs), and
+  // Supabase (so it doesn't reappear in the popup's remote-merge list). If
+  // the deleted theme was active, fall back to 'connectry'.
+  async function deleteCustomTheme(id) {
+    const customs = (syncState.customThemes || []).filter(ct => ct.id !== id);
+    await chrome.storage.sync.set({ customThemes: customs });
+    syncState.customThemes = customs;
+
+    try {
+      await chrome.storage.local.remove([`themeCSS_${id}`, `themeCache:${id}`]);
+    } catch (_) {}
+
+    if (syncState.theme === id) {
+      await selectTheme('connectry');
+    }
+
+    if (id.startsWith('theme_') && self.ConnectryIntel?.deleteTheme) {
+      const owner = await self.ConnectryIntel.getAnonUserId();
+      self.ConnectryIntel.deleteTheme({ slug: id, owner }).catch((err) => {
+        console.warn('[Themer] Supabase deleteTheme failed:', err);
+      });
+    }
+  }
+
   async function _mirrorCustomThemeToSupabase(slug, custom) {
     if (!self.ConnectryIntel?.saveTheme) return;
     // Ask background to (re-)render and cache the CSS; it's the only context
@@ -3776,6 +3959,10 @@
     await selectTheme(id);
     renderCollectionGrid(id);
     renderBuilderSidebar(id);
+
+    // Save succeeded — reset the dirty baseline so the pill clears and the
+    // Save button reverts to "Save Theme".
+    snapshotEditorBaseline();
 
     // V2.5 Migration B: mirror the save to Supabase so the theme can be loaded
     // on other browsers / machines and (later) published as a paid preset. The
