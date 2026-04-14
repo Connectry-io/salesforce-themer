@@ -6956,6 +6956,7 @@ body.is-premium .theme-card-clone-badge {
 }
 
 /* ─── Builder state pill (Unsaved / Edited) ─────────────────────────────── */
+.builder-state-pill[hidden] { display: none; }
 .builder-state-pill {
   display: inline-flex;
   align-items: center;
