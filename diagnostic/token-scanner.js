@@ -393,6 +393,13 @@
     const isStructural = STRUCTURAL_OVERRIDES.some(so => lower.includes(so.toLowerCase()));
     if (isStructural) return true;
 
+    // Dimensional-suffix check — catches `--lwc-colorPickerSwatchSize`,
+    // `--lwc-colorPickerRangeHeight` etc. that pass the `color` keyword
+    // gate but are actually layout values. See REVIEW-HEURISTICS AA-2
+    // and BACKLOG §1l (2026-04-15).
+    const DIMENSIONAL_SUFFIX = /(?:size|width|height|spacing|padding|margin|duration|delay|radius|offset|indent|gap|scale|stroke|ratio|thickness|inset)$/i;
+    if (DIMENSIONAL_SUFFIX.test(token)) return true;
+
     return false;
   }
 
