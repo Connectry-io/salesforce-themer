@@ -2108,9 +2108,25 @@
       const panel = document.createElement('div');
       panel.id = 'sf-themer-explain-result';
       panel.style.cssText = 'position:fixed;top:80px;right:20px;width:520px;max-height:70vh;overflow:auto;z-index:2147483647;background:#1a1d23;color:#e0e0e0;border:1px solid #333;border-radius:8px;box-shadow:0 10px 40px rgba(0,0,0,.4);font-family:system-ui;padding:12px';
+      const copyPayload = {
+        element: label,
+        tag,
+        id: el.id || null,
+        classes: el.className && typeof el.className === 'string' ? el.className.trim().split(/\s+/) : [],
+        properties: results.map((r) => ({
+          prop: r.prop,
+          value: r.info.value,
+          source: r.info.source,
+          patchKey: r.info.patchKey || null,
+          selector: r.info.selector || null,
+        })),
+        injectedLayers: sources,
+      };
+      panel._copyPayload = copyPayload;
       panel.innerHTML = `
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-          <div style="font-weight:600">🔍 Explain: <code style="background:#2a2d33;padding:2px 6px;border-radius:3px">${label}</code></div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;gap:8px">
+          <div style="font-weight:600;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">🔍 <code style="background:#2a2d33;padding:2px 6px;border-radius:3px">${label}</code></div>
+          <button id="sf-explain-copy" style="background:#2a2d33;border:1px solid #444;color:#e0e0e0;padding:4px 10px;border-radius:4px;font-size:11px;cursor:pointer">📋 Copy</button>
           <button id="sf-explain-close" style="background:none;border:none;color:#aaa;font-size:18px;cursor:pointer">×</button>
         </div>
         <div style="font-size:11px;color:#888;margin-bottom:10px">Injected layers: ${sourcesLine || 'none tagged'}</div>
@@ -2121,6 +2137,16 @@
       document.getElementById('sf-themer-explain-result')?.remove();
       document.documentElement.appendChild(panel);
       panel.querySelector('#sf-explain-close').onclick = () => panel.remove();
+      panel.querySelector('#sf-explain-copy').onclick = async (ev) => {
+        const btn = ev.currentTarget;
+        try {
+          await navigator.clipboard.writeText(JSON.stringify(panel._copyPayload, null, 2));
+          btn.textContent = '✓ Copied';
+          setTimeout(() => { btn.textContent = '📋 Copy'; }, 1500);
+        } catch (e) {
+          btn.textContent = 'Failed';
+        }
+      };
     }
 
     _sourceColor(src) {
