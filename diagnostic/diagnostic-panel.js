@@ -525,6 +525,9 @@
             <button class="diag-scan-btn diag-scan-btn--secondary" data-action="scanThemesAll" title="Scan this page against every preset + custom theme">
               <span>All</span>
             </button>
+            <button class="diag-scan-btn diag-scan-btn--secondary" data-action="explainPicker" title="Click any element on the page to see which layer (engine, preset, patch) painted it">
+              <span>🔍 Explain</span>
+            </button>
           </div>
         </div>`;
     }
@@ -1416,6 +1419,7 @@
         else if (action === 'scanThemesPresets') this._runMultiThemeScan('presets');
         else if (action === 'scanThemesMine') this._runMultiThemeScan('custom');
         else if (action === 'scanThemesAll') this._runMultiThemeScan('all');
+        else if (action === 'explainPicker') this._startExplainPicker();
         else if (action === 'toggleAutoScan') this._toggleAutoScan();
         else if (action === 'resetProgress') this._resetTestingProgress();
         else if (action === 'copyTokenFixes') this._copyTokenFixes(btn);
@@ -2024,6 +2028,108 @@
       const sid = this.aiSuggestion?.id || 'unknown';
       const wrapped = `/* ── @sft-patch key=live-suggestion-${sid} origin=panel ── */\n${css}\n/* ── @sft-end key=live-suggestion-${sid} ── */`;
       el.textContent = (el.textContent || '') + '\n\n' + wrapped;
+    }
+
+    // ── Explain Pixel picker ───────────────────────────────────────────────
+    _startExplainPicker() {
+      if (this._explainPickerActive) { this._stopExplainPicker(); return; }
+      if (!window.__sftExplain) {
+        console.warn('[SFT] __sftExplain not loaded — reload extension');
+        return;
+      }
+      this._explainPickerActive = true;
+      const outline = document.createElement('div');
+      outline.id = 'sf-themer-explain-outline';
+      outline.style.cssText = 'position:fixed;pointer-events:none;z-index:2147483646;border:2px solid #00bcd4;background:rgba(0,188,212,.08);transition:all 60ms ease;display:none';
+      document.documentElement.appendChild(outline);
+
+      const host = document.getElementById('sf-themer-diagnostic-host');
+
+      const onMove = (ev) => {
+        const t = ev.target;
+        if (!t || host?.contains(t)) { outline.style.display = 'none'; return; }
+        const r = t.getBoundingClientRect();
+        Object.assign(outline.style, {
+          display: 'block',
+          left: r.left + 'px',
+          top: r.top + 'px',
+          width: r.width + 'px',
+          height: r.height + 'px',
+        });
+      };
+      const onClick = (ev) => {
+        const t = ev.target;
+        if (!t || host?.contains(t)) return;
+        ev.preventDefault();
+        ev.stopPropagation();
+        this._renderExplainResult(t);
+        this._stopExplainPicker();
+      };
+      const onKey = (ev) => {
+        if (ev.key === 'Escape') this._stopExplainPicker();
+      };
+      this._explainHandlers = { onMove, onClick, onKey, outline };
+      document.addEventListener('mousemove', onMove, true);
+      document.addEventListener('click', onClick, true);
+      document.addEventListener('keydown', onKey, true);
+    }
+
+    _stopExplainPicker() {
+      if (!this._explainPickerActive) return;
+      this._explainPickerActive = false;
+      const { onMove, onClick, onKey, outline } = this._explainHandlers || {};
+      if (onMove) document.removeEventListener('mousemove', onMove, true);
+      if (onClick) document.removeEventListener('click', onClick, true);
+      if (onKey) document.removeEventListener('keydown', onKey, true);
+      if (outline) outline.remove();
+      this._explainHandlers = null;
+    }
+
+    _renderExplainResult(el) {
+      const PROPS = ['background-color', 'background-image', 'color', 'border-color', 'border-top-color', 'border-bottom-color', 'box-shadow'];
+      const results = PROPS.map((p) => ({ prop: p, info: window.__sftExplain(el, p) })).filter((r) => r.info);
+      const sources = window.__sftSources ? window.__sftSources() : [];
+
+      const tag = el.tagName.toLowerCase();
+      const id = el.id ? `#${el.id}` : '';
+      const cls = el.className && typeof el.className === 'string' ? '.' + el.className.trim().split(/\s+/).slice(0, 4).join('.') : '';
+      const label = `<${tag}${id}${cls}>`;
+
+      const rows = results.map((r) => `
+        <tr>
+          <td style="padding:4px 8px;font-family:monospace;font-size:11px;color:#888">${r.prop}</td>
+          <td style="padding:4px 8px;font-family:monospace;font-size:11px">${r.info.value || '—'}</td>
+          <td style="padding:4px 8px;font-size:11px"><span style="padding:2px 6px;border-radius:3px;background:${this._sourceColor(r.info.source)};color:#fff">${r.info.source}</span></td>
+          <td style="padding:4px 8px;font-family:monospace;font-size:10px;color:#666">${r.info.patchKey || r.info.selector?.slice(0, 40) || ''}</td>
+        </tr>`).join('');
+
+      const sourcesLine = sources.map((s) => `${s.source} (${s.bytes}B)`).join(' · ');
+
+      const panel = document.createElement('div');
+      panel.id = 'sf-themer-explain-result';
+      panel.style.cssText = 'position:fixed;top:80px;right:20px;width:520px;max-height:70vh;overflow:auto;z-index:2147483647;background:#1a1d23;color:#e0e0e0;border:1px solid #333;border-radius:8px;box-shadow:0 10px 40px rgba(0,0,0,.4);font-family:system-ui;padding:12px';
+      panel.innerHTML = `
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+          <div style="font-weight:600">🔍 Explain: <code style="background:#2a2d33;padding:2px 6px;border-radius:3px">${label}</code></div>
+          <button id="sf-explain-close" style="background:none;border:none;color:#aaa;font-size:18px;cursor:pointer">×</button>
+        </div>
+        <div style="font-size:11px;color:#888;margin-bottom:10px">Injected layers: ${sourcesLine || 'none tagged'}</div>
+        ${rows.length
+          ? `<table style="width:100%;border-collapse:collapse;font-size:12px"><thead><tr style="border-bottom:1px solid #333"><th align="left" style="padding:4px 8px;color:#888">Property</th><th align="left" style="padding:4px 8px;color:#888">Value</th><th align="left" style="padding:4px 8px;color:#888">Source</th><th align="left" style="padding:4px 8px;color:#888">Patch / Selector</th></tr></thead><tbody>${rows}</tbody></table>`
+          : '<div style="padding:12px;color:#888">No Themer-tagged rules matched this element. Colors are coming from Salesforce defaults.</div>'}
+      `;
+      document.getElementById('sf-themer-explain-result')?.remove();
+      document.documentElement.appendChild(panel);
+      panel.querySelector('#sf-explain-close').onclick = () => panel.remove();
+    }
+
+    _sourceColor(src) {
+      if (!src) return '#666';
+      if (src.startsWith('engine:')) return '#1976d2';
+      if (src.startsWith('intel:patches')) return '#7b1fa2';
+      if (src.startsWith('intel:live')) return '#e67e22';
+      if (src.startsWith('custom:')) return '#388e3c';
+      return '#555';
     }
 
     async _decideAISuggestion(decision) {
