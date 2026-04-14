@@ -2086,8 +2086,42 @@
     }
 
     _renderExplainResult(el) {
-      const PROPS = ['background-color', 'background-image', 'color', 'border-color', 'border-top-color', 'border-bottom-color', 'box-shadow'];
-      const results = PROPS.map((p) => ({ prop: p, info: window.__sftExplain(el, p) })).filter((r) => r.info);
+      const PAINT_PROPS = ['background-color', 'background-image', 'color', 'border-color', 'border-top-color', 'border-bottom-color', 'border-left-color', 'border-right-color', 'box-shadow', 'outline-color', 'fill', 'stroke'];
+      const LAYOUT_PROPS = ['position', 'z-index', 'opacity', 'display', 'width', 'height'];
+      const results = PAINT_PROPS.map((p) => ({ prop: p, info: window.__sftExplain(el, p) })).filter((r) => r.info);
+
+      // Parent chain — 3 levels up, paint attribution at each
+      const parentChain = [];
+      let cur = el.parentElement;
+      let depth = 0;
+      while (cur && depth < 3) {
+        const bg = window.__sftExplain(cur, 'background-color');
+        parentChain.push({
+          label: `<${cur.tagName.toLowerCase()}${cur.id ? '#' + cur.id : ''}${cur.className && typeof cur.className === 'string' ? '.' + cur.className.trim().split(/\s+/).slice(0,2).join('.') : ''}>`,
+          bg,
+        });
+        cur = cur.parentElement;
+        depth++;
+      }
+
+      // Pseudo-element rules: walk stylesheets for ::before / ::after selectors that match
+      const pseudos = [];
+      for (const sheet of Array.from(document.styleSheets)) {
+        let rules; try { rules = sheet.cssRules; } catch { continue; }
+        if (!rules) continue;
+        const owner = sheet.ownerNode;
+        const src = owner?.dataset?.sftSource || (owner?.id ? `extension:${owner.id}` : 'salesforce');
+        for (const r of rules) {
+          if (!r.selectorText || !/::(before|after)/.test(r.selectorText)) continue;
+          const base = r.selectorText.replace(/::(before|after).*/, '');
+          try { if (el.matches(base)) pseudos.push({ selector: r.selectorText, source: src, cssText: r.cssText.slice(0, 160) }); } catch {}
+        }
+      }
+
+      // Layout snapshot (computed only)
+      const comp = getComputedStyle(el);
+      const layout = LAYOUT_PROPS.map((p) => ({ prop: p, value: comp[p] }));
+
       const sources = window.__sftSources ? window.__sftSources() : [];
 
       const tag = el.tagName.toLowerCase();
@@ -2120,11 +2154,31 @@
           patchKey: r.info.patchKey || null,
           selector: r.info.selector || null,
         })),
+        layout,
+        parentChain: parentChain.map((p) => ({
+          label: p.label,
+          bgValue: p.bg?.value || null,
+          bgSource: p.bg?.source || null,
+        })),
+        pseudoElements: pseudos.slice(0, 10),
         injectedLayers: sources,
       };
       panel._copyPayload = copyPayload;
+      const parentRows = parentChain.map((p) => `
+        <tr>
+          <td style="padding:3px 8px;font-family:monospace;font-size:10px;color:#bbb">${p.label}</td>
+          <td style="padding:3px 8px;font-family:monospace;font-size:10px">${p.bg?.value || '—'}</td>
+          <td style="padding:3px 8px;font-size:10px">${p.bg ? `<span style="padding:1px 5px;border-radius:3px;background:${this._sourceColor(p.bg.source)};color:#fff">${p.bg.source}</span>` : ''}</td>
+        </tr>`).join('');
+      const pseudoRows = pseudos.slice(0, 6).map((p) => `
+        <tr>
+          <td style="padding:3px 8px;font-family:monospace;font-size:10px">${p.selector}</td>
+          <td style="padding:3px 8px;font-size:10px"><span style="padding:1px 5px;border-radius:3px;background:${this._sourceColor(p.source)};color:#fff">${p.source}</span></td>
+        </tr>`).join('');
+      const layoutLine = layout.map((l) => `<code style="background:#2a2d33;padding:1px 5px;border-radius:3px;margin-right:6px;font-size:10px">${l.prop}: ${l.value}</code>`).join('');
+
       panel.innerHTML = `
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;gap:8px">
+        <div id="sf-explain-header" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;gap:8px;cursor:move;user-select:none">
           <div style="font-weight:600;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">🔍 <code style="background:#2a2d33;padding:2px 6px;border-radius:3px">${label}</code></div>
           <button id="sf-explain-copy" style="background:#2a2d33;border:1px solid #444;color:#e0e0e0;padding:4px 10px;border-radius:4px;font-size:11px;cursor:pointer">📋 Copy</button>
           <button id="sf-explain-close" style="background:none;border:none;color:#aaa;font-size:18px;cursor:pointer">×</button>
@@ -2133,9 +2187,30 @@
         ${rows.length
           ? `<table style="width:100%;border-collapse:collapse;font-size:12px"><thead><tr style="border-bottom:1px solid #333"><th align="left" style="padding:4px 8px;color:#888">Property</th><th align="left" style="padding:4px 8px;color:#888">Value</th><th align="left" style="padding:4px 8px;color:#888">Source</th><th align="left" style="padding:4px 8px;color:#888">Patch / Selector</th></tr></thead><tbody>${rows}</tbody></table>`
           : '<div style="padding:12px;color:#888">No Themer-tagged rules matched this element. Colors are coming from Salesforce defaults.</div>'}
+        ${parentRows ? `<div style="margin-top:10px;font-size:11px;color:#888;padding:0 8px">Parent chain backgrounds</div><table style="width:100%;border-collapse:collapse;font-size:11px">${parentRows}</table>` : ''}
+        ${pseudoRows ? `<div style="margin-top:10px;font-size:11px;color:#888;padding:0 8px">::before / ::after rules</div><table style="width:100%;border-collapse:collapse;font-size:11px">${pseudoRows}</table>` : ''}
+        <div style="margin-top:10px;font-size:11px;color:#888;padding:0 8px">Layout</div>
+        <div style="padding:4px 8px">${layoutLine}</div>
       `;
       document.getElementById('sf-themer-explain-result')?.remove();
       document.documentElement.appendChild(panel);
+      // Draggable
+      const header = panel.querySelector('#sf-explain-header');
+      let drag = null;
+      header.addEventListener('mousedown', (ev) => {
+        if (ev.target.tagName === 'BUTTON') return;
+        const r = panel.getBoundingClientRect();
+        drag = { dx: ev.clientX - r.left, dy: ev.clientY - r.top };
+        ev.preventDefault();
+      });
+      document.addEventListener('mousemove', (ev) => {
+        if (!drag) return;
+        panel.style.left = (ev.clientX - drag.dx) + 'px';
+        panel.style.top = (ev.clientY - drag.dy) + 'px';
+        panel.style.right = 'auto';
+      });
+      document.addEventListener('mouseup', () => { drag = null; });
+
       panel.querySelector('#sf-explain-close').onclick = () => panel.remove();
       panel.querySelector('#sf-explain-copy').onclick = async (ev) => {
         const btn = ev.currentTarget;
