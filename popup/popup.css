@@ -1051,7 +1051,7 @@ body {
 
 .theme-name-row {
   display: flex;
-  align-items: baseline;
+  align-items: center;
   gap: 5px;
 }
 
@@ -1516,11 +1516,15 @@ body {
   transform: translateY(-2px);
   transition: opacity 120ms ease, transform 120ms ease;
   z-index: 2;
+  /* Invisible hover actions were catching clicks meant for the card
+     itself, blocking apply-on-click. Re-enable only when revealed. */
+  pointer-events: none;
 }
 .theme-card:hover .theme-card-hover-actions,
 .theme-card:focus-within .theme-card-hover-actions {
   opacity: 1;
   transform: translateY(0);
+  pointer-events: auto;
 }
 .theme-card-hover-btn {
   width: 22px;

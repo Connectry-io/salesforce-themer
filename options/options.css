@@ -671,8 +671,8 @@
 
 .theme-card-header {
   display: flex;
-  align-items: baseline;
-  justify-content: space-between;
+  align-items: center;
+  justify-content: flex-start;
   gap: var(--cx-space-2);
   flex-wrap: wrap;
 }

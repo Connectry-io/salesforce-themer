@@ -4589,7 +4589,7 @@
               <button type="button" class="anatomy-marker" data-marker="2" aria-label="Name, category, favicon explainer">2</button>
               <span class="anatomy-title-group">
                 <span class="theme-name">${Connectry.Settings.escape(theme.name)}</span>
-                <span class="anatomy-favicon-dot" title="Theme favicon (defaults to Connectry icon)">${_connectryDotSvg(theme.colors.accent)}</span>
+                <span class="anatomy-favicon-dot" title="Theme favicon (defaults to Connectry icon)">${self.ConnectryFavicon ? self.ConnectryFavicon.buildSVG({ shape: 'circle', color: theme.colors.accent, icon: 'connectry' }, 16) : _connectryDotSvg(theme.colors.accent)}</span>
               </span>
               <span class="theme-category-badge ${theme.category}">${theme.category === 'light' ? 'Light' : 'Dark'}</span>
             </div>
