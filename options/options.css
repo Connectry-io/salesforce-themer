@@ -7100,18 +7100,16 @@ body.is-premium .theme-card-clone-badge {
   margin: 4px 2px;
 }
 
-/* ─── Favicon chip on theme cards + hero preview ────────────────────────── */
+/* ─── Favicon chip inline with theme name ───────────────────────────────── */
 .theme-card-favicon {
-  position: absolute;
-  top: 8px;
-  left: 8px;
-  width: 18px;
-  height: 18px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  z-index: 1;
-  pointer-events: none;
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  margin-right: 6px;
+  vertical-align: -3px;
 }
 .theme-card-favicon svg { display: block; }
 .opt-detail-panel-favicon {

@@ -1001,10 +1001,10 @@
 
     card.innerHTML = `
       ${deleteBtnHtml}
-      <span class="theme-card-favicon" aria-hidden="true">${faviconSvg}</span>
       <div class="theme-swatch">${swatchHtml}</div>
       <div class="theme-card-body">
         <div class="theme-card-header">
+          <span class="theme-card-favicon" aria-hidden="true">${faviconSvg}</span>
           <span class="theme-name">${theme.name}</span>
           ${isActive ? '<span class="theme-active-badge">✓ Active</span>' : ''}
           <span class="theme-category-badge ${theme.isCustom ? (theme.category || 'light') : theme.category}">${theme.isCustom ? 'Custom' : (theme.category === 'light' ? 'Light' : 'Dark')}</span>
