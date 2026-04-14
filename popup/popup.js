@@ -170,7 +170,10 @@
         // theme is currently selected, and Connectry-as-default is implicit
         // because it's the first card on first install.
 
+        const presetFavCfg = theme.favicon || { shape: 'circle', color: (theme.colors && theme.colors.accent) || '#4A6FA5', icon: 'connectry' };
+        const presetFavSvg = self.ConnectryFavicon ? self.ConnectryFavicon.buildSVG(presetFavCfg, 16) : '';
         btn.innerHTML = `
+          <span class="theme-card-favicon" aria-hidden="true">${presetFavSvg}</span>
           <div class="theme-swatch">${swatchHtml}</div>
           <div class="theme-info">
             <div class="theme-name-row">
@@ -555,7 +558,10 @@
       ? ct.description
       : `Based on ${base?.name || ct.basedOn}`;
 
+    const ctFavCfg = ct.favicon || { shape: 'circle', color: resolvedColors.accent || '#4A6FA5', icon: 'connectry' };
+    const ctFavSvg = self.ConnectryFavicon ? self.ConnectryFavicon.buildSVG(ctFavCfg, 16) : '';
     btn.innerHTML = `
+      <span class="theme-card-favicon" aria-hidden="true">${ctFavSvg}</span>
       <span class="theme-card-edit-btn" data-edit="${ct.id}" title="Edit in Builder">
         <svg width="11" height="11" viewBox="0 0 12 12" fill="none" aria-hidden="true">
           <path d="M8 1.5l2 2-7 7H1v-2l7-7z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/>

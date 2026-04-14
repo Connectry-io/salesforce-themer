@@ -7099,3 +7099,28 @@ body.is-premium .theme-card-clone-badge {
   background: var(--cx-border);
   margin: 4px 2px;
 }
+
+/* ─── Favicon chip on theme cards + hero preview ────────────────────────── */
+.theme-card-favicon {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  width: 18px;
+  height: 18px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1;
+  pointer-events: none;
+}
+.theme-card-favicon svg { display: block; }
+.opt-detail-panel-favicon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  margin-right: 8px;
+  vertical-align: -5px;
+}
+.opt-detail-panel-favicon svg { display: block; }

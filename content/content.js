@@ -271,6 +271,29 @@
   // core/favicon/engine.js (loaded ahead of this script via manifest
   // content_scripts). Single source of truth across every surface.
 
+  // Resolve the active theme's favicon config. Custom themes carry .favicon
+  // inline; presets carry it in themes/themes.json. Null = use the bundled
+  // connectry.svg fallback.
+  let _presetRegistryCache = null;
+  async function _resolveThemeFavicon(themeName) {
+    if (!themeName || themeName === 'none') return null;
+    if (themeName.startsWith('theme_') || themeName.startsWith('custom-')) {
+      try {
+        const { customThemes = [] } = await chrome.storage.sync.get('customThemes');
+        const ct = customThemes.find(t => t.id === themeName);
+        return ct?.favicon || null;
+      } catch (_) { return null; }
+    }
+    try {
+      if (!_presetRegistryCache) {
+        const res = await fetch(chrome.runtime.getURL('themes/themes.json'));
+        _presetRegistryCache = await res.json();
+      }
+      const t = (_presetRegistryCache.themes || []).find(x => x.id === themeName);
+      return t?.favicon || null;
+    } catch (_) { return null; }
+  }
+
   function applyFavicon(enabled, config) {
     _currentFaviconEnabled = enabled;
     _currentFaviconConfig = config || null;
@@ -622,9 +645,14 @@
 
   chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
     if (message.action === 'setTheme') {
-      applyTheme(message.theme, true).then(() => {
+      applyTheme(message.theme, true).then(async () => {
         // Re-apply effects for new theme (colors may differ)
         loadAndApplyEffects(message.theme);
+        // Swap the favicon to the new theme's config
+        try {
+          const cfg = await _resolveThemeFavicon(message.theme);
+          applyFavicon(_currentFaviconEnabled !== false, cfg);
+        } catch (_) {}
         // Keep diagnostic panel in sync with active theme
         if (diagnosticPanel) diagnosticPanel.updateTheme(message.theme);
         sendResponse({ success: true, theme: message.theme });
@@ -782,8 +810,11 @@
         try { window.__sfThemerDiag.injectPatches(); } catch (_) {}
       }
 
-      // Favicon — Connectry branding on free themes, toggleable + customizable
-      applyFavicon(syncResult.faviconEnabled, syncResult.faviconConfig);
+      // Favicon — resolve from the active theme's own config (custom themes
+      // carry .favicon inline, presets carry it in themes.json). Fall back to
+      // the bundled Connectry mark if the theme has no favicon config.
+      const faviconCfg = await _resolveThemeFavicon(themeName);
+      applyFavicon(syncResult.faviconEnabled, faviconCfg);
 
       // Auto-reopen diagnostic panel if it was open before page refresh
       if (isTopFrame && window.__sfThemerDiag?.DiagnosticPanel) {

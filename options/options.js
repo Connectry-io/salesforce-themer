@@ -986,6 +986,11 @@
     const swatchColors = [c.background, c.surface, c.accent, c.textPrimary];
     const swatchHtml = swatchColors.map(col => `<span style="background:${col || '#ddd'}"></span>`).join('');
 
+    // Favicon chip — pulls the theme's favicon config if set, otherwise
+    // renders the default Connectry mark tinted with the theme accent.
+    const favCfg = theme.favicon || { shape: 'circle', color: c.accent || '#4A6FA5', icon: 'connectry' };
+    const faviconSvg = self.ConnectryFavicon ? self.ConnectryFavicon.buildSVG(favCfg, 18) : '';
+
     const deleteBtnHtml = theme.isCustom
       ? `<button type="button" class="theme-card-delete-btn" data-theme-delete title="Delete theme" aria-label="Delete ${Connectry.Settings.escape(theme.name)}">
            <svg width="12" height="12" viewBox="0 0 22 22" fill="none" aria-hidden="true">
@@ -996,6 +1001,7 @@
 
     card.innerHTML = `
       ${deleteBtnHtml}
+      <span class="theme-card-favicon" aria-hidden="true">${faviconSvg}</span>
       <div class="theme-swatch">${swatchHtml}</div>
       <div class="theme-card-body">
         <div class="theme-card-header">
@@ -1166,8 +1172,15 @@
 
     _openDetailId = theme.id;
 
-    // Header
-    document.getElementById('optDetailName').textContent = theme.name;
+    // Header — name + small favicon chip showing the theme's tab mark
+    const detailNameEl = document.getElementById('optDetailName');
+    detailNameEl.textContent = theme.name;
+    const detailFavHost = document.getElementById('optDetailFavicon');
+    if (detailFavHost) {
+      const favC = theme.colors || {};
+      const favCfg = theme.favicon || { shape: 'circle', color: favC.accent || '#4A6FA5', icon: 'connectry' };
+      detailFavHost.innerHTML = self.ConnectryFavicon ? self.ConnectryFavicon.buildSVG(favCfg, 22) : '';
+    }
 
     // Toolbar: actions above the preview (always visible, no scrolling)
     const toolbar = document.getElementById('optDetailToolbar');

@@ -1534,3 +1534,18 @@ body {
   background: #eef2ff;
   color: #1d4ed8;
 }
+
+/* ─── Theme card favicon chip (popup) ───────────────────────────────────── */
+.theme-card-favicon {
+  position: absolute;
+  top: 6px;
+  left: 6px;
+  width: 16px;
+  height: 16px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1;
+  pointer-events: none;
+}
+.theme-card-favicon svg { display: block; }
