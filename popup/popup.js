@@ -173,6 +173,19 @@
         const presetFavCfg = theme.favicon || { shape: 'circle', color: (theme.colors && theme.colors.accent) || '#4A6FA5', icon: 'connectry' };
         const presetFavSvg = self.ConnectryFavicon ? self.ConnectryFavicon.buildSVG(presetFavCfg, 16) : '';
         btn.innerHTML = `
+          <span class="theme-card-hover-actions" aria-hidden="false">
+            <span class="theme-card-hover-btn" data-edit="${theme.id}" title="Edit (creates a copy)">
+              <svg width="11" height="11" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+                <path d="M8 1.5l2 2-7 7H1v-2l7-7z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/>
+              </svg>
+            </span>
+            <span class="theme-card-hover-btn" data-share="${theme.id}" title="Share this theme">
+              <svg width="11" height="11" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+                <path d="M3 7v3a.75.75 0 00.75.75h4.5A.75.75 0 009 10V7" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M6 1.5v6M4 3.5l2-2 2 2" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </span>
+          </span>
           <div class="theme-swatch">${swatchHtml}</div>
           <div class="theme-info">
             <div class="theme-name-row">
@@ -182,22 +195,6 @@
             <div class="theme-desc-popup">${theme.description || ''}</div>
             ${buildPopupEffectPills(theme.id)}
             ${_popupTypeRow(null)}
-          </div>
-          <div class="theme-action-row">
-            <span class="theme-action-btn" data-open-builder="${theme.id}" title="Open in Builder">
-              <svg width="10" height="10" viewBox="0 0 12 12" fill="none" aria-hidden="true">
-                <path d="M9.5 1.5h-7a1 1 0 0 0-1 1v7a1 1 0 0 0 1 1h7a1 1 0 0 0 1-1v-7a1 1 0 0 0-1-1z" stroke="currentColor" stroke-width="1.2"/>
-                <path d="M4 6h4M6 4v4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
-              </svg>
-              Open in Builder
-            </span>
-            <span class="theme-action-btn" data-share="${theme.id}" title="Share this theme">
-              <svg width="10" height="10" viewBox="0 0 12 12" fill="none" aria-hidden="true">
-                <path d="M3 7v3a.75.75 0 00.75.75h4.5A.75.75 0 009 10V7" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
-                <path d="M6 1.5v6M4 3.5l2-2 2 2" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
-              </svg>
-              Share
-            </span>
           </div>
           <div class="theme-check" aria-hidden="true">
             <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
@@ -226,13 +223,14 @@
     // Bind theme cards
     document.querySelectorAll('.theme-card[data-theme]').forEach(btn => {
       btn.addEventListener('click', (e) => {
-        // Open in Builder → open options page Builder tab with this theme
-        const builderBtn = e.target.closest('[data-open-builder]');
-        if (builderBtn) {
+        // Edit → opens Builder. For presets this clones into a new custom
+        // ("My <theme name>"); for customs it loads the theme for editing.
+        const editBtn = e.target.closest('[data-edit]');
+        if (editBtn) {
           e.stopPropagation();
           chrome.storage.local.set({
             openOptionsTab: 'builder',
-            openBuilderClone: builderBtn.dataset.openBuilder,
+            openBuilderClone: editBtn.dataset.edit,
           }).then(() => {
             chrome.runtime.openOptionsPage();
             window.close();
@@ -244,7 +242,8 @@
         if (shareBtn) {
           e.stopPropagation();
           const themeId = shareBtn.dataset.share;
-          const theme = THEMES.find(t => t.id === themeId);
+          const theme = THEMES.find(t => t.id === themeId)
+            || (syncState.customThemes || []).find(t => t.id === themeId);
           if (theme) _showPopupShareMenu(shareBtn, theme);
           return;
         }
@@ -561,10 +560,18 @@
     const ctFavCfg = ct.favicon || { shape: 'circle', color: resolvedColors.accent || '#4A6FA5', icon: 'connectry' };
     const ctFavSvg = self.ConnectryFavicon ? self.ConnectryFavicon.buildSVG(ctFavCfg, 16) : '';
     btn.innerHTML = `
-      <span class="theme-card-edit-btn" data-edit="${ct.id}" title="Edit in Builder">
-        <svg width="11" height="11" viewBox="0 0 12 12" fill="none" aria-hidden="true">
-          <path d="M8 1.5l2 2-7 7H1v-2l7-7z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/>
-        </svg>
+      <span class="theme-card-hover-actions" aria-hidden="false">
+        <span class="theme-card-hover-btn" data-edit="${ct.id}" title="Edit in Builder">
+          <svg width="11" height="11" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+            <path d="M8 1.5l2 2-7 7H1v-2l7-7z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/>
+          </svg>
+        </span>
+        <span class="theme-card-hover-btn" data-share="${ct.id}" title="Share this theme">
+          <svg width="11" height="11" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+            <path d="M3 7v3a.75.75 0 00.75.75h4.5A.75.75 0 009 10V7" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M6 1.5v6M4 3.5l2-2 2 2" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </span>
       </span>
       <div class="theme-swatch">${swatchHtml}</div>
       <div class="theme-info">
