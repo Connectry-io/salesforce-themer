@@ -1539,7 +1539,7 @@ body {
   color: #1d4ed8;
 }
 
-/* ─── Theme card favicon chip inline with name (popup) ──────────────────── */
+/* ─── Theme card favicon chip inline (right of title, popup) ────────────── */
 .theme-card-favicon {
   display: inline-flex;
   align-items: center;
@@ -1547,7 +1547,7 @@ body {
   width: 14px;
   height: 14px;
   flex-shrink: 0;
-  margin-right: 5px;
+  margin-left: 5px;
   vertical-align: -2px;
 }
 .theme-card-favicon svg { display: block; }

@@ -189,8 +189,8 @@
           <div class="theme-swatch">${swatchHtml}</div>
           <div class="theme-info">
             <div class="theme-name-row">
-              <span class="theme-card-favicon" aria-hidden="true">${presetFavSvg}</span>
               <span class="theme-name">${theme.name}</span>
+              <span class="theme-card-favicon" aria-hidden="true">${presetFavSvg}</span>
             </div>
             <div class="theme-desc-popup">${theme.description || ''}</div>
             ${buildPopupEffectPills(theme.id)}
@@ -576,8 +576,8 @@
       <div class="theme-swatch">${swatchHtml}</div>
       <div class="theme-info">
         <div class="theme-name-row">
-          <span class="theme-card-favicon" aria-hidden="true">${ctFavSvg}</span>
           <span class="theme-name">${ct.name}</span>
+          <span class="theme-card-favicon" aria-hidden="true">${ctFavSvg}</span>
         </div>
         <div class="theme-desc-popup">${subline}</div>
         <div class="theme-effects-pills is-empty">Custom effects</div>
