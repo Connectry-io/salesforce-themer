@@ -124,7 +124,7 @@
     const style = document.createElement('style');
     style.id = 'sf-themer-transitions';
     style.dataset.sftSource = 'engine:transitions';
-    style.textContent = `/* @sft-source: engine:transitions */
+    style.textContent = `/* sft-source: engine:transitions */
 
       ::view-transition-old(root),
       ::view-transition-new(root) {
@@ -183,7 +183,7 @@
     const style = document.createElement('style');
     style.id = STYLE_ID;
     style.dataset.sftSource = 'engine:theme';
-    style.textContent = `/* @sft-source: engine:theme */\n${css}`;
+    style.textContent = `/* sft-source: engine:theme */\n${css}`;
     const target = document.head || document.documentElement;
     target.appendChild(style);
   }
@@ -315,7 +315,7 @@
     const style = document.createElement('style');
     style.id = EFFECTS_STYLE_ID;
     style.dataset.sftSource = 'engine:effects';
-    style.textContent = `/* @sft-source: engine:effects */\n${css}`;
+    style.textContent = `/* sft-source: engine:effects */\n${css}`;
     const target = document.head || document.documentElement;
     target.appendChild(style);
   }

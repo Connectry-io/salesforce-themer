@@ -2026,7 +2026,7 @@
       el.dataset.intelSource = 'live-accepted';
       el.dataset.sftSource = 'intel:live-accepted';
       const sid = this.aiSuggestion?.id || 'unknown';
-      const wrapped = `/* ── @sft-patch key=live-suggestion-${sid} origin=panel ── */\n${css}\n/* ── @sft-end key=live-suggestion-${sid} ── */`;
+      const wrapped = `/* ── sft-patch key=live-suggestion-${sid} origin=panel ── */\n${css}\n/* ── sft-end key=live-suggestion-${sid} ── */`;
       el.textContent = (el.textContent || '') + '\n\n' + wrapped;
     }
 

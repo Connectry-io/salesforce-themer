@@ -102,18 +102,22 @@ export function validatePatchCSS(css: string): ValidationResult {
     return { ok: false, reason: "css-escape: backslash-hex escapes outside strings" };
   }
 
-  // At-rule scan.
+  // Strip /* ... */ comments before any token/at-rule/selector analysis.
+  // CSS comments are inert at runtime, so validation rules should not
+  // fire on text that will be discarded. Also prevents our own
+  // sft-patch boundary markers in engine_css_excerpt from tripping the
+  // at-rule scan when Claude copies them into its output.
+  const stripped = css.replace(/\/\*[\s\S]*?\*\//g, "");
+
+  // At-rule scan (on comment-stripped source).
   const atRulePattern = /@[a-z-]+/gi;
-  while ((m = atRulePattern.exec(css)) !== null) {
+  while ((m = atRulePattern.exec(stripped)) !== null) {
     const at = m[0].toLowerCase();
     if (ALLOWED_AT_RULES.has(at)) continue;
     if (FORBIDDEN_AT_RULES.has(at)) return { ok: false, reason: `forbidden-at-rule: ${at}` };
     if (at.startsWith("@-")) return { ok: false, reason: `vendor-at-rule: ${at}` };
     return { ok: false, reason: `unknown-at-rule: ${at}` };
   }
-
-  // Strip /* ... */ comments before per-rule analysis.
-  const stripped = css.replace(/\/\*[\s\S]*?\*\//g, "");
 
   // Walk rules naively. We don't need a full parser — we need defense in depth.
   // Each "rule" = selector { decl; decl; }. We split on '}' and inspect.
