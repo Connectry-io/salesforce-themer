@@ -126,7 +126,8 @@
     const css = enabledPatches.map(p => p.css).join('\n\n');
     const style = document.createElement('style');
     style.id = PATCH_STYLE_ID;
-    style.textContent = `/* Custom LWC Patches — Salesforce Themer */\n\n${css}`;
+    style.dataset.sftSource = 'custom:local';
+    style.textContent = `/* @sft-source: custom:local */\n/* Custom LWC Patches — Salesforce Themer */\n\n${css}`;
     const target = document.head || document.documentElement;
     target.appendChild(style);
 

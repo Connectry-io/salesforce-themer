@@ -2020,7 +2020,10 @@
         document.head.appendChild(el);
       }
       el.dataset.intelSource = 'live-accepted';
-      el.textContent = (el.textContent || '') + '\n\n' + css;
+      el.dataset.sftSource = 'intel:live-accepted';
+      const sid = this.aiSuggestion?.id || 'unknown';
+      const wrapped = `/* ── @sft-patch key=live-suggestion-${sid} origin=panel ── */\n${css}\n/* ── @sft-end key=live-suggestion-${sid} ── */`;
+      el.textContent = (el.textContent || '') + '\n\n' + wrapped;
     }
 
     async _decideAISuggestion(decision) {
