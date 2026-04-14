@@ -448,8 +448,17 @@
     const styleTag = document.getElementById('sf-themer-styles');
     const themeCSS = styleTag ? styleTag.textContent : '';
 
-    // What the theme declares
-    const themeProvides = extractDeclaredTokens(themeCSS);
+    // Published + live-accepted AI patches also provide tokens — without
+    // this union, approved patches stay counted as "gaps" forever and the
+    // Suggest Fix counter never drops.
+    const intelTag = document.getElementById('sf-themer-intel-patch');
+    const intelCSS = intelTag ? intelTag.textContent : '';
+
+    // What the engine + intel layer together declare
+    const themeProvides = new Set([
+      ...extractDeclaredTokens(themeCSS),
+      ...extractDeclaredTokens(intelCSS),
+    ]);
 
     // What SF pages reference via var()
     const pageUses = getPageUsedTokens();
