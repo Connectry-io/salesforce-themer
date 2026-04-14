@@ -20,7 +20,7 @@ export function json(body: unknown, status = 200, extraHeaders: Record<string, s
     headers: {
       "content-type": "application/json",
       "access-control-allow-origin": "*",
-      "access-control-allow-headers": "content-type, x-connectry-secret, if-none-match",
+      "access-control-allow-headers": "content-type, x-connectry-secret, x-connectry-publish-secret, if-none-match",
       "access-control-allow-methods": "GET, POST, OPTIONS",
       ...extraHeaders,
     },
@@ -33,7 +33,7 @@ export function handleCors(req: Request): Response | null {
       status: 204,
       headers: {
         "access-control-allow-origin": "*",
-        "access-control-allow-headers": "content-type, x-connectry-secret, if-none-match",
+        "access-control-allow-headers": "content-type, x-connectry-secret, x-connectry-publish-secret, if-none-match",
         "access-control-allow-methods": "GET, POST, OPTIONS",
         "access-control-max-age": "86400",
       },
