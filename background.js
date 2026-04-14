@@ -1788,6 +1788,24 @@ async function broadcastThemeToActiveTabs(themeId) {
 // posts { action: 'intel.captureScreenshot' } and we return a base64 PNG of
 // the visible viewport for the active tab.
 
+// Render + cache a theme's CSS on demand. Used by the options-page Builder
+// save flow so it can pass the rendered bundle up to /themes in Supabase
+// without duplicating the engine in the options context.
+chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
+  if (msg?.action !== 'themer.renderAndCacheTheme') return false;
+  const themeId = msg.themeId;
+  (async () => {
+    try {
+      await cacheThemeCSS(themeId);
+      const { [`themeCSS_${themeId}`]: css } = await chrome.storage.local.get(`themeCSS_${themeId}`);
+      sendResponse({ ok: !!css, css: css || '' });
+    } catch (err) {
+      sendResponse({ ok: false, error: String(err) });
+    }
+  })();
+  return true; // async response
+});
+
 chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
   if (msg?.action !== 'intel.captureScreenshot') return false;
   const windowId = sender.tab?.windowId;

@@ -426,6 +426,33 @@
     for (const ct of customThemes) {
       grid.appendChild(_buildCustomThemeCard(ct));
     }
+
+    // V2.5 Migration B: reconcile with Supabase — any server-known themes not
+    // yet mirrored into local customThemes (e.g. saved on another browser and
+    // Google sync hasn't propagated yet) show up as lightweight "remote" cards.
+    // Clicking one sets activeThemeId; content.js loader fetches the CSS on
+    // demand with ETag caching.
+    _appendRemoteCustomThemes(grid, customThemes).catch(() => {});
+  }
+
+  async function _appendRemoteCustomThemes(grid, localThemes) {
+    if (!self.ConnectryIntel?.listUserThemes) return;
+    const localIds = new Set(localThemes.map(t => t.id));
+    const res = await self.ConnectryIntel.listUserThemes();
+    if (!res || res.error || !Array.isArray(res.themes)) return;
+    for (const t of res.themes) {
+      if (localIds.has(t.slug)) continue;
+      const card = _buildCustomThemeCard({
+        id: t.slug,
+        name: t.name || t.slug,
+        category: 'light',
+        coreOverrides: {},
+        advancedOverrides: {},
+        basedOn: 'connectry',
+        _remote: true,
+      });
+      grid.appendChild(card);
+    }
   }
 
   function _renderUpsellHtml() {

@@ -3643,6 +3643,48 @@
     return false;
   }
 
+  // 12-char url-safe slug appended to the `theme_` prefix. Matches the server
+  // regex in supabase/functions/themes/index.ts.
+  function _generateThemeSlug() {
+    const alphabet = 'abcdefghijklmnopqrstuvwxyz0123456789';
+    const bytes = new Uint8Array(12);
+    crypto.getRandomValues(bytes);
+    let s = '';
+    for (const b of bytes) s += alphabet[b % 36];
+    return `theme_${s}`;
+  }
+
+  async function _mirrorCustomThemeToSupabase(slug, custom) {
+    if (!self.ConnectryIntel?.saveTheme) return;
+    // Ask background to (re-)render and cache the CSS; it's the only context
+    // with the full engine available (themes/engine.js is baked into
+    // background.js via scripts/sync-engine.py).
+    const rsp = await chrome.runtime.sendMessage({
+      action: 'themer.renderAndCacheTheme',
+      themeId: slug,
+    });
+    if (!rsp?.ok || !rsp.css) {
+      console.warn('[Themer] engine render failed; skipping Supabase mirror');
+      return;
+    }
+    // Split the stored config into base_tokens (input) + overrides (post-
+    // derivation tweaks). Engine treats overrides as authoritative on
+    // re-render (see ARCHITECTURE.md § V2.5 design note).
+    const { advancedOverrides = {}, ...rest } = custom;
+    const owner = await self.ConnectryIntel.getAnonUserId();
+    const result = await self.ConnectryIntel.saveTheme({
+      slug,
+      owner,
+      name: custom.name,
+      baseTokens: rest,
+      overrides: advancedOverrides,
+      renderedCss: rsp.css,
+    });
+    if (result?.error) {
+      console.warn('[Themer] Supabase saveTheme returned error:', result.error);
+    }
+  }
+
   async function saveCustomTheme() {
     // V3: builder is open to all but Save is the Premium gate.
     // Show the upgrade dialog and bail without losing any in-progress edits.
@@ -3661,11 +3703,21 @@
       return;
     }
 
-    const id = editorState.customId || `custom-${Date.now()}`;
+    // V2.5 Migration B: new saves get a server-compatible slug
+    // (`theme_<12 chars>`). Legacy `custom-<timestamp>` ids get migrated to
+    // the slug format on first re-save — the old entry is dropped so we don't
+    // carry two copies.
+    const priorId = editorState.customId || null;
+    const isLegacyId = priorId && !priorId.startsWith('theme_');
+    const id = (priorId && !isLegacyId) ? priorId : _generateThemeSlug();
     const base = getThemeById(editorState.basedOn);
 
     // Load existing custom themes first so we can preserve existing effects on update
-    const { customThemes = [] } = await chrome.storage.sync.get('customThemes');
+    let { customThemes = [] } = await chrome.storage.sync.get('customThemes');
+    if (isLegacyId) {
+      // Drop the legacy entry; the new slug-based one will replace it below.
+      customThemes = customThemes.filter(t => t.id !== priorId);
+    }
     const existing = customThemes.find(t => t.id === id);
 
     // Effects snapshot: prefer the live editor state (user's in-flight edits),
@@ -3724,6 +3776,15 @@
     await selectTheme(id);
     renderCollectionGrid(id);
     renderBuilderSidebar(id);
+
+    // V2.5 Migration B: mirror the save to Supabase so the theme can be loaded
+    // on other browsers / machines and (later) published as a paid preset. The
+    // Supabase write is best-effort — local save is the source of truth for
+    // this session; a failure here just means the cross-device sync lags until
+    // the next save. Non-blocking toast on failure.
+    _mirrorCustomThemeToSupabase(id, custom).catch((err) => {
+      console.warn('[Themer] Supabase theme mirror failed:', err);
+    });
 
     // Visual feedback — topbar button flashes, toast confirms
     _flashToast(`Saved "${name}"`);

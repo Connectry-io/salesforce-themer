@@ -200,11 +200,56 @@
     return false;
   }
 
+  // Preset themes ship in the binary at content/themes/<id>.css.
+  // Custom themes (id starts with "theme_") live in Supabase app_configs at
+  // key='themes/user/<slug>' and are fetched with ETag caching; see
+  // ARCHITECTURE.md § V2.5. Cache survives Chrome restarts so zero-flash
+  // return visits cost nothing on the wire (304 after first load).
+  const SUPABASE_PROJECT_REF = 'pemofbbniuzogxzzioyp';
+  const SUPABASE_CONFIG_BASE =
+    `https://${SUPABASE_PROJECT_REF}.supabase.co/functions/v1/config/themer`;
+
   async function fetchThemeCSS(themeName) {
+    if (typeof themeName === 'string' && themeName.startsWith('theme_')) {
+      return fetchCustomThemeCSS(themeName);
+    }
     const url = chrome.runtime.getURL(`content/themes/${themeName}.css`);
     const response = await fetch(url);
     if (!response.ok) throw new Error(`Failed to fetch theme: ${themeName} (${response.status})`);
     return response.text();
+  }
+
+  async function fetchCustomThemeCSS(slug) {
+    const cacheKey = `themeCache:${slug}`;
+    let cached = null;
+    try {
+      const obj = await chrome.storage.local.get(cacheKey);
+      cached = obj?.[cacheKey] || null;
+    } catch (_) {}
+
+    const url = `${SUPABASE_CONFIG_BASE}/themes/user/${encodeURIComponent(slug)}`;
+    try {
+      const headers = {};
+      if (cached?.etag) headers['if-none-match'] = cached.etag;
+      const res = await fetch(url, { headers, signal: AbortSignal.timeout(4000) });
+      if (res.status === 304 && cached) return cached.css;
+      if (res.ok) {
+        const css = await res.text();
+        const etag = res.headers.get('etag') || '';
+        try {
+          await chrome.storage.local.set({
+            [cacheKey]: { css, etag, fetchedAt: Date.now() },
+          });
+        } catch (_) {}
+        return css;
+      }
+      // 404 / 5xx: fall through to cache or fail.
+    } catch (_) {
+      // Network error — fall through to cache.
+    }
+
+    if (cached?.css) return cached.css;
+    throw new Error(`Failed to fetch custom theme ${slug} and no cache`);
   }
 
   // ─── Favicon injection ────────────────────────────────────────────────────

@@ -75,7 +75,10 @@ Deno.serve(async (req) => {
   if (error) return json({ error: error.message }, 500);
   if (!data) return json({ error: "not found" }, 404);
 
-  const ifNoneMatch = req.headers.get("if-none-match");
+  // Cloudflare rewrites outbound ETags to weak ("W/…"). Clients echo back what
+  // they received, so normalize before comparing.
+  const ifNoneMatchRaw = req.headers.get("if-none-match") ?? "";
+  const ifNoneMatch = ifNoneMatchRaw.replace(/^W\//, "").replace(/^"|"$/g, "");
   if (ifNoneMatch === data.etag) {
     return new Response(null, {
       status: 304,
