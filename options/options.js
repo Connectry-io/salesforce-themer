@@ -1050,7 +1050,7 @@
     const newBtn = document.getElementById('optMyThemesNewBtn');
     if (!grid) return;
     grid.innerHTML = '';
-    closeDetailPanel();
+    _preserveOrCloseDetail();
 
     // Free users: hide grid, show premium gate
     if (!isPremium()) {
@@ -1084,7 +1084,7 @@
     const grid = document.getElementById('optPresetsGrid');
     if (!grid) return;
     grid.innerHTML = '';
-    closeDetailPanel();
+    _preserveOrCloseDetail();
 
     for (const theme of THEMES) {
       const t = { ...theme, isCustom: false };
@@ -1359,6 +1359,29 @@
     if (panel) panel.hidden = true;
     document.querySelectorAll('.theme-card.is-expanded').forEach(c => c.classList.remove('is-expanded'));
     _openDetailId = null;
+  }
+
+  // Keep the detail preview open across grid re-renders as long as the
+  // previewed theme still exists. Called at the top of each grid render
+  // instead of the unconditional closeDetailPanel() that used to live there.
+  function _preserveOrCloseDetail() {
+    if (!_openDetailId) return;
+    const stillExists = _findAnyThemeById(_openDetailId);
+    if (!stillExists) {
+      closeDetailPanel();
+      return;
+    }
+    // Re-highlight the card after the grid rebuild paints it.
+    setTimeout(() => {
+      const card = document.querySelector(
+        `#optMyThemesGrid .theme-card[data-theme="${_openDetailId}"], #optPresetsGrid .theme-card[data-theme="${_openDetailId}"]`,
+      );
+      if (card) card.classList.add('is-expanded');
+    }, 0);
+  }
+
+  function _findAnyThemeById(id) {
+    return getThemeById(id) || (syncState.customThemes || []).find(t => t.id === id);
   }
 
   function bindDetailPanelClose() {
