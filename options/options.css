@@ -7055,3 +7055,47 @@ body.is-premium .theme-card-clone-badge {
   border-color: #fecaca;
   color: #b42318;
 }
+
+/* ─── Hero toolbar overflow menu (Export / Share / Delete) ──────────────── */
+.opt-detail-overflow { position: relative; display: inline-block; }
+.opt-detail-overflow-btn {
+  width: 30px;
+  padding: 0 !important;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.opt-detail-overflow-menu[hidden] { display: none; }
+.opt-detail-overflow-menu {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 4px);
+  min-width: 160px;
+  background: var(--cx-surface);
+  border: 1px solid var(--cx-border);
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+  z-index: 20;
+  padding: 4px;
+  display: flex;
+  flex-direction: column;
+}
+.opt-detail-overflow-item {
+  background: none;
+  border: 0;
+  text-align: left;
+  padding: 8px 10px;
+  font-size: 13px;
+  border-radius: 6px;
+  cursor: pointer;
+  color: var(--cx-text);
+}
+.opt-detail-overflow-item:hover { background: var(--cx-surface-hover, #f2f4f7); }
+.opt-detail-overflow-item:disabled { opacity: 0.5; cursor: not-allowed; }
+.opt-detail-overflow-item-danger { color: #b42318; }
+.opt-detail-overflow-item-danger:hover { background: #fef3f2; }
+.opt-detail-overflow-divider {
+  height: 1px;
+  background: var(--cx-border);
+  margin: 4px 2px;
+}

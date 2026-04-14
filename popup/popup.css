@@ -1503,3 +1503,34 @@ body {
 .popup {
   animation: pop-in 180ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
+
+/* ─── Custom theme card: hover-reveal Edit icon ─────────────────────────── */
+.theme-card { position: relative; }
+.theme-card-edit-btn {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 22px;
+  height: 22px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  background: rgba(255,255,255,0.9);
+  color: var(--cx-text-subtle, #667085);
+  cursor: pointer;
+  opacity: 0;
+  transform: translateY(-2px);
+  transition: opacity 120ms ease, transform 120ms ease, color 120ms ease, background 120ms ease;
+  z-index: 2;
+}
+.theme-card:hover .theme-card-edit-btn,
+.theme-card:focus-within .theme-card-edit-btn,
+.theme-card-edit-btn:focus {
+  opacity: 1;
+  transform: translateY(0);
+}
+.theme-card-edit-btn:hover {
+  background: #eef2ff;
+  color: #1d4ed8;
+}

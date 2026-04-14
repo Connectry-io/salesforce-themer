@@ -1175,24 +1175,62 @@
     const applyLabel = theme.id === syncState.theme ? 'Active' : 'Apply';
     const applyDisabled = theme.id === syncState.theme ? ' disabled' : '';
 
+    // Consolidated toolbar: [Apply] [Edit/Clone] ──spacer── [⋮]
+    // Primary + Secondary stay visible; overflow owns Export, Share, and
+    // (custom-only) Delete so the row isn't a buffet of five equal buttons.
     let toolbarHtml = `<button class="cx-btn cx-btn-primary cx-btn-sm" data-detail-apply="${theme.id}"${applyDisabled}>${applyLabel}</button>`;
-    if (isBuiltIn) {
-      toolbarHtml += `<button class="cx-btn cx-btn-secondary cx-btn-sm" data-detail-clone="${theme.id}">Clone</button>`;
-    } else {
-      toolbarHtml += `<button class="cx-btn cx-btn-secondary cx-btn-sm" data-detail-edit="${theme.id}">Edit</button>`;
-      toolbarHtml += `<button class="cx-btn cx-btn-ghost cx-btn-sm" data-detail-export="${theme.id}"${isPremium() ? '' : ' disabled title="Premium feature"'}>Export</button>`;
-    }
-    // Share (standard share icon) + Delete (custom only, far right)
+    const secondaryLabel = isBuiltIn ? 'Clone' : 'Edit';
+    const secondaryAttr = isBuiltIn ? 'data-detail-clone' : 'data-detail-edit';
+    toolbarHtml += `<button class="cx-btn cx-btn-secondary cx-btn-sm" ${secondaryAttr}="${theme.id}">${secondaryLabel}</button>`;
+
     toolbarHtml += `<span class="opt-toolbar-spacer"></span>`;
-    toolbarHtml += `<button class="cx-btn cx-btn-ghost cx-btn-sm" data-detail-share="${theme.id}" title="Share">
-      <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M4 9v4a1 1 0 001 1h6a1 1 0 001-1V9" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M8 2v8M5 5l3-3 3 3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
-    </button>`;
-    if (!isBuiltIn) {
-      toolbarHtml += `<button class="cx-btn cx-btn-ghost cx-btn-sm cx-btn-delete" data-detail-delete="${theme.id}" title="Delete">
-        <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M3 4h10M6 4V3a1 1 0 011-1h2a1 1 0 011 1v1M5 4v9a1 1 0 001 1h4a1 1 0 001-1V4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
-      </button>`;
-    }
+
+    toolbarHtml += `<div class="opt-detail-overflow">
+      <button class="cx-btn cx-btn-ghost cx-btn-sm opt-detail-overflow-btn" data-detail-overflow="${theme.id}" aria-haspopup="true" aria-expanded="false" title="More">
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+          <circle cx="3" cy="8" r="1.4" fill="currentColor"/>
+          <circle cx="8" cy="8" r="1.4" fill="currentColor"/>
+          <circle cx="13" cy="8" r="1.4" fill="currentColor"/>
+        </svg>
+      </button>
+      <div class="opt-detail-overflow-menu" hidden role="menu">
+        ${!isBuiltIn ? `<button type="button" class="opt-detail-overflow-item" role="menuitem" data-detail-export="${theme.id}"${isPremium() ? '' : ' disabled title="Premium feature"'}>
+          <span>Export JSON</span>
+        </button>` : ''}
+        <button type="button" class="opt-detail-overflow-item" role="menuitem" data-detail-share="${theme.id}">
+          <span>Share</span>
+        </button>
+        ${!isBuiltIn ? `<div class="opt-detail-overflow-divider"></div>
+        <button type="button" class="opt-detail-overflow-item opt-detail-overflow-item-danger" role="menuitem" data-detail-delete="${theme.id}">
+          <span>Delete</span>
+        </button>` : ''}
+      </div>
+    </div>`;
     toolbar.innerHTML = toolbarHtml;
+
+    // Wire the overflow dropdown open/close
+    const overflowBtn = toolbar.querySelector('[data-detail-overflow]');
+    const overflowMenu = toolbar.querySelector('.opt-detail-overflow-menu');
+    if (overflowBtn && overflowMenu) {
+      overflowBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const willShow = overflowMenu.hidden;
+        overflowMenu.hidden = !willShow;
+        overflowBtn.setAttribute('aria-expanded', String(willShow));
+      });
+      document.addEventListener('click', (e) => {
+        if (!overflowMenu.hidden && !overflowMenu.contains(e.target) && !overflowBtn.contains(e.target)) {
+          overflowMenu.hidden = true;
+          overflowBtn.setAttribute('aria-expanded', 'false');
+        }
+      });
+      overflowMenu.querySelectorAll('.opt-detail-overflow-item').forEach((item) => {
+        item.addEventListener('click', () => {
+          overflowMenu.hidden = true;
+          overflowBtn.setAttribute('aria-expanded', 'false');
+        });
+      });
+    }
 
     // Compact preview with live effects
     const previewHost = document.getElementById('optDetailPreview');
@@ -2554,7 +2592,7 @@
       saveBtn.textContent = 'Save changes';
     } else {
       pill.hidden = true;
-      saveBtn.textContent = 'Save Theme';
+      saveBtn.textContent = 'Save & Apply';
     }
   }
 

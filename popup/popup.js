@@ -556,6 +556,11 @@
       : `Based on ${base?.name || ct.basedOn}`;
 
     btn.innerHTML = `
+      <span class="theme-card-edit-btn" data-edit="${ct.id}" title="Edit in Builder">
+        <svg width="11" height="11" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+          <path d="M8 1.5l2 2-7 7H1v-2l7-7z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/>
+        </svg>
+      </span>
       <div class="theme-swatch">${swatchHtml}</div>
       <div class="theme-info">
         <div class="theme-name-row">
@@ -564,14 +569,6 @@
         <div class="theme-desc-popup">${subline}</div>
         <div class="theme-effects-pills is-empty">Custom effects</div>
         ${_popupTypeRow(ct.typography)}
-      </div>
-      <div class="theme-action-row">
-        <span class="theme-action-btn" data-edit="${ct.id}" title="Edit in Builder">
-          <svg width="10" height="10" viewBox="0 0 12 12" fill="none" aria-hidden="true">
-            <path d="M8 1.5l2 2-7 7H1v-2l7-7z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/>
-          </svg>
-          Edit
-        </span>
       </div>
       <div class="theme-check" aria-hidden="true">
         <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
