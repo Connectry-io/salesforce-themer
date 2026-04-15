@@ -2770,7 +2770,11 @@
 }
 .editor-live-favicon-display { display: inline-flex; }
 .editor-live-favicon-display svg { width: 18px; height: 18px; display: block; }
-.editor-live-card .editor-live-badge { margin-left: auto; flex-shrink: 0; }
+/* Push the category badge to the far right edge of the mini card header,
+   regardless of how narrow the title or how many intermediate items sit
+   between it and the name input. */
+.editor-live-card .theme-card-header { flex-wrap: nowrap; }
+.editor-live-card .editor-live-badge { margin-left: auto !important; flex-shrink: 0; }
 
 /* Favicon panel: center the live preview, keep it modest. Frame only shows
    on transparent shapes — Figma/Photoshop-style: checkerboard appears when
