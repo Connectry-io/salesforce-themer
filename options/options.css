@@ -2746,6 +2746,7 @@
 #editorFaviconPanel .guide-favicon-hero {
   display: inline-flex; align-items: center; justify-content: center;
   width: 72px; height: 72px; margin: 0 auto;
+  box-sizing: border-box;
 }
 #editorFaviconPanel .guide-favicon-hero svg { width: 56px; height: 56px; }
 #editorFaviconPanel .guide-favicon-hero.is-transparent { padding: 8px; }
@@ -6192,6 +6193,7 @@ td.upgrade-compare-col-premium,
   width: 144px; height: 144px;
   display: flex; align-items: center; justify-content: center;
   margin-top: var(--cx-space-4);
+  box-sizing: border-box;
 }
 .guide-favicon-hero svg { width: 128px; height: 128px; }
 .guide-favicon-hero.is-transparent {
@@ -6205,7 +6207,6 @@ td.upgrade-compare-col-premium,
     linear-gradient(-45deg, transparent 75%, #e2e8f0 75%);
   background-size: 12px 12px;
   background-position: 0 0, 0 6px, 6px -6px, -6px 0px;
-  border: 1px solid var(--cx-border);
 }
 
 .guide-favicon-apply-btn { margin-top: var(--cx-space-3); width: auto; min-width: 240px; }
