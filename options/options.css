@@ -2776,11 +2776,10 @@
 #editorFaviconPanel .editor-group:has(> .guide-favicon-hero) { text-align: center; }
 #editorFaviconPanel .guide-favicon-hero {
   display: inline-flex; align-items: center; justify-content: center;
-  width: 72px; height: 72px; margin: 0 auto;
+  width: 56px; height: 56px; margin: 0 auto;
   box-sizing: border-box;
 }
 #editorFaviconPanel .guide-favicon-hero svg { width: 56px; height: 56px; }
-#editorFaviconPanel .guide-favicon-hero.is-transparent { padding: 8px; }
 
 /* Favicon panel: enable-row */
 .editor-favicon-enable-row {
@@ -6221,15 +6220,17 @@ td.upgrade-compare-col-premium,
 /* Large favicon hero below the browser. Checkerboard frame ONLY when the
    shape is transparent ("None") — otherwise the glyph+shape stands alone. */
 .guide-favicon-hero {
-  width: 144px; height: 144px;
+  width: 128px; height: 128px;
   display: flex; align-items: center; justify-content: center;
   margin-top: var(--cx-space-4);
   box-sizing: border-box;
+  border-radius: var(--cx-radius-md);
+  overflow: hidden;
 }
 .guide-favicon-hero svg { width: 128px; height: 128px; }
+/* Checkerboard occupies the exact same 128x128 footprint as the shape
+   backgrounds — Circle / Rounded / Square / None all render in the same box. */
 .guide-favicon-hero.is-transparent {
-  padding: 8px;
-  border-radius: var(--cx-radius-md);
   background-color: #f8fafc;
   background-image:
     linear-gradient(45deg, #e2e8f0 25%, transparent 25%),
