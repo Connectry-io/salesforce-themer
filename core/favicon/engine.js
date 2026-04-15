@@ -31,7 +31,7 @@
   // those get rewritten to the user's chosen color.
   const ICONS = [
     { id: 'connectry', label: 'Connectry', svg: '<circle cx="8" cy="16" r="4" fill="white"/><line x1="12" y1="16" x2="20" y2="16" stroke="white" stroke-width="2" stroke-linecap="round"/><circle cx="24" cy="16" r="4" fill="white" opacity="0.7"/>' },
-    { id: 'cloud', label: 'Cloud', svg: '<path d="M23 14.5c-.6 0-1.2.1-1.8.3a5.5 5.5 0 00-10.3-1 4 4 0 00-.7 7.9 3.8 3.8 0 003.8 3.8h9a5.5 5.5 0 000-11z" fill="white"/>' },
+    { id: 'cloud', label: 'Cloud', svg: '<circle cx="10" cy="19" r="5" fill="white"/><circle cx="16" cy="14" r="6" fill="white"/><circle cx="22" cy="19" r="5" fill="white"/><rect x="10" y="19" width="12" height="5" fill="white"/>' },
     { id: 'snowflake', label: 'Snowflake', svg: '<path d="M16 4v24M4 16h24M8 8l16 16M24 8L8 24" stroke="white" stroke-width="2" stroke-linecap="round"/><circle cx="16" cy="16" r="2" fill="white"/>' },
     { id: 'flame', label: 'Flame', svg: '<path d="M16 4c0 6-6 8-6 14a6 6 0 0012 0c0-6-6-8-6-14z" fill="white" opacity="0.9"/><path d="M16 12c0 3-3 4-3 7a3 3 0 006 0c0-3-3-4-3-7z" fill="white" opacity="0.5"/>' },
     { id: 'moon', label: 'Moon', svg: '<path d="M20 6a10 10 0 11-8 20 12 12 0 008-20z" fill="white" opacity="0.9"/>' },

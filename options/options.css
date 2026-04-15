@@ -2739,25 +2739,16 @@
 .editor-live-favicon-display { display: inline-flex; }
 .editor-live-favicon-display svg { width: 18px; height: 18px; display: block; }
 
-/* Favicon panel: center the live preview, keep it modest. Checkerboard bg
-   so a "None" shape with a light glyph color is still visible — same trick
-   Figma/Photoshop use to signal transparency. */
+/* Favicon panel: center the live preview, keep it modest. Frame only shows
+   on transparent shapes — Figma/Photoshop-style: checkerboard appears when
+   there's no background, otherwise the glyph+shape sits on its own. */
 #editorFaviconPanel .editor-group:has(> .guide-favicon-hero) { text-align: center; }
 #editorFaviconPanel .guide-favicon-hero {
   display: inline-flex; align-items: center; justify-content: center;
-  width: 72px; height: 72px; margin: 0 auto; padding: 8px;
-  border-radius: var(--cx-radius-md);
-  background-color: #f8fafc;
-  background-image:
-    linear-gradient(45deg, #e2e8f0 25%, transparent 25%),
-    linear-gradient(-45deg, #e2e8f0 25%, transparent 25%),
-    linear-gradient(45deg, transparent 75%, #e2e8f0 75%),
-    linear-gradient(-45deg, transparent 75%, #e2e8f0 75%);
-  background-size: 10px 10px;
-  background-position: 0 0, 0 5px, 5px -5px, -5px 0px;
-  border: 1px solid var(--cx-border);
+  width: 72px; height: 72px; margin: 0 auto;
 }
 #editorFaviconPanel .guide-favicon-hero svg { width: 56px; height: 56px; }
+#editorFaviconPanel .guide-favicon-hero.is-transparent { padding: 8px; }
 
 /* Favicon panel: enable-row */
 .editor-favicon-enable-row {
@@ -6195,12 +6186,15 @@ td.upgrade-compare-col-premium,
   white-space: nowrap;
 }
 
-/* Large favicon hero below the browser — framed with a subtle checkerboard
-   so transparent/"None" shapes stay visible. */
+/* Large favicon hero below the browser. Checkerboard frame ONLY when the
+   shape is transparent ("None") — otherwise the glyph+shape stands alone. */
 .guide-favicon-hero {
   width: 144px; height: 144px;
   display: flex; align-items: center; justify-content: center;
   margin-top: var(--cx-space-4);
+}
+.guide-favicon-hero svg { width: 128px; height: 128px; }
+.guide-favicon-hero.is-transparent {
   padding: 8px;
   border-radius: var(--cx-radius-md);
   background-color: #f8fafc;
@@ -6213,7 +6207,6 @@ td.upgrade-compare-col-premium,
   background-position: 0 0, 0 6px, 6px -6px, -6px 0px;
   border: 1px solid var(--cx-border);
 }
-.guide-favicon-hero svg { width: 128px; height: 128px; }
 
 .guide-favicon-apply-btn { margin-top: var(--cx-space-3); width: auto; min-width: 240px; }
 .guide-favicon-apply-btn.is-success { background: #10b981; border-color: #10b981; color: #fff; }

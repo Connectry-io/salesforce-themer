@@ -3633,7 +3633,10 @@
     const miniIcon = document.getElementById('editorFaviconPreview');
     if (miniIcon) miniIcon.innerHTML = _renderFaviconSVG(shape, color, icon, 18, iconColor);
     const hero = document.getElementById('editorFaviconLivePreview');
-    if (hero) hero.innerHTML = _renderFaviconSVG(shape, color, icon, 56, iconColor);
+    if (hero) {
+      hero.innerHTML = _renderFaviconSVG(shape, color, icon, 56, iconColor);
+      hero.classList.toggle('is-transparent', shape === 'none');
+    }
     // The fake browser tab in the live preview represents the *actual* SF
     // tab, so if the global toggle is off it should show SF's real cloud.
     const tabFav = document.getElementById('previewBrowserTabFav');
@@ -5409,7 +5412,10 @@
   function _updateGuideFaviconPreview() {
     const { shape, color, icon, iconColor } = _guideFaviconState;
     const main = document.getElementById('guideFaviconLivePreview');
-    if (main) main.innerHTML = _renderFaviconSVG(shape, color, icon, 128, iconColor);
+    if (main) {
+      main.innerHTML = _renderFaviconSVG(shape, color, icon, 128, iconColor);
+      main.classList.toggle('is-transparent', shape === 'none');
+    }
     const tab1 = document.getElementById('guideFaviconTabIcon1');
     if (tab1) tab1.innerHTML = _renderFaviconSVG(shape, color, icon, 12, iconColor);
     const tab2 = document.getElementById('guideFaviconTabIcon2');
