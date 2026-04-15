@@ -3643,8 +3643,8 @@
     if (tabFav) {
       const enabled = document.getElementById('editorFaviconToggle')?.checked !== false;
       tabFav.innerHTML = enabled
-        ? _renderFaviconSVG(shape, color, icon, 10, iconColor)
-        : self.ConnectryFavicon.buildSVG({ shape: 'none', icon: 'cloud', iconColor: '#00A1E0' }, 10);
+        ? _renderFaviconSVG(shape, color, icon, 14, iconColor)
+        : self.ConnectryFavicon.buildSVG({ shape: 'none', icon: 'cloud', iconColor: '#00A1E0' }, 14);
     }
   }
 

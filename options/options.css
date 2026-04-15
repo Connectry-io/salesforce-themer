@@ -2695,13 +2695,28 @@
 }
 .editor-live-name-wrap { flex: 0 1 auto; }
 .editor-live-desc-wrap { flex: 1; }
+.editor-live-card .editor-name-input,
+.editor-live-card .editor-desc-input {
+  background: transparent;
+  border: 1px dashed transparent;
+  border-radius: var(--cx-radius-sm);
+  transition: border-color var(--cx-transition), background var(--cx-transition);
+}
+.editor-live-card .editor-name-input:hover,
+.editor-live-card .editor-desc-input:hover {
+  border-color: var(--cx-border);
+}
+.editor-live-card .editor-name-input:focus,
+.editor-live-card .editor-desc-input:focus {
+  outline: none;
+  border-color: var(--cx-accent);
+  border-style: solid;
+  background: var(--cx-surface);
+}
 .editor-live-card .editor-name-input {
   font-size: 14px;
   font-weight: 600;
   padding: 2px 6px;
-  /* Grow to fit the title. Chrome 123+ sizes to content automatically;
-     min/max clamp so tiny titles still look like an input and obscenely
-     long ones don't shove the favicon off-screen. */
   field-sizing: content;
   min-width: 8ch;
   max-width: 100%;
@@ -2709,18 +2724,34 @@
 }
 .editor-live-card .editor-desc-input {
   font-size: 11px;
-  padding: 1px 6px;
+  padding: 3px 6px;
   min-width: 0;
   flex: 1;
+  resize: none;
+  line-height: 1.4;
+  font-family: inherit;
+  color: var(--cx-text-muted);
+  /* Two-row wrapping description — height = 2 lines of 11px * 1.4 + padding. */
+  height: calc(11px * 1.4 * 2 + 6px);
   overflow: hidden;
-  text-overflow: ellipsis;
+  white-space: normal;
 }
 .editor-live-card .editor-input-icon {
   flex-shrink: 0;
   color: var(--cx-text-subtle);
-  opacity: 0.4;
+  opacity: 0.7;
+  transition: opacity var(--cx-transition), color var(--cx-transition);
 }
 .editor-live-card .editor-input-icon:hover { opacity: 1; color: var(--cx-accent); }
+
+/* Meta cluster (category badge + favicon preview), pinned to the right. */
+.editor-live-meta {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto;
+  flex-shrink: 0;
+}
 
 /* Actions row: type hint + favicon */
 .editor-live-type-hint {
@@ -3798,8 +3829,8 @@ body.is-premium .builder-overflow-premium-badge { display: none !important; }
   max-width: 200px; min-width: 0;
 }
 .preview-browser-tab.is-active { background: #475569; }
-.preview-browser-tab-fav { display: inline-flex; flex-shrink: 0; }
-.preview-browser-tab-fav svg { width: 10px; height: 10px; }
+.preview-browser-tab-fav { display: inline-flex; flex-shrink: 0; position: relative; z-index: 1; }
+.preview-browser-tab-fav svg { width: 14px; height: 14px; display: block; }
 .preview-browser-tab-text {
   overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1;
 }
