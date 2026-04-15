@@ -265,7 +265,12 @@ body.sf-themer-fx-hover .slds-popover {
   const _legacyBorder = config.gradientBorders
     ? 'gradient'
     : (config.borderShimmer ? 'shimmer' : 'none');
-  const _borderStyle = config.borderEffect || _legacyBorder;
+  // Treat the new 'none' the same as undefined for fallback purposes — a
+  // legacy-shaped config merged over a new default stamps borderEffect='none'
+  // on top of the legacy boolean, which otherwise kills the border silently.
+  const _borderStyle = (config.borderEffect && config.borderEffect !== 'none')
+    ? config.borderEffect
+    : _legacyBorder;
   if (_borderStyle === 'shimmer') {
     // Pass the right intensity key through to the engine via a merged config.
     const mergedConfig = {
@@ -893,9 +898,11 @@ function applyEffectsClasses(config) {
   if (config.hoverLift) body.classList.add('sf-themer-fx-hover');
   if (config.ambientGlow) body.classList.add('sf-themer-fx-glow');
   // Border effect — consolidated shimmer|gradient via config.borderEffect
-  // (falls back to the legacy booleans for unmigrated configs).
-  const borderStyle = config.borderEffect
-    || (config.gradientBorders ? 'gradient' : (config.borderShimmer ? 'shimmer' : 'none'));
+  // (falls back to the legacy booleans for unmigrated configs). Same 'none'
+  // fallback trick as above so legacy saves still render correctly.
+  const borderStyle = (config.borderEffect && config.borderEffect !== 'none')
+    ? config.borderEffect
+    : (config.gradientBorders ? 'gradient' : (config.borderShimmer ? 'shimmer' : 'none'));
   if (borderStyle === 'shimmer') body.classList.add('sf-themer-fx-shimmer');
   if (borderStyle === 'gradient') body.classList.add('sf-themer-fx-gradient-border');
   if (config.aurora) body.classList.add('sf-themer-fx-aurora');

@@ -436,6 +436,11 @@
     // Clicking one sets activeThemeId; content.js loader fetches the CSS on
     // demand with ETag caching.
     _appendRemoteCustomThemes(grid, customThemes).catch(() => {});
+
+    // Re-sync the is-active state onto the freshly-rendered custom cards —
+    // setActiveUI ran at init before these cards existed, so they'd open
+    // without the active ring even though their theme IS the active one.
+    setActiveUI(syncState.theme);
   }
 
   async function _appendRemoteCustomThemes(grid, localThemes) {

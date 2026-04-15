@@ -382,7 +382,12 @@
     const _borderLegacy = effects.gradientBorders
       ? 'gradient'
       : (effects.borderShimmer ? 'shimmer' : 'none');
-    const borderStyle = effects.borderEffect || _borderLegacy;
+    // Legacy-shaped configs merged with the new default stamp
+    // borderEffect='none' over the legacy boolean, so treat 'none' the same
+    // as undefined for fallback purposes.
+    const borderStyle = (effects.borderEffect && effects.borderEffect !== 'none')
+      ? effects.borderEffect
+      : _borderLegacy;
     if (borderStyle && borderStyle !== 'none') {
       frame.dataset.fxBorderEffect = borderStyle;
       const beIntensity = effects.borderEffectIntensity
