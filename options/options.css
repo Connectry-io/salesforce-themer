@@ -6370,12 +6370,17 @@ td.upgrade-compare-col-premium,
   50%      { box-shadow: 0 0 calc(22px * var(--fx-mult)) rgba(var(--fx-accent-rgb), calc(0.32 * var(--fx-mult))); }
 }
 
-/* Shimmer — intensity-aware */
-.guide-effect-card[data-effect="borderEffect"] .guide-effect-preview-card {
+/* Shimmer — intensity-aware. Selector scoped to data-style="shimmer" (also
+   handles the default state before JS sets the attribute). */
+.guide-effect-card[data-effect="borderEffect"] .guide-effect-preview[data-style="shimmer"] .guide-effect-preview-card,
+.guide-effect-card[data-effect="borderEffect"] .guide-effect-preview:not([data-style]) .guide-effect-preview-card,
+.guide-effect-card[data-effect="borderEffect"] .guide-effect-preview[data-style=""] .guide-effect-preview-card {
   overflow: clip;
   position: relative;
 }
-.guide-effect-card[data-effect="borderEffect"] .guide-effect-preview-card::before {
+.guide-effect-card[data-effect="borderEffect"] .guide-effect-preview[data-style="shimmer"] .guide-effect-preview-card::before,
+.guide-effect-card[data-effect="borderEffect"] .guide-effect-preview:not([data-style]) .guide-effect-preview-card::before,
+.guide-effect-card[data-effect="borderEffect"] .guide-effect-preview[data-style=""] .guide-effect-preview-card::before {
   content: '';
   position: absolute;
   top: 0;
@@ -6405,11 +6410,11 @@ td.upgrade-compare-col-premium,
 @keyframes guide-fx-rotate {
   to { --guide-fx-angle: 360deg; }
 }
-.guide-effect-card[data-effect="borderEffect"][data-effect-style="gradient"] .guide-effect-preview-card {
+.guide-effect-card[data-effect="borderEffect"] .guide-effect-preview[data-style="gradient"] .guide-effect-preview-card {
   position: relative;
   border-color: transparent;
 }
-.guide-effect-card[data-effect="borderEffect"][data-effect-style="gradient"] .guide-effect-preview-card::after {
+.guide-effect-card[data-effect="borderEffect"] .guide-effect-preview[data-style="gradient"] .guide-effect-preview-card::after {
   content: '';
   position: absolute;
   inset: 0;

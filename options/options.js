@@ -2675,6 +2675,19 @@
   // Fire refreshBuilderState whenever the user interacts with the editor.
   // Delegated on document — cheap and captures everything without threading
   // refresh calls through every setter.
+  // Ctrl+S / Cmd+S → save current theme when the Builder is active.
+  // Swallows the browser's default "save page" prompt. No-op on other tabs.
+  function _bindBuilderSaveHotkey() {
+    window.addEventListener('keydown', (e) => {
+      const isSaveKey = (e.key === 's' || e.key === 'S') && (e.ctrlKey || e.metaKey) && !e.altKey && !e.shiftKey;
+      if (!isSaveKey) return;
+      if (!editorState?.active) return;
+      e.preventDefault();
+      e.stopPropagation();
+      if (typeof saveCustomTheme === 'function') saveCustomTheme();
+    });
+  }
+
   function _bindBuilderDirtyTracking() {
     const handler = () => {
       if (editorState.active) refreshBuilderState();
@@ -3413,6 +3426,7 @@
     // Top bar actions — Reset, Save dropdown, free notice
     _bindTopbarActions();
     _bindBuilderDirtyTracking();
+    _bindBuilderSaveHotkey();
 
     document.getElementById('editorImportFile')?.addEventListener('change', importThemeJSON);
 
@@ -4918,7 +4932,13 @@
   const GUIDE_EFFECT_CATALOG = [
     { id: 'hoverLift',       name: 'Hover Lift',        desc: 'Cards, buttons, and list items gently float up when you hover. Modals and dropdowns are never affected.', preview: 'Hover me' },
     { id: 'ambientGlow',     name: 'Ambient Glow',      desc: 'Brand buttons, active nav items, and focused inputs gain a slow pulsing glow in your theme accent color.', preview: 'Glow' },
-    { id: 'borderEffect',    name: 'Border',            desc: 'Animated card edges — Shimmer for a top-edge light sweep, or Gradient for a rotating color ring. Pick one style.', preview: 'Border' },
+    { id: 'borderEffect',    name: 'Border',            desc: 'Animated card edges — Shimmer for a top-edge light sweep, or Gradient for a rotating color ring. Pick one style.', preview: 'Border',
+      defaultStyle: 'shimmer',
+      styles: [
+        { value: 'shimmer',  label: 'Shimmer' },
+        { value: 'gradient', label: 'Gradient' },
+      ],
+    },
     { id: 'aurora',          name: 'Aurora Background', desc: 'A soft, slow-moving gradient glow sits behind all content. Colors derive from your theme accent.', preview: '' },
     { id: 'neonFlicker',     name: 'Neon Flicker',      desc: 'Page titles and active navigation gain a neon text glow with occasional flicker, like a sign.', preview: 'NEON' },
     {
