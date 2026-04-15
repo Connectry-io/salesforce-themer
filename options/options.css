@@ -2740,9 +2740,10 @@
 .editor-live-favicon-display svg { width: 18px; height: 18px; display: block; }
 
 /* Favicon panel: center the live preview, keep it modest */
+#editorFaviconPanel .editor-group:has(> .guide-favicon-hero) { text-align: center; }
 #editorFaviconPanel .guide-favicon-hero {
-  width: 56px; height: 56px;
-  margin: 0 auto;
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 56px; height: 56px; margin: 0 auto;
 }
 #editorFaviconPanel .guide-favicon-hero svg { width: 56px; height: 56px; }
 
