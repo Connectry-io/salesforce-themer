@@ -3931,9 +3931,28 @@ body.is-premium .builder-overflow-premium-badge { display: none !important; }
   position: relative;
   z-index: 1;
 }
+/* Active nav tab — matches real-SF .slds-context-bar__item.slds-is-active.
+   Slightly slower cycle (1.3×) so the two glows don't pulse in lockstep. */
+.editor-preview-frame[data-fx-ambient-glow="on"] .preview-tab-active {
+  animation: editor-fx-glow calc(3.9s * var(--fx-ambient-glow-speed, 1)) ease-in-out infinite;
+  position: relative;
+  z-index: 1;
+  border-radius: 4px;
+}
+/* Search / input focus glow — real SF uses :focus; preview has no default
+   focus, so we run it as an always-on subtle focus ring so the user can
+   see that inputs are in scope too. */
+.editor-preview-frame[data-fx-ambient-glow="on"] .preview-topbar-search {
+  animation: editor-fx-focus-glow calc(2.5s * var(--fx-ambient-glow-speed, 1)) ease-in-out infinite;
+}
 @keyframes editor-fx-glow {
   0%, 100% { box-shadow: 0 0 calc(6px * var(--fx-ambient-glow-mult, 1)) rgba(var(--fx-accent-rgb), calc(0.18 * var(--fx-ambient-glow-mult, 1))); }
   50%      { box-shadow: 0 0 calc(20px * var(--fx-ambient-glow-mult, 1)) rgba(var(--fx-accent-rgb), calc(0.45 * var(--fx-ambient-glow-mult, 1))); }
+}
+@keyframes editor-fx-focus-glow {
+  0%, 100% { box-shadow: 0 0 0 2px rgba(var(--fx-accent-rgb), calc(0.2 * var(--fx-ambient-glow-mult, 1))); }
+  50%      { box-shadow: 0 0 0 4px rgba(var(--fx-accent-rgb), calc(0.12 * var(--fx-ambient-glow-mult, 1))),
+                          0 0 calc(15px * var(--fx-ambient-glow-mult, 1)) rgba(var(--fx-accent-rgb), calc(0.08 * var(--fx-ambient-glow-mult, 1))); }
 }
 
 /* Border effect — shimmer style. Single top-edge sweep. */
