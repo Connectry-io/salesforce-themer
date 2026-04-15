@@ -336,6 +336,201 @@ function buildHoverLiftDeclarations(intensityLevel, scale) {
 }
 
 // ────────────────────────────────────────────────────────────────────────────
+// Ambient Glow — pulsing box-shadow on brand button + nav active + input focus.
+// Exports keyframes as a CSS prelude string so adapters can emit them once,
+// alongside role-bound declarations they apply to their own selectors.
+// ────────────────────────────────────────────────────────────────────────────
+
+function buildAmbientGlowRules(intensityLevel, accentHex, scale) {
+  const { accentRgb } = deriveColors(accentHex);
+  const mult = (INTENSITY_LADDER[intensityLevel] || INTENSITY_LADDER.medium).mult;
+  const s = typeof scale === 'number' ? scale : 1.0;
+  const k = mult * s;
+
+  const glowMin = (0.06 * k).toFixed(3);
+  const glowMax = (0.15 * k).toFixed(3);
+  const glowSpeed = Math.round(3000 / mult);
+  const focusSpeed = Math.round(2500 / mult);
+  const innerA = (0.08 * k).toFixed(3);
+  const innerPx = Math.round(15 * mult);
+
+  const prelude = `
+@keyframes sf-themer-glow-pulse {
+  0%, 100% { box-shadow: 0 0 ${Math.round(10 * mult)}px rgba(${accentRgb}, ${glowMin}); }
+  50%      { box-shadow: 0 0 ${Math.round(20 * mult)}px rgba(${accentRgb}, ${glowMax}); }
+}
+@keyframes sf-themer-focus-glow {
+  0%, 100% { box-shadow: 0 0 0 2px rgba(${accentRgb}, ${(0.2 * s).toFixed(3)}); }
+  50%      { box-shadow: 0 0 0 4px rgba(${accentRgb}, ${(0.12 * s).toFixed(3)}),
+                          0 0 ${innerPx}px rgba(${accentRgb}, ${innerA}); }
+}`.trim();
+
+  return {
+    cssPrelude: prelude,
+    cssRules: [
+      { selectorRole: 'brandButton',
+        declarations: { animation: `sf-themer-glow-pulse ${glowSpeed}ms ease-in-out infinite` } },
+      { selectorRole: 'navActive',
+        declarations: { animation: `sf-themer-glow-pulse ${Math.round(glowSpeed * 1.3)}ms ease-in-out infinite` } },
+      { selectorRole: 'inputFocus',
+        declarations: { animation: `sf-themer-focus-glow ${focusSpeed}ms ease-in-out infinite` } },
+    ],
+    runtimeConfig: null,
+  };
+}
+
+// ────────────────────────────────────────────────────────────────────────────
+// Border Shimmer — animated gradient edge along card top.
+// ────────────────────────────────────────────────────────────────────────────
+
+function buildBorderShimmerRules(intensityLevel, accentHex, scale) {
+  const { accentRgb } = deriveColors(accentHex);
+  const mult = (INTENSITY_LADDER[intensityLevel] || INTENSITY_LADDER.medium).mult;
+  const s = typeof scale === 'number' ? scale : 1.0;
+
+  const shimmerSpeed = Math.round(3000 / mult);
+  const shimmerAlpha = (0.6 * mult * s).toFixed(3);
+
+  const prelude = `
+@keyframes sf-themer-shimmer {
+  0%   { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}`.trim();
+
+  return {
+    cssPrelude: prelude,
+    cssRules: [
+      { selectorRole: 'cardShimmerContainer',
+        declarations: { position: 'relative', overflow: 'clip' } },
+      { selectorRole: 'cardShimmerEdge',
+        declarations: {
+          content: "''",
+          position: 'absolute',
+          top: '0', left: '0', right: '0',
+          height: '1px',
+          background: `linear-gradient(90deg, transparent 0%, transparent 40%, rgba(${accentRgb}, ${shimmerAlpha}) 50%, transparent 60%, transparent 100%)`,
+          'background-size': '200% 100%',
+          animation: `sf-themer-shimmer ${shimmerSpeed}ms ease-in-out infinite`,
+          'z-index': '1',
+          'pointer-events': 'none',
+        } },
+    ],
+    runtimeConfig: null,
+  };
+}
+
+// ────────────────────────────────────────────────────────────────────────────
+// Gradient Borders — rotating conic-gradient edge around cards (uses @property
+// for smooth angle interpolation; needs Chrome 85+).
+// ────────────────────────────────────────────────────────────────────────────
+
+function buildGradientBordersRules(intensityLevel, accentHex, scale) {
+  const { accentRgb } = deriveColors(accentHex);
+  const mult = (INTENSITY_LADDER[intensityLevel] || INTENSITY_LADDER.medium).mult;
+  const s = typeof scale === 'number' ? scale : 1.0;
+
+  const rotateSpeed = Math.round(4000 / mult);
+  const gradientAlpha = Math.min(1, (0.8 * mult * s)).toFixed(3);
+
+  const prelude = `
+@property --sf-border-angle {
+  syntax: '<angle>';
+  initial-value: 0deg;
+  inherits: false;
+}
+@keyframes sf-themer-border-rotate {
+  to { --sf-border-angle: 360deg; }
+}`.trim();
+
+  return {
+    cssPrelude: prelude,
+    cssRules: [
+      { selectorRole: 'cardGradientContainer',
+        declarations: { position: 'relative' } },
+      { selectorRole: 'cardGradientEdge',
+        declarations: {
+          content: "''",
+          position: 'absolute',
+          inset: '0',
+          padding: '1px',
+          'border-radius': 'inherit',
+          background: `conic-gradient(from var(--sf-border-angle), rgba(${accentRgb}, ${gradientAlpha}) 0%, transparent 25%, transparent 75%, rgba(${accentRgb}, ${gradientAlpha}) 100%)`,
+          '-webkit-mask': 'linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)',
+          '-webkit-mask-composite': 'xor',
+          'mask-composite': 'exclude',
+          animation: `sf-themer-border-rotate ${rotateSpeed}ms linear infinite`,
+          'pointer-events': 'none',
+          'z-index': '1',
+        } },
+    ],
+    runtimeConfig: null,
+  };
+}
+
+// ────────────────────────────────────────────────────────────────────────────
+// Neon Flicker — erratic + breathing text-shadow glows on headings/nav.
+// ────────────────────────────────────────────────────────────────────────────
+
+function buildNeonFlickerRules(intensityLevel, accentHex, scale) {
+  const { accentRgb } = deriveColors(accentHex);
+  const mult = (INTENSITY_LADDER[intensityLevel] || INTENSITY_LADDER.medium).mult;
+  const s = typeof scale === 'number' ? scale : 1.0;
+  const k = mult * s;
+
+  const a1 = Math.min(1, (0.8 * k)).toFixed(3);
+  const a2 = (0.5 * k).toFixed(3);
+  const a3 = (0.3 * k).toFixed(3);
+  const a4 = (0.15 * k).toFixed(3);
+  const b1 = (0.4 * k).toFixed(3);
+  const b2 = (0.2 * k).toFixed(3);
+  const b3 = (0.6 * k).toFixed(3);
+  const b4 = (0.35 * k).toFixed(3);
+  const b5 = (0.15 * k).toFixed(3);
+
+  const prelude = `
+@keyframes sf-themer-neon-flicker {
+  0%, 19%, 21%, 23%, 25%, 54%, 56%, 100% {
+    text-shadow:
+      0 0 4px rgba(${accentRgb}, ${a1}),
+      0 0 11px rgba(${accentRgb}, ${a2}),
+      0 0 19px rgba(${accentRgb}, ${a3}),
+      0 0 40px rgba(${accentRgb}, ${a4});
+  }
+  20%, 24%, 55% { text-shadow: none; }
+}
+@keyframes sf-themer-neon-breathe {
+  0%, 100% {
+    text-shadow:
+      0 0 4px rgba(${accentRgb}, ${b1}),
+      0 0 10px rgba(${accentRgb}, ${b2});
+  }
+  50% {
+    text-shadow:
+      0 0 8px rgba(${accentRgb}, ${b3}),
+      0 0 20px rgba(${accentRgb}, ${b4}),
+      0 0 35px rgba(${accentRgb}, ${b5});
+  }
+}`.trim();
+
+  const flickerMs = Math.round(4000 / mult);
+  const breatheMs = Math.round(3000 / mult);
+  const cardMs    = Math.round(5000 / mult);
+
+  return {
+    cssPrelude: prelude,
+    cssRules: [
+      { selectorRole: 'titleFlicker',
+        declarations: { animation: `sf-themer-neon-flicker ${flickerMs}ms ease-in-out infinite` } },
+      { selectorRole: 'navBreathe',
+        declarations: { animation: `sf-themer-neon-breathe ${breatheMs}ms ease-in-out infinite` } },
+      { selectorRole: 'cardHeaderBreathe',
+        declarations: { animation: `sf-themer-neon-breathe ${cardMs}ms ease-in-out infinite` } },
+    ],
+    runtimeConfig: null,
+  };
+}
+
+// ────────────────────────────────────────────────────────────────────────────
 // renderRules — The primary adapter-facing API. Given an effect id + config,
 // returns a structured IR the adapter walks and binds to its selectors.
 //
@@ -400,6 +595,22 @@ function renderRules(effectId, config, accentHex, opts) {
       };
     }
 
+    case 'ambientGlow':
+      if (!config.ambientGlow) return null;
+      return buildAmbientGlowRules(intensity, accentHex, scale);
+
+    case 'borderShimmer':
+      if (!config.borderShimmer) return null;
+      return buildBorderShimmerRules(intensity, accentHex, scale);
+
+    case 'gradientBorders':
+      if (!config.gradientBorders) return null;
+      return buildGradientBordersRules(intensity, accentHex, scale);
+
+    case 'neonFlicker':
+      if (!config.neonFlicker) return null;
+      return buildNeonFlickerRules(intensity, accentHex, scale);
+
     // Other effects not yet migrated — fall through to legacy in consumers.
     default:
       return null;
@@ -435,6 +646,10 @@ const API = {
   // Effect-specific
   buildBackgroundPatternDeclarations,
   buildHoverLiftDeclarations,
+  buildAmbientGlowRules,
+  buildBorderShimmerRules,
+  buildGradientBordersRules,
+  buildNeonFlickerRules,
   // Main adapter API
   renderRules,
   cssFromDeclarations,

@@ -229,132 +229,45 @@ body.sf-themer-fx-hover .slds-popover {
     }
   }
 
-  // ─── Ambient Glow ──────────────────────────────────────────────────────────
+  // ─── Ambient Glow / Border Shimmer / Gradient Borders (via core engine) ──
+  // All three effects pull their keyframes + declarations from the canonical
+  // engine. Adapter maps IR selector roles → SF DOM selectors. The engine
+  // returns cssPrelude (keyframes / @property) separately from cssRules.
+  const engine = (typeof self !== 'undefined' && self.SFThemerEffectsEngine) ||
+                 (typeof window !== 'undefined' && window.SFThemerEffectsEngine);
+
+  function _appendEngineEffect(effectKey, selectorRoles) {
+    const ir = engine && engine.renderRules(effectKey, config, accent);
+    if (!ir || !ir.cssRules) return;
+    const imp = { important: true };
+    if (ir.cssPrelude) css += `\n/* ─── ${effectKey} prelude (engine) ─── */\n${ir.cssPrelude}\n`;
+    for (const rule of ir.cssRules) {
+      const sel = selectorRoles[rule.selectorRole];
+      if (!sel) continue;
+      css += `\n${sel} {\n${engine.cssFromDeclarations(rule.declarations, imp)}\n}\n`;
+    }
+  }
+
   if (config.ambientGlow) {
-    const m = _intensityMult(config, 'ambientGlow');
-    const glowMin = (0.06 * m).toFixed(3);
-    const glowMax = (0.15 * m).toFixed(3);
-    const glowSpeed = Math.round(3000 / m);
-
-    css += `
-/* ─── Ambient Glow (intensity ${(config.ambientGlowIntensity || 'medium')}) ─── */
-
-@keyframes sf-themer-glow-pulse {
-  0%, 100% { box-shadow: 0 0 ${Math.round(10 * m)}px rgba(${accentRgb}, ${glowMin}); }
-  50%      { box-shadow: 0 0 ${Math.round(20 * m)}px rgba(${accentRgb}, ${glowMax}); }
-}
-
-body.sf-themer-fx-glow .slds-button_brand,
-body.sf-themer-fx-glow .slds-button--brand {
-  animation: sf-themer-glow-pulse ${glowSpeed}ms ease-in-out infinite !important;
-}
-
-body.sf-themer-fx-glow .slds-context-bar__item.slds-is-active {
-  animation: sf-themer-glow-pulse ${Math.round(glowSpeed * 1.3)}ms ease-in-out infinite !important;
-}
-
-@keyframes sf-themer-focus-glow {
-  0%, 100% { box-shadow: 0 0 0 2px rgba(${accentRgb}, 0.2); }
-  50%      { box-shadow: 0 0 0 4px rgba(${accentRgb}, 0.12),
-                          0 0 ${Math.round(15 * m)}px rgba(${accentRgb}, ${(0.08 * m).toFixed(3)}); }
-}
-
-body.sf-themer-fx-glow .slds-input:focus,
-body.sf-themer-fx-glow .slds-textarea:focus,
-body.sf-themer-fx-glow .slds-select:focus {
-  animation: sf-themer-focus-glow ${Math.round(2500 / m)}ms ease-in-out infinite !important;
-}
-`;
+    _appendEngineEffect('ambientGlow', {
+      brandButton: 'body.sf-themer-fx-glow .slds-button_brand,\nbody.sf-themer-fx-glow .slds-button--brand',
+      navActive:   'body.sf-themer-fx-glow .slds-context-bar__item.slds-is-active',
+      inputFocus:  'body.sf-themer-fx-glow .slds-input:focus,\nbody.sf-themer-fx-glow .slds-textarea:focus,\nbody.sf-themer-fx-glow .slds-select:focus',
+    });
   }
 
-  // ─── Border Shimmer ────────────────────────────────────────────────────────
   if (config.borderShimmer) {
-    const m = _intensityMult(config, 'borderShimmer');
-    const shimmerSpeed = Math.round(3000 / m);
-    const shimmerAlpha = (0.6 * m).toFixed(3);
-
-    css += `
-/* ─── Border Shimmer (intensity ${(config.borderShimmerIntensity || 'medium')}) ─── */
-
-@keyframes sf-themer-shimmer {
-  0%   { background-position: -200% center; }
-  100% { background-position: 200% center; }
-}
-
-body.sf-themer-fx-shimmer .slds-card {
-  position: relative !important;
-  overflow: clip !important;
-}
-
-body.sf-themer-fx-shimmer .slds-card::before {
-  content: '' !important;
-  position: absolute !important;
-  top: 0 !important;
-  left: 0 !important;
-  right: 0 !important;
-  height: 1px !important;
-  background: linear-gradient(
-    90deg,
-    transparent 0%,
-    transparent 40%,
-    rgba(${accentRgb}, ${shimmerAlpha}) 50%,
-    transparent 60%,
-    transparent 100%
-  ) !important;
-  background-size: 200% 100% !important;
-  animation: sf-themer-shimmer ${shimmerSpeed}ms ease-in-out infinite !important;
-  z-index: 1 !important;
-  pointer-events: none !important;
-}
-`;
+    _appendEngineEffect('borderShimmer', {
+      cardShimmerContainer: 'body.sf-themer-fx-shimmer .slds-card',
+      cardShimmerEdge:      'body.sf-themer-fx-shimmer .slds-card::before',
+    });
   }
 
-  // ─── Gradient Borders (Animated conic-gradient via @property) ──────────────
   if (config.gradientBorders) {
-    const m = _intensityMult(config, 'gradientBorders');
-    const rotateSpeed = Math.round(4000 / m);
-    const gradientAlpha = Math.min(1, (0.8 * m)).toFixed(3);
-
-    css += `
-/* ─── Gradient Borders (intensity ${(config.gradientBordersIntensity || 'medium')}) ─── */
-
-@property --sf-border-angle {
-  syntax: '<angle>';
-  initial-value: 0deg;
-  inherits: false;
-}
-
-@keyframes sf-themer-border-rotate {
-  to { --sf-border-angle: 360deg; }
-}
-
-body.sf-themer-fx-gradient-border .slds-card {
-  position: relative !important;
-}
-
-body.sf-themer-fx-gradient-border .slds-card::after {
-  content: '' !important;
-  position: absolute !important;
-  inset: 0 !important;
-  padding: 1px !important;
-  border-radius: inherit !important;
-  background: conic-gradient(
-    from var(--sf-border-angle),
-    rgba(${accentRgb}, ${gradientAlpha}) 0%,
-    transparent 25%,
-    transparent 75%,
-    rgba(${accentRgb}, ${gradientAlpha}) 100%
-  ) !important;
-  -webkit-mask:
-    linear-gradient(#fff 0 0) content-box,
-    linear-gradient(#fff 0 0) !important;
-  -webkit-mask-composite: xor !important;
-  mask-composite: exclude !important;
-  animation: sf-themer-border-rotate ${rotateSpeed}ms linear infinite !important;
-  pointer-events: none !important;
-  z-index: 1 !important;
-}
-`;
+    _appendEngineEffect('gradientBorders', {
+      cardGradientContainer: 'body.sf-themer-fx-gradient-border .slds-card',
+      cardGradientEdge:      'body.sf-themer-fx-gradient-border .slds-card::after',
+    });
   }
 
   // ─── Aurora Background (theme-accent-derived colors) ──────────────────────
@@ -399,56 +312,13 @@ body.sf-themer-fx-aurora .slds-modal__container {
 `;
   }
 
-  // ─── Neon Flicker (uses theme accent) ─────────────────────────────────────
+  // ─── Neon Flicker (via core engine) ───────────────────────────────────────
   if (config.neonFlicker) {
-    const m = _intensityMult(config, 'neonFlicker');
-    const flickerIntensity = Math.min(1, (0.8 * m)).toFixed(3);
-
-    css += `
-/* ─── Neon Flicker (intensity ${(config.neonFlickerIntensity || 'medium')}) ─── */
-
-@keyframes sf-themer-neon-flicker {
-  0%, 19%, 21%, 23%, 25%, 54%, 56%, 100% {
-    text-shadow:
-      0 0 4px rgba(${accentRgb}, ${flickerIntensity}),
-      0 0 11px rgba(${accentRgb}, ${(0.5 * m).toFixed(3)}),
-      0 0 19px rgba(${accentRgb}, ${(0.3 * m).toFixed(3)}),
-      0 0 40px rgba(${accentRgb}, ${(0.15 * m).toFixed(3)});
-  }
-  20%, 24%, 55% {
-    text-shadow: none;
-  }
-}
-
-@keyframes sf-themer-neon-breathe {
-  0%, 100% {
-    text-shadow:
-      0 0 4px rgba(${accentRgb}, ${(0.4 * m).toFixed(3)}),
-      0 0 10px rgba(${accentRgb}, ${(0.2 * m).toFixed(3)});
-  }
-  50% {
-    text-shadow:
-      0 0 8px rgba(${accentRgb}, ${(0.6 * m).toFixed(3)}),
-      0 0 20px rgba(${accentRgb}, ${(0.35 * m).toFixed(3)}),
-      0 0 35px rgba(${accentRgb}, ${(0.15 * m).toFixed(3)});
-  }
-}
-
-body.sf-themer-fx-neon .slds-page-header__title,
-body.sf-themer-fx-neon .slds-page-header__name-title {
-  animation: sf-themer-neon-flicker ${Math.round(4000 / m)}ms ease-in-out infinite !important;
-}
-
-body.sf-themer-fx-neon .slds-context-bar__label-action,
-body.sf-themer-fx-neon .slds-tabs_default__item.slds-is-active a,
-body.sf-themer-fx-neon .slds-tabs--default__item.slds-active a {
-  animation: sf-themer-neon-breathe ${Math.round(3000 / m)}ms ease-in-out infinite !important;
-}
-
-body.sf-themer-fx-neon .slds-card__header-title {
-  animation: sf-themer-neon-breathe ${Math.round(5000 / m)}ms ease-in-out infinite !important;
-}
-`;
+    _appendEngineEffect('neonFlicker', {
+      titleFlicker:      'body.sf-themer-fx-neon .slds-page-header__title,\nbody.sf-themer-fx-neon .slds-page-header__name-title',
+      navBreathe:        'body.sf-themer-fx-neon .slds-context-bar__label-action,\nbody.sf-themer-fx-neon .slds-tabs_default__item.slds-is-active a,\nbody.sf-themer-fx-neon .slds-tabs--default__item.slds-active a',
+      cardHeaderBreathe: 'body.sf-themer-fx-neon .slds-card__header-title',
+    });
   }
 
   // ─── Cursor Trail (canvas container rules) ────────────────────────────────

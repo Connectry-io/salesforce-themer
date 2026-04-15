@@ -27,6 +27,10 @@ const REPO = path.resolve(__dirname, '..');
 const MIGRATED_EFFECTS = [
   'backgroundPattern',
   'hoverLift',
+  'ambientGlow',
+  'borderShimmer',
+  'gradientBorders',
+  'neonFlicker',
 ];
 
 // Forbidden patterns per migrated effect. Each entry describes where
@@ -58,6 +62,34 @@ const RULES = {
       // hover-lift rule, that's drift.
       forbid: /sf-themer-fx-hover[^{]*:hover[^{]*\{[^}]*translateY\(-\d/,
       reason: 'hoverLift transforms must come from engine.renderRules, not hardcoded px values',
+    },
+  ],
+  ambientGlow: [
+    {
+      file: 'effects/effects.js',
+      forbid: /@keyframes\s+sf-themer-glow-pulse\b/,
+      reason: 'ambientGlow keyframes must come from engine.renderRules cssPrelude',
+    },
+  ],
+  borderShimmer: [
+    {
+      file: 'effects/effects.js',
+      forbid: /@keyframes\s+sf-themer-shimmer\b/,
+      reason: 'borderShimmer keyframes must come from engine.renderRules cssPrelude',
+    },
+  ],
+  gradientBorders: [
+    {
+      file: 'effects/effects.js',
+      forbid: /@keyframes\s+sf-themer-border-rotate\b/,
+      reason: 'gradientBorders keyframes must come from engine.renderRules cssPrelude',
+    },
+  ],
+  neonFlicker: [
+    {
+      file: 'effects/effects.js',
+      forbid: /@keyframes\s+sf-themer-neon-(flicker|breathe)\b/,
+      reason: 'neonFlicker keyframes must come from engine.renderRules cssPrelude',
     },
   ],
 };
