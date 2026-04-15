@@ -598,15 +598,14 @@ function buildAuroraRules(intensityLevel, accentHex, opts) {
   const s = (opts && typeof opts.scale === 'number') ? opts.scale : 1.0;
   const isDark = !!(opts && opts.isDark);
 
-  // Aurora is fullscreen + blurred, so opacity reads as faint even at full
-  // alpha. Iteration history:
-  //   0.06 (original) — imperceptible + sank below body bg at z-index:-1
-  //   0.18 — still barely readable at full SF viewport with 60px blur
-  //   0.35 — current; blobs read as ambient color regions at medium/strong
-  // Blur also scaled up (60 → 120px) because blur is absolute: 60px on a
-  // 400px preview frame dominates; on a 1920px viewport it's a tiny edge
-  // softener. 120px blur lets blob colors diffuse properly at scale.
-  const auroraOpacity = (0.35 * mult * s).toFixed(3);
+  // Aurora uses mix-blend-mode:soft-light to tint content below instead of
+  // overlaying solid color. At that blend mode, opacity controls intensity
+  // of the tint; higher values become painted-on rather than lighting-like.
+  // 0.55 base reads as subtle-ambient at medium; 0.88 at strong feels like
+  // lit from behind by the blobs. Blur also scaled up (60 → 120px) for
+  // fullscreen scale — 60px reads as an edge softener on 1920px viewports,
+  // 120px lets blob colors diffuse broadly like real ambient lighting.
+  const auroraOpacity = (0.55 * mult * s).toFixed(3);
   const auroraSpeed = Math.round(25000 / mult);
   const [a1, a2, a3] = _deriveAuroraBlobs(accentHex, isDark);
 
@@ -645,6 +644,12 @@ function buildAuroraRules(intensityLevel, accentHex, opts) {
           'background-size': '200% 200%',
           animation: `sf-themer-aurora ${auroraSpeed}ms ease-in-out infinite`,
           filter: 'blur(120px)',
+          // Paint aurora above SF content (z-index max above) but blend it
+          // into the pixels underneath so content stays readable and cards
+          // get tinted by the blobs instead of occluded. `soft-light` is
+          // gentle — darkens shadows, lightens highlights, preserves hue.
+          // `overlay` is more dramatic if user wants stronger ambient.
+          'mix-blend-mode': 'soft-light',
         },
       },
     ],
