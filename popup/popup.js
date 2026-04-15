@@ -170,7 +170,9 @@
         // theme is currently selected, and Connectry-as-default is implicit
         // because it's the first card on first install.
 
-        const presetFavCfg = theme.favicon || { shape: 'circle', color: (theme.colors && theme.colors.accent) || '#4A6FA5', icon: 'connectry' };
+        const presetFavCfg = theme.favicon
+          || (self.ConnectryFavicon?.defaultForTheme(theme.id, theme.colors?.accent))
+          || { shape: 'circle', color: (theme.colors && theme.colors.accent) || '#4A6FA5', icon: 'connectry' };
         const presetFavSvg = self.ConnectryFavicon ? self.ConnectryFavicon.buildSVG(presetFavCfg, 16) : '';
         btn.innerHTML = `
           <span class="theme-card-hover-actions" aria-hidden="false">
@@ -557,7 +559,9 @@
       ? ct.description
       : `Based on ${base?.name || ct.basedOn}`;
 
-    const ctFavCfg = ct.favicon || { shape: 'circle', color: resolvedColors.accent || '#4A6FA5', icon: 'connectry' };
+    const ctFavCfg = ct.favicon
+      || (self.ConnectryFavicon?.defaultForTheme(ct.basedOn, resolvedColors.accent))
+      || { shape: 'circle', color: resolvedColors.accent || '#4A6FA5', icon: 'connectry' };
     const ctFavSvg = self.ConnectryFavicon ? self.ConnectryFavicon.buildSVG(ctFavCfg, 16) : '';
     btn.innerHTML = `
       <span class="theme-card-hover-actions" aria-hidden="false">

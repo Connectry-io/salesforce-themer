@@ -277,9 +277,11 @@
   // tab matches what the theme card in Studio/popup shows (circle + accent
   // + connectry glyph). Null = use the bundled connectry.svg fallback.
   let _presetRegistryCache = null;
-  function _defaultFaviconForTheme(theme) {
-    const accent = theme?.colors?.accent || '#4A6FA5';
-    return { shape: 'circle', color: accent, icon: 'connectry' };
+  function _defaultFavicon(themeId, accent) {
+    if (self.ConnectryFavicon && self.ConnectryFavicon.defaultForTheme) {
+      return self.ConnectryFavicon.defaultForTheme(themeId, accent);
+    }
+    return { shape: 'circle', color: accent || '#4A6FA5', icon: 'connectry' };
   }
   async function _resolveThemeFavicon(themeName) {
     if (!themeName || themeName === 'none') return null;
@@ -291,7 +293,7 @@
         if (ct.favicon) return ct.favicon;
         const base = _presetRegistryCache?.themes?.find(x => x.id === ct.basedOn);
         const accent = ct.advancedOverrides?.accent || ct.coreOverrides?.accent || base?.colors?.accent;
-        return _defaultFaviconForTheme({ colors: { accent } });
+        return _defaultFavicon(ct.basedOn, accent);
       } catch (_) { return null; }
     }
     try {
@@ -301,7 +303,7 @@
       }
       const t = (_presetRegistryCache.themes || []).find(x => x.id === themeName);
       if (!t) return null;
-      return t.favicon || _defaultFaviconForTheme(t);
+      return t.favicon || _defaultFavicon(t.id, t.colors?.accent);
     } catch (_) { return null; }
   }
 

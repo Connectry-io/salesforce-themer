@@ -46,6 +46,32 @@
 
   const DEFAULT_CONFIG = { shape: 'circle', color: '#4A6FA5', icon: 'connectry' };
 
+  // Per-theme default icon. When a theme has no explicit favicon config, pick
+  // the thematic icon (arctic → snowflake, ember → flame, etc.) instead of
+  // showing the Connectry glyph on every preset.
+  const THEME_ICON_MAP = {
+    connectry: 'connectry', 'connectry-dark': 'connectry',
+    arctic: 'snowflake', midnight: 'moon', ember: 'flame',
+    forest: 'leaf', ocean: 'waves', sunset: 'star',
+    lavender: 'diamond', rose: 'heart', slate: 'shield',
+    tron: 'bolt', terminal: 'bolt', solarized: 'circle',
+    nord: 'snowflake', sakura: 'heart', obsidian: 'diamond',
+    'salesforce-lightning': 'bolt', 'salesforce-cosmos': 'star',
+  };
+
+  /**
+   * Resolve the default favicon config for a theme when it hasn't set one
+   * explicitly. Uses THEME_ICON_MAP for a thematic glyph and tints it with
+   * the theme's accent color.
+   */
+  function defaultForTheme(themeId, accent) {
+    return {
+      shape: 'circle',
+      color: accent || DEFAULT_CONFIG.color,
+      icon: THEME_ICON_MAP[themeId] || 'connectry',
+    };
+  }
+
   function _findIcon(iconId) {
     return ICONS.find(i => i.id === iconId) || ICONS[0];
   }
@@ -79,6 +105,8 @@
   Object.assign(ns, {
     ICONS,
     DEFAULT_CONFIG,
+    THEME_ICON_MAP,
+    defaultForTheme,
     buildSVG,
   });
 })();

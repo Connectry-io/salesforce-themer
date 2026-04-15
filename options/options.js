@@ -987,8 +987,11 @@
     const swatchHtml = swatchColors.map(col => `<span style="background:${col || '#ddd'}"></span>`).join('');
 
     // Favicon chip — pulls the theme's favicon config if set, otherwise
-    // renders the default Connectry mark tinted with the theme accent.
-    const favCfg = theme.favicon || { shape: 'circle', color: c.accent || '#4A6FA5', icon: 'connectry' };
+    // renders the per-theme default (thematic glyph + theme accent) from
+    // the canonical favicon engine.
+    const favCfg = theme.favicon
+      || (self.ConnectryFavicon?.defaultForTheme(theme.basedOn || theme.id, c.accent))
+      || { shape: 'circle', color: c.accent || '#4A6FA5', icon: 'connectry' };
     const faviconSvg = self.ConnectryFavicon ? self.ConnectryFavicon.buildSVG(favCfg, 18) : '';
 
     const deleteBtnHtml = theme.isCustom
@@ -1178,7 +1181,9 @@
     const detailFavHost = document.getElementById('optDetailFavicon');
     if (detailFavHost) {
       const favC = theme.colors || {};
-      const favCfg = theme.favicon || { shape: 'circle', color: favC.accent || '#4A6FA5', icon: 'connectry' };
+      const favCfg = theme.favicon
+        || (self.ConnectryFavicon?.defaultForTheme(theme.basedOn || theme.id, favC.accent))
+        || { shape: 'circle', color: favC.accent || '#4A6FA5', icon: 'connectry' };
       detailFavHost.innerHTML = self.ConnectryFavicon ? self.ConnectryFavicon.buildSVG(favCfg, 22) : '';
     }
 
