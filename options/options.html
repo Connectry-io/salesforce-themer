@@ -811,17 +811,11 @@
         <div class="cx-section-header">
           <div>
             <h2 class="cx-section-title">Favicons</h2>
-            <p class="cx-section-subtitle">Replace the Salesforce cloud in your browser tab. Pick a theme icon or design your own — applies instantly.</p>
+            <p class="cx-section-subtitle">Replace the Salesforce cloud in your browser tab. Play with shape, color, and icon — preview here, then apply to your open tabs. Changes are ephemeral; clone a theme in the Builder to save your own.</p>
           </div>
         </div>
         <div class="guide-live-panel guide-favicon-panel">
           <div class="guide-live-editor">
-            <div class="editor-group">
-              <h3 class="editor-group-title">Theme Icons</h3>
-              <div class="guide-favicon-grid" id="guideFaviconGrid">
-                <!-- Populated by JS — one per preset theme -->
-              </div>
-            </div>
             <div class="editor-group">
               <h3 class="editor-group-title">Shape</h3>
               <div class="editor-type-presets" id="guideFaviconShapeBtns" style="grid-template-columns: repeat(4, 1fr);">
@@ -1297,48 +1291,10 @@
                   </svg>
                   <input type="text" class="editor-name-input" id="editorName" value="My Custom Theme" spellcheck="false" maxlength="50" />
                 </div>
-                <div class="editor-live-favicon" id="editorFaviconSlot" style="position:relative;">
-                  <button type="button" class="editor-live-favicon-btn" id="editorFaviconBtn" title="Customize favicon">
-                    <span id="editorFaviconPreview">
-                      <svg width="14" height="14" viewBox="0 0 32 32" fill="none"><circle cx="8" cy="16" r="4" fill="#2D2D2D"/><line x1="12" y1="16" x2="20" y2="16" stroke="#4A6FA5" stroke-width="2" stroke-linecap="round"/><circle cx="24" cy="16" r="4" fill="#4A6FA5"/></svg>
-                    </span>
-                  </button>
-                  <label class="editor-favicon-toggle">
-                    <input type="checkbox" id="editorFaviconToggle" checked />
-                  </label>
-                  <!-- Favicon customizer popout -->
-                  <div class="editor-favicon-popout" id="editorFaviconPopout" hidden>
-                    <div class="editor-favicon-popout-section">
-                      <span class="editor-favicon-popout-label">Shape</span>
-                      <div class="editor-favicon-popout-shapes" id="editorFaviconShapes">
-                        <button type="button" class="editor-favicon-shape-btn is-active" data-shape="circle">
-                          <svg width="14" height="14" viewBox="0 0 20 20"><circle cx="10" cy="10" r="8" fill="currentColor"/></svg>
-                        </button>
-                        <button type="button" class="editor-favicon-shape-btn" data-shape="rounded">
-                          <svg width="14" height="14" viewBox="0 0 20 20"><rect x="2" y="2" width="16" height="16" rx="4" fill="currentColor"/></svg>
-                        </button>
-                        <button type="button" class="editor-favicon-shape-btn" data-shape="square">
-                          <svg width="14" height="14" viewBox="0 0 20 20"><rect x="2" y="2" width="16" height="16" rx="1" fill="currentColor"/></svg>
-                        </button>
-                        <button type="button" class="editor-favicon-shape-btn" data-shape="none">
-                          <svg width="14" height="14" viewBox="0 0 20 20"><circle cx="10" cy="10" r="8" stroke="currentColor" stroke-width="1.5" fill="none" stroke-dasharray="3,2"/></svg>
-                        </button>
-                      </div>
-                    </div>
-                    <div class="editor-favicon-popout-section">
-                      <span class="editor-favicon-popout-label">Color</span>
-                      <input type="color" class="editor-favicon-popout-color" id="editorFaviconColor" value="#4A6FA5" />
-                    </div>
-                    <div class="editor-favicon-popout-section">
-                      <span class="editor-favicon-popout-label">Icon</span>
-                      <div class="editor-favicon-popout-icons" id="editorFaviconIconGrid">
-                        <!-- Populated by JS from FAVICON_ICONS -->
-                      </div>
-                    </div>
-                    <div class="editor-favicon-popout-preview" id="editorFaviconPopoutPreview">
-                      <!-- 48px live preview -->
-                    </div>
-                  </div>
+                <div class="editor-live-favicon is-readonly" id="editorFaviconSlot" title="Edit favicon in the Favicon tab">
+                  <span class="editor-live-favicon-display" id="editorFaviconPreview">
+                    <svg width="14" height="14" viewBox="0 0 32 32" fill="none"><circle cx="8" cy="16" r="4" fill="#2D2D2D"/><line x1="12" y1="16" x2="20" y2="16" stroke="#4A6FA5" stroke-width="2" stroke-linecap="round"/><circle cx="24" cy="16" r="4" fill="#4A6FA5"/></svg>
+                  </span>
                 </div>
                 <span class="theme-category-badge" id="editorCategoryBadge">Light</span>
               </div>
@@ -1385,6 +1341,13 @@
               <path d="M3 3h10M8 3v10M5 13h6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
             </svg>
             <span>Type</span>
+          </button>
+          <button class="editor-subtab" data-editor-subtab="favicon" role="tab" aria-selected="false">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+              <circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.6"/>
+              <circle cx="8" cy="8" r="2" fill="currentColor"/>
+            </svg>
+            <span>Favicon</span>
           </button>
         </nav>
 
@@ -1705,6 +1668,63 @@
               </div>
             </div>
           </div>
+        </div>
+
+        <!-- Favicon panel — shape + color + icon + enable toggle -->
+        <div class="editor-panel editor-favicon-panel" id="editorFaviconPanel" hidden>
+
+          <div class="editor-group">
+            <h3 class="editor-group-title">Favicon</h3>
+            <label class="editor-favicon-enable-row">
+              <input type="checkbox" id="editorFaviconToggle" checked />
+              <span>Replace the Salesforce cloud on my tabs with this theme's favicon</span>
+            </label>
+          </div>
+
+          <div class="editor-group">
+            <h3 class="editor-group-title">Shape</h3>
+            <div class="editor-type-presets" id="editorFaviconShapes" style="grid-template-columns: repeat(4, 1fr);">
+              <button type="button" class="editor-type-preset is-active" data-shape="circle">
+                <svg width="18" height="18" viewBox="0 0 20 20"><circle cx="10" cy="10" r="8" fill="currentColor"/></svg>
+                <span>Circle</span>
+              </button>
+              <button type="button" class="editor-type-preset" data-shape="rounded">
+                <svg width="18" height="18" viewBox="0 0 20 20"><rect x="2" y="2" width="16" height="16" rx="4" fill="currentColor"/></svg>
+                <span>Rounded</span>
+              </button>
+              <button type="button" class="editor-type-preset" data-shape="square">
+                <svg width="18" height="18" viewBox="0 0 20 20"><rect x="2" y="2" width="16" height="16" rx="1" fill="currentColor"/></svg>
+                <span>Square</span>
+              </button>
+              <button type="button" class="editor-type-preset" data-shape="none">
+                <svg width="18" height="18" viewBox="0 0 20 20"><circle cx="10" cy="10" r="8" stroke="currentColor" stroke-width="1.5" fill="none" stroke-dasharray="3,2"/></svg>
+                <span>None</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="editor-group">
+            <h3 class="editor-group-title">Color</h3>
+            <div class="editor-field">
+              <label>Background</label>
+              <input type="color" class="guide-favicon-color-input" id="editorFaviconColor" value="#4A6FA5" />
+            </div>
+          </div>
+
+          <div class="editor-group">
+            <h3 class="editor-group-title">Icon</h3>
+            <div class="guide-favicon-icon-grid" id="editorFaviconIconGrid">
+              <!-- Populated by JS from ConnectryFavicon.ICONS -->
+            </div>
+          </div>
+
+          <div class="editor-group">
+            <h3 class="editor-group-title">Preview</h3>
+            <div class="guide-favicon-hero" id="editorFaviconLivePreview">
+              <!-- Live SVG rendered by JS -->
+            </div>
+          </div>
+
         </div>
 
           </div><!-- /.editor-card-body -->

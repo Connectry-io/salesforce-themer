@@ -618,13 +618,18 @@ function buildAuroraRules(intensityLevel, accentHex, opts) {
           content: "''",
           position: 'fixed',
           inset: '-50%',
+          // pointer-events:none is load-bearing — aurora paints ABOVE SF
+          // content at a max-ish z-index, so without this every click
+          // would be swallowed by the overlay. Blob gradients fade to
+          // transparent at 50% radius, so between blob centers the layer
+          // is fully see-through; only the blob regions tint content.
           'pointer-events': 'none',
-          // z-index: 0 paints aurora above body's own background but below
-          // any positioned content children (cards, nav, etc. all render
-          // at their own stacking levels above). The alternative (z-index:
-          // -1 inside body's stacking context) sinks below body's bg color
-          // and makes aurora invisible on themes that set body bg.
-          'z-index': '0',
+          // High z-index: on real SF, body::before at z-index:0 gets
+          // occluded by the .desktop / .oneContent app shell that paints
+          // a full-viewport opaque background. Moving aurora ABOVE that
+          // shell (with pointer-events disabled) is the only reliable
+          // way to make it visible without per-wrapper hoisting.
+          'z-index': '2147483600',
           opacity: String(auroraOpacity),
           background:
             `radial-gradient(ellipse at 20% 50%, ${a1} 0%, transparent 50%),` +

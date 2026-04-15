@@ -2480,7 +2480,7 @@
 
     // Favicon toggle + popout builder
     _bindFaviconToggle();
-    _bindEditorFaviconPopout();
+    _bindEditorFaviconPanel();
 
     // (Top bar Save is wired in bindEditorEvents via builderTopbarSave)
 
@@ -3460,11 +3460,13 @@
     const colorsPanel = document.querySelector('.editor-colors');
     const effectsPanel = document.getElementById('editorEffectsPanel');
     const typePanel = document.getElementById('editorTypePanel');
+    const faviconPanel = document.getElementById('editorFaviconPanel');
     if (!colorsPanel || !effectsPanel) return;
 
     colorsPanel.hidden = target !== 'colors';
     effectsPanel.hidden = target !== 'effects';
     if (typePanel) typePanel.hidden = target !== 'type';
+    if (faviconPanel) faviconPanel.hidden = target !== 'favicon';
 
     document.querySelectorAll('.editor-subtab[data-editor-subtab]').forEach(b => {
       const active = b.dataset.editorSubtab === target;
@@ -3474,6 +3476,10 @@
 
     if (target === 'effects') {
       renderEditorEffectsGrid();
+    }
+    if (target === 'favicon') {
+      _bindEditorFaviconPanel();
+      _syncEditorFaviconControls();
     }
   }
 
@@ -3545,38 +3551,28 @@
     }
   }
 
-  // ─── Favicon builder popout (in editor mini card) ──────────────────────────
+  // ─── Favicon panel (Builder sub-tab) ───────────────────────────────────────
 
   let _editorFaviconState = { shape: 'circle', color: '#4A6FA5', icon: 'connectry' };
   let _editorFaviconBound = false;
 
-  function _bindEditorFaviconPopout() {
+  function _bindEditorFaviconPanel() {
     if (_editorFaviconBound) return;
     _editorFaviconBound = true;
 
-    const btn = document.getElementById('editorFaviconBtn');
-    const popout = document.getElementById('editorFaviconPopout');
-    if (!btn || !popout) return;
-
-    btn.addEventListener('click', (e) => { e.stopPropagation(); popout.hidden = !popout.hidden; });
-    document.addEventListener('click', (e) => {
-      if (!popout.hidden && !popout.contains(e.target) && !btn.contains(e.target)) popout.hidden = true;
-    });
-    document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !popout.hidden) popout.hidden = true; });
-
-    // Populate icon grid
+    // Populate icon grid (reuses .guide-favicon-icon-btn styling from Guide)
     const iconGrid = document.getElementById('editorFaviconIconGrid');
     if (iconGrid && !iconGrid.children.length) {
       for (const icon of FAVICON_ICONS) {
         const b = document.createElement('button');
         b.type = 'button';
-        b.className = icon.id === 'connectry' ? 'is-active' : '';
+        b.className = `guide-favicon-icon-btn${icon.id === 'connectry' ? ' is-active' : ''}`;
         b.dataset.icon = icon.id;
         b.title = icon.label;
-        b.innerHTML = _renderFaviconSVG('circle', '#4A6FA5', icon.id, 18);
+        b.innerHTML = _renderFaviconSVG('circle', '#4A6FA5', icon.id, 22);
         b.addEventListener('click', () => {
           _editorFaviconState.icon = icon.id;
-          iconGrid.querySelectorAll('button').forEach(x => x.classList.toggle('is-active', x.dataset.icon === icon.id));
+          iconGrid.querySelectorAll('.guide-favicon-icon-btn').forEach(x => x.classList.toggle('is-active', x.dataset.icon === icon.id));
           _updateEditorFaviconPreview();
         });
         iconGrid.appendChild(b);
@@ -3584,10 +3580,10 @@
     }
 
     // Shape buttons
-    document.querySelectorAll('#editorFaviconShapes .editor-favicon-shape-btn').forEach(sb => {
+    document.querySelectorAll('#editorFaviconShapes .editor-type-preset').forEach(sb => {
       sb.addEventListener('click', () => {
         _editorFaviconState.shape = sb.dataset.shape;
-        document.querySelectorAll('#editorFaviconShapes .editor-favicon-shape-btn').forEach(x => x.classList.toggle('is-active', x === sb));
+        document.querySelectorAll('#editorFaviconShapes .editor-type-preset').forEach(x => x.classList.toggle('is-active', x === sb));
         _updateEditorFaviconPreview();
       });
     });
@@ -3604,9 +3600,9 @@
   function _updateEditorFaviconPreview() {
     const { shape, color, icon } = _editorFaviconState;
     const miniIcon = document.getElementById('editorFaviconPreview');
-    if (miniIcon) miniIcon.innerHTML = _renderFaviconSVG(shape, color, icon, 16);
-    const popPreview = document.getElementById('editorFaviconPopoutPreview');
-    if (popPreview) popPreview.innerHTML = _renderFaviconSVG(shape, color, icon, 48);
+    if (miniIcon) miniIcon.innerHTML = _renderFaviconSVG(shape, color, icon, 14);
+    const hero = document.getElementById('editorFaviconLivePreview');
+    if (hero) hero.innerHTML = _renderFaviconSVG(shape, color, icon, 72);
     const tabFav = document.getElementById('previewBrowserTabFav');
     if (tabFav) tabFav.innerHTML = _renderFaviconSVG(shape, color, icon, 10);
   }
@@ -3620,12 +3616,23 @@
       _editorFaviconState = {
         shape: 'circle',
         color: themeObj?.colors?.accent || '#4A6FA5',
-        icon: THEME_FAVICON_MAP[baseId] || 'connectry',
+        icon: 'connectry',
       };
     }
     const colorInput = document.getElementById('editorFaviconColor');
     if (colorInput) colorInput.value = _editorFaviconState.color;
+    _syncEditorFaviconControls();
     _updateEditorFaviconPreview();
+  }
+
+  function _syncEditorFaviconControls() {
+    const { shape, icon } = _editorFaviconState;
+    document.querySelectorAll('#editorFaviconShapes .editor-type-preset').forEach(b =>
+      b.classList.toggle('is-active', b.dataset.shape === shape)
+    );
+    document.querySelectorAll('#editorFaviconIconGrid .guide-favicon-icon-btn').forEach(b =>
+      b.classList.toggle('is-active', b.dataset.icon === icon)
+    );
   }
 
   // ─── Typography controls ───────────────────────────────────────────────────
@@ -5321,16 +5328,6 @@
   // existing call sites don't have to change shape.
   const FAVICON_ICONS = (self.ConnectryFavicon && self.ConnectryFavicon.ICONS) || [];
 
-  // Theme-specific default icons
-  const THEME_FAVICON_MAP = {
-    'connectry': 'connectry', 'connectry-dark': 'connectry',
-    'arctic': 'snowflake', 'midnight': 'moon', 'ember': 'flame',
-    'forest': 'leaf', 'ocean': 'waves', 'sunset': 'star',
-    'lavender': 'diamond', 'rose': 'heart', 'slate': 'shield',
-    'tron': 'bolt', 'terminal': 'bolt', 'solarized': 'circle',
-    'nord': 'snowflake',
-  };
-
   let _guideFaviconState = { shape: 'circle', color: '#4A6FA5', icon: 'connectry' };
   let _guideFaviconBound = false;
 
@@ -5355,35 +5352,6 @@
   function _bindGuideFaviconDemo() {
     if (_guideFaviconBound) return;
     _guideFaviconBound = true;
-
-    // Populate the pre-built favicon grid (one per theme)
-    const grid = document.getElementById('guideFaviconGrid');
-    if (grid && !grid.children.length) {
-      for (const theme of THEMES) {
-        const iconId = THEME_FAVICON_MAP[theme.id] || 'connectry';
-        const accentColor = theme.colors.accent || '#4A6FA5';
-        const item = document.createElement('div');
-        item.className = 'guide-favicon-item';
-        item.title = theme.name;
-        const shortName = theme.name.replace(' Light', '').replace(' Dark', '');
-        item.innerHTML = `
-          <div class="guide-favicon-item-icon">${_renderFaviconSVG('circle', accentColor, iconId, 28)}</div>
-          <span class="guide-favicon-item-label">${shortName}</span>`;
-        item.addEventListener('click', () => {
-          _guideFaviconState.color = accentColor;
-          _guideFaviconState.icon = iconId;
-          document.getElementById('guideFaviconColor').value = accentColor;
-          // Update active states
-          grid.querySelectorAll('.guide-favicon-item').forEach(i => i.classList.remove('is-active'));
-          item.classList.add('is-active');
-          document.querySelectorAll('#guideFaviconIconGrid .guide-favicon-icon-btn').forEach(b =>
-            b.classList.toggle('is-active', b.dataset.icon === iconId)
-          );
-          _updateGuideFaviconPreview();
-        });
-        grid.appendChild(item);
-      }
-    }
 
     // Populate icon picker
     const iconGrid = document.getElementById('guideFaviconIconGrid');
