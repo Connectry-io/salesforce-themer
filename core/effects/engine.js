@@ -599,19 +599,22 @@ function buildAuroraRules(intensityLevel, accentHex, opts) {
   const isDark = !!(opts && opts.isDark);
 
   // Aurora is fullscreen + blurred, so opacity reads as faint even at full
-  // alpha. Old 0.06 base was basically imperceptible on real SF (it sank
-  // below body's own background layer at z-index:-1 anyway). Tripled to
-  // 0.18 base so medium/strong actually read as ambient light rather than
-  // "did I even turn this on?"
-  const auroraOpacity = (0.18 * mult * s).toFixed(3);
+  // alpha. Iteration history:
+  //   0.06 (original) — imperceptible + sank below body bg at z-index:-1
+  //   0.18 — still barely readable at full SF viewport with 60px blur
+  //   0.35 — current; blobs read as ambient color regions at medium/strong
+  // Blur also scaled up (60 → 120px) because blur is absolute: 60px on a
+  // 400px preview frame dominates; on a 1920px viewport it's a tiny edge
+  // softener. 120px blur lets blob colors diffuse properly at scale.
+  const auroraOpacity = (0.35 * mult * s).toFixed(3);
   const auroraSpeed = Math.round(25000 / mult);
   const [a1, a2, a3] = _deriveAuroraBlobs(accentHex, isDark);
 
   const prelude = `
 @keyframes sf-themer-aurora {
-  0%   { background-position: 0% 50%; filter: blur(60px) hue-rotate(0deg); }
-  50%  { background-position: 100% 50%; filter: blur(60px) hue-rotate(30deg); }
-  100% { background-position: 0% 50%; filter: blur(60px) hue-rotate(0deg); }
+  0%   { background-position: 0% 50%; filter: blur(120px) hue-rotate(0deg); }
+  50%  { background-position: 100% 50%; filter: blur(120px) hue-rotate(30deg); }
+  100% { background-position: 0% 50%; filter: blur(120px) hue-rotate(0deg); }
 }`.trim();
 
   return {
@@ -641,7 +644,7 @@ function buildAuroraRules(intensityLevel, accentHex, opts) {
             `radial-gradient(ellipse at 50% 80%, ${a3} 0%, transparent 50%)`,
           'background-size': '200% 200%',
           animation: `sf-themer-aurora ${auroraSpeed}ms ease-in-out infinite`,
-          filter: 'blur(60px)',
+          filter: 'blur(120px)',
         },
       },
     ],
