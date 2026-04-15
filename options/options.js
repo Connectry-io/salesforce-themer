@@ -353,13 +353,26 @@
       strong: { mult: 1.6, speed: 0.65 },
     };
     const FX_KEYS = ['hoverLift', 'ambientGlow', 'borderShimmer', 'gradientBorders', 'neonFlicker', 'aurora'];
+    // camelCase → kebab-case for CSS var names (hoverLift → hover-lift).
+    const _kebab = (s) => s.replace(/([A-Z])/g, '-$1').toLowerCase();
     for (const key of FX_KEYS) {
       const on = !!effects[key];
       const attr = 'fx' + key.charAt(0).toUpperCase() + key.slice(1);
+      const multVar = `--fx-${_kebab(key)}-mult`;
+      const speedVar = `--fx-${_kebab(key)}-speed`;
       if (on) {
         frame.dataset[attr] = 'on';
+        // Per-effect multiplier — each effect's intensity knob is independent,
+        // so emitting a single --fx-mult masked per-effect differences (the
+        // max of all active effects won; subtle hoverLift alongside strong
+        // shimmer rendered as strong). Scope each knob to its own var.
+        const v = LADDER[effects[key + 'Intensity']] || LADDER.medium;
+        frame.style.setProperty(multVar, String(v.mult));
+        frame.style.setProperty(speedVar, String(v.speed));
       } else {
         delete frame.dataset[attr];
+        frame.style.removeProperty(multVar);
+        frame.style.removeProperty(speedVar);
       }
     }
     // Aurora complementary colors — derive 2 extra hues via HSL rotation

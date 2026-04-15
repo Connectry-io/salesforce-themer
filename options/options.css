@@ -3897,6 +3897,10 @@ body.is-premium .builder-overflow-premium-badge { display: none !important; }
 }
 
 /* ─── Sandboxed effect rendering for the editor preview ──────────────── */
+/* Each effect uses its own per-effect --fx-<key>-mult / --fx-<key>-speed
+   vars set by options.js. Using a single --fx-mult masked per-effect
+   intensity differences (the highest-intensity active effect won).  */
+
 /* Hover lift — only applies to the main card so the layout doesn't bounce */
 .editor-preview-frame[data-fx-hover-lift="on"] .preview-card {
   transition: transform 240ms cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 240ms ease;
@@ -3904,19 +3908,19 @@ body.is-premium .builder-overflow-premium-badge { display: none !important; }
 .editor-preview-frame[data-fx-hover-lift="on"] .preview-card:hover {
   /* Canonical hover-lift values live in core/effects/engine.js
      (buildHoverLiftDeclarations, scale=1.0). Keep these in sync. */
-  transform: translateY(calc(-4px * var(--fx-mult)));
+  transform: translateY(calc(-4px * var(--fx-hover-lift-mult, 1)));
   box-shadow:
-    0 calc(8px * var(--fx-mult)) calc(20px * var(--fx-mult)) rgba(0, 0, 0, calc(0.14 * var(--fx-mult))),
-    0 2px 6px rgba(0, 0, 0, calc(0.05 * var(--fx-mult)));
+    0 calc(8px * var(--fx-hover-lift-mult, 1)) calc(20px * var(--fx-hover-lift-mult, 1)) rgba(0, 0, 0, calc(0.14 * var(--fx-hover-lift-mult, 1))),
+    0 2px 6px rgba(0, 0, 0, calc(0.05 * var(--fx-hover-lift-mult, 1)));
 }
 
 /* Ambient glow on the brand button (closest to engine behaviour) */
 .editor-preview-frame[data-fx-ambient-glow="on"] .preview-btn-brand {
-  animation: editor-fx-glow calc(3s * var(--fx-speed-mult)) ease-in-out infinite;
+  animation: editor-fx-glow calc(3s * var(--fx-ambient-glow-speed, 1)) ease-in-out infinite;
 }
 @keyframes editor-fx-glow {
-  0%, 100% { box-shadow: 0 0 calc(6px * var(--fx-mult)) rgba(var(--fx-accent-rgb), calc(0.18 * var(--fx-mult))); }
-  50%      { box-shadow: 0 0 calc(20px * var(--fx-mult)) rgba(var(--fx-accent-rgb), calc(0.45 * var(--fx-mult))); }
+  0%, 100% { box-shadow: 0 0 calc(6px * var(--fx-ambient-glow-mult, 1)) rgba(var(--fx-accent-rgb), calc(0.18 * var(--fx-ambient-glow-mult, 1))); }
+  50%      { box-shadow: 0 0 calc(20px * var(--fx-ambient-glow-mult, 1)) rgba(var(--fx-accent-rgb), calc(0.45 * var(--fx-ambient-glow-mult, 1))); }
 }
 
 /* Border shimmer — top edge of the main card */
@@ -3930,14 +3934,14 @@ body.is-premium .builder-overflow-premium-badge { display: none !important; }
   top: 0;
   left: -50%;
   width: 50%;
-  height: calc(2px * var(--fx-mult));
+  height: calc(2px * var(--fx-border-shimmer-mult, 1));
   background: linear-gradient(
     90deg,
     transparent 0%,
-    rgba(var(--fx-accent-rgb), calc(0.85 * var(--fx-mult))) 50%,
+    rgba(var(--fx-accent-rgb), calc(0.85 * var(--fx-border-shimmer-mult, 1))) 50%,
     transparent 100%
   );
-  animation: editor-fx-shimmer calc(3.5s * var(--fx-speed-mult)) ease-in-out infinite;
+  animation: editor-fx-shimmer calc(3.5s * var(--fx-border-shimmer-speed, 1)) ease-in-out infinite;
   pointer-events: none;
 }
 @keyframes editor-fx-shimmer {
@@ -3954,9 +3958,9 @@ body.is-premium .builder-overflow-premium-badge { display: none !important; }
 .editor-preview-frame[data-fx-gradient-borders="on"] .preview-card::after {
   content: '';
   position: absolute;
-  inset: calc(-1.5px * var(--fx-mult));
+  inset: calc(-1.5px * var(--fx-gradient-borders-mult, 1));
   border-radius: 9px;
-  padding: calc(2px * var(--fx-mult));
+  padding: calc(2px * var(--fx-gradient-borders-mult, 1));
   background: conic-gradient(
     from var(--editor-fx-border-angle),
     rgba(var(--fx-accent-rgb), 1) 0%,
@@ -3968,7 +3972,7 @@ body.is-premium .builder-overflow-premium-badge { display: none !important; }
   -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
   -webkit-mask-composite: xor;
           mask-composite: exclude;
-  animation: editor-fx-rotate calc(4s * var(--fx-speed-mult)) linear infinite;
+  animation: editor-fx-rotate calc(4s * var(--fx-gradient-borders-speed, 1)) linear infinite;
   pointer-events: none;
   z-index: 1;
 }
@@ -3982,17 +3986,17 @@ body.is-premium .builder-overflow-premium-badge { display: none !important; }
 /* Neon flicker — page title glows */
 .editor-preview-frame[data-fx-neon-flicker="on"] .preview-header-title {
   text-shadow:
-    0 0 calc(4px * var(--fx-mult)) rgba(var(--fx-accent-rgb), calc(0.85 * var(--fx-mult))),
-    0 0 calc(11px * var(--fx-mult)) rgba(var(--fx-accent-rgb), calc(0.55 * var(--fx-mult))),
-    0 0 calc(19px * var(--fx-mult)) rgba(var(--fx-accent-rgb), calc(0.35 * var(--fx-mult)));
-  animation: editor-fx-neon calc(4s * var(--fx-speed-mult)) ease-in-out infinite;
+    0 0 calc(4px * var(--fx-neon-flicker-mult, 1)) rgba(var(--fx-accent-rgb), calc(0.85 * var(--fx-neon-flicker-mult, 1))),
+    0 0 calc(11px * var(--fx-neon-flicker-mult, 1)) rgba(var(--fx-accent-rgb), calc(0.55 * var(--fx-neon-flicker-mult, 1))),
+    0 0 calc(19px * var(--fx-neon-flicker-mult, 1)) rgba(var(--fx-accent-rgb), calc(0.35 * var(--fx-neon-flicker-mult, 1)));
+  animation: editor-fx-neon calc(4s * var(--fx-neon-flicker-speed, 1)) ease-in-out infinite;
 }
 @keyframes editor-fx-neon {
   0%, 19%, 21%, 23%, 25%, 54%, 56%, 100% {
     text-shadow:
-      0 0 calc(4px * var(--fx-mult)) rgba(var(--fx-accent-rgb), 0.85),
-      0 0 calc(11px * var(--fx-mult)) rgba(var(--fx-accent-rgb), 0.55),
-      0 0 calc(19px * var(--fx-mult)) rgba(var(--fx-accent-rgb), 0.35);
+      0 0 calc(4px * var(--fx-neon-flicker-mult, 1)) rgba(var(--fx-accent-rgb), 0.85),
+      0 0 calc(11px * var(--fx-neon-flicker-mult, 1)) rgba(var(--fx-accent-rgb), 0.55),
+      0 0 calc(19px * var(--fx-neon-flicker-mult, 1)) rgba(var(--fx-accent-rgb), 0.35);
     opacity: 1;
   }
   20%, 24%, 55% {
