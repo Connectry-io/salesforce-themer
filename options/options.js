@@ -3514,35 +3514,50 @@
   // ─── Favicon toggle ─────────────────────────────────────────────────────
 
   async function _bindFaviconToggle() {
-    const toggle = document.getElementById('editorFaviconToggle');
+    // New UI: "Use standard Salesforce cloud favicon" (inverted semantics).
+    // Checked = SF default → customization controls greyed out.
+    // Unchecked = custom theme favicon → controls active.
+    const useDefault = document.getElementById('editorFaviconUseDefault');
+    const toggle = document.getElementById('editorFaviconToggle'); // hidden mirror
     const slot = document.getElementById('editorFaviconSlot');
-    if (!toggle || !slot) return;
+    if (!useDefault || !toggle || !slot) return;
 
-    // Load stored state
-    const { faviconEnabled = true } = await chrome.storage.sync.get('faviconEnabled');
-    toggle.checked = faviconEnabled;
-    slot.classList.toggle('is-off', !faviconEnabled);
-
-    // Update preview favicon
-    _updatePreviewFavicon(faviconEnabled);
-
-    toggle.addEventListener('change', async () => {
-      const enabled = toggle.checked;
-      await chrome.storage.sync.set({ faviconEnabled: enabled });
-      slot.classList.toggle('is-off', !enabled);
-      _updatePreviewFavicon(enabled);
-      // Re-render so the fake browser tab flips between the design and SF blue.
+    const applyUiState = (customEnabled) => {
+      useDefault.checked = !customEnabled;
+      toggle.checked = customEnabled;
+      slot.classList.toggle('is-off', !customEnabled);
+      _updatePreviewFavicon(customEnabled);
+      _updateFaviconPanelDisabled(!customEnabled);
       _updateEditorFaviconPreview();
+    };
 
-      // Push to all active SF tabs
+    const { faviconEnabled = true } = await chrome.storage.sync.get('faviconEnabled');
+    applyUiState(faviconEnabled);
+
+    useDefault.addEventListener('change', async () => {
+      const customEnabled = !useDefault.checked;
+      await chrome.storage.sync.set({ faviconEnabled: customEnabled });
+      applyUiState(customEnabled);
       try {
         const tabs = await chrome.tabs.query({
           url: ['https://*.lightning.force.com/*', 'https://*.my.salesforce.com/*', 'https://*.salesforce.com/*'],
         });
         for (const tab of tabs) {
-          if (tab.id) chrome.tabs.sendMessage(tab.id, { action: 'setFavicon', enabled }).catch(() => {});
+          if (tab.id) chrome.tabs.sendMessage(tab.id, { action: 'setFavicon', enabled: customEnabled }).catch(() => {});
         }
       } catch (_) {}
+    });
+  }
+
+  function _updateFaviconPanelDisabled(useDefault) {
+    const panel = document.getElementById('editorFaviconPanel');
+    if (!panel) return;
+    // Grey out every customization group except the toggle row itself.
+    panel.querySelectorAll('.editor-group').forEach((group, i) => {
+      // First group holds the toggle; keep it active.
+      if (i === 0) return;
+      group.classList.toggle('is-disabled', useDefault);
+      group.querySelectorAll('input, button, textarea, select').forEach(el => { el.disabled = useDefault; });
     });
   }
 

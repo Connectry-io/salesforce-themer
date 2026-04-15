@@ -1295,20 +1295,18 @@
             </div>
             <div class="theme-card-body">
               <div class="theme-card-header">
+                <div class="editor-live-favicon is-readonly" id="editorFaviconSlot" title="Edit favicon in the Favicon tab">
+                  <span class="editor-live-favicon-display" id="editorFaviconPreview">
+                    <svg width="22" height="22" viewBox="0 0 32 32" fill="none"><circle cx="8" cy="16" r="4" fill="#2D2D2D"/><line x1="12" y1="16" x2="20" y2="16" stroke="#4A6FA5" stroke-width="2" stroke-linecap="round"/><circle cx="24" cy="16" r="4" fill="#4A6FA5"/></svg>
+                  </span>
+                </div>
                 <div class="editor-live-name-wrap">
                   <svg class="editor-input-icon" width="10" height="10" viewBox="0 0 14 14" fill="none" aria-hidden="true">
                     <path d="M9.5 1.5l3 3-8 8H1.5v-3l8-8z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/>
                   </svg>
                   <input type="text" class="editor-name-input" id="editorName" value="My Custom Theme" spellcheck="false" maxlength="50" />
                 </div>
-                <div class="editor-live-meta">
-                  <span class="theme-category-badge" id="editorCategoryBadge">Light</span>
-                  <div class="editor-live-favicon is-readonly" id="editorFaviconSlot" title="Edit favicon in the Favicon tab">
-                    <span class="editor-live-favicon-display" id="editorFaviconPreview">
-                      <svg width="18" height="18" viewBox="0 0 32 32" fill="none"><circle cx="8" cy="16" r="4" fill="#2D2D2D"/><line x1="12" y1="16" x2="20" y2="16" stroke="#4A6FA5" stroke-width="2" stroke-linecap="round"/><circle cx="24" cy="16" r="4" fill="#4A6FA5"/></svg>
-                    </span>
-                  </div>
-                </div>
+                <span class="theme-category-badge" id="editorCategoryBadge">Light</span>
               </div>
               <div class="editor-live-desc-wrap">
                 <svg class="editor-input-icon" width="9" height="9" viewBox="0 0 14 14" fill="none" aria-hidden="true">
@@ -1688,9 +1686,12 @@
           <div class="editor-group">
             <h3 class="editor-group-title">Favicon</h3>
             <label class="editor-favicon-enable-row">
-              <input type="checkbox" id="editorFaviconToggle" checked />
-              <span>Replace the Salesforce cloud on my tabs with this theme's favicon</span>
+              <input type="checkbox" id="editorFaviconUseDefault" />
+              <span>Use standard Salesforce cloud favicon</span>
             </label>
+            <!-- Hidden mirror input kept for backward compat with existing
+                 wiring that reads `#editorFaviconToggle.checked`. -->
+            <input type="hidden" id="editorFaviconToggle" value="on" />
           </div>
 
           <div class="editor-group">

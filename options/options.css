@@ -2759,16 +2759,18 @@
   color: var(--cx-text-subtle);
   white-space: nowrap;
 }
-/* Read-only favicon display in editor mini card header — no chrome, just
-   the glyph, pinned to the far right so it reads as the tab icon preview. */
+/* Read-only favicon in editor mini card header — sits left of the title
+   as the theme's identity mark (Notion-style page icon). */
 .editor-live-favicon {
   display: inline-flex;
   align-items: center;
-  margin-left: auto;
   flex-shrink: 0;
 }
 .editor-live-favicon-display { display: inline-flex; }
-.editor-live-favicon-display svg { width: 18px; height: 18px; display: block; }
+.editor-live-favicon-display svg { width: 22px; height: 22px; display: block; }
+
+/* Category badge pinned to the right of the header row. */
+.editor-live-card .theme-category-badge { margin-left: auto; flex-shrink: 0; }
 
 /* Favicon panel: center the live preview, keep it modest. Frame only shows
    on transparent shapes — Figma/Photoshop-style: checkerboard appears when
@@ -3822,12 +3824,14 @@ body.is-premium .builder-overflow-premium-badge { display: none !important; }
 .preview-browser-dots span { width: 7px; height: 7px; border-radius: 50%; }
 .preview-browser-tabs { display: flex; gap: 1px; flex: 1; min-width: 0; }
 .preview-browser-tab {
-  display: flex; align-items: center; gap: 4px;
-  padding: 4px 8px; background: #334155; border-radius: 5px 5px 0 0;
+  display: flex; align-items: center; gap: 5px;
+  padding: 5px 9px; background: #334155; border-radius: 5px 5px 0 0;
   font-size: 9px; font-weight: 500; color: #e2e8f0;
   max-width: 200px; min-width: 0;
 }
-.preview-browser-tab.is-active { background: #475569; }
+/* Active tab uses a near-white background — matches real Chrome in light
+   mode and lets the favicon (SF blue cloud especially) read at 14px. */
+.preview-browser-tab.is-active { background: #f8fafc; color: #1e293b; }
 .preview-browser-tab-fav { display: inline-flex; flex-shrink: 0; position: relative; z-index: 1; }
 .preview-browser-tab-fav svg { width: 14px; height: 14px; display: block; }
 .preview-browser-tab-text {
@@ -6247,6 +6251,10 @@ td.upgrade-compare-col-premium,
 
 /* Disabled field (e.g., Background color when shape=none) */
 .editor-field.is-disabled { opacity: 0.45; pointer-events: none; }
+
+/* Disabled editor-group — whole block greys out (e.g., favicon customization
+   when the "Use standard Salesforce cloud" checkbox is ticked). */
+.editor-group.is-disabled { opacity: 0.4; pointer-events: none; }
 
 .guide-placeholder-card {
   background: var(--cx-surface-alt);
