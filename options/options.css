@@ -2833,8 +2833,12 @@
 
 .editor-subtab svg {
   opacity: 0.7;
-  transition: opacity var(--cx-transition);
+  transition: opacity var(--cx-transition), transform var(--cx-transition);
 }
+/* Colorful multi-fill icons stay fully saturated on active + hover. */
+.editor-subtab.is-active .editor-subtab-icon,
+.editor-subtab:hover:not(.is-disabled) .editor-subtab-icon { opacity: 1; }
+.editor-subtab.is-active .editor-subtab-icon { transform: scale(1.08); }
 
 .editor-subtab:hover:not(.is-disabled) {
   background: var(--cx-surface-alt);
