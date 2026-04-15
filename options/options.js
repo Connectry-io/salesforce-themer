@@ -3588,9 +3588,19 @@
       });
     });
 
-    // Color picker
-    document.getElementById('editorFaviconColor')?.addEventListener('input', (e) => {
+    // Color picker (swatch + hex, mirrored)
+    const colorSwatch = document.getElementById('editorFaviconColor');
+    const colorHex = document.getElementById('editorFaviconColorHex');
+    colorSwatch?.addEventListener('input', (e) => {
       _editorFaviconState.color = e.target.value;
+      if (colorHex) colorHex.value = e.target.value;
+      _updateEditorFaviconPreview();
+    });
+    colorHex?.addEventListener('input', (e) => {
+      const v = (e.target.value || '').trim();
+      if (!/^#[0-9a-fA-F]{6}$/.test(v)) return;
+      _editorFaviconState.color = v;
+      if (colorSwatch) colorSwatch.value = v;
       _updateEditorFaviconPreview();
     });
 
@@ -3621,6 +3631,8 @@
     }
     const colorInput = document.getElementById('editorFaviconColor');
     if (colorInput) colorInput.value = _editorFaviconState.color;
+    const colorHex = document.getElementById('editorFaviconColorHex');
+    if (colorHex) colorHex.value = _editorFaviconState.color;
     _syncEditorFaviconControls();
     _updateEditorFaviconPreview();
   }
@@ -5383,9 +5395,19 @@
       });
     });
 
-    // Color picker
-    document.getElementById('guideFaviconColor')?.addEventListener('input', (e) => {
+    // Color picker (swatch + hex, mirrored)
+    const gSwatch = document.getElementById('guideFaviconColor');
+    const gHex = document.getElementById('guideFaviconColorHex');
+    gSwatch?.addEventListener('input', (e) => {
       _guideFaviconState.color = e.target.value;
+      if (gHex) gHex.value = e.target.value;
+      _updateGuideFaviconPreview();
+    });
+    gHex?.addEventListener('input', (e) => {
+      const v = (e.target.value || '').trim();
+      if (!/^#[0-9a-fA-F]{6}$/.test(v)) return;
+      _guideFaviconState.color = v;
+      if (gSwatch) gSwatch.value = v;
       _updateGuideFaviconPreview();
     });
 

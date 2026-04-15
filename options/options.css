@@ -6097,17 +6097,6 @@ td.upgrade-compare-col-premium,
   border-color: var(--cx-accent); box-shadow: 0 0 0 2px rgba(74,111,165,0.2);
 }
 
-/* Shape + Color row — shape buttons stretch, color swatch sits at the end */
-.guide-favicon-shape-row {
-  display: flex; align-items: stretch; gap: 6px;
-}
-.guide-favicon-shape-row .editor-type-preset {
-  min-height: 36px; padding: 6px 2px;
-}
-.guide-favicon-shape-row .editor-type-preset span { display: none; }
-.guide-favicon-shape-row .guide-favicon-color-input {
-  width: 36px; height: auto; align-self: stretch;
-}
 
 /* Favicon preview area — center everything in the remaining pane */
 .guide-favicon-preview-area {

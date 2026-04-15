@@ -315,30 +315,22 @@
       return;
     }
     _saveOriginalFavicons();
-    // Remove all existing favicons so ours takes priority
-    document.querySelectorAll('link[rel*="icon"]').forEach(link => {
-      if (link.id !== FAVICON_LINK_ID) link.remove();
-    });
-    let link = document.getElementById(FAVICON_LINK_ID);
-    if (!link) {
-      link = document.createElement('link');
-      link.id = FAVICON_LINK_ID;
-      link.rel = 'icon';
-      link.type = 'image/svg+xml';
-      (document.head || document.documentElement).appendChild(link);
-    }
-    // Use custom config if provided, otherwise static Connectry SVG
+    // Nuke all existing favicons — ours AND SF's — so the browser is forced
+    // to re-evaluate. Chrome is sticky about favicons when only the href
+    // changes on the same <link> node; remove+re-add is the reliable path.
+    document.querySelectorAll('link[rel*="icon"]').forEach(link => link.remove());
+    const link = document.createElement('link');
+    link.id = FAVICON_LINK_ID;
+    link.rel = 'icon';
+    link.type = 'image/svg+xml';
+    link.setAttribute('sizes', 'any');
     if (config && config.icon) {
       const svg = self.ConnectryFavicon.buildSVG(config, 32);
-      // Use base64 encoding for reliable cross-browser favicon rendering
       link.href = 'data:image/svg+xml;base64,' + btoa(svg);
     } else {
       link.href = chrome.runtime.getURL('favicons/connectry.svg');
     }
-    // Force Chrome to re-evaluate the favicon by toggling sizes
-    link.setAttribute('sizes', 'any');
-    // Also set as shortcut icon for older browser compat
-    link.rel = 'icon';
+    (document.head || document.documentElement).appendChild(link);
   }
 
   function removeFavicon() {
