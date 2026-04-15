@@ -5824,9 +5824,9 @@ td.upgrade-compare-col-premium,
   border-radius: var(--cx-radius-lg);
   overflow: hidden;
 }
-/* Favicon section needs more room on the left for the icon grid */
+/* Favicon section: tighter editor column, preview takes the rest */
 .guide-live-panel.guide-favicon-panel {
-  grid-template-columns: 1fr minmax(240px, 320px);
+  grid-template-columns: minmax(320px, 360px) 1fr;
 }
 @media (max-width: 750px) {
   .guide-live-panel,
@@ -6078,26 +6078,41 @@ td.upgrade-compare-col-premium,
 /* ─── Guide & Builder: Favicon demo ─────────────────────────────────── */
 
 .guide-favicon-color-input {
-  width: 100%; height: 32px; border: 1px solid var(--cx-border); border-radius: var(--cx-radius-sm);
-  cursor: pointer; padding: 2px;
+  width: 36px; height: 28px; border: 1px solid var(--cx-border); border-radius: var(--cx-radius-sm);
+  cursor: pointer; padding: 2px; flex: 0 0 auto;
 }
 .guide-favicon-icon-grid {
   display: grid; grid-template-columns: repeat(6, 1fr); gap: 4px;
 }
 .guide-favicon-icon-btn {
   display: flex; align-items: center; justify-content: center;
-  aspect-ratio: 1; border: 1.5px solid var(--cx-border); border-radius: var(--cx-radius-sm);
+  width: 100%; height: 34px; border: 1.5px solid var(--cx-border); border-radius: var(--cx-radius-sm);
   background: var(--cx-surface); cursor: pointer;
-  transition: all var(--cx-transition);
+  transition: border-color var(--cx-transition), box-shadow var(--cx-transition);
+  padding: 0;
 }
-.guide-favicon-icon-btn:hover { border-color: var(--cx-accent); transform: scale(1.1); }
+.guide-favicon-icon-btn svg { width: 22px; height: 22px; display: block; }
+.guide-favicon-icon-btn:hover { border-color: var(--cx-accent); }
 .guide-favicon-icon-btn.is-active {
   border-color: var(--cx-accent); box-shadow: 0 0 0 2px rgba(74,111,165,0.2);
 }
 
-/* Favicon preview area */
+/* Shape + Color row — shape buttons stretch, color swatch sits at the end */
+.guide-favicon-shape-row {
+  display: flex; align-items: stretch; gap: 6px;
+}
+.guide-favicon-shape-row .editor-type-preset {
+  min-height: 36px; padding: 6px 2px;
+}
+.guide-favicon-shape-row .editor-type-preset span { display: none; }
+.guide-favicon-shape-row .guide-favicon-color-input {
+  width: 36px; height: auto; align-self: stretch;
+}
+
+/* Favicon preview area — center everything in the remaining pane */
 .guide-favicon-preview-area {
   align-items: center;
+  justify-content: center;
 }
 
 /* Fake browser window mockup */
@@ -6166,13 +6181,15 @@ td.upgrade-compare-col-premium,
 
 /* Large favicon hero below the browser */
 .guide-favicon-hero {
-  width: 72px; height: 72px;
+  width: 128px; height: 128px;
   display: flex; align-items: center; justify-content: center;
-  margin-top: var(--cx-space-3);
+  margin-top: var(--cx-space-4);
 }
-.guide-favicon-hero svg { width: 72px; height: 72px; }
+.guide-favicon-hero svg { width: 128px; height: 128px; }
 
-.guide-favicon-apply-btn { margin-top: var(--cx-space-3); width: 100%; }
+.guide-favicon-apply-btn { margin-top: var(--cx-space-3); width: auto; min-width: 240px; }
+.guide-favicon-apply-btn.is-success { background: #10b981; border-color: #10b981; color: #fff; }
+.guide-favicon-apply-btn.is-error { background: #ef4444; border-color: #ef4444; color: #fff; }
 
 .guide-placeholder-card {
   background: var(--cx-surface-alt);

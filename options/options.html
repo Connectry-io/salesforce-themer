@@ -817,31 +817,23 @@
         <div class="guide-live-panel guide-favicon-panel">
           <div class="guide-live-editor">
             <div class="editor-group">
-              <h3 class="editor-group-title">Shape</h3>
-              <div class="editor-type-presets" id="guideFaviconShapeBtns" style="grid-template-columns: repeat(4, 1fr);">
-                <button type="button" class="editor-type-preset is-active" data-shape="circle">
-                  <svg width="18" height="18" viewBox="0 0 20 20"><circle cx="10" cy="10" r="8" fill="currentColor"/></svg>
-                  <span>Circle</span>
-                </button>
-                <button type="button" class="editor-type-preset" data-shape="rounded">
-                  <svg width="18" height="18" viewBox="0 0 20 20"><rect x="2" y="2" width="16" height="16" rx="4" fill="currentColor"/></svg>
-                  <span>Rounded</span>
-                </button>
-                <button type="button" class="editor-type-preset" data-shape="square">
-                  <svg width="18" height="18" viewBox="0 0 20 20"><rect x="2" y="2" width="16" height="16" rx="1" fill="currentColor"/></svg>
-                  <span>Square</span>
-                </button>
-                <button type="button" class="editor-type-preset" data-shape="none">
-                  <svg width="18" height="18" viewBox="0 0 20 20"><circle cx="10" cy="10" r="8" stroke="currentColor" stroke-width="1.5" fill="none" stroke-dasharray="3,2"/></svg>
-                  <span>None</span>
-                </button>
-              </div>
-            </div>
-            <div class="editor-group">
-              <h3 class="editor-group-title">Color</h3>
-              <div class="editor-field">
-                <label>Background</label>
-                <input type="color" class="guide-favicon-color-input" id="guideFaviconColor" value="#4A6FA5" />
+              <h3 class="editor-group-title">Shape &amp; Color</h3>
+              <div class="guide-favicon-shape-row">
+                <div class="editor-type-presets" id="guideFaviconShapeBtns" style="grid-template-columns: repeat(4, 1fr); flex:1;">
+                  <button type="button" class="editor-type-preset is-active" data-shape="circle" title="Circle">
+                    <svg width="18" height="18" viewBox="0 0 20 20"><circle cx="10" cy="10" r="8" fill="currentColor"/></svg>
+                  </button>
+                  <button type="button" class="editor-type-preset" data-shape="rounded" title="Rounded">
+                    <svg width="18" height="18" viewBox="0 0 20 20"><rect x="2" y="2" width="16" height="16" rx="4" fill="currentColor"/></svg>
+                  </button>
+                  <button type="button" class="editor-type-preset" data-shape="square" title="Square">
+                    <svg width="18" height="18" viewBox="0 0 20 20"><rect x="2" y="2" width="16" height="16" rx="1" fill="currentColor"/></svg>
+                  </button>
+                  <button type="button" class="editor-type-preset" data-shape="none" title="None (transparent)">
+                    <svg width="18" height="18" viewBox="0 0 20 20"><circle cx="10" cy="10" r="8" stroke="currentColor" stroke-width="1.5" fill="none" stroke-dasharray="3,2"/></svg>
+                  </button>
+                </div>
+                <input type="color" class="guide-favicon-color-input" id="guideFaviconColor" value="#4A6FA5" title="Background color" />
               </div>
             </div>
             <div class="editor-group">

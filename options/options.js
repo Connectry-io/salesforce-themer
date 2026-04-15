@@ -5395,20 +5395,47 @@
     document.getElementById('guideFaviconApplyBtn')?.addEventListener('click', async () => {
       const btn = document.getElementById('guideFaviconApplyBtn');
       const config = { ..._guideFaviconState };
+      const restore = (text, cls) => {
+        if (!btn) return;
+        btn.textContent = text;
+        btn.classList.add(cls);
+        setTimeout(() => { btn.textContent = 'Apply to my Salesforce tabs'; btn.classList.remove(cls); }, 2200);
+      };
 
+      let tabs = [];
       try {
-        const tabs = await chrome.tabs.query({
+        tabs = await chrome.tabs.query({
           url: ['https://*.lightning.force.com/*', 'https://*.my.salesforce.com/*', 'https://*.salesforce.com/*'],
         });
-        for (const tab of tabs) {
-          if (tab.id) chrome.tabs.sendMessage(tab.id, { action: 'setFavicon', enabled: true, config }).catch(() => {});
-        }
-      } catch (_) {}
+      } catch (err) {
+        console.error('[themer] favicon apply: tabs.query failed', err);
+        restore('Error — see console', 'is-error');
+        return;
+      }
 
-      if (btn) {
-        btn.textContent = 'Applied (until reload)';
-        btn.classList.add('is-success');
-        setTimeout(() => { btn.textContent = 'Apply to my Salesforce tabs'; btn.classList.remove('is-success'); }, 2000);
+      if (!tabs.length) {
+        restore('No Salesforce tabs open', 'is-error');
+        return;
+      }
+
+      let ok = 0;
+      const errors = [];
+      await Promise.all(tabs.map(async (tab) => {
+        if (!tab.id) return;
+        try {
+          await chrome.tabs.sendMessage(tab.id, { action: 'setFavicon', enabled: true, config });
+          ok++;
+        } catch (err) {
+          errors.push({ tabId: tab.id, url: tab.url, msg: err?.message || String(err) });
+        }
+      }));
+
+      if (ok > 0) {
+        restore(`Applied to ${ok} tab${ok === 1 ? '' : 's'} (until reload)`, 'is-success');
+        if (errors.length) console.warn('[themer] favicon apply: partial failures', errors);
+      } else {
+        console.error('[themer] favicon apply: all tabs failed', errors);
+        restore('No active Themer on SF tabs — reload them', 'is-error');
       }
     });
 
