@@ -2640,7 +2640,7 @@
    grid, so the layout stays stable whether the drawer is open or not. */
 .editor-layout {
   display: grid;
-  grid-template-columns: minmax(290px, 320px) 1fr;
+  grid-template-columns: minmax(320px, 360px) 1fr;
   gap: var(--cx-space-4);
   align-items: start;
   position: relative; /* anchor for the chat drawer */
@@ -2802,10 +2802,10 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 2px;
+  gap: 4px;
   background: var(--cx-surface);
   border-bottom: 1px solid var(--cx-border);
-  padding: 6px var(--cx-space-3);
+  padding: 8px var(--cx-space-4);
   overflow-x: auto;
   scrollbar-width: none;
 }
@@ -2834,14 +2834,12 @@
 
 .editor-subtab svg {
   opacity: 0.7;
-  transition: opacity var(--cx-transition), transform var(--cx-transition);
+  transition: opacity var(--cx-transition);
 }
-/* Colorful multi-fill icons stay fully saturated on active + hover. */
-.editor-subtab.is-active .editor-subtab-icon,
-.editor-subtab:hover:not(.is-disabled) .editor-subtab-icon { opacity: 1; }
-.editor-subtab.is-active .editor-subtab-icon { transform: scale(1.08); }
 
-.editor-subtab:hover:not(.is-disabled) {
+/* Hover only applies to non-active tabs — the active tab keeps its
+   accent fill instead of flashing back to surface-alt on hover. */
+.editor-subtab:not(.is-active):hover:not(.is-disabled) {
   background: var(--cx-surface-alt);
   color: var(--cx-text);
 }
