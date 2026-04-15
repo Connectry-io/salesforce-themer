@@ -706,11 +706,22 @@
 
   async function selectTheme(theme) {
     const allIds = getAllThemeIds();
-    if (theme !== 'none' && !allIds.includes(theme)) return;
+    const customThemes = syncState.customThemes || [];
+    const customIds = new Set(customThemes.map(t => t.id));
+    if (theme !== 'none' && !allIds.includes(theme) && !customIds.has(theme)) return;
 
     const updates = { theme };
-    if (LIGHT_THEME_IDS.has(theme)) updates.lastLightTheme = theme;
-    if (DARK_THEME_IDS.has(theme)) updates.lastDarkTheme = theme;
+    // Update lastLightTheme / lastDarkTheme for presets AND customs so
+    // autoMode doesn't snap back to an old theme on refresh. The preset
+    // category sets cover built-ins; customThemes carry their own category
+    // field (defaults to light when luminance detection is inconclusive).
+    const customMatch = customThemes.find(t => t.id === theme);
+    if (LIGHT_THEME_IDS.has(theme) || customMatch?.category === 'light') {
+      updates.lastLightTheme = theme;
+    }
+    if (DARK_THEME_IDS.has(theme) || customMatch?.category === 'dark') {
+      updates.lastDarkTheme = theme;
+    }
 
     const orgThemes = syncState.orgThemes || {};
     if (currentOrgHostname && orgThemes[currentOrgHostname]) {
