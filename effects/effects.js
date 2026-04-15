@@ -325,46 +325,32 @@ body.sf-themer-fx-hover .slds-popover {
     }
   }
 
-  // ─── Aurora Background (theme-accent-derived colors) ──────────────────────
+  // ─── Aurora Background (via core engine) ──────────────────────────────────
+  // Same z-index fix pattern as backgroundPattern: body::before goes to
+  // z-index: -1 inside body's own stacking context (set below). Drops the
+  // old fragile wrapper-hoisting list; SF has too many wrapper layers to
+  // enumerate reliably.
   if (config.aurora) {
-    const m = _intensityMult(config, 'aurora');
-    const auroraOpacity = (0.06 * m).toFixed(3);
-    const auroraSpeed = Math.round(25000 / m);
-    const [aurora1, aurora2, aurora3] = _deriveAuroraColors(accent, isDark);
+    const ir = engine && engine.renderRules('aurora', config, accent, { scale: 1.0, isDark });
+    if (ir && ir.cssRules) {
+      const imp = { important: true };
+      if (ir.cssPrelude) css += `\n/* ─── aurora prelude (engine) ─── */\n${ir.cssPrelude}\n`;
+      const rule = ir.cssRules.find(r => r.selectorRole === 'bodyWrapper');
+      if (rule) {
+        css += `
+/* ─── Aurora Background (intensity ${(config.auroraIntensity || 'medium')}, via core engine) ─── */
 
-    css += `
-/* ─── Aurora Background (intensity ${(config.auroraIntensity || 'medium')}) ─── */
-
-@keyframes sf-themer-aurora {
-  0%   { background-position: 0% 50%; filter: hue-rotate(0deg); }
-  50%  { background-position: 100% 50%; filter: hue-rotate(30deg); }
-  100% { background-position: 0% 50%; filter: hue-rotate(0deg); }
+body.sf-themer-fx-aurora {
+  position: relative !important;
+  z-index: 0 !important;
 }
 
 body.sf-themer-fx-aurora::before {
-  content: '' !important;
-  position: fixed !important;
-  inset: -50% !important;
-  pointer-events: none !important;
-  z-index: 0 !important;
-  opacity: ${auroraOpacity} !important;
-  background:
-    radial-gradient(ellipse at 20% 50%, ${aurora1} 0%, transparent 50%),
-    radial-gradient(ellipse at 80% 20%, ${aurora2} 0%, transparent 50%),
-    radial-gradient(ellipse at 50% 80%, ${aurora3} 0%, transparent 50%) !important;
-  background-size: 200% 200% !important;
-  animation: sf-themer-aurora ${auroraSpeed}ms ease-in-out infinite !important;
-  filter: blur(60px) !important;
-}
-
-body.sf-themer-fx-aurora .oneContent,
-body.sf-themer-fx-aurora .slds-card,
-body.sf-themer-fx-aurora .slds-page-header,
-body.sf-themer-fx-aurora .slds-modal__container {
-  position: relative !important;
-  z-index: 1 !important;
+${engine.cssFromDeclarations(rule.declarations, imp)}
 }
 `;
+      }
+    }
   }
 
   // ─── Neon Flicker (via core engine) ───────────────────────────────────────

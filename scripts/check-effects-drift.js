@@ -30,6 +30,7 @@ const MIGRATED_EFFECTS = [
   'ambientGlow',
   'borderEffect',
   'neonFlicker',
+  'aurora',
 ];
 
 // Forbidden patterns per migrated effect. Each entry describes where
@@ -82,6 +83,13 @@ const RULES = {
       file: 'effects/effects.js',
       forbid: /@keyframes\s+sf-themer-neon-(flicker|breathe)\b/,
       reason: 'neonFlicker keyframes must come from engine.renderRules cssPrelude',
+    },
+  ],
+  aurora: [
+    {
+      file: 'effects/effects.js',
+      forbid: /@keyframes\s+sf-themer-aurora\b/,
+      reason: 'aurora keyframes must come from engine.renderRules cssPrelude',
     },
   ],
 };

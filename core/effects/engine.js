@@ -543,6 +543,94 @@ function buildNeonFlickerRules(intensityLevel, accentHex, scale) {
 }
 
 // ────────────────────────────────────────────────────────────────────────────
+// Aurora — slow-moving ambient gradient behind content. Three accent-derived
+// blobs, hue-rotated by the keyframe. isDark toggles between a dark-blob /
+// dark-bg palette and a light-blob / light-bg palette.
+// ────────────────────────────────────────────────────────────────────────────
+
+function _hexToHsl(hex) {
+  const clean = (hex || '#4a6fa5').replace('#', '');
+  const r = parseInt(clean.substring(0, 2), 16) / 255;
+  const g = parseInt(clean.substring(2, 4), 16) / 255;
+  const b = parseInt(clean.substring(4, 6), 16) / 255;
+  const max = Math.max(r, g, b), min = Math.min(r, g, b);
+  let h = 0, s = 0; const l = (max + min) / 2;
+  if (max !== min) {
+    const d = max - min;
+    s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+    switch (max) {
+      case r: h = (g - b) / d + (g < b ? 6 : 0); break;
+      case g: h = (b - r) / d + 2; break;
+      case b: h = (r - g) / d + 4; break;
+    }
+    h /= 6;
+  }
+  return { h: h * 360, s: s * 100, l: l * 100 };
+}
+function _hslToHex(h, s, l) {
+  s /= 100; l /= 100;
+  const a = s * Math.min(l, 1 - l);
+  const f = (n) => {
+    const k = (n + h / 30) % 12;
+    const c = l - a * Math.max(-1, Math.min(k - 3, 9 - k, 1));
+    return Math.round(255 * c).toString(16).padStart(2, '0');
+  };
+  return `#${f(0)}${f(8)}${f(4)}`;
+}
+
+function _deriveAuroraBlobs(accent, isDark) {
+  const hsl = _hexToHsl(accent);
+  const s = isDark ? Math.max(40, hsl.s) : Math.max(25, Math.min(50, hsl.s));
+  const baseL = isDark ? 18 : 88;
+  return [
+    _hslToHex(hsl.h, s, baseL),
+    _hslToHex((hsl.h + 60) % 360, s, baseL + (isDark ? 4 : -2)),
+    _hslToHex((hsl.h + 180) % 360, s, baseL + (isDark ? 2 : -1)),
+  ];
+}
+
+function buildAuroraRules(intensityLevel, accentHex, opts) {
+  const mult = (INTENSITY_LADDER[intensityLevel] || INTENSITY_LADDER.medium).mult;
+  const s = (opts && typeof opts.scale === 'number') ? opts.scale : 1.0;
+  const isDark = !!(opts && opts.isDark);
+
+  const auroraOpacity = (0.06 * mult * s).toFixed(3);
+  const auroraSpeed = Math.round(25000 / mult);
+  const [a1, a2, a3] = _deriveAuroraBlobs(accentHex, isDark);
+
+  const prelude = `
+@keyframes sf-themer-aurora {
+  0%   { background-position: 0% 50%; filter: blur(60px) hue-rotate(0deg); }
+  50%  { background-position: 100% 50%; filter: blur(60px) hue-rotate(30deg); }
+  100% { background-position: 0% 50%; filter: blur(60px) hue-rotate(0deg); }
+}`.trim();
+
+  return {
+    cssPrelude: prelude,
+    cssRules: [
+      { selectorRole: 'bodyWrapper',
+        declarations: {
+          content: "''",
+          position: 'fixed',
+          inset: '-50%',
+          'pointer-events': 'none',
+          'z-index': '-1',
+          opacity: String(auroraOpacity),
+          background:
+            `radial-gradient(ellipse at 20% 50%, ${a1} 0%, transparent 50%),` +
+            `radial-gradient(ellipse at 80% 20%, ${a2} 0%, transparent 50%),` +
+            `radial-gradient(ellipse at 50% 80%, ${a3} 0%, transparent 50%)`,
+          'background-size': '200% 200%',
+          animation: `sf-themer-aurora ${auroraSpeed}ms ease-in-out infinite`,
+          filter: 'blur(60px)',
+        },
+      },
+    ],
+    runtimeConfig: null,
+  };
+}
+
+// ────────────────────────────────────────────────────────────────────────────
 // renderRules — The primary adapter-facing API. Given an effect id + config,
 // returns a structured IR the adapter walks and binds to its selectors.
 //
@@ -639,6 +727,10 @@ function renderRules(effectId, config, accentHex, opts) {
       if (!config.neonFlicker) return null;
       return buildNeonFlickerRules(intensity, accentHex, scale);
 
+    case 'aurora':
+      if (!config.aurora) return null;
+      return buildAuroraRules(intensity, accentHex, { scale, isDark: !!(opts && opts.isDark) });
+
     // Other effects not yet migrated — fall through to legacy in consumers.
     default:
       return null;
@@ -678,6 +770,7 @@ const API = {
   buildBorderShimmerRules,
   buildGradientBordersRules,
   buildNeonFlickerRules,
+  buildAuroraRules,
   // Main adapter API
   renderRules,
   cssFromDeclarations,
