@@ -2010,12 +2010,14 @@
   transition: transform 220ms cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 220ms ease;
 }
 
-/* Hover lift preview — lift distance and shadow scale with intensity */
+/* Hover lift preview — matches core/effects/engine.js buildHoverLiftDeclarations
+   at scale=1.0. Keep the 4px/8/20/0.14/0.05 numbers in lockstep with the
+   engine; drift detector asserts this. */
 .effect-preview[data-effect="hoverLift"]:hover .effect-preview-card {
   transform: translateY(calc(-4px * var(--fx-mult)));
   box-shadow:
-    0 calc(8px * var(--fx-mult)) calc(20px * var(--fx-mult)) rgba(0, 0, 0, calc(0.12 * var(--fx-mult))),
-    0 2px 6px rgba(0, 0, 0, calc(0.06 * var(--fx-mult)));
+    0 calc(8px * var(--fx-mult)) calc(20px * var(--fx-mult)) rgba(0, 0, 0, calc(0.14 * var(--fx-mult))),
+    0 2px 6px rgba(0, 0, 0, calc(0.05 * var(--fx-mult)));
 }
 
 /* Glow preview — pulse intensity, color, and speed all derived */
@@ -3900,6 +3902,8 @@ body.is-premium .builder-overflow-premium-badge { display: none !important; }
   transition: transform 240ms cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 240ms ease;
 }
 .editor-preview-frame[data-fx-hover-lift="on"] .preview-card:hover {
+  /* Canonical hover-lift values live in core/effects/engine.js
+     (buildHoverLiftDeclarations, scale=1.0). Keep these in sync. */
   transform: translateY(calc(-4px * var(--fx-mult)));
   box-shadow:
     0 calc(8px * var(--fx-mult)) calc(20px * var(--fx-mult)) rgba(0, 0, 0, calc(0.14 * var(--fx-mult))),
@@ -6310,12 +6314,13 @@ td.upgrade-compare-col-premium,
   --fx-speed-mult: 1;
 }
 
-/* Hover lift: lifts on hover */
+/* Hover lift: lifts on hover. Canonical values from
+   core/effects/engine.js buildHoverLiftDeclarations (scale=1.0). */
 .guide-effect-card[data-effect="hoverLift"]:hover .guide-effect-preview-card {
-  transform: translateY(calc(-5px * var(--fx-mult)));
+  transform: translateY(calc(-4px * var(--fx-mult)));
   box-shadow:
-    0 calc(10px * var(--fx-mult)) calc(20px * var(--fx-mult)) rgba(0, 0, 0, calc(0.14 * var(--fx-mult))),
-    0 2px 6px rgba(0, 0, 0, calc(0.06 * var(--fx-mult)));
+    0 calc(8px * var(--fx-mult)) calc(20px * var(--fx-mult)) rgba(0, 0, 0, calc(0.14 * var(--fx-mult))),
+    0 2px 6px rgba(0, 0, 0, calc(0.05 * var(--fx-mult)));
 }
 
 /* Glow */

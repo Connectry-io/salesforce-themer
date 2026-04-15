@@ -175,45 +175,45 @@ function generateEffectsCSS(config, themeColors) {
 }
 `;
 
-  // ─── Hover Lift ────────────────────────────────────────────────────────────
+  // ─── Hover Lift (via core engine) ──────────────────────────────────────────
+  // All lift/shadow math lives in core/effects/engine.js — this block just
+  // binds the engine's declarations to the SF DOM selectors. Fullscreen
+  // scale is 1.0 for hoverLift (transforms feel right at the same magnitude
+  // on both small previews and real SF cards; unlike backgroundPattern, the
+  // saturation doesn't scale with area).
   if (config.hoverLift) {
-    const m = _intensityMult(config, 'hoverLift');
-    const liftPx = Math.max(1, Math.round(2 * m));
-    const shadowSpread = Math.round(25 * m);
-    const shadowAlpha = (isDark ? 0.25 : 0.12) * m;
-    const btnLift = Math.max(1, Math.round(1 * m));
-
-    css += `
-/* ─── Hover Lift (intensity ${(config.hoverLiftIntensity || 'medium')}) ─── */
+    const engine = (typeof self !== 'undefined' && self.SFThemerEffectsEngine) ||
+                   (typeof window !== 'undefined' && window.SFThemerEffectsEngine);
+    const ir = engine && engine.renderRules('hoverLift', config, accent);
+    if (ir && ir.cssRules) {
+      const byRole = {};
+      for (const r of ir.cssRules) byRole[r.selectorRole] = r.declarations;
+      const imp = { important: true };
+      css += `
+/* ─── Hover Lift (intensity ${(config.hoverLiftIntensity || 'medium')}, via core engine) ─── */
 
 body.sf-themer-fx-hover .slds-card,
 body.sf-themer-fx-hover .forceRelatedListSingleContainer,
 body.sf-themer-fx-hover .forceRecordCard {
-  transition:
-    transform 220ms cubic-bezier(0.34, 1.56, 0.64, 1),
-    box-shadow 220ms ease !important;
+${engine.cssFromDeclarations(byRole.cardTransition, imp)}
 }
 
 body.sf-themer-fx-hover .slds-card:hover,
 body.sf-themer-fx-hover .forceRelatedListSingleContainer:hover,
 body.sf-themer-fx-hover .forceRecordCard:hover {
-  transform: translateY(-${liftPx}px) !important;
-  box-shadow:
-    0 ${Math.round(8 * m)}px ${shadowSpread}px rgba(0, 0, 0, ${shadowAlpha.toFixed(3)}),
-    0 2px 8px rgba(0, 0, 0, ${(shadowAlpha * 0.6).toFixed(3)}) !important;
+${engine.cssFromDeclarations(byRole.cardHover, imp)}
 }
 
 body.sf-themer-fx-hover .slds-button:not(.slds-button_icon):hover {
-  transform: translateY(-${btnLift}px) !important;
-  transition: transform 150ms ease !important;
+${engine.cssFromDeclarations(byRole.buttonHover, imp)}
 }
 
 body.sf-themer-fx-hover .slds-table tbody tr {
-  transition: transform 150ms ease, background-color 150ms ease !important;
+${engine.cssFromDeclarations(byRole.rowTransition, imp)}
 }
 
 body.sf-themer-fx-hover .slds-table tbody tr:hover {
-  transform: translateX(${Math.max(1, Math.round(2 * m))}px) !important;
+${engine.cssFromDeclarations(byRole.rowHover, imp)}
 }
 
 /* NEVER lift modals, dropdowns, comboboxes, popovers — breaks SF positioning */
@@ -226,6 +226,7 @@ body.sf-themer-fx-hover .slds-popover {
   transform: none !important;
 }
 `;
+    }
   }
 
   // ─── Ambient Glow ──────────────────────────────────────────────────────────

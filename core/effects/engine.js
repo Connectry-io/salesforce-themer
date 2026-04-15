@@ -293,6 +293,49 @@ function buildBackgroundPatternDeclarations(pattern, accentHex, intensityLevel, 
 
 
 // ────────────────────────────────────────────────────────────────────────────
+// Hover Lift — card/button/table-row transform on hover.
+//
+// Canonical values derived from the Builder preview calibration (which Noland
+// tuned to feel right on a card): 4px lift, 8/20/0.14 shadow. Returns
+// declarations for four adapter-bound roles so each surface can pick what it
+// needs (preview surfaces use just card; content script uses all three).
+// ────────────────────────────────────────────────────────────────────────────
+
+function buildHoverLiftDeclarations(intensityLevel, scale) {
+  const mult = (INTENSITY_LADDER[intensityLevel] || INTENSITY_LADDER.medium).mult;
+  const s = typeof scale === 'number' ? scale : 1.0;
+  const k = mult * s;
+
+  const liftPx = (4 * k).toFixed(2);
+  const btnLiftPx = (1.5 * k).toFixed(2);
+  const rowShiftPx = (2 * k).toFixed(2);
+  const shadowY = (8 * k).toFixed(2);
+  const shadowSpread = (20 * k).toFixed(2);
+  const shadowAlpha = (0.14 * k).toFixed(3);
+  const shadowAlphaClose = (0.05 * k).toFixed(3);
+
+  return {
+    cardTransition: {
+      'transition': 'transform 220ms cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 220ms ease',
+    },
+    cardHover: {
+      'transform': `translateY(-${liftPx}px)`,
+      'box-shadow': `0 ${shadowY}px ${shadowSpread}px rgba(0, 0, 0, ${shadowAlpha}), 0 2px 6px rgba(0, 0, 0, ${shadowAlphaClose})`,
+    },
+    buttonHover: {
+      'transform': `translateY(-${btnLiftPx}px)`,
+      'transition': 'transform 150ms ease',
+    },
+    rowTransition: {
+      'transition': 'transform 150ms ease, background-color 150ms ease',
+    },
+    rowHover: {
+      'transform': `translateX(${rowShiftPx}px)`,
+    },
+  };
+}
+
+// ────────────────────────────────────────────────────────────────────────────
 // renderRules — The primary adapter-facing API. Given an effect id + config,
 // returns a structured IR the adapter walks and binds to its selectors.
 //
@@ -342,6 +385,21 @@ function renderRules(effectId, config, accentHex, opts) {
       };
     }
 
+    case 'hoverLift': {
+      if (!config.hoverLift) return null;
+      const d = buildHoverLiftDeclarations(intensity, scale);
+      return {
+        cssRules: [
+          { selectorRole: 'cardTransition', declarations: d.cardTransition },
+          { selectorRole: 'cardHover',      declarations: d.cardHover },
+          { selectorRole: 'buttonHover',    declarations: d.buttonHover },
+          { selectorRole: 'rowTransition',  declarations: d.rowTransition },
+          { selectorRole: 'rowHover',       declarations: d.rowHover },
+        ],
+        runtimeConfig: null,
+      };
+    }
+
     // Other effects not yet migrated — fall through to legacy in consumers.
     default:
       return null;
@@ -376,6 +434,7 @@ const API = {
   deriveColors,
   // Effect-specific
   buildBackgroundPatternDeclarations,
+  buildHoverLiftDeclarations,
   // Main adapter API
   renderRules,
   cssFromDeclarations,
