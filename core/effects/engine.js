@@ -580,12 +580,16 @@ function _hslToHex(h, s, l) {
 
 function _deriveAuroraBlobs(accent, isDark) {
   const hsl = _hexToHsl(accent);
-  const s = isDark ? Math.max(40, hsl.s) : Math.max(25, Math.min(50, hsl.s));
-  const baseL = isDark ? 18 : 88;
+  const s = isDark ? Math.max(50, hsl.s) : Math.max(35, Math.min(60, hsl.s));
+  // Blobs need to CONTRAST with the page bg — not match it. Old logic had
+  // dark blobs on dark themes (baseL 18) / light blobs on light themes
+  // (baseL 88), which was invisible by design. Flip it: light blobs on
+  // dark themes, mid-saturated blobs on light themes.
+  const baseL = isDark ? 68 : 42;
   return [
     _hslToHex(hsl.h, s, baseL),
-    _hslToHex((hsl.h + 60) % 360, s, baseL + (isDark ? 4 : -2)),
-    _hslToHex((hsl.h + 180) % 360, s, baseL + (isDark ? 2 : -1)),
+    _hslToHex((hsl.h + 60) % 360, s, baseL + (isDark ? -6 : 4)),
+    _hslToHex((hsl.h + 180) % 360, s, baseL + (isDark ? -3 : 2)),
   ];
 }
 
