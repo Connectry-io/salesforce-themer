@@ -149,9 +149,11 @@ function generateEffectsCSS(config, themeColors) {
   // Bail only if truly nothing is enabled. Individual toggles can be active
   // even when preset is 'none' or 'custom' — don't gate on preset value alone.
   const hasBackground = config.backgroundPattern && config.backgroundPattern !== 'none';
+  const hasBorder = (config.borderEffect && config.borderEffect !== 'none')
+    || config.borderShimmer || config.gradientBorders;
   const anyOn = !!(
-    config.hoverLift || config.ambientGlow || config.borderShimmer ||
-    config.gradientBorders || config.aurora || config.neonFlicker ||
+    config.hoverLift || config.ambientGlow || hasBorder ||
+    config.aurora || config.neonFlicker ||
     config.particles || config.cursorTrail || hasBackground
   );
   if (!anyOn) return '';
@@ -256,18 +258,49 @@ body.sf-themer-fx-hover .slds-popover {
     });
   }
 
-  if (config.borderShimmer) {
-    _appendEngineEffect('borderShimmer', {
-      cardShimmerContainer: 'body.sf-themer-fx-shimmer .slds-card',
-      cardShimmerEdge:      'body.sf-themer-fx-shimmer .slds-card::before',
-    });
-  }
-
-  if (config.gradientBorders) {
-    _appendEngineEffect('gradientBorders', {
-      cardGradientContainer: 'body.sf-themer-fx-gradient-border .slds-card',
-      cardGradientEdge:      'body.sf-themer-fx-gradient-border .slds-card::after',
-    });
+  // Border Effect — consolidated Shimmer | Gradient (mutually exclusive).
+  // Accepts the new `borderEffect` string config OR falls back to the legacy
+  // booleans (borderShimmer / gradientBorders) so unmigrated saved themes
+  // still render correctly.
+  const _legacyBorder = config.gradientBorders
+    ? 'gradient'
+    : (config.borderShimmer ? 'shimmer' : 'none');
+  const _borderStyle = config.borderEffect || _legacyBorder;
+  if (_borderStyle === 'shimmer') {
+    // Pass the right intensity key through to the engine via a merged config.
+    const mergedConfig = {
+      borderEffect: 'shimmer',
+      borderEffectIntensity: config.borderEffectIntensity || config.borderShimmerIntensity || 'medium',
+    };
+    const ir = engine && engine.renderRules('borderEffect', mergedConfig, accent);
+    if (ir && ir.cssRules) {
+      const imp = { important: true };
+      if (ir.cssPrelude) css += `\n/* ─── borderEffect=shimmer prelude ─── */\n${ir.cssPrelude}\n`;
+      for (const rule of ir.cssRules) {
+        const sel = {
+          cardShimmerContainer: 'body.sf-themer-fx-shimmer .slds-card',
+          cardShimmerEdge:      'body.sf-themer-fx-shimmer .slds-card::before',
+        }[rule.selectorRole];
+        if (sel) css += `\n${sel} {\n${engine.cssFromDeclarations(rule.declarations, imp)}\n}\n`;
+      }
+    }
+  } else if (_borderStyle === 'gradient') {
+    const mergedConfig = {
+      borderEffect: 'gradient',
+      borderEffectIntensity: config.borderEffectIntensity || config.gradientBordersIntensity || 'medium',
+    };
+    const ir = engine && engine.renderRules('borderEffect', mergedConfig, accent);
+    if (ir && ir.cssRules) {
+      const imp = { important: true };
+      if (ir.cssPrelude) css += `\n/* ─── borderEffect=gradient prelude ─── */\n${ir.cssPrelude}\n`;
+      for (const rule of ir.cssRules) {
+        const sel = {
+          cardGradientContainer: 'body.sf-themer-fx-gradient-border .slds-card',
+          cardGradientEdge:      'body.sf-themer-fx-gradient-border .slds-card::after',
+        }[rule.selectorRole];
+        if (sel) css += `\n${sel} {\n${engine.cssFromDeclarations(rule.declarations, imp)}\n}\n`;
+      }
+    }
   }
 
   // ─── Aurora Background (theme-accent-derived colors) ──────────────────────
@@ -847,9 +880,11 @@ function applyEffectsClasses(config) {
 
   // Only bail if ALL effects are actually off — don't gate on preset name
   // because individual effects can be toggled on even with preset 'none'.
+  const hasBorderFx = (config.borderEffect && config.borderEffect !== 'none')
+    || config.borderShimmer || config.gradientBorders;
   const hasAnyEffect = !!(
-    config.hoverLift || config.ambientGlow || config.borderShimmer ||
-    config.gradientBorders || config.aurora || config.neonFlicker ||
+    config.hoverLift || config.ambientGlow || hasBorderFx ||
+    config.aurora || config.neonFlicker ||
     config.particles || config.cursorTrail ||
     (config.backgroundPattern && config.backgroundPattern !== 'none')
   );
@@ -857,8 +892,12 @@ function applyEffectsClasses(config) {
 
   if (config.hoverLift) body.classList.add('sf-themer-fx-hover');
   if (config.ambientGlow) body.classList.add('sf-themer-fx-glow');
-  if (config.borderShimmer) body.classList.add('sf-themer-fx-shimmer');
-  if (config.gradientBorders) body.classList.add('sf-themer-fx-gradient-border');
+  // Border effect — consolidated shimmer|gradient via config.borderEffect
+  // (falls back to the legacy booleans for unmigrated configs).
+  const borderStyle = config.borderEffect
+    || (config.gradientBorders ? 'gradient' : (config.borderShimmer ? 'shimmer' : 'none'));
+  if (borderStyle === 'shimmer') body.classList.add('sf-themer-fx-shimmer');
+  if (borderStyle === 'gradient') body.classList.add('sf-themer-fx-gradient-border');
   if (config.aurora) body.classList.add('sf-themer-fx-aurora');
   if (config.neonFlicker) body.classList.add('sf-themer-fx-neon');
   if (config.particles) body.classList.add('sf-themer-fx-particles');

@@ -605,12 +605,28 @@ function renderRules(effectId, config, accentHex, opts) {
       return buildAmbientGlowRules(intensity, accentHex, scale);
 
     case 'borderShimmer':
+      // DEPRECATED: subsumed by 'borderEffect' with style='shimmer'.
+      // Kept so legacy configs that still set the old boolean work.
       if (!config.borderShimmer) return null;
       return buildBorderShimmerRules(intensity, accentHex, scale);
 
     case 'gradientBorders':
+      // DEPRECATED: subsumed by 'borderEffect' with style='gradient'.
       if (!config.gradientBorders) return null;
       return buildGradientBordersRules(intensity, accentHex, scale);
+
+    case 'borderEffect': {
+      // Consolidated border effect. config.borderEffect is one of
+      // 'none' | 'shimmer' | 'gradient'; config.borderEffectIntensity is the
+      // intensity. Replaces the old mutually-exclusive-anyway pair of
+      // borderShimmer + gradientBorders booleans.
+      const style = config.borderEffect;
+      if (!style || style === 'none') return null;
+      const beIntensity = config.borderEffectIntensity || 'medium';
+      if (style === 'shimmer') return buildBorderShimmerRules(beIntensity, accentHex, scale);
+      if (style === 'gradient') return buildGradientBordersRules(beIntensity, accentHex, scale);
+      return null;
+    }
 
     case 'neonFlicker':
       if (!config.neonFlicker) return null;

@@ -28,8 +28,7 @@ const MIGRATED_EFFECTS = [
   'backgroundPattern',
   'hoverLift',
   'ambientGlow',
-  'borderShimmer',
-  'gradientBorders',
+  'borderEffect',
   'neonFlicker',
 ];
 
@@ -71,18 +70,11 @@ const RULES = {
       reason: 'ambientGlow keyframes must come from engine.renderRules cssPrelude',
     },
   ],
-  borderShimmer: [
+  borderEffect: [
     {
       file: 'effects/effects.js',
-      forbid: /@keyframes\s+sf-themer-shimmer\b/,
-      reason: 'borderShimmer keyframes must come from engine.renderRules cssPrelude',
-    },
-  ],
-  gradientBorders: [
-    {
-      file: 'effects/effects.js',
-      forbid: /@keyframes\s+sf-themer-border-rotate\b/,
-      reason: 'gradientBorders keyframes must come from engine.renderRules cssPrelude',
+      forbid: /@keyframes\s+sf-themer-(shimmer|border-rotate)\b/,
+      reason: 'borderEffect keyframes (shimmer or border-rotate) must come from engine.renderRules cssPrelude',
     },
   ],
   neonFlicker: [

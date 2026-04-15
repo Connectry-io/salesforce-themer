@@ -24,8 +24,7 @@ const EFFECTS_PRESETS = {
     preset: 'none',
     hoverLift: false, hoverLiftIntensity: 'medium',
     ambientGlow: false, ambientGlowIntensity: 'medium',
-    borderShimmer: false, borderShimmerIntensity: 'medium',
-    gradientBorders: false, gradientBordersIntensity: 'medium',
+    borderEffect: 'none', borderEffectIntensity: 'medium',
     aurora: false, auroraIntensity: 'medium',
     neonFlicker: false, neonFlickerIntensity: 'medium',
     particles: false, particlesIntensity: 'medium',
@@ -37,8 +36,7 @@ const EFFECTS_PRESETS = {
     preset: 'subtle',
     hoverLift: true, hoverLiftIntensity: 'subtle',
     ambientGlow: false, ambientGlowIntensity: 'subtle',
-    borderShimmer: false, borderShimmerIntensity: 'subtle',
-    gradientBorders: false, gradientBordersIntensity: 'subtle',
+    borderEffect: 'none', borderEffectIntensity: 'subtle',
     aurora: false, auroraIntensity: 'subtle',
     neonFlicker: false, neonFlickerIntensity: 'subtle',
     particles: false, particlesIntensity: 'subtle',
@@ -50,8 +48,7 @@ const EFFECTS_PRESETS = {
     preset: 'alive',
     hoverLift: true, hoverLiftIntensity: 'medium',
     ambientGlow: true, ambientGlowIntensity: 'medium',
-    borderShimmer: true, borderShimmerIntensity: 'medium',
-    gradientBorders: false, gradientBordersIntensity: 'medium',
+    borderEffect: 'shimmer', borderEffectIntensity: 'medium',
     aurora: false, auroraIntensity: 'medium',
     neonFlicker: false, neonFlickerIntensity: 'medium',
     particles: false, particlesIntensity: 'medium',
@@ -63,8 +60,7 @@ const EFFECTS_PRESETS = {
     preset: 'immersive',
     hoverLift: true, hoverLiftIntensity: 'strong',
     ambientGlow: true, ambientGlowIntensity: 'strong',
-    borderShimmer: true, borderShimmerIntensity: 'medium',
-    gradientBorders: true, gradientBordersIntensity: 'strong',
+    borderEffect: 'gradient', borderEffectIntensity: 'strong',
     aurora: false, auroraIntensity: 'medium',
     neonFlicker: false, neonFlickerIntensity: 'medium',
     particles: false, particlesIntensity: 'medium',
@@ -117,15 +113,10 @@ const EFFECT_DESCRIPTIONS = {
     short: 'Pulsing glow on accent elements',
     long: 'Brand buttons, active nav items, and focused inputs gain a slow pulsing glow in your theme accent color.',
   },
-  borderShimmer: {
-    name: 'Border Shimmer',
-    short: 'Animated light sweep on cards',
-    long: 'A thin line of light sweeps across the top of each card, giving a subtle animated edge.',
-  },
-  gradientBorders: {
-    name: 'Gradient Borders',
-    short: 'Rotating gradient card edges',
-    long: 'Card borders become animated conic gradients that slowly rotate around the edge.',
+  borderEffect: {
+    name: 'Border',
+    short: 'Animated card edges — shimmer or gradient',
+    long: 'Adds motion to card edges. Shimmer sweeps a thin line across the top; Gradient rotates a color ring around the perimeter. Pick one style per theme.',
   },
   aurora: {
     name: 'Aurora Background',
@@ -169,7 +160,7 @@ const THEME_EFFECTS_MAP = {
   },
   'sakura': {
     base: 'subtle',
-    extras: { borderShimmer: true, borderShimmerIntensity: 'subtle' },
+    extras: { borderEffect: 'shimmer', borderEffectIntensity: 'subtle' },
   },
   'high-contrast':   { base: 'none' },
   'solarized-light': { base: 'subtle' },
@@ -205,7 +196,7 @@ const THEME_EFFECTS_MAP = {
   },
   'dracula': {
     base: 'subtle',
-    extras: { ambientGlow: true, ambientGlowIntensity: 'medium', borderShimmer: true, borderShimmerIntensity: 'medium' },
+    extras: { ambientGlow: true, ambientGlowIntensity: 'medium', borderEffect: 'shimmer', borderEffectIntensity: 'medium' },
   },
   'solarized-dark': {
     base: 'subtle',
@@ -255,8 +246,7 @@ function applyVolume(config, volume) {
       ...config,
       hoverLift: false,
       ambientGlow: false,
-      borderShimmer: false,
-      gradientBorders: false,
+      borderEffect: 'none',
       aurora: false,
       neonFlicker: false,
       particles: false,
@@ -270,7 +260,7 @@ function applyVolume(config, volume) {
   // 'subtle' or 'immersive' → clamp every intensity field
   const targetIntensity = volume === 'immersive' ? 'strong' : 'subtle';
   const out = { ...config };
-  const effects = ['hoverLift', 'ambientGlow', 'borderShimmer', 'gradientBorders', 'aurora', 'neonFlicker', 'particles', 'cursorTrail', 'backgroundPattern'];
+  const effects = ['hoverLift', 'ambientGlow', 'borderEffect', 'aurora', 'neonFlicker', 'particles', 'cursorTrail', 'backgroundPattern'];
   for (const eff of effects) {
     out[eff + 'Intensity'] = targetIntensity;
   }

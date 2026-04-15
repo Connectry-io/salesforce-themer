@@ -352,7 +352,7 @@
       medium: { mult: 1.0, speed: 1.0 },
       strong: { mult: 1.6, speed: 0.65 },
     };
-    const FX_KEYS = ['hoverLift', 'ambientGlow', 'borderShimmer', 'gradientBorders', 'neonFlicker', 'aurora'];
+    const FX_KEYS = ['hoverLift', 'ambientGlow', 'neonFlicker', 'aurora'];
     // camelCase → kebab-case for CSS var names (hoverLift → hover-lift).
     const _kebab = (s) => s.replace(/([A-Z])/g, '-$1').toLowerCase();
     for (const key of FX_KEYS) {
@@ -375,6 +375,29 @@
         frame.style.removeProperty(speedVar);
       }
     }
+    // Border effect — shimmer | gradient | none (mutually exclusive).
+    // Sets data-fx-border-effect on the frame for CSS selection and also
+    // emits its own per-effect mult/speed vars so the intensity knob
+    // stays independent like every other effect.
+    const _borderLegacy = effects.gradientBorders
+      ? 'gradient'
+      : (effects.borderShimmer ? 'shimmer' : 'none');
+    const borderStyle = effects.borderEffect || _borderLegacy;
+    if (borderStyle && borderStyle !== 'none') {
+      frame.dataset.fxBorderEffect = borderStyle;
+      const beIntensity = effects.borderEffectIntensity
+        || effects.gradientBordersIntensity
+        || effects.borderShimmerIntensity
+        || 'medium';
+      const v = LADDER[beIntensity] || LADDER.medium;
+      frame.style.setProperty('--fx-border-effect-mult', String(v.mult));
+      frame.style.setProperty('--fx-border-effect-speed', String(v.speed));
+    } else {
+      delete frame.dataset.fxBorderEffect;
+      frame.style.removeProperty('--fx-border-effect-mult');
+      frame.style.removeProperty('--fx-border-effect-speed');
+    }
+
     // Aurora complementary colors — derive 2 extra hues via HSL rotation
     if (effects.aurora) {
       const parsed = _parseHexRgb(accent);
@@ -540,8 +563,7 @@
   const EFFECT_LABELS = {
     hoverLift:       'Hover lift',
     ambientGlow:     'Glow',
-    borderShimmer:   'Shimmer',
-    gradientBorders: 'Gradient',
+    borderEffect:    'Border',
     aurora:          'Aurora',
     neonFlicker:     'Neon',
     particles:       'Particles',
@@ -559,7 +581,16 @@
       ? getSuggestedEffectsFor(themeIdOrConfig)
       : (themeIdOrConfig || {});
     const enabled = [];
-    for (const eff of ['hoverLift', 'ambientGlow', 'borderShimmer', 'gradientBorders', 'aurora', 'neonFlicker', 'particles', 'cursorTrail']) {
+    for (const eff of ['hoverLift', 'ambientGlow', 'borderEffect', 'aurora', 'neonFlicker', 'particles', 'cursorTrail']) {
+      // borderEffect is a string (shimmer|gradient|none), not a boolean.
+      // Treat anything truthy-and-not-'none' as enabled; legacy booleans
+      // (borderShimmer / gradientBorders) also count.
+      if (eff === 'borderEffect') {
+        const v = cfg.borderEffect
+          || (cfg.gradientBorders ? 'gradient' : (cfg.borderShimmer ? 'shimmer' : 'none'));
+        if (v && v !== 'none') enabled.push('borderEffect');
+        continue;
+      }
       if (cfg[eff]) enabled.push(eff);
     }
     if (!enabled.length) {
@@ -1791,8 +1822,7 @@
       preset: 'none',
       hoverLift: false, hoverLiftIntensity: 'medium',
       ambientGlow: false, ambientGlowIntensity: 'medium',
-      borderShimmer: false, borderShimmerIntensity: 'medium',
-      gradientBorders: false, gradientBordersIntensity: 'medium',
+      borderEffect: 'none', borderEffectIntensity: 'medium',
       aurora: false, auroraIntensity: 'medium',
       neonFlicker: false, neonFlickerIntensity: 'medium',
       particles: false, particlesIntensity: 'medium',
@@ -1804,14 +1834,13 @@
       ...NONE, preset: 'alive',
       hoverLift: true, hoverLiftIntensity: 'medium',
       ambientGlow: true, ambientGlowIntensity: 'medium',
-      borderShimmer: true, borderShimmerIntensity: 'medium',
+      borderEffect: 'shimmer', borderEffectIntensity: 'medium',
     };
     const IMMERSIVE = {
       ...NONE, preset: 'immersive',
       hoverLift: true, hoverLiftIntensity: 'strong',
       ambientGlow: true, ambientGlowIntensity: 'strong',
-      borderShimmer: true, borderShimmerIntensity: 'medium',
-      gradientBorders: true, gradientBordersIntensity: 'strong',
+      borderEffect: 'gradient', borderEffectIntensity: 'strong',
       cursorTrail: true, cursorTrailIntensity: 'medium',
     };
     const MAP = {
@@ -1822,12 +1851,12 @@
       'tron': { ...IMMERSIVE, neonFlicker: true, neonFlickerIntensity: 'strong', ambientGlow: true, ambientGlowIntensity: 'strong' },
       'obsidian': { ...SUBTLE, ambientGlow: true, ambientGlowIntensity: 'subtle' },
       'arctic': { ...ALIVE, aurora: true, auroraIntensity: 'medium', particles: 'snow', particlesIntensity: 'medium' },
-      'sakura': { ...SUBTLE, borderShimmer: true, borderShimmerIntensity: 'subtle' },
+      'sakura': { ...SUBTLE, borderEffect: 'shimmer', borderEffectIntensity: 'subtle' },
       'ember': { ...SUBTLE, ambientGlow: true, ambientGlowIntensity: 'medium', particles: 'embers', particlesIntensity: 'subtle' },
       'nord': { ...SUBTLE, aurora: true, auroraIntensity: 'subtle' },
       'terminal': { ...ALIVE, neonFlicker: true, neonFlickerIntensity: 'medium', particles: 'matrix', particlesIntensity: 'medium' },
       'high-contrast': NONE,
-      'dracula': { ...SUBTLE, ambientGlow: true, ambientGlowIntensity: 'medium', borderShimmer: true, borderShimmerIntensity: 'medium' },
+      'dracula': { ...SUBTLE, ambientGlow: true, ambientGlowIntensity: 'medium', borderEffect: 'shimmer', borderEffectIntensity: 'medium' },
       'solarized-light': SUBTLE,
       'solarized-dark': { ...SUBTLE, ambientGlow: true, ambientGlowIntensity: 'subtle' },
     };
@@ -3653,8 +3682,7 @@
   const EFFECT_PREVIEW_HTML = {
     hoverLift:       '<div class="fx-prev-card fx-prev-lift">Aa</div>',
     ambientGlow:     '<div class="fx-prev-card fx-prev-glow">Aa</div>',
-    borderShimmer:   '<div class="fx-prev-card fx-prev-shimmer">Aa</div>',
-    gradientBorders: '<div class="fx-prev-card fx-prev-gradient">Aa</div>',
+    borderEffect:    '<div class="fx-prev-card fx-prev-shimmer">Aa</div>',
     aurora:          '<div class="fx-prev-aurora"></div><div class="fx-prev-card">Aa</div>',
     neonFlicker:     '<div class="fx-prev-neon">NEON</div>',
     particles:       '<div class="fx-prev-dot"></div><div class="fx-prev-dot"></div><div class="fx-prev-dot"></div><div class="fx-prev-card">Aa</div>',
@@ -3669,10 +3697,18 @@
     const config = editorState.effects || { ...NONE_EFFECTS };
 
     for (const effect of EFFECT_CATALOG) {
-      // backgroundPattern is ON when its value is a valid style string (not 'none' or false)
-      const isOn = effect.id === 'backgroundPattern'
-        ? (config[effect.id] && config[effect.id] !== 'none')
-        : !!config[effect.id];
+      // String-valued effects (backgroundPattern, borderEffect) are ON when
+      // their config value is a valid style, not 'none' or falsy.
+      let isOn;
+      if (effect.id === 'backgroundPattern') {
+        isOn = !!(config[effect.id] && config[effect.id] !== 'none');
+      } else if (effect.id === 'borderEffect') {
+        const v = config.borderEffect
+          || (config.gradientBorders ? 'gradient' : (config.borderShimmer ? 'shimmer' : 'none'));
+        isOn = !!(v && v !== 'none');
+      } else {
+        isOn = !!config[effect.id];
+      }
       const intensity = config[effect.id + 'Intensity'] || 'medium';
 
       const card = document.createElement('div');
@@ -3702,6 +3738,24 @@
             <option value="comet"   ${cursorTrailStyle === 'comet'   ? 'selected' : ''}>Comet</option>
             <option value="sparkle" ${cursorTrailStyle === 'sparkle' ? 'selected' : ''}>Sparkle</option>
             <option value="line"    ${cursorTrailStyle === 'line'    ? 'selected' : ''}>Line</option>
+          </select>
+        </div>
+      ` : '';
+
+      // borderEffect style dropdown — Shimmer or Gradient (mutually exclusive).
+      // Legacy booleans (borderShimmer / gradientBorders) are read as a
+      // fallback so unmigrated saved configs still light up correctly.
+      const _legacyBorderVal = config.gradientBorders
+        ? 'gradient'
+        : (config.borderShimmer ? 'shimmer' : 'shimmer');
+      const borderStyle = (typeof config.borderEffect === 'string' && config.borderEffect !== 'none')
+        ? config.borderEffect : _legacyBorderVal;
+      const borderEffectSelectRow = effect.id === 'borderEffect' ? `
+        <div class="effect-slider-row">
+          <span class="effect-select-label">Style</span>
+          <select class="effect-select" data-effect-select="borderEffect">
+            <option value="shimmer"  ${borderStyle === 'shimmer'  ? 'selected' : ''}>Shimmer</option>
+            <option value="gradient" ${borderStyle === 'gradient' ? 'selected' : ''}>Gradient</option>
           </select>
         </div>
       ` : '';
@@ -3757,6 +3811,7 @@
           ${particleSelectRow}
           ${cursorTrailSelectRow}
           ${backgroundPatternSelectRow}
+          ${borderEffectSelectRow}
         </div>` : ''}
       `;
 
@@ -3767,6 +3822,14 @@
           editorState.effects.particles = toggle.checked ? (particleType || 'snow') : false;
         } else if (effect.id === 'backgroundPattern') {
           editorState.effects.backgroundPattern = toggle.checked ? bgPatternStyle : 'none';
+        } else if (effect.id === 'borderEffect') {
+          // Clear the deprecated booleans on first write so we don't carry
+          // them forward into saves.
+          delete editorState.effects.borderShimmer;
+          delete editorState.effects.borderShimmerIntensity;
+          delete editorState.effects.gradientBorders;
+          delete editorState.effects.gradientBordersIntensity;
+          editorState.effects.borderEffect = toggle.checked ? borderStyle : 'none';
         } else {
           editorState.effects[effect.id] = toggle.checked;
         }
@@ -3806,6 +3869,14 @@
       bgSelect?.addEventListener('change', () => {
         editorState.effects.backgroundPattern = bgSelect.value;
         applyEditorPreviewEffects();
+      });
+
+      // Border effect style select (shimmer | gradient)
+      const beSelect = card.querySelector('[data-effect-select="borderEffect"]');
+      beSelect?.addEventListener('change', () => {
+        editorState.effects.borderEffect = beSelect.value;
+        applyEditorPreviewEffects();
+        renderEditorEffectsGrid();
       });
 
       grid.appendChild(card);
@@ -4157,8 +4228,10 @@
   const EFFECT_CATALOG = [
     { id: 'hoverLift',       name: 'Hover Lift',        short: 'Cards lift on hover',             long: 'Cards, buttons, and list items gently float up when you hover. Modals and dropdowns are never affected.' },
     { id: 'ambientGlow',     name: 'Ambient Glow',      short: 'Pulsing glow on accent elements', long: 'Brand buttons, active nav items, and focused inputs gain a slow pulsing glow in your theme accent color.' },
-    { id: 'borderShimmer',   name: 'Border Shimmer',    short: 'Animated light sweep on cards',   long: 'A thin line of light sweeps across the top of each card, giving a subtle animated edge.' },
-    { id: 'gradientBorders', name: 'Gradient Borders',  short: 'Rotating gradient card edges',    long: 'Card borders become animated conic gradients that slowly rotate around the edge.' },
+    { id: 'borderEffect',    name: 'Border',            short: 'Animated card border — Shimmer or Gradient', long: 'Adds motion to card edges. Shimmer is a thin sweep of light along the top; Gradient is a rotating color ring around the perimeter. Pick one style per theme.', styles: [
+      { value: 'shimmer',  label: 'Shimmer' },
+      { value: 'gradient', label: 'Gradient' },
+    ] },
     { id: 'aurora',          name: 'Aurora Background', short: 'Slow-moving ambient background',  long: 'A soft, slow-moving gradient glow sits behind all content. Colors derive from your theme accent.' },
     { id: 'neonFlicker',     name: 'Neon Flicker',      short: 'Glowing text with flicker',       long: 'Page titles and active navigation gain a neon text glow with occasional flicker, like a sign.' },
     { id: 'particles',       name: 'Particles',         short: 'Snow, rain, matrix, dots, embers', long: 'Animated background particles. Pick from snow, rain, matrix rain, floating dots, or rising embers.' },
@@ -4170,8 +4243,7 @@
     preset: 'none',
     hoverLift: false, hoverLiftIntensity: 'medium',
     ambientGlow: false, ambientGlowIntensity: 'medium',
-    borderShimmer: false, borderShimmerIntensity: 'medium',
-    gradientBorders: false, gradientBordersIntensity: 'medium',
+    borderEffect: 'none', borderEffectIntensity: 'medium',
     aurora: false, auroraIntensity: 'medium',
     neonFlicker: false, neonFlickerIntensity: 'medium',
     particles: false, particlesIntensity: 'medium',
@@ -4186,14 +4258,13 @@
       ...NONE_EFFECTS, preset: 'alive',
       hoverLift: true, hoverLiftIntensity: 'medium',
       ambientGlow: true, ambientGlowIntensity: 'medium',
-      borderShimmer: true, borderShimmerIntensity: 'medium',
+      borderEffect: 'shimmer', borderEffectIntensity: 'medium',
     },
     immersive: {
       ...NONE_EFFECTS, preset: 'immersive',
       hoverLift: true, hoverLiftIntensity: 'strong',
       ambientGlow: true, ambientGlowIntensity: 'strong',
-      borderShimmer: true, borderShimmerIntensity: 'medium',
-      gradientBorders: true, gradientBordersIntensity: 'strong',
+      borderEffect: 'gradient', borderEffectIntensity: 'strong',
       cursorTrail: true, cursorTrailIntensity: 'medium',
     },
   };
@@ -4842,8 +4913,7 @@
   const GUIDE_EFFECT_CATALOG = [
     { id: 'hoverLift',       name: 'Hover Lift',        desc: 'Cards, buttons, and list items gently float up when you hover. Modals and dropdowns are never affected.', preview: 'Hover me' },
     { id: 'ambientGlow',     name: 'Ambient Glow',      desc: 'Brand buttons, active nav items, and focused inputs gain a slow pulsing glow in your theme accent color.', preview: 'Glow' },
-    { id: 'borderShimmer',   name: 'Border Shimmer',    desc: 'A thin line of light sweeps across the top of each card, giving a subtle animated edge.', preview: 'Shimmer' },
-    { id: 'gradientBorders', name: 'Gradient Borders',  desc: 'Card borders become animated conic gradients that slowly rotate around the edge.', preview: 'Border' },
+    { id: 'borderEffect',    name: 'Border',            desc: 'Animated card edges — Shimmer for a top-edge light sweep, or Gradient for a rotating color ring. Pick one style.', preview: 'Border' },
     { id: 'aurora',          name: 'Aurora Background', desc: 'A soft, slow-moving gradient glow sits behind all content. Colors derive from your theme accent.', preview: '' },
     { id: 'neonFlicker',     name: 'Neon Flicker',      desc: 'Page titles and active navigation gain a neon text glow with occasional flicker, like a sign.', preview: 'NEON' },
     {
@@ -5750,8 +5820,7 @@
     const labels = {
       hoverLift: 'Hover me',
       ambientGlow: 'Glow',
-      borderShimmer: 'Shimmer',
-      gradientBorders: 'Border',
+      borderEffect: 'Border',
       aurora: '',
       neonFlicker: 'NEON',
       particles: 'Particles',

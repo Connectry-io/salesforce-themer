@@ -2031,12 +2031,12 @@
 }
 
 /* Shimmer preview — uses theme accent and intensity-driven speed */
-.effect-preview[data-effect="borderShimmer"] .effect-preview-card {
+.effect-preview[data-effect="borderEffect"] .effect-preview-card {
   overflow: clip;
   position: relative;
 }
 
-.effect-preview[data-effect="borderShimmer"] .effect-preview-card::before {
+.effect-preview[data-effect="borderEffect"] .effect-preview-card::before {
   content: '';
   position: absolute;
   top: 0;
@@ -2069,12 +2069,12 @@
   to { --fx-preview-angle: 360deg; }
 }
 
-.effect-preview[data-effect="gradientBorders"] .effect-preview-card {
+.effect-preview[data-effect="borderEffect"][data-effect-style="gradient"] .effect-preview-card {
   position: relative;
   border-color: transparent;
 }
 
-.effect-preview[data-effect="gradientBorders"] .effect-preview-card::after {
+.effect-preview[data-effect="borderEffect"][data-effect-style="gradient"] .effect-preview-card::after {
   content: '';
   position: absolute;
   inset: 0;
@@ -3936,25 +3936,25 @@ body.is-premium .builder-overflow-premium-badge { display: none !important; }
   50%      { box-shadow: 0 0 calc(20px * var(--fx-ambient-glow-mult, 1)) rgba(var(--fx-accent-rgb), calc(0.45 * var(--fx-ambient-glow-mult, 1))); }
 }
 
-/* Border shimmer — top edge of the main card */
-.editor-preview-frame[data-fx-border-shimmer="on"] .preview-card {
+/* Border effect — shimmer style. Single top-edge sweep. */
+.editor-preview-frame[data-fx-border-effect="shimmer"] .preview-card {
   position: relative;
   overflow: clip;
 }
-.editor-preview-frame[data-fx-border-shimmer="on"] .preview-card::before {
+.editor-preview-frame[data-fx-border-effect="shimmer"] .preview-card::before {
   content: '';
   position: absolute;
   top: 0;
   left: -50%;
   width: 50%;
-  height: calc(2px * var(--fx-border-shimmer-mult, 1));
+  height: calc(2px * var(--fx-border-effect-mult, 1));
   background: linear-gradient(
     90deg,
     transparent 0%,
-    rgba(var(--fx-accent-rgb), calc(0.85 * var(--fx-border-shimmer-mult, 1))) 50%,
+    rgba(var(--fx-accent-rgb), calc(0.85 * var(--fx-border-effect-mult, 1))) 50%,
     transparent 100%
   );
-  animation: editor-fx-shimmer calc(3.5s * var(--fx-border-shimmer-speed, 1)) ease-in-out infinite;
+  animation: editor-fx-shimmer calc(3.5s * var(--fx-border-effect-speed, 1)) ease-in-out infinite;
   pointer-events: none;
 }
 @keyframes editor-fx-shimmer {
@@ -3968,14 +3968,14 @@ body.is-premium .builder-overflow-premium-badge { display: none !important; }
   initial-value: 0deg;
   inherits: false;
 }
-.editor-preview-frame[data-fx-gradient-borders="on"] .preview-card::after {
+.editor-preview-frame[data-fx-border-effect="gradient"] .preview-card::after {
   content: '';
   position: absolute;
   /* max(0.7, mult) floor matches core/effects/engine.js
      buildGradientBordersRules — subtle was barely perceptible without it. */
-  inset: calc(-1.5px * max(0.7, var(--fx-gradient-borders-mult, 1)));
+  inset: calc(-1.5px * max(0.7, var(--fx-border-effect-mult, 1)));
   border-radius: 9px;
-  padding: calc(2px * max(0.7, var(--fx-gradient-borders-mult, 1)));
+  padding: calc(2px * max(0.7, var(--fx-border-effect-mult, 1)));
   background: conic-gradient(
     from var(--editor-fx-border-angle),
     rgba(var(--fx-accent-rgb), 1) 0%,
@@ -3987,11 +3987,11 @@ body.is-premium .builder-overflow-premium-badge { display: none !important; }
   -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
   -webkit-mask-composite: xor;
           mask-composite: exclude;
-  animation: editor-fx-rotate calc(4s * var(--fx-gradient-borders-speed, 1)) linear infinite;
+  animation: editor-fx-rotate calc(4s * var(--fx-border-effect-speed, 1)) linear infinite;
   pointer-events: none;
   z-index: 1;
 }
-.editor-preview-frame[data-fx-gradient-borders="on"] .preview-card {
+.editor-preview-frame[data-fx-border-effect="gradient"] .preview-card {
   position: relative;
 }
 @keyframes editor-fx-rotate {
@@ -6352,11 +6352,11 @@ td.upgrade-compare-col-premium,
 }
 
 /* Shimmer — intensity-aware */
-.guide-effect-card[data-effect="borderShimmer"] .guide-effect-preview-card {
+.guide-effect-card[data-effect="borderEffect"] .guide-effect-preview-card {
   overflow: clip;
   position: relative;
 }
-.guide-effect-card[data-effect="borderShimmer"] .guide-effect-preview-card::before {
+.guide-effect-card[data-effect="borderEffect"] .guide-effect-preview-card::before {
   content: '';
   position: absolute;
   top: 0;
@@ -6386,11 +6386,11 @@ td.upgrade-compare-col-premium,
 @keyframes guide-fx-rotate {
   to { --guide-fx-angle: 360deg; }
 }
-.guide-effect-card[data-effect="gradientBorders"] .guide-effect-preview-card {
+.guide-effect-card[data-effect="borderEffect"][data-effect-style="gradient"] .guide-effect-preview-card {
   position: relative;
   border-color: transparent;
 }
-.guide-effect-card[data-effect="gradientBorders"] .guide-effect-preview-card::after {
+.guide-effect-card[data-effect="borderEffect"][data-effect-style="gradient"] .guide-effect-preview-card::after {
   content: '';
   position: absolute;
   inset: 0;

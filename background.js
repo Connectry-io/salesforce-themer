@@ -1635,8 +1635,7 @@ function suggestedEffectsFor(themeId) {
     preset: 'none',
     hoverLift: false, hoverLiftIntensity: 'medium',
     ambientGlow: false, ambientGlowIntensity: 'medium',
-    borderShimmer: false, borderShimmerIntensity: 'medium',
-    gradientBorders: false, gradientBordersIntensity: 'medium',
+    borderEffect: 'none', borderEffectIntensity: 'medium',
     aurora: false, auroraIntensity: 'medium',
     neonFlicker: false, neonFlickerIntensity: 'medium',
     particles: false, particlesIntensity: 'medium',
@@ -1647,14 +1646,13 @@ function suggestedEffectsFor(themeId) {
     ...NONE, preset: 'alive',
     hoverLift: true, hoverLiftIntensity: 'medium',
     ambientGlow: true, ambientGlowIntensity: 'medium',
-    borderShimmer: true, borderShimmerIntensity: 'medium',
+    borderEffect: 'shimmer', borderEffectIntensity: 'medium',
   };
   const IMMERSIVE = {
     ...NONE, preset: 'immersive',
     hoverLift: true, hoverLiftIntensity: 'strong',
     ambientGlow: true, ambientGlowIntensity: 'strong',
-    borderShimmer: true, borderShimmerIntensity: 'medium',
-    gradientBorders: true, gradientBordersIntensity: 'strong',
+    borderEffect: 'gradient', borderEffectIntensity: 'strong',
     cursorTrail: true, cursorTrailIntensity: 'medium',
   };
 
@@ -1666,12 +1664,12 @@ function suggestedEffectsFor(themeId) {
     'tron': { ...IMMERSIVE, neonFlicker: true, neonFlickerIntensity: 'strong', ambientGlow: true, ambientGlowIntensity: 'strong' },
     'obsidian': { ...SUBTLE, ambientGlow: true, ambientGlowIntensity: 'subtle' },
     'arctic': { ...ALIVE, aurora: true, auroraIntensity: 'medium', particles: 'snow', particlesIntensity: 'medium' },
-    'sakura': { ...SUBTLE, borderShimmer: true, borderShimmerIntensity: 'subtle' },
+    'sakura': { ...SUBTLE, borderEffect: 'shimmer', borderEffectIntensity: 'subtle' },
     'ember': { ...SUBTLE, ambientGlow: true, ambientGlowIntensity: 'medium', particles: 'embers', particlesIntensity: 'subtle' },
     'nord': { ...SUBTLE, aurora: true, auroraIntensity: 'subtle' },
     'terminal': { ...ALIVE, neonFlicker: true, neonFlickerIntensity: 'medium', particles: 'matrix', particlesIntensity: 'medium' },
     'high-contrast': NONE,
-    'dracula': { ...SUBTLE, ambientGlow: true, ambientGlowIntensity: 'medium', borderShimmer: true, borderShimmerIntensity: 'medium' },
+    'dracula': { ...SUBTLE, ambientGlow: true, ambientGlowIntensity: 'medium', borderEffect: 'shimmer', borderEffectIntensity: 'medium' },
     'solarized-light': SUBTLE,
     'solarized-dark': { ...SUBTLE, ambientGlow: true, ambientGlowIntensity: 'subtle' },
   };
