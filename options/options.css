@@ -2759,9 +2759,10 @@
   color: var(--cx-text-subtle);
   white-space: nowrap;
 }
-/* Read-only favicon in editor mini card header — same placement as the
-   theme card elsewhere: to the right of the title, grouped with the
-   category badge in the meta cluster. */
+/* Read-only favicon sits immediately after the title, before the badge.
+   Title input is content-sized (field-sizing: content), so the favicon
+   hugs the right edge of the actual text. Badge floats to the far right
+   via margin-left:auto. */
 .editor-live-favicon {
   display: inline-flex;
   align-items: center;
@@ -2769,6 +2770,7 @@
 }
 .editor-live-favicon-display { display: inline-flex; }
 .editor-live-favicon-display svg { width: 18px; height: 18px; display: block; }
+.editor-live-card .editor-live-badge { margin-left: auto; flex-shrink: 0; }
 
 /* Favicon panel: center the live preview, keep it modest. Frame only shows
    on transparent shapes — Figma/Photoshop-style: checkerboard appears when
