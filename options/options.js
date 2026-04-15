@@ -3561,11 +3561,12 @@
     });
   }
 
-  function _updatePreviewFavicon(enabled) {
+  function _updatePreviewFavicon(_enabled) {
+    // The tab favicon renders fully opaque in both states — the visual
+    // difference is already carried by the glyph itself (user's design vs
+    // the SF blue cloud). Fading to 30% made the SF cloud look washed out.
     const tabFav = document.getElementById('previewBrowserTabFav');
-    if (tabFav) {
-      tabFav.style.opacity = enabled ? '' : '0.3';
-    }
+    if (tabFav) tabFav.style.opacity = '';
   }
 
   // ─── Favicon panel (Builder sub-tab) ───────────────────────────────────────
