@@ -594,7 +594,12 @@ function buildAuroraRules(intensityLevel, accentHex, opts) {
   const s = (opts && typeof opts.scale === 'number') ? opts.scale : 1.0;
   const isDark = !!(opts && opts.isDark);
 
-  const auroraOpacity = (0.06 * mult * s).toFixed(3);
+  // Aurora is fullscreen + blurred, so opacity reads as faint even at full
+  // alpha. Old 0.06 base was basically imperceptible on real SF (it sank
+  // below body's own background layer at z-index:-1 anyway). Tripled to
+  // 0.18 base so medium/strong actually read as ambient light rather than
+  // "did I even turn this on?"
+  const auroraOpacity = (0.18 * mult * s).toFixed(3);
   const auroraSpeed = Math.round(25000 / mult);
   const [a1, a2, a3] = _deriveAuroraBlobs(accentHex, isDark);
 
@@ -614,7 +619,12 @@ function buildAuroraRules(intensityLevel, accentHex, opts) {
           position: 'fixed',
           inset: '-50%',
           'pointer-events': 'none',
-          'z-index': '-1',
+          // z-index: 0 paints aurora above body's own background but below
+          // any positioned content children (cards, nav, etc. all render
+          // at their own stacking levels above). The alternative (z-index:
+          // -1 inside body's stacking context) sinks below body's bg color
+          // and makes aurora invisible on themes that set body bg.
+          'z-index': '0',
           opacity: String(auroraOpacity),
           background:
             `radial-gradient(ellipse at 20% 50%, ${a1} 0%, transparent 50%),` +

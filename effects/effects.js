@@ -337,12 +337,16 @@ body.sf-themer-fx-hover .slds-popover {
       if (ir.cssPrelude) css += `\n/* ─── aurora prelude (engine) ─── */\n${ir.cssPrelude}\n`;
       const rule = ir.cssRules.find(r => r.selectorRole === 'bodyWrapper');
       if (rule) {
+        // Aurora paints ABOVE body's background layer (z-index:0), which
+        // means body needs to not paint its own bg over it. SF themes set
+        // body bg themselves; we keep that but layer aurora on top with
+        // its low opacity so the theme shows through. Content wrappers
+        // don't need hoisting if we don't try to sink aurora to z-index:-1.
         css += `
 /* ─── Aurora Background (intensity ${(config.auroraIntensity || 'medium')}, via core engine) ─── */
 
 body.sf-themer-fx-aurora {
   position: relative !important;
-  z-index: 0 !important;
 }
 
 body.sf-themer-fx-aurora::before {
