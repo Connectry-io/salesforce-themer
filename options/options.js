@@ -3553,7 +3553,7 @@
 
   // ─── Favicon panel (Builder sub-tab) ───────────────────────────────────────
 
-  let _editorFaviconState = { shape: 'circle', color: '#4A6FA5', icon: 'connectry' };
+  let _editorFaviconState = { shape: 'circle', color: '#4A6FA5', icon: 'connectry', iconColor: '#ffffff' };
   let _editorFaviconBound = false;
 
   function _bindEditorFaviconPanel() {
@@ -3584,56 +3584,75 @@
       sb.addEventListener('click', () => {
         _editorFaviconState.shape = sb.dataset.shape;
         document.querySelectorAll('#editorFaviconShapes .editor-type-preset').forEach(x => x.classList.toggle('is-active', x === sb));
+        _updateEditorFaviconBgDisabled();
         _updateEditorFaviconPreview();
       });
     });
 
-    // Color picker (swatch + hex, mirrored)
-    const colorSwatch = document.getElementById('editorFaviconColor');
-    const colorHex = document.getElementById('editorFaviconColorHex');
-    colorSwatch?.addEventListener('input', (e) => {
-      _editorFaviconState.color = e.target.value;
-      if (colorHex) colorHex.value = e.target.value;
-      _updateEditorFaviconPreview();
-    });
-    colorHex?.addEventListener('input', (e) => {
-      const v = (e.target.value || '').trim();
-      if (!/^#[0-9a-fA-F]{6}$/.test(v)) return;
-      _editorFaviconState.color = v;
-      if (colorSwatch) colorSwatch.value = v;
-      _updateEditorFaviconPreview();
-    });
+    _bindFaviconColorPair('editorFaviconColor', 'editorFaviconColorHex', (v) => { _editorFaviconState.color = v; });
+    _bindFaviconColorPair('editorFaviconIconColor', 'editorFaviconIconColorHex', (v) => { _editorFaviconState.iconColor = v; });
 
+    _updateEditorFaviconBgDisabled();
     _updateEditorFaviconPreview();
   }
 
+  function _bindFaviconColorPair(swatchId, hexId, set) {
+    const swatch = document.getElementById(swatchId);
+    const hex = document.getElementById(hexId);
+    swatch?.addEventListener('input', (e) => {
+      set(e.target.value);
+      if (hex) hex.value = e.target.value;
+      // Guide and editor both listen; call both preview fns safely.
+      _updateEditorFaviconPreview?.();
+      _updateGuideFaviconPreview?.();
+    });
+    hex?.addEventListener('input', (e) => {
+      const v = (e.target.value || '').trim();
+      if (!/^#[0-9a-fA-F]{6}$/.test(v)) return;
+      set(v);
+      if (swatch) swatch.value = v;
+      _updateEditorFaviconPreview?.();
+      _updateGuideFaviconPreview?.();
+    });
+  }
+
+  function _updateEditorFaviconBgDisabled() {
+    const field = document.getElementById('editorFaviconBgField');
+    if (!field) return;
+    const disabled = _editorFaviconState.shape === 'none';
+    field.classList.toggle('is-disabled', disabled);
+    field.querySelectorAll('input').forEach(i => { i.disabled = disabled; });
+  }
+
   function _updateEditorFaviconPreview() {
-    const { shape, color, icon } = _editorFaviconState;
+    const { shape, color, icon, iconColor } = _editorFaviconState;
     const miniIcon = document.getElementById('editorFaviconPreview');
-    if (miniIcon) miniIcon.innerHTML = _renderFaviconSVG(shape, color, icon, 14);
+    if (miniIcon) miniIcon.innerHTML = _renderFaviconSVG(shape, color, icon, 14, iconColor);
     const hero = document.getElementById('editorFaviconLivePreview');
-    if (hero) hero.innerHTML = _renderFaviconSVG(shape, color, icon, 72);
+    if (hero) hero.innerHTML = _renderFaviconSVG(shape, color, icon, 72, iconColor);
     const tabFav = document.getElementById('previewBrowserTabFav');
-    if (tabFav) tabFav.innerHTML = _renderFaviconSVG(shape, color, icon, 10);
+    if (tabFav) tabFav.innerHTML = _renderFaviconSVG(shape, color, icon, 10, iconColor);
   }
 
   function _loadEditorFaviconState(customTheme) {
+    const defaults = { shape: 'circle', color: '#4A6FA5', icon: 'connectry', iconColor: '#ffffff' };
     if (customTheme?.favicon) {
-      _editorFaviconState = { shape: 'circle', color: '#4A6FA5', icon: 'connectry', ...customTheme.favicon };
+      _editorFaviconState = { ...defaults, ...customTheme.favicon };
     } else {
       const baseId = customTheme?.basedOn || editorState.basedOn || 'connectry';
       const themeObj = getThemeById(baseId);
       _editorFaviconState = {
-        shape: 'circle',
-        color: themeObj?.colors?.accent || '#4A6FA5',
-        icon: 'connectry',
+        ...defaults,
+        color: themeObj?.colors?.accent || defaults.color,
       };
     }
-    const colorInput = document.getElementById('editorFaviconColor');
-    if (colorInput) colorInput.value = _editorFaviconState.color;
-    const colorHex = document.getElementById('editorFaviconColorHex');
-    if (colorHex) colorHex.value = _editorFaviconState.color;
+    const set = (id, v) => { const el = document.getElementById(id); if (el) el.value = v; };
+    set('editorFaviconColor', _editorFaviconState.color);
+    set('editorFaviconColorHex', _editorFaviconState.color);
+    set('editorFaviconIconColor', _editorFaviconState.iconColor);
+    set('editorFaviconIconColorHex', _editorFaviconState.iconColor);
     _syncEditorFaviconControls();
+    _updateEditorFaviconBgDisabled();
     _updateEditorFaviconPreview();
   }
 
@@ -5340,25 +5359,50 @@
   // existing call sites don't have to change shape.
   const FAVICON_ICONS = (self.ConnectryFavicon && self.ConnectryFavicon.ICONS) || [];
 
-  let _guideFaviconState = { shape: 'circle', color: '#4A6FA5', icon: 'connectry' };
+  let _guideFaviconState = { shape: 'circle', color: '#4A6FA5', icon: 'connectry', iconColor: '#ffffff' };
   let _guideFaviconBound = false;
+
+  function _updateGuideFaviconBgDisabled() {
+    const field = document.getElementById('guideFaviconBgField');
+    if (!field) return;
+    const disabled = _guideFaviconState.shape === 'none';
+    field.classList.toggle('is-disabled', disabled);
+    field.querySelectorAll('input').forEach(i => { i.disabled = disabled; });
+  }
+
+  /**
+   * Swap this Studio tab's OWN favicon to the preview config. Customer
+   * sees the change live in the Chrome tab of the Theme Studio page they
+   * are currently looking at — a cheap, honest preview.
+   */
+  function _applyFaviconToThisTab(config) {
+    const svg = self.ConnectryFavicon.buildSVG(config, 32);
+    const href = 'data:image/svg+xml;base64,' + btoa(svg);
+    // Nuke any existing icon links — Chrome is sticky about the same node.
+    document.querySelectorAll('link[rel*="icon"]').forEach(l => l.remove());
+    const link = document.createElement('link');
+    link.id = 'cx-studio-favicon';
+    link.rel = 'icon';
+    link.type = 'image/svg+xml';
+    link.setAttribute('sizes', 'any');
+    link.href = href;
+    document.head.appendChild(link);
+  }
 
   // Thin pass-through to the canonical engine so existing call sites (size
   // last, positional) keep working during the monocode migration.
-  function _renderFaviconSVG(shape, color, iconId, size) {
-    return self.ConnectryFavicon.buildSVG({ shape, color, icon: iconId }, size);
+  function _renderFaviconSVG(shape, color, iconId, size, iconColor) {
+    return self.ConnectryFavicon.buildSVG({ shape, color, icon: iconId, iconColor }, size);
   }
 
   function _updateGuideFaviconPreview() {
-    const { shape, color, icon } = _guideFaviconState;
-    // Large hero preview
+    const { shape, color, icon, iconColor } = _guideFaviconState;
     const main = document.getElementById('guideFaviconLivePreview');
-    if (main) main.innerHTML = _renderFaviconSVG(shape, color, icon, 72);
-    // Browser tab icons (fake tab bar)
+    if (main) main.innerHTML = _renderFaviconSVG(shape, color, icon, 128, iconColor);
     const tab1 = document.getElementById('guideFaviconTabIcon1');
-    if (tab1) tab1.innerHTML = _renderFaviconSVG(shape, color, icon, 12);
+    if (tab1) tab1.innerHTML = _renderFaviconSVG(shape, color, icon, 12, iconColor);
     const tab2 = document.getElementById('guideFaviconTabIcon2');
-    if (tab2) tab2.innerHTML = _renderFaviconSVG(shape, color, icon, 12);
+    if (tab2) tab2.innerHTML = _renderFaviconSVG(shape, color, icon, 12, iconColor);
   }
 
   function _bindGuideFaviconDemo() {
@@ -5385,79 +5429,58 @@
       }
     }
 
-    // Shape buttons (using .editor-type-preset classes now)
+    // Shape buttons
     document.querySelectorAll('#guideFaviconShapeBtns .editor-type-preset').forEach(btn => {
       btn.addEventListener('click', () => {
         _guideFaviconState.shape = btn.dataset.shape;
         document.querySelectorAll('#guideFaviconShapeBtns .editor-type-preset').forEach(b => b.classList.remove('is-active'));
         btn.classList.add('is-active');
+        _updateGuideFaviconBgDisabled();
         _updateGuideFaviconPreview();
       });
     });
 
-    // Color picker (swatch + hex, mirrored)
-    const gSwatch = document.getElementById('guideFaviconColor');
-    const gHex = document.getElementById('guideFaviconColorHex');
-    gSwatch?.addEventListener('input', (e) => {
-      _guideFaviconState.color = e.target.value;
-      if (gHex) gHex.value = e.target.value;
-      _updateGuideFaviconPreview();
-    });
-    gHex?.addEventListener('input', (e) => {
-      const v = (e.target.value || '').trim();
-      if (!/^#[0-9a-fA-F]{6}$/.test(v)) return;
-      _guideFaviconState.color = v;
-      if (gSwatch) gSwatch.value = v;
-      _updateGuideFaviconPreview();
-    });
+    // Color pickers (swatch + hex, mirrored). Uses the same helper as the
+    // editor panel so both surfaces stay in lockstep.
+    const bindGuide = (swatchId, hexId, set) => {
+      const swatch = document.getElementById(swatchId);
+      const hex = document.getElementById(hexId);
+      swatch?.addEventListener('input', (e) => {
+        set(e.target.value);
+        if (hex) hex.value = e.target.value;
+        _updateGuideFaviconPreview();
+      });
+      hex?.addEventListener('input', (e) => {
+        const v = (e.target.value || '').trim();
+        if (!/^#[0-9a-fA-F]{6}$/.test(v)) return;
+        set(v);
+        if (swatch) swatch.value = v;
+        _updateGuideFaviconPreview();
+      });
+    };
+    bindGuide('guideFaviconColor', 'guideFaviconColorHex', (v) => { _guideFaviconState.color = v; });
+    bindGuide('guideFaviconIconColor', 'guideFaviconIconColorHex', (v) => { _guideFaviconState.iconColor = v; });
+    _updateGuideFaviconBgDisabled();
 
-    // "Apply to my tabs now" — EPHEMERAL. Pushes the config to all open SF
-    // tabs as a live preview but does NOT write to storage. The tab's next
-    // reload / navigation re-applies the user's saved favicon automatically.
-    document.getElementById('guideFaviconApplyBtn')?.addEventListener('click', async () => {
+    // "Preview on this tab" — swaps the Studio tab's own favicon so the
+    // customer sees their design in the real Chrome tab they're already
+    // looking at. Ephemeral: reload restores the default Studio favicon.
+    document.getElementById('guideFaviconApplyBtn')?.addEventListener('click', () => {
       const btn = document.getElementById('guideFaviconApplyBtn');
-      const config = { ..._guideFaviconState };
-      const restore = (text, cls) => {
-        if (!btn) return;
-        btn.textContent = text;
-        btn.classList.add(cls);
-        setTimeout(() => { btn.textContent = 'Apply to my Salesforce tabs'; btn.classList.remove(cls); }, 2200);
-      };
-
-      let tabs = [];
       try {
-        tabs = await chrome.tabs.query({
-          url: ['https://*.lightning.force.com/*', 'https://*.my.salesforce.com/*', 'https://*.salesforce.com/*'],
-        });
-      } catch (err) {
-        console.error('[themer] favicon apply: tabs.query failed', err);
-        restore('Error — see console', 'is-error');
-        return;
-      }
-
-      if (!tabs.length) {
-        restore('No Salesforce tabs open', 'is-error');
-        return;
-      }
-
-      let ok = 0;
-      const errors = [];
-      await Promise.all(tabs.map(async (tab) => {
-        if (!tab.id) return;
-        try {
-          await chrome.tabs.sendMessage(tab.id, { action: 'setFavicon', enabled: true, config });
-          ok++;
-        } catch (err) {
-          errors.push({ tabId: tab.id, url: tab.url, msg: err?.message || String(err) });
+        _applyFaviconToThisTab({ ..._guideFaviconState });
+        if (btn) {
+          btn.textContent = 'Previewing — reload to reset';
+          btn.classList.add('is-success');
+          setTimeout(() => { btn.textContent = 'Preview on this tab'; btn.classList.remove('is-success'); }, 2200);
         }
-      }));
-
-      if (ok > 0) {
-        restore(`Applied to ${ok} tab${ok === 1 ? '' : 's'} (until reload)`, 'is-success');
-        if (errors.length) console.warn('[themer] favicon apply: partial failures', errors);
-      } else {
-        console.error('[themer] favicon apply: all tabs failed', errors);
-        restore('No active Themer on SF tabs — reload them', 'is-error');
+      } catch (err) {
+        console.error('[themer] favicon preview failed', err);
+        if (btn) {
+          btn.textContent = 'Error — see console';
+          btn.classList.add('is-error');
+          setTimeout(() => { btn.textContent = 'Preview on this tab'; btn.classList.remove('is-error'); }, 2200);
+        }
       }
     });
 

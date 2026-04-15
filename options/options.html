@@ -811,7 +811,7 @@
         <div class="cx-section-header">
           <div>
             <h2 class="cx-section-title">Favicons</h2>
-            <p class="cx-section-subtitle">Replace the Salesforce cloud in your browser tab. Play with shape, color, and icon — preview here, then apply to your open tabs. Changes are ephemeral; clone a theme in the Builder to save your own.</p>
+            <p class="cx-section-subtitle">Replace the Salesforce cloud in your browser tab. Play with shape, color, and icon — then click "Preview on this tab" to try it live on the Studio tab you're looking at right now. Ephemeral: reload to reset. Clone a theme in the Builder to save your own.</p>
           </div>
         </div>
         <div class="guide-live-panel guide-favicon-panel">
@@ -839,11 +839,18 @@
             </div>
             <div class="editor-group">
               <h3 class="editor-group-title">Color</h3>
-              <div class="editor-field">
+              <div class="editor-field" id="guideFaviconBgField">
                 <label>Background</label>
                 <div class="color-input-wrap">
                   <input type="color" class="color-swatch-input" id="guideFaviconColor" value="#4A6FA5" />
                   <input type="text" class="color-hex-input" id="guideFaviconColorHex" value="#4A6FA5" spellcheck="false" />
+                </div>
+              </div>
+              <div class="editor-field">
+                <label>Icon</label>
+                <div class="color-input-wrap">
+                  <input type="color" class="color-swatch-input" id="guideFaviconIconColor" value="#ffffff" />
+                  <input type="text" class="color-hex-input" id="guideFaviconIconColorHex" value="#ffffff" spellcheck="false" />
                 </div>
               </div>
             </div>
@@ -891,7 +898,7 @@
               <!-- Live SVG rendered by JS -->
             </div>
             <button class="cx-btn cx-btn-primary guide-favicon-apply-btn" id="guideFaviconApplyBtn" type="button">
-              Apply to my Salesforce tabs
+              Preview on this tab
             </button>
           </div>
         </div>
@@ -1708,11 +1715,18 @@
 
           <div class="editor-group">
             <h3 class="editor-group-title">Color</h3>
-            <div class="editor-field">
+            <div class="editor-field" id="editorFaviconBgField">
               <label>Background</label>
               <div class="color-input-wrap">
                 <input type="color" class="color-swatch-input" id="editorFaviconColor" value="#4A6FA5" />
                 <input type="text" class="color-hex-input" id="editorFaviconColorHex" value="#4A6FA5" spellcheck="false" />
+              </div>
+            </div>
+            <div class="editor-field">
+              <label>Icon</label>
+              <div class="color-input-wrap">
+                <input type="color" class="color-swatch-input" id="editorFaviconIconColor" value="#ffffff" />
+                <input type="text" class="color-hex-input" id="editorFaviconIconColorHex" value="#ffffff" spellcheck="false" />
               </div>
             </div>
           </div>

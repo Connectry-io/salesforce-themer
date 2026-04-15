@@ -6180,6 +6180,9 @@ td.upgrade-compare-col-premium,
 .guide-favicon-apply-btn.is-success { background: #10b981; border-color: #10b981; color: #fff; }
 .guide-favicon-apply-btn.is-error { background: #ef4444; border-color: #ef4444; color: #fff; }
 
+/* Disabled field (e.g., Background color when shape=none) */
+.editor-field.is-disabled { opacity: 0.45; pointer-events: none; }
+
 .guide-placeholder-card {
   background: var(--cx-surface-alt);
   border: 1px dashed var(--cx-border-hover);

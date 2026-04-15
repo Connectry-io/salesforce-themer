@@ -44,7 +44,7 @@
     { id: 'waves', label: 'Waves', svg: '<path d="M4 12c4-3 8 3 12 0s8 3 12 0M4 18c4-3 8 3 12 0s8 3 12 0" stroke="white" stroke-width="2.5" stroke-linecap="round" fill="none" opacity="0.85"/>' },
   ];
 
-  const DEFAULT_CONFIG = { shape: 'circle', color: '#4A6FA5', icon: 'connectry' };
+  const DEFAULT_CONFIG = { shape: 'circle', color: '#4A6FA5', icon: 'connectry', iconColor: '#ffffff' };
 
   // Monogram system: every preset uses the Connectry glyph tinted with its
   // accent color. Pro users override via an explicit `favicon` config on
@@ -87,12 +87,15 @@
     const shape = (config && config.shape) || DEFAULT_CONFIG.shape;
     const color = (config && config.color) || DEFAULT_CONFIG.color;
     const iconId = (config && config.icon) || DEFAULT_CONFIG.icon;
+    // When there's no background, an unspecified iconColor falls back to the
+    // bg color so the glyph stays visible on a transparent tab — preserves
+    // the pre-iconColor behavior users were relying on.
+    const iconColor = (config && config.iconColor)
+      || (shape === 'none' ? color : DEFAULT_CONFIG.iconColor);
     const dim = size || 32;
     const icon = _findIcon(iconId);
     const bg = _buildBackground(shape, color);
-    // When there's no background, recolor the glyph's white placeholders
-    // with the chosen color so it remains visible on any tab.
-    const glyph = shape === 'none' ? icon.svg.replace(/white/g, color) : icon.svg;
+    const glyph = icon.svg.replace(/white/g, iconColor);
     return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="${dim}" height="${dim}">${bg}${glyph}</svg>`;
   }
 
