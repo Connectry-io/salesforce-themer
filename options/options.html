@@ -1334,9 +1334,12 @@
         <nav class="editor-subtab-bar" role="tablist" aria-label="Editor sections">
           <button class="editor-subtab is-active" data-editor-subtab="colors" role="tab" aria-selected="true">
             <svg class="editor-subtab-icon" width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true">
-              <circle cx="6" cy="7" r="3.5" fill="#ef4444"/>
-              <circle cx="12" cy="7" r="3.5" fill="#3b82f6" opacity="0.9"/>
-              <circle cx="9" cy="12" r="3.5" fill="#f59e0b" opacity="0.9"/>
+              <!-- Paint-palette: rounded blob with thumb hole + 4 colored dabs -->
+              <path d="M9 2a7 7 0 00-.5 13.98 1.5 1.5 0 001.3-2.3 1.2 1.2 0 01.9-1.8h1.8A4.5 4.5 0 0016 7.5 5.5 5.5 0 009 2z" fill="#f8fafc" stroke="#cbd5e1" stroke-width="0.9"/>
+              <circle cx="5.5" cy="8" r="1.4" fill="#ef4444"/>
+              <circle cx="8.5" cy="5" r="1.4" fill="#3b82f6"/>
+              <circle cx="11.5" cy="6.5" r="1.4" fill="#10b981"/>
+              <circle cx="12" cy="10" r="1.4" fill="#f59e0b"/>
             </svg>
             <span>Colors</span>
           </button>
@@ -1354,8 +1357,10 @@
           </button>
           <button class="editor-subtab" data-editor-subtab="type" role="tab" aria-selected="false">
             <svg class="editor-subtab-icon" width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true">
-              <path d="M3.5 14L7 4h4l3.5 10" stroke="#0ea5e9" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
-              <path d="M5 11h8" stroke="#22c55e" stroke-width="1.8" stroke-linecap="round"/>
+              <!-- Three colored lines of text — reads as typography/paragraphs -->
+              <rect x="3" y="4" width="12" height="1.8" rx="0.9" fill="#0ea5e9"/>
+              <rect x="3" y="8.1" width="9" height="1.8" rx="0.9" fill="#a855f7"/>
+              <rect x="3" y="12.2" width="11" height="1.8" rx="0.9" fill="#22c55e"/>
             </svg>
             <span>Type</span>
           </button>

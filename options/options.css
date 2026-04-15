@@ -2640,7 +2640,7 @@
    grid, so the layout stays stable whether the drawer is open or not. */
 .editor-layout {
   display: grid;
-  grid-template-columns: minmax(340px, 380px) 1fr;
+  grid-template-columns: minmax(290px, 320px) 1fr;
   gap: var(--cx-space-4);
   align-items: start;
   position: relative; /* anchor for the chat drawer */
@@ -2801,6 +2801,7 @@
 .editor-subtab-bar {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 2px;
   background: var(--cx-surface);
   border-bottom: 1px solid var(--cx-border);
