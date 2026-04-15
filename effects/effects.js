@@ -495,35 +495,38 @@ body.sf-themer-fx-neon .slds-card__header-title {
   if (config.backgroundPattern && config.backgroundPattern !== 'none') {
     const engine = (typeof self !== 'undefined' && self.SFThemerEffectsEngine) ||
                    (typeof window !== 'undefined' && window.SFThemerEffectsEngine);
-    const ir = engine && engine.renderRules('backgroundPattern', config, accent);
+    // Fullscreen scale factor — opacity is calibrated for the small Builder
+    // preview frame; on the full SF viewport the same values read as
+    // candy-stripe wallpaper. Damp to ~55% so the pattern reads as a subtle
+    // backdrop, not a takeover.
+    const ir = engine && engine.renderRules('backgroundPattern', config, accent, { scale: 0.55 });
     if (ir && ir.cssRules && ir.cssRules.length) {
       const rule = ir.cssRules.find(r => r.selectorRole === 'bodyWrapper');
       if (rule) {
         const decls = engine.cssFromDeclarations(rule.declarations, { important: true });
+        // The pattern sits on body::after at z-index: -1, below body's
+        // content. body itself becomes a stacking context (position:
+        // relative; z-index: 0) so the negative z-index stays scoped and
+        // doesn't sink below the page background. This replaces the old
+        // wrapper-hoisting approach that was fragile — SF has dozens of
+        // wrapper layers, and enumerating them to boost z-index:1 missed
+        // many, so the pattern ended up painting over content on most
+        // pages. See §BACKGROUND_PATTERN_FIX.
         css += `
 /* ─── Background Pattern: ${config.backgroundPattern} (via core engine) ─── */
+
+body.sf-themer-fx-background {
+  position: relative !important;
+  z-index: 0 !important;
+}
 
 body.sf-themer-fx-background::after {
   content: '' !important;
   position: fixed !important;
   inset: 0 !important;
   pointer-events: none !important;
-  z-index: 0 !important;
+  z-index: -1 !important;
 ${decls}
-}
-
-body.sf-themer-fx-background .oneContent,
-body.sf-themer-fx-background .slds-card,
-body.sf-themer-fx-background .slds-page-header,
-body.sf-themer-fx-background .slds-modal__container,
-body.sf-themer-fx-background .slds-global-header,
-body.sf-themer-fx-background .slds-global-header_container,
-body.sf-themer-fx-background .slds-context-bar,
-body.sf-themer-fx-background .oneAppNavContainer,
-body.sf-themer-fx-background .forceBrandBand,
-body.sf-themer-fx-background .desktop {
-  position: relative !important;
-  z-index: 1 !important;
 }
 `;
       }

@@ -231,14 +231,19 @@ function deriveColors(accentHex) {
 // surface's bodyWrapper role.
 // ────────────────────────────────────────────────────────────────────────────
 
-function buildBackgroundPatternDeclarations(pattern, accentHex, intensityLevel) {
+function buildBackgroundPatternDeclarations(pattern, accentHex, intensityLevel, scale) {
   const { accentRgb } = deriveColors(accentHex);
   const mult = (INTENSITY_LADDER[intensityLevel] || INTENSITY_LADDER.medium).mult;
+  // `scale` is a context multiplier on opacity — small preview surfaces pass
+  // 1.0 (their default visual impact is already calibrated); fullscreen
+  // surfaces like the real SF viewport pass <1 to dampen what would
+  // otherwise be wallpaper-level saturation at the same intensity level.
+  const s = typeof scale === 'number' ? scale : 1.0;
 
-  // Per-pattern base opacity scaled by intensity multiplier.
-  // Also scales line/dot thickness so Subtle/Medium/Strong are perceivable on
-  // thin-line patterns (was an issue that prompted this refactor).
-  const opacity = (base) => (base * mult).toFixed(3);
+  // Per-pattern base opacity scaled by intensity multiplier AND context scale.
+  // Line/dot thickness scales with intensity only (thickness isn't the
+  // saturation problem on fullscreen — density is).
+  const opacity = (base) => (base * mult * s).toFixed(3);
   const thickness = (basePx) => `${(basePx * mult).toFixed(2)}px`;
 
   switch (pattern) {
@@ -309,15 +314,19 @@ function buildBackgroundPatternDeclarations(pattern, accentHex, intensityLevel) 
 // migration. This keeps the refactor incremental and reversible.
 // ────────────────────────────────────────────────────────────────────────────
 
-function renderRules(effectId, config, accentHex) {
+function renderRules(effectId, config, accentHex, opts) {
   if (!config) return null;
   const intensity = (config[effectId + 'Intensity']) || 'medium';
+  // context.scale — preview=1.0 (default), fullscreen=~0.55. Adapters pass
+  // their own context so the engine stays the single source of truth for
+  // how patterns feel at each scale.
+  const scale = (opts && typeof opts.scale === 'number') ? opts.scale : 1.0;
 
   switch (effectId) {
     case 'backgroundPattern': {
       const style = config.backgroundPattern;
       if (!style || style === 'none') return null;
-      const declarations = buildBackgroundPatternDeclarations(style, accentHex, intensity);
+      const declarations = buildBackgroundPatternDeclarations(style, accentHex, intensity, scale);
       if (!declarations) return null;
       return {
         cssRules: [
