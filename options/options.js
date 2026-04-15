@@ -3531,6 +3531,8 @@
       await chrome.storage.sync.set({ faviconEnabled: enabled });
       slot.classList.toggle('is-off', !enabled);
       _updatePreviewFavicon(enabled);
+      // Re-render so the fake browser tab flips between the design and SF blue.
+      _updateEditorFaviconPreview();
 
       // Push to all active SF tabs
       try {
@@ -3626,12 +3628,21 @@
 
   function _updateEditorFaviconPreview() {
     const { shape, color, icon, iconColor } = _editorFaviconState;
+    // Mini-card and hero always show the design — even if the global
+    // "Replace SF cloud" toggle is off, the user is still authoring these.
     const miniIcon = document.getElementById('editorFaviconPreview');
     if (miniIcon) miniIcon.innerHTML = _renderFaviconSVG(shape, color, icon, 18, iconColor);
     const hero = document.getElementById('editorFaviconLivePreview');
     if (hero) hero.innerHTML = _renderFaviconSVG(shape, color, icon, 56, iconColor);
+    // The fake browser tab in the live preview represents the *actual* SF
+    // tab, so if the global toggle is off it should show SF's real cloud.
     const tabFav = document.getElementById('previewBrowserTabFav');
-    if (tabFav) tabFav.innerHTML = _renderFaviconSVG(shape, color, icon, 10, iconColor);
+    if (tabFav) {
+      const enabled = document.getElementById('editorFaviconToggle')?.checked !== false;
+      tabFav.innerHTML = enabled
+        ? _renderFaviconSVG(shape, color, icon, 10, iconColor)
+        : self.ConnectryFavicon.buildSVG({ shape: 'none', icon: 'cloud', iconColor: '#00A1E0' }, 10);
+    }
   }
 
   function _loadEditorFaviconState(customTheme) {
