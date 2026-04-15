@@ -272,16 +272,26 @@
   // content_scripts). Single source of truth across every surface.
 
   // Resolve the active theme's favicon config. Custom themes carry .favicon
-  // inline; presets carry it in themes/themes.json. Null = use the bundled
-  // connectry.svg fallback.
+  // inline; presets carry it in themes/themes.json. When a theme has no
+  // explicit favicon config, derive one from the theme's accent so the SF
+  // tab matches what the theme card in Studio/popup shows (circle + accent
+  // + connectry glyph). Null = use the bundled connectry.svg fallback.
   let _presetRegistryCache = null;
+  function _defaultFaviconForTheme(theme) {
+    const accent = theme?.colors?.accent || '#4A6FA5';
+    return { shape: 'circle', color: accent, icon: 'connectry' };
+  }
   async function _resolveThemeFavicon(themeName) {
     if (!themeName || themeName === 'none') return null;
     if (themeName.startsWith('theme_') || themeName.startsWith('custom-')) {
       try {
         const { customThemes = [] } = await chrome.storage.sync.get('customThemes');
         const ct = customThemes.find(t => t.id === themeName);
-        return ct?.favicon || null;
+        if (!ct) return null;
+        if (ct.favicon) return ct.favicon;
+        const base = _presetRegistryCache?.themes?.find(x => x.id === ct.basedOn);
+        const accent = ct.advancedOverrides?.accent || ct.coreOverrides?.accent || base?.colors?.accent;
+        return _defaultFaviconForTheme({ colors: { accent } });
       } catch (_) { return null; }
     }
     try {
@@ -290,7 +300,8 @@
         _presetRegistryCache = await res.json();
       }
       const t = (_presetRegistryCache.themes || []).find(x => x.id === themeName);
-      return t?.favicon || null;
+      if (!t) return null;
+      return t.favicon || _defaultFaviconForTheme(t);
     } catch (_) { return null; }
   }
 
