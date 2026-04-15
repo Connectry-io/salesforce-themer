@@ -613,6 +613,7 @@
       let needsEffectsReinjection = false;
       let needsFaviconReinjection = false;
       let needsPatchReinjection = false;
+      let competingFaviconAdded = false;
       for (const mutation of mutations) {
         for (const node of mutation.removedNodes) {
           if (node.id === STYLE_ID || node.id === 'sf-themer-transitions') {
@@ -627,6 +628,26 @@
           if (node.id === 'sf-themer-custom-patches') {
             needsPatchReinjection = true;
           }
+        }
+        for (const node of mutation.addedNodes) {
+          // Salesforce's SPA re-adds its own <link rel="icon"> after navigation.
+          // If ours is already in place, strip the competitor so the browser
+          // doesn't pick the newer sibling as the tab icon.
+          if (node.nodeType === 1 && node.tagName === 'LINK'
+              && (node.rel || '').includes('icon') && node.id !== FAVICON_LINK_ID
+              && _currentFaviconEnabled) {
+            node.remove();
+            competingFaviconAdded = true;
+          }
+        }
+      }
+      if (competingFaviconAdded) {
+        // Force the browser to re-read our favicon.
+        const ours = document.getElementById(FAVICON_LINK_ID);
+        if (ours) {
+          const href = ours.href;
+          ours.href = '';
+          ours.href = href;
         }
       }
       if (needsReinjection) {
@@ -661,10 +682,13 @@
       applyTheme(message.theme, true).then(async () => {
         // Re-apply effects for new theme (colors may differ)
         loadAndApplyEffects(message.theme);
-        // Swap the favicon to the new theme's config
+        // Swap the favicon to the new theme's config. Pull the enabled flag
+        // from sync storage in case this message arrives before the initial
+        // apply on this tab has stamped _currentFaviconEnabled.
         try {
+          const { faviconEnabled = true } = await chrome.storage.sync.get({ faviconEnabled: true });
           const cfg = await _resolveThemeFavicon(message.theme);
-          applyFavicon(_currentFaviconEnabled !== false, cfg);
+          applyFavicon(faviconEnabled, cfg);
         } catch (_) {}
         // Keep diagnostic panel in sync with active theme
         if (diagnosticPanel) diagnosticPanel.updateTheme(message.theme);

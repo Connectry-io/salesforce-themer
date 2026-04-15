@@ -61,14 +61,16 @@
 
   /**
    * Resolve the default favicon config for a theme when it hasn't set one
-   * explicitly. Uses THEME_ICON_MAP for a thematic glyph and tints it with
-   * the theme's accent color.
+   * explicitly. Defaults to the Connectry glyph on a circle tinted with the
+   * theme's accent — consistent Connectry branding across presets, with the
+   * theme accent as the only differentiator. Explicit per-theme `favicon`
+   * configs (including a THEME_ICON_MAP lookup) still override this default.
    */
   function defaultForTheme(themeId, accent) {
     return {
       shape: 'circle',
       color: accent || DEFAULT_CONFIG.color,
-      icon: THEME_ICON_MAP[themeId] || 'connectry',
+      icon: 'connectry',
     };
   }
 
