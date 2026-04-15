@@ -3971,9 +3971,11 @@ body.is-premium .builder-overflow-premium-badge { display: none !important; }
 .editor-preview-frame[data-fx-gradient-borders="on"] .preview-card::after {
   content: '';
   position: absolute;
-  inset: calc(-1.5px * var(--fx-gradient-borders-mult, 1));
+  /* max(0.7, mult) floor matches core/effects/engine.js
+     buildGradientBordersRules — subtle was barely perceptible without it. */
+  inset: calc(-1.5px * max(0.7, var(--fx-gradient-borders-mult, 1)));
   border-radius: 9px;
-  padding: calc(2px * var(--fx-gradient-borders-mult, 1));
+  padding: calc(2px * max(0.7, var(--fx-gradient-borders-mult, 1)));
   background: conic-gradient(
     from var(--editor-fx-border-angle),
     rgba(var(--fx-accent-rgb), 1) 0%,

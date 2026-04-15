@@ -429,8 +429,13 @@ function buildGradientBordersRules(intensityLevel, accentHex, scale) {
   const mult = (INTENSITY_LADDER[intensityLevel] || INTENSITY_LADDER.medium).mult;
   const s = typeof scale === 'number' ? scale : 1.0;
 
+  // gradientBorders-specific floor — subtle at mult=0.5 produced an alpha
+  // of 0.4 on a thin ring, which reads as basically no effect on most
+  // backgrounds. Clamp the effective multiplier so even subtle is visible
+  // while medium/strong keep their full reach.
+  const k = Math.max(0.7, mult * s);
   const rotateSpeed = Math.round(4000 / mult);
-  const gradientAlpha = Math.min(1, (0.8 * mult * s)).toFixed(3);
+  const gradientAlpha = Math.min(1, (0.8 * k)).toFixed(3);
 
   const prelude = `
 @property --sf-border-angle {
