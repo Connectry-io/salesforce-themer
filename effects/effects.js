@@ -271,6 +271,12 @@ body.sf-themer-fx-hover .slds-popover {
   const _borderStyle = (config.borderEffect && config.borderEffect !== 'none')
     ? config.borderEffect
     : _legacyBorder;
+  // Card selector — matches hoverLift's scope so the two stay in agreement
+  // about "what counts as a card." Modern SF record pages rarely use raw
+  // `.slds-card`; `.forceRecordCard` and `.forceRelatedListSingleContainer`
+  // are where the actual record/related-list panels live.
+  const CARD_SEL = '.slds-card, .forceRecordCard, .forceRelatedListSingleContainer';
+
   if (_borderStyle === 'shimmer') {
     // Pass the right intensity key through to the engine via a merged config.
     const mergedConfig = {
@@ -281,11 +287,14 @@ body.sf-themer-fx-hover .slds-popover {
     if (ir && ir.cssRules) {
       const imp = { important: true };
       if (ir.cssPrelude) css += `\n/* ─── borderEffect=shimmer prelude ─── */\n${ir.cssPrelude}\n`;
+      const prefix = 'body.sf-themer-fx-shimmer';
+      const expand = (suffix) => CARD_SEL.split(',')
+        .map(s => `${prefix} ${s.trim()}${suffix}`)
+        .join(',\n');
       for (const rule of ir.cssRules) {
-        const sel = {
-          cardShimmerContainer: 'body.sf-themer-fx-shimmer .slds-card',
-          cardShimmerEdge:      'body.sf-themer-fx-shimmer .slds-card::before',
-        }[rule.selectorRole];
+        let sel = null;
+        if (rule.selectorRole === 'cardShimmerContainer') sel = expand('');
+        if (rule.selectorRole === 'cardShimmerEdge')      sel = expand('::before');
         if (sel) css += `\n${sel} {\n${engine.cssFromDeclarations(rule.declarations, imp)}\n}\n`;
       }
     }
@@ -298,11 +307,14 @@ body.sf-themer-fx-hover .slds-popover {
     if (ir && ir.cssRules) {
       const imp = { important: true };
       if (ir.cssPrelude) css += `\n/* ─── borderEffect=gradient prelude ─── */\n${ir.cssPrelude}\n`;
+      const prefix = 'body.sf-themer-fx-gradient-border';
+      const expand = (suffix) => CARD_SEL.split(',')
+        .map(s => `${prefix} ${s.trim()}${suffix}`)
+        .join(',\n');
       for (const rule of ir.cssRules) {
-        const sel = {
-          cardGradientContainer: 'body.sf-themer-fx-gradient-border .slds-card',
-          cardGradientEdge:      'body.sf-themer-fx-gradient-border .slds-card::after',
-        }[rule.selectorRole];
+        let sel = null;
+        if (rule.selectorRole === 'cardGradientContainer') sel = expand('');
+        if (rule.selectorRole === 'cardGradientEdge')      sel = expand('::after');
         if (sel) css += `\n${sel} {\n${engine.cssFromDeclarations(rule.declarations, imp)}\n}\n`;
       }
     }
