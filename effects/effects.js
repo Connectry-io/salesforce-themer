@@ -253,7 +253,12 @@ body.sf-themer-fx-hover .slds-popover {
   if (config.ambientGlow) {
     _appendEngineEffect('ambientGlow', {
       brandButton: 'body.sf-themer-fx-glow .slds-button_brand,\nbody.sf-themer-fx-glow .slds-button--brand',
-      navActive:   'body.sf-themer-fx-glow .slds-context-bar__item.slds-is-active',
+      // Active tab coverage across the three common SLDS tab patterns:
+      // app nav bar (.slds-context-bar__item.slds-is-active), record
+      // subtabs (Details/Activity/Chatter — .slds-tabs_default__item.slds-is-active,
+      // .slds-tabs_scoped__item.slds-is-active), and workspace pinned
+      // tabs (.slds-context-bar__item_tab.slds-is-active).
+      navActive:   'body.sf-themer-fx-glow .slds-context-bar__item.slds-is-active,\nbody.sf-themer-fx-glow .slds-context-bar__item_tab.slds-is-active,\nbody.sf-themer-fx-glow .slds-tabs_default__item.slds-is-active,\nbody.sf-themer-fx-glow .slds-tabs_default__item.slds-active,\nbody.sf-themer-fx-glow .slds-tabs_scoped__item.slds-is-active,\nbody.sf-themer-fx-glow .slds-tabs--default__item.slds-active',
       inputFocus:  'body.sf-themer-fx-glow .slds-input:focus,\nbody.sf-themer-fx-glow .slds-textarea:focus,\nbody.sf-themer-fx-glow .slds-select:focus',
     });
   }
