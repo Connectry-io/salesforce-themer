@@ -5389,21 +5389,13 @@
       _updateGuideFaviconPreview();
     });
 
-    // "Apply to my tabs now" button — pushes the custom favicon to all SF tabs live
+    // "Apply to my tabs now" — EPHEMERAL. Pushes the config to all open SF
+    // tabs as a live preview but does NOT write to storage. The tab's next
+    // reload / navigation re-applies the user's saved favicon automatically.
     document.getElementById('guideFaviconApplyBtn')?.addEventListener('click', async () => {
       const btn = document.getElementById('guideFaviconApplyBtn');
       const config = { ..._guideFaviconState };
 
-      // Save to storage so it persists
-      await chrome.storage.sync.set({ faviconEnabled: true, faviconConfig: config });
-
-      // Update the editor toolbar toggle to reflect enabled state
-      const toggle = document.getElementById('editorFaviconToggle');
-      if (toggle) toggle.checked = true;
-      const slot = document.getElementById('editorFaviconSlot');
-      if (slot) slot.classList.remove('is-off');
-
-      // Push to all active SF tabs
       try {
         const tabs = await chrome.tabs.query({
           url: ['https://*.lightning.force.com/*', 'https://*.my.salesforce.com/*', 'https://*.salesforce.com/*'],
@@ -5413,11 +5405,10 @@
         }
       } catch (_) {}
 
-      // Visual feedback
       if (btn) {
-        btn.textContent = 'Applied!';
+        btn.textContent = 'Applied (until reload)';
         btn.classList.add('is-success');
-        setTimeout(() => { btn.textContent = 'Apply to my tabs now'; btn.classList.remove('is-success'); }, 2000);
+        setTimeout(() => { btn.textContent = 'Apply to my Salesforce tabs'; btn.classList.remove('is-success'); }, 2000);
       }
     });
 

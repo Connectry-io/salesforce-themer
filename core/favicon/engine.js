@@ -46,18 +46,10 @@
 
   const DEFAULT_CONFIG = { shape: 'circle', color: '#4A6FA5', icon: 'connectry' };
 
-  // Per-theme default icon. When a theme has no explicit favicon config, pick
-  // the thematic icon (arctic → snowflake, ember → flame, etc.) instead of
-  // showing the Connectry glyph on every preset.
-  const THEME_ICON_MAP = {
-    connectry: 'connectry', 'connectry-dark': 'connectry',
-    arctic: 'snowflake', midnight: 'moon', ember: 'flame',
-    forest: 'leaf', ocean: 'waves', sunset: 'star',
-    lavender: 'diamond', rose: 'heart', slate: 'shield',
-    tron: 'bolt', terminal: 'bolt', solarized: 'circle',
-    nord: 'snowflake', sakura: 'heart', obsidian: 'diamond',
-    'salesforce-lightning': 'bolt', 'salesforce-cosmos': 'star',
-  };
+  // Monogram system: every preset uses the Connectry glyph tinted with its
+  // accent color. Pro users override via an explicit `favicon` config on
+  // their custom theme (including image uploads, future).
+  const THEME_ICON_MAP = {};
 
   /**
    * Resolve the default favicon config for a theme when it hasn't set one
