@@ -3531,6 +3531,8 @@
       await chrome.storage.sync.set({ faviconEnabled: enabled });
       slot.classList.toggle('is-off', !enabled);
       _updatePreviewFavicon(enabled);
+      // Preview now reflects disabled state: SF cloud everywhere.
+      _updateEditorFaviconPreview();
 
       // Push to all active SF tabs
       try {
@@ -3624,14 +3626,24 @@
     field.querySelectorAll('input').forEach(i => { i.disabled = disabled; });
   }
 
+  // Salesforce's own favicon, rendered via our engine so the preview swaps
+  // cleanly when the "Replace the SF cloud" toggle is off.
+  function _renderSFDefaultFavicon(size) {
+    return self.ConnectryFavicon.buildSVG({ shape: 'none', icon: 'cloud', iconColor: '#00A1E0' }, size);
+  }
+
   function _updateEditorFaviconPreview() {
     const { shape, color, icon, iconColor } = _editorFaviconState;
+    const enabled = document.getElementById('editorFaviconToggle')?.checked !== false;
+    const render = (size) => enabled
+      ? _renderFaviconSVG(shape, color, icon, size, iconColor)
+      : _renderSFDefaultFavicon(size);
     const miniIcon = document.getElementById('editorFaviconPreview');
-    if (miniIcon) miniIcon.innerHTML = _renderFaviconSVG(shape, color, icon, 14, iconColor);
+    if (miniIcon) miniIcon.innerHTML = render(18);
     const hero = document.getElementById('editorFaviconLivePreview');
-    if (hero) hero.innerHTML = _renderFaviconSVG(shape, color, icon, 72, iconColor);
+    if (hero) hero.innerHTML = render(56);
     const tabFav = document.getElementById('previewBrowserTabFav');
-    if (tabFav) tabFav.innerHTML = _renderFaviconSVG(shape, color, icon, 10, iconColor);
+    if (tabFav) tabFav.innerHTML = render(10);
   }
 
   function _loadEditorFaviconState(customTheme) {

@@ -40,7 +40,7 @@
     { id: 'diamond', label: 'Diamond', svg: '<path d="M16 3l11 13-11 13L5 16z" fill="white" opacity="0.85"/>' },
     { id: 'shield', label: 'Shield', svg: '<path d="M16 3L5 8v7c0 7 5 12 11 14 6-2 11-7 11-14V8L16 3z" fill="white" opacity="0.85"/>' },
     { id: 'heart', label: 'Heart', svg: '<path d="M16 28s-10-6-10-14a5.5 5.5 0 0111 0 5.5 5.5 0 0111 0c0 8-12 14-12 14z" fill="white" opacity="0.9" transform="translate(0,-2)"/>' },
-    { id: 'circle', label: 'Circle', svg: '<circle cx="16" cy="16" r="8" fill="white" opacity="0.85"/>' },
+    { id: 'cloud', label: 'Cloud', svg: '<path d="M23 14.5c-.6 0-1.2.1-1.8.3a5.5 5.5 0 00-10.3-1 4 4 0 00-.7 7.9 3.8 3.8 0 003.8 3.8h9a5.5 5.5 0 000-11z" fill="white"/>' },
     { id: 'waves', label: 'Waves', svg: '<path d="M4 12c4-3 8 3 12 0s8 3 12 0M4 18c4-3 8 3 12 0s8 3 12 0" stroke="white" stroke-width="2.5" stroke-linecap="round" fill="none" opacity="0.85"/>' },
   ];
 

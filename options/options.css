@@ -2689,15 +2689,23 @@
   display: flex;
   align-items: center;
   gap: 5px;
-  flex: 1;
+  /* Name-wrap: content-width so favicon and badge can sit naturally after.
+     Desc-wrap: full-width so the description has breathing room. */
   min-width: 0;
 }
+.editor-live-name-wrap { flex: 0 1 auto; }
+.editor-live-desc-wrap { flex: 1; }
 .editor-live-card .editor-name-input {
   font-size: 14px;
   font-weight: 600;
   padding: 2px 6px;
-  min-width: 0;
-  flex: 1;
+  /* Grow to fit the title. Chrome 123+ sizes to content automatically;
+     min/max clamp so tiny titles still look like an input and obscenely
+     long ones don't shove the favicon off-screen. */
+  field-sizing: content;
+  min-width: 8ch;
+  max-width: 100%;
+  flex: 0 1 auto;
 }
 .editor-live-card .editor-desc-input {
   font-size: 11px;
@@ -2720,17 +2728,23 @@
   color: var(--cx-text-subtle);
   white-space: nowrap;
 }
-/* Read-only favicon display in editor mini card header */
+/* Read-only favicon display in editor mini card header — no chrome, just
+   the glyph, pinned to the far right so it reads as the tab icon preview. */
 .editor-live-favicon {
   display: inline-flex;
   align-items: center;
   margin-left: auto;
-  padding: 2px;
-  border: 1px solid var(--cx-border);
-  border-radius: var(--cx-radius-sm);
+  flex-shrink: 0;
 }
 .editor-live-favicon-display { display: inline-flex; }
-.editor-live-favicon-display svg { width: 14px; height: 14px; display: block; }
+.editor-live-favicon-display svg { width: 18px; height: 18px; display: block; }
+
+/* Favicon panel: center the live preview, keep it modest */
+#editorFaviconPanel .guide-favicon-hero {
+  width: 56px; height: 56px;
+  margin: 0 auto;
+}
+#editorFaviconPanel .guide-favicon-hero svg { width: 56px; height: 56px; }
 
 /* Favicon panel: enable-row */
 .editor-favicon-enable-row {
