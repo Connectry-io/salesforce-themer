@@ -3914,9 +3914,22 @@ body.is-premium .builder-overflow-premium-badge { display: none !important; }
     0 2px 6px rgba(0, 0, 0, calc(0.05 * var(--fx-hover-lift-mult, 1)));
 }
 
-/* Ambient glow on the brand button (closest to engine behaviour) */
+/* Ambient glow on the brand button (closest to engine behaviour).
+   Needs overflow:visible on the card AND the button's toolbar row so
+   the glow isn't scissored by their rounded-corner clips. Border
+   shimmer's own rule re-forces overflow:clip when both are active;
+   that's intentional — shimmer wins because its animation requires
+   the clip. */
+.editor-preview-frame[data-fx-ambient-glow="on"] .preview-card,
+.editor-preview-frame[data-fx-ambient-glow="on"] .preview-card-body,
+.editor-preview-frame[data-fx-ambient-glow="on"] .preview-card-footer,
+.editor-preview-frame[data-fx-ambient-glow="on"] .preview-actions {
+  overflow: visible;
+}
 .editor-preview-frame[data-fx-ambient-glow="on"] .preview-btn-brand {
   animation: editor-fx-glow calc(3s * var(--fx-ambient-glow-speed, 1)) ease-in-out infinite;
+  position: relative;
+  z-index: 1;
 }
 @keyframes editor-fx-glow {
   0%, 100% { box-shadow: 0 0 calc(6px * var(--fx-ambient-glow-mult, 1)) rgba(var(--fx-accent-rgb), calc(0.18 * var(--fx-ambient-glow-mult, 1))); }
