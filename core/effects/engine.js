@@ -347,21 +347,28 @@ function buildAmbientGlowRules(intensityLevel, accentHex, scale) {
   const s = typeof scale === 'number' ? scale : 1.0;
   const k = mult * s;
 
-  const glowMin = (0.06 * k).toFixed(3);
-  const glowMax = (0.15 * k).toFixed(3);
+  // IMPORTANT: brand buttons in SLDS ship with a default box-shadow whose
+  // static rule carries `!important`. @keyframes values cannot use
+  // !important (spec forbids it), so an animated box-shadow lost to SLDS
+  // silently. Switch to `filter: drop-shadow()` for the button pulse —
+  // SLDS doesn't style filter on buttons, so no collision. Also doubled
+  // the opacity math because 0.15 peak on same-color-accent was borderline
+  // even without the override problem.
+  const glowMin = (0.25 * k).toFixed(3);
+  const glowMax = (0.55 * k).toFixed(3);
   const glowSpeed = Math.round(3000 / mult);
   const focusSpeed = Math.round(2500 / mult);
-  const innerA = (0.08 * k).toFixed(3);
+  const innerA = (0.16 * k).toFixed(3);
   const innerPx = Math.round(15 * mult);
 
   const prelude = `
 @keyframes sf-themer-glow-pulse {
-  0%, 100% { box-shadow: 0 0 ${Math.round(10 * mult)}px rgba(${accentRgb}, ${glowMin}); }
-  50%      { box-shadow: 0 0 ${Math.round(20 * mult)}px rgba(${accentRgb}, ${glowMax}); }
+  0%, 100% { filter: drop-shadow(0 0 ${Math.round(6 * mult)}px rgba(${accentRgb}, ${glowMin})); }
+  50%      { filter: drop-shadow(0 0 ${Math.round(14 * mult)}px rgba(${accentRgb}, ${glowMax})); }
 }
 @keyframes sf-themer-focus-glow {
-  0%, 100% { box-shadow: 0 0 0 2px rgba(${accentRgb}, ${(0.2 * s).toFixed(3)}); }
-  50%      { box-shadow: 0 0 0 4px rgba(${accentRgb}, ${(0.12 * s).toFixed(3)}),
+  0%, 100% { box-shadow: 0 0 0 2px rgba(${accentRgb}, ${(0.35 * s).toFixed(3)}); }
+  50%      { box-shadow: 0 0 0 4px rgba(${accentRgb}, ${(0.25 * s).toFixed(3)}),
                           0 0 ${innerPx}px rgba(${accentRgb}, ${innerA}); }
 }`.trim();
 
