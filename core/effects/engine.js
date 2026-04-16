@@ -598,14 +598,14 @@ function buildAuroraRules(intensityLevel, accentHex, opts) {
   const s = (opts && typeof opts.scale === 'number') ? opts.scale : 1.0;
   const isDark = !!(opts && opts.isDark);
 
-  // Aurora uses mix-blend-mode:soft-light to tint content below instead of
-  // overlaying solid color. At that blend mode, opacity controls intensity
-  // of the tint; higher values become painted-on rather than lighting-like.
-  // 0.55 base reads as subtle-ambient at medium; 0.88 at strong feels like
-  // lit from behind by the blobs. Blur also scaled up (60 → 120px) for
-  // fullscreen scale — 60px reads as an edge softener on 1920px viewports,
-  // 120px lets blob colors diffuse broadly like real ambient lighting.
-  const auroraOpacity = (0.55 * mult * s).toFixed(3);
+  // Aurora uses plain alpha compositing (no mix-blend-mode). Tried
+  // soft-light (too subtle on any bg) and overlay (invisible on white
+  // cards because overlay = screen for base > 50% gray, and screen with
+  // any color on white = white). Plain alpha is boring but predictable:
+  // tints whatever's below with the blob color at the given opacity.
+  // 0.28 base keeps text readable — peak at strong is 0.45 which reads
+  // as distinct colored regions on cards. Preview uses same model.
+  const auroraOpacity = (0.28 * mult * s).toFixed(3);
   const auroraSpeed = Math.round(25000 / mult);
   const [a1, a2, a3] = _deriveAuroraBlobs(accentHex, isDark);
 
@@ -644,14 +644,11 @@ function buildAuroraRules(intensityLevel, accentHex, opts) {
           'background-size': '200% 200%',
           animation: `sf-themer-aurora ${auroraSpeed}ms ease-in-out infinite`,
           filter: 'blur(120px)',
-          // Paint aurora above SF content (z-index max) and blend it into
-          // the pixels underneath. SF-DOM-MAP observation (2026-04-16): on
-          // light-bg custom themes, `soft-light` blend was near-invisible
-          // even at 0.55 opacity — its math produces tiny luminance shifts.
-          // `overlay` multiplies shadows and screens highlights, giving
-          // meaningful contrast on both light and dark theme backgrounds
-          // while keeping the "lit-from-behind" ambient feel.
-          'mix-blend-mode': 'overlay',
+          // No blend mode — plain alpha compositing. See SF-DOM-MAP
+          // 2026-04-16 blend-mode table: overlay fails on white cards
+          // (screen math returns white regardless of blend color),
+          // soft-light too subtle, multiply/screen are one-direction-only.
+          // Plain alpha tints predictably on any bg.
         },
       },
     ],
