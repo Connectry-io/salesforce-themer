@@ -782,9 +782,11 @@
   letter-spacing: 0.03em;
   text-transform: uppercase;
   flex-shrink: 0;
-  /* Always pin to the right edge of the card header — consistent across
-     every surface (gallery, popup, anatomy, builder mini card). */
+  /* Pin to the right of the card header, but nudge in slightly so the
+     badge aligns with the rounded edge of the 4th color swatch rather
+     than the raw card-header bounds. */
   margin-left: auto;
+  margin-right: 4px;
 }
 .theme-category-badge.light {
   color: var(--cx-text-subtle);
