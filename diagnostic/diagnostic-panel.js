@@ -375,6 +375,9 @@
             <button class="diag-icon-btn" data-action="toggleAdvancedMode" title="Advanced mode: rich enrichment + screenshot for AI suggestions" style="font-size:9px;font-weight:600;letter-spacing:0.04em;width:auto;padding:0 8px;">
               <span data-advanced-label>ADV</span>
             </button>
+            <button class="diag-icon-btn" data-action="dumpEffects" title="Dump effects state to clipboard (for Claude debugging)" style="font-size:9px;font-weight:600;letter-spacing:0.04em;width:auto;padding:0 8px;">
+              FX
+            </button>
             <button class="diag-icon-btn" data-action="togglePanelTheme" title="Toggle light/dark panel">
               <svg viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="5" stroke="currentColor" stroke-width="1.4"/><path d="M7 2a5 5 0 0 1 0 10z" fill="currentColor"/></svg>
             </button>
@@ -1413,6 +1416,10 @@
         if (action === 'close') this.close();
         else if (action === 'minimize') this.minimize();
         else if (action === 'togglePanelTheme') this._togglePanelTheme();
+        else if (action === 'dumpEffects') {
+          try { window.__sfThemerDiag?.dumpEffectsState?.(); }
+          catch (err) { console.warn('[SFT] dumpEffects failed', err); }
+        }
         else if (action === 'toggleAdvancedMode') this._toggleAdvancedMode(btn);
         else if (action === 'toggleQAMode') this._toggleQAMode(btn);
         else if (action === 'scanAll') this._runScanAll(btn);
