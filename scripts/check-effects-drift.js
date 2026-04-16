@@ -24,13 +24,21 @@ const REPO = path.resolve(__dirname, '..');
 // Effects that have been migrated to core/effects/engine.js.
 // As each effect is migrated, add it here; the detector's assertions become
 // active for that effect across all surfaces.
+// All 9 effects now flow through core/effects/engine.js. Each effect has a
+// forbidden-pattern rule below that fires if its per-surface math or
+// class/state reappears outside the engine (backgroundPattern) or the
+// shared canvas runtime (aurora, particles, cursorTrail).
 const MIGRATED_EFFECTS = [
   'backgroundPattern',
   'hoverLift',
   'ambientGlow',
   'borderEffect',
+  'borderShimmer',
+  'gradientBorders',
   'neonFlicker',
   'aurora',
+  'particles',
+  'cursorTrail',
 ];
 
 // Forbidden patterns per migrated effect. Each entry describes where
@@ -85,11 +93,74 @@ const RULES = {
       reason: 'neonFlicker keyframes must come from engine.renderRules cssPrelude',
     },
   ],
+  borderShimmer: [
+    // Legacy boolean was subsumed by borderEffect='shimmer'. Any new
+    // handwritten keyframe would also be caught by the borderEffect rule
+    // above — this entry keeps borderShimmer explicitly listed as migrated.
+    {
+      file: 'effects/effects.js',
+      forbid: /@keyframes\s+sf-themer-shimmer\b/,
+      reason: 'borderShimmer keyframes must come from engine.renderRules cssPrelude (via borderEffect)',
+    },
+  ],
+  gradientBorders: [
+    {
+      file: 'effects/effects.js',
+      forbid: /@keyframes\s+sf-themer-border-rotate\b/,
+      reason: 'gradientBorders keyframes must come from engine.renderRules cssPrelude (via borderEffect)',
+    },
+  ],
   aurora: [
+    // Canvas-based since 2026-04-16. CSS keyframes, the 200%-viewport fixed
+    // body::before, and any local accent-to-blob palette helper are all drift
+    // — they were the shapes that crashed SF pages under Aura DOM mutation.
     {
       file: 'effects/effects.js',
       forbid: /@keyframes\s+sf-themer-aurora\b/,
-      reason: 'aurora keyframes must come from engine.renderRules cssPrelude',
+      reason: 'aurora is canvas-based; CSS keyframes for aurora indicate the CSS-gradient regression',
+    },
+    {
+      file: 'effects/effects.js',
+      forbid: /_deriveAuroraColors\s*\(/,
+      reason: 'aurora blob colors are derived in core/effects/engine.js (_deriveAuroraBlobs); no local helper in effects.js',
+    },
+    {
+      file: 'effects/effects.js',
+      // Guard against accidentally disabling the canvas path again by
+      // re-wrapping the block in `if (false && ...)`.
+      forbid: /if\s*\(\s*false\s*&&\s*config\.aurora\b/,
+      reason: 'aurora canvas path must stay enabled; remove the `false &&` guard',
+    },
+  ],
+  particles: [
+    // Renderer class + config math moved to effects/canvas-runtime.js + engine.
+    // Any reappearance in effects.js is drift.
+    {
+      file: 'effects/effects.js',
+      forbid: /class\s+SFThemerParticles\b/,
+      reason: 'SFThemerParticles renderer lives in effects/canvas-runtime.js (ParticleRenderer), not effects.js',
+    },
+    {
+      file: 'effects/effects.js',
+      forbid: /const\s+PARTICLE_INTENSITY\s*=/,
+      reason: 'PARTICLE_INTENSITY (density/speed/opacity ladder) lives in core/effects/engine.js, not effects.js',
+    },
+    {
+      file: 'effects/effects.js',
+      forbid: /function\s+buildParticleRuntimeConfig\b/,
+      reason: 'particle runtime config is produced by engine.renderRules(\'particles\', ...); remove this helper',
+    },
+  ],
+  cursorTrail: [
+    {
+      file: 'effects/effects.js',
+      forbid: /class\s+SFThemerCursorTrail\b/,
+      reason: 'SFThemerCursorTrail renderer lives in effects/canvas-runtime.js (CursorTrailRenderer), not effects.js',
+    },
+    {
+      file: 'effects/effects.js',
+      forbid: /function\s+buildCursorTrailRuntimeConfig\b/,
+      reason: 'cursorTrail runtime config is produced by engine.renderRules(\'cursorTrail\', ...); remove this helper',
     },
   ],
 };

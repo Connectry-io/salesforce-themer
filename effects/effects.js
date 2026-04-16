@@ -17,122 +17,21 @@
 'use strict';
 
 // ─── Intensity helper ────────────────────────────────────────────────────────
+// INTENSITY_MULT kept only for legacy fallback compatibility in internal call
+// sites that haven't been migrated off the old helper. The canonical ladder
+// lives in core/effects/engine.js (INTENSITY_LADDER). Particle intensity
+// (density/speed/opacity tuple) moved there too — see engine.PARTICLE_INTENSITY.
 
 const INTENSITY_MULT = { subtle: 0.5, medium: 1.0, strong: 1.5 };
-
-function _intensityMult(config, effect, fallback = 'medium') {
-  const lvl = (config && config[effect + 'Intensity']) || fallback;
-  return INTENSITY_MULT[lvl] || 1.0;
-}
-
-// Particle density/speed/opacity derived from intensity level
-const PARTICLE_INTENSITY = {
-  subtle: { density: 25, speed: 0.6, opacity: 0.35 },
-  medium: { density: 50, speed: 1.0, opacity: 0.5 },
-  strong: { density: 100, speed: 1.3, opacity: 0.7 },
-};
 
 
 // ─── Color utilities ────────────────────────────────────────────────────────
 
-function _hexToRgb(hex) {
-  if (!hex || typeof hex !== 'string') return '128, 128, 128';
-  const clean = hex.replace('#', '');
-  if (clean.length === 3) {
-    const r = parseInt(clean[0] + clean[0], 16);
-    const g = parseInt(clean[1] + clean[1], 16);
-    const b = parseInt(clean[2] + clean[2], 16);
-    return `${r}, ${g}, ${b}`;
-  }
-  if (clean.length === 6) {
-    const r = parseInt(clean.slice(0, 2), 16);
-    const g = parseInt(clean.slice(2, 4), 16);
-    const b = parseInt(clean.slice(4, 6), 16);
-    return `${r}, ${g}, ${b}`;
-  }
-  return '128, 128, 128';
-}
-
-function _parseHex(hex) {
-  if (!hex || typeof hex !== 'string') return null;
-  const clean = hex.replace('#', '');
-  if (clean.length === 3) {
-    return {
-      r: parseInt(clean[0] + clean[0], 16),
-      g: parseInt(clean[1] + clean[1], 16),
-      b: parseInt(clean[2] + clean[2], 16),
-    };
-  }
-  if (clean.length === 6) {
-    return {
-      r: parseInt(clean.slice(0, 2), 16),
-      g: parseInt(clean.slice(2, 4), 16),
-      b: parseInt(clean.slice(4, 6), 16),
-    };
-  }
-  return null;
-}
-
-function _rgbToHsl(r, g, b) {
-  r /= 255; g /= 255; b /= 255;
-  const max = Math.max(r, g, b), min = Math.min(r, g, b);
-  const l = (max + min) / 2;
-  let h = 0, s = 0;
-  if (max !== min) {
-    const d = max - min;
-    s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
-    if (max === r) h = ((g - b) / d + (g < b ? 6 : 0)) / 6;
-    else if (max === g) h = ((b - r) / d + 2) / 6;
-    else h = ((r - g) / d + 4) / 6;
-  }
-  return { h: h * 360, s: s * 100, l: l * 100 };
-}
-
-function _hslToHex(h, s, l) {
-  h /= 360; s /= 100; l /= 100;
-  let r, g, b;
-  if (s === 0) {
-    r = g = b = l;
-  } else {
-    const hue2rgb = (p, q, t) => {
-      if (t < 0) t += 1;
-      if (t > 1) t -= 1;
-      if (t < 1/6) return p + (q - p) * 6 * t;
-      if (t < 1/2) return q;
-      if (t < 2/3) return p + (q - p) * (2/3 - t) * 6;
-      return p;
-    };
-    const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
-    const p = 2 * l - q;
-    r = hue2rgb(p, q, h + 1/3);
-    g = hue2rgb(p, q, h);
-    b = hue2rgb(p, q, h - 1/3);
-  }
-  const toHex = v => Math.round(v * 255).toString(16).padStart(2, '0');
-  return '#' + toHex(r) + toHex(g) + toHex(b);
-}
-
-/**
- * Derive a 3-stop aurora color palette from theme accent.
- * Uses HSL rotations to create related colors that feel intentional.
- */
-function _deriveAuroraColors(accent, isDark) {
-  const rgb = _parseHex(accent);
-  if (!rgb) {
-    return isDark
-      ? ['#1a1a2e', '#16213e', '#0f3460']
-      : ['#e8f4fd', '#f0e6ff', '#e6fff0'];
-  }
-  const hsl = _rgbToHsl(rgb.r, rgb.g, rgb.b);
-  const s = isDark ? Math.max(40, hsl.s) : Math.max(25, Math.min(50, hsl.s));
-  const baseL = isDark ? 18 : 88;
-
-  return [
-    _hslToHex(hsl.h, s, baseL),
-    _hslToHex((hsl.h + 60) % 360, s, baseL + (isDark ? 4 : -2)),
-    _hslToHex((hsl.h + 180) % 360, s, baseL + (isDark ? 2 : -1)),
-  ];
-}
+// Color helpers moved to core/effects/engine.js (deriveColors, hexToRgbCsv,
+// rgbToHsl, hslToRgbCsv, _hexToHsl, _hslToHex, _deriveAuroraBlobs).
+// Aurora-specific color derivation is engine-side only now that the effect
+// is canvas-based — the old local helpers here produced *different* blob
+// palettes than the engine, which was drift waiting to happen.
 
 
 // ─── Effect CSS Generator ─────────────────────────────────────────────────────
@@ -160,7 +59,6 @@ function generateEffectsCSS(config, themeColors) {
 
   const c = themeColors || {};
   const accent = c.accent || '#4a6fa5';
-  const accentRgb = _hexToRgb(accent);
   const isDark = c.colorScheme === 'dark';
 
   let css = `/* Salesforce Themer — Effects Layer */\n`;
@@ -325,65 +223,49 @@ body.sf-themer-fx-hover .slds-popover {
     }
   }
 
-  // ─── Aurora Background ────────────────────────────────────────────────────
-  // DISABLED on SF (2026-04-16). CSS gradient animation on a 200%-viewport
-  // fixed element crashes SF pages with heavy Aura/LWC DOM mutation —
-  // tried blur/no-blur, blend-modes, z-index strategies, wrapper
-  // transparentizing; every approach either crashed or was invisible.
+  // ─── Aurora Background (canvas-backed, via core engine) ──────────────────
+  // Aurora now renders on a <canvas> managed by effects/canvas-runtime.js.
+  // The CSS side only needs to:
+  //   1. Make body a stacking context (so the canvas at z-index:-1 stays
+  //      scoped to body and doesn't get pushed behind html).
+  //   2. Transparentize SF's viewport-filling wrappers so the canvas
+  //      behind them is visible in the gaps between cards.
+  // The blob painting + animation live in canvas-runtime.js — see the
+  // runtimeConfig returned by engine.renderRules('aurora', ...).
   //
-  // Aurora will be reimplemented as a CANVAS-based effect (same batch as
-  // particles + cursorTrail) in the next session. Canvas is GPU-optimized
-  // for animated colored blobs — no CSS recomposite, no layout thrash.
+  // Why this is different from the 2026-04-16 CSS attempt: canvas avoids
+  // the full-viewport CSS animation + composite cost that stalled Aura
+  // pages. The expensive repaint-every-DOM-mutation cycle is gone; RAF
+  // draws at the browser's natural cadence and pauses on visibilitychange.
   //
-  // Preview rendering in Builder/Guide is unaffected (works fine there).
-  // Body class sf-themer-fx-aurora is still added so the toggle state
-  // persists; it just doesn't emit any CSS for the SF page.
-  if (false && config.aurora) {
+  // Transparentized layers (from SF-DOM-MAP 2026-04-16): .flexipagePage,
+  // .sellerHomeContainer, .forceRecordLayout, .slds-template_default.
+  // .oneContent / .responsiveContents deliberately NOT transparentized —
+  // they carry theme-engine bg colors for cards.
+  if (config.aurora) {
     const ir = engine && engine.renderRules('aurora', config, accent, { scale: 1.0, isDark });
     if (ir && ir.cssRules) {
       const imp = { important: true };
-      if (ir.cssPrelude) css += `\n/* ─── aurora prelude (engine) ─── */\n${ir.cssPrelude}\n`;
-      const rule = ir.cssRules.find(r => r.selectorRole === 'bodyWrapper');
-      if (rule) {
-        // Aurora paints BEHIND the cards, visible in the gap regions
-        // between them. For that to work, SF's viewport-filling wrappers
-        // have to be made transparent — otherwise they paint opaque on
-        // top of body::before and aurora is invisible.
-        //
-        // Transparentized layers (from SF-DOM-MAP 2026-04-16):
-        //   body.sf-themer-fx-aurora          — theme-set bg
-        //   .flexipagePage                    — Lightning page container
-        //   .sellerHomeContainer              — Home-specific wrapper
-        //   .responsiveContents               — generic wrapper
-        //   .forceRecordLayout                — record-page wrapper
-        //   .slds-template_default            — layout template
-        // Cards (.slds-card, .forceRecordCard, .forceBaseCard) are NOT
-        // touched — they keep their solid bg. Aurora only shows in
-        // empty gaps between them.
-        const rect = engine.cssFromDeclarations(rule.declarations, imp);
+      const bodyRule = ir.cssRules.find(r => r.selectorRole === 'bodyWrapper');
+      const occluderRule = ir.cssRules.find(r => r.selectorRole === 'occluderWrapper');
+      css += `\n/* ─── Aurora Background (intensity ${(config.auroraIntensity || 'medium')}, canvas via core engine) ─── */\n`;
+      if (bodyRule) {
         css += `
-/* ─── Aurora Background (intensity ${(config.auroraIntensity || 'medium')}, via core engine) ─── */
-
 body.sf-themer-fx-aurora {
-  position: relative !important;
-  z-index: 0 !important;
-  background: transparent !important;
-  background-color: transparent !important;
+${engine.cssFromDeclarations(bodyRule.declarations, imp)}
 }
-
-body.sf-themer-fx-aurora .flexipagePage,
-body.sf-themer-fx-aurora .sellerHomeContainer,
-body.sf-themer-fx-aurora .forceRecordLayout,
-body.sf-themer-fx-aurora .slds-template_default {
-  background: transparent !important;
-  background-color: transparent !important;
-}
-/* .oneContent and .responsiveContents deliberately NOT transparentized —
-   they carry theme-engine bg colors that paint cards/content surfaces.
-   Removing them turns themed cards back to plain white. */
-
-body.sf-themer-fx-aurora::before {
-${rect}
+`;
+      }
+      if (occluderRule) {
+        const occluderSelectors = [
+          'body.sf-themer-fx-aurora .flexipagePage',
+          'body.sf-themer-fx-aurora .sellerHomeContainer',
+          'body.sf-themer-fx-aurora .forceRecordLayout',
+          'body.sf-themer-fx-aurora .slds-template_default',
+        ].join(',\n');
+        css += `
+${occluderSelectors} {
+${engine.cssFromDeclarations(occluderRule.declarations, imp)}
 }
 `;
       }
@@ -399,39 +281,11 @@ ${rect}
     });
   }
 
-  // ─── Cursor Trail (canvas container rules) ────────────────────────────────
-  if (config.cursorTrail) {
-    css += `
-/* ─── Cursor Trail (canvas container rules) ─── */
-
-#sf-themer-fx-canvas {
-  position: fixed !important;
-  top: 0 !important;
-  left: 0 !important;
-  width: 100vw !important;
-  height: 100vh !important;
-  pointer-events: none !important;
-  z-index: 998 !important;
-}
-`;
-  }
-
-  // ─── Particles (canvas container rules) ───────────────────────────────────
-  if (config.particles) {
-    css += `
-/* ─── Particles (canvas container rules) ─── */
-
-#sf-themer-particles {
-  position: fixed !important;
-  top: 0 !important;
-  left: 0 !important;
-  width: 100vw !important;
-  height: 100vh !important;
-  pointer-events: none !important;
-  z-index: 997 !important;
-}
-`;
-  }
+  // Canvas-based effects (aurora, particles, cursorTrail) style their
+  // own canvas inline — see effects/canvas-runtime.js BaseRenderer.init.
+  // No CSS is emitted here for canvas containers; SF sometimes overrides
+  // IDs via its own stylesheets, but the inline-style !important-ish
+  // equivalent (direct element.style properties) wins regardless.
 
   // ─── Background Patterns ──────────────────────────────────────────────────
   // Delegates to core engine (core/effects/engine.js). Adapter maps IR role
@@ -490,422 +344,6 @@ ${decls}
 // scripts/check-effects-drift.js.
 
 
-// ─── Particle System ──────────────────────────────────────────────────────────
-
-class SFThemerParticles {
-  constructor(type, config) {
-    this.type = type;
-    this.config = {
-      color: '#ffffff',
-      density: 50,
-      speed: 1,
-      opacity: 0.6,
-      ...config,
-    };
-    this.particles = [];
-    this.canvas = null;
-    this.ctx = null;
-    this.raf = null;
-    this.paused = false;
-    this.onBattery = false;
-    this._boundVisibility = null;
-    this._resizeTimer = null;
-  }
-
-  init() {
-    document.getElementById('sf-themer-particles')?.remove();
-
-    this.canvas = document.createElement('canvas');
-    this.canvas.id = 'sf-themer-particles';
-    Object.assign(this.canvas.style, {
-      position: 'fixed',
-      top: '0',
-      left: '0',
-      width: '100vw',
-      height: '100vh',
-      pointerEvents: 'none',
-      zIndex: '997',
-      opacity: String(this.config.opacity),
-    });
-    this.canvas.width = window.innerWidth;
-    this.canvas.height = window.innerHeight;
-    document.body.appendChild(this.canvas);
-    this.ctx = this.canvas.getContext('2d');
-
-    this._detectBattery();
-    this._spawn();
-    this._loop();
-
-    this._boundVisibility = () => {
-      this.paused = document.hidden;
-      if (!this.paused && !this.raf) this._loop();
-    };
-    document.addEventListener('visibilitychange', this._boundVisibility);
-
-    window.addEventListener('resize', () => {
-      clearTimeout(this._resizeTimer);
-      this._resizeTimer = setTimeout(() => {
-        if (!this.canvas) return;
-        this.canvas.width = window.innerWidth;
-        this.canvas.height = window.innerHeight;
-      }, 200);
-    });
-  }
-
-  _detectBattery() {
-    if (navigator.getBattery) {
-      navigator.getBattery().then(battery => {
-        this.onBattery = !battery.charging;
-        battery.addEventListener('chargingchange', () => {
-          this.onBattery = !battery.charging;
-          if (this.onBattery && this.particles.length > this.config.density * 0.5) {
-            this.particles.length = Math.floor(this.config.density * 0.5);
-          }
-        });
-      }).catch(() => {});
-    }
-  }
-
-  _getDensity() {
-    const base = this.config.density;
-    return this.onBattery ? Math.floor(base * 0.5) : base;
-  }
-
-  _spawn() {
-    const count = this._getDensity();
-    const w = this.canvas.width;
-    const h = this.canvas.height;
-    this.particles = [];
-    for (let i = 0; i < count; i++) {
-      this.particles.push(this._createParticle(w, h, true));
-    }
-  }
-
-  _createParticle(w, h, randomY) {
-    const speed = this.config.speed;
-    switch (this.type) {
-      case 'snow':
-        return {
-          x: Math.random() * w,
-          y: randomY ? Math.random() * h : -5,
-          r: Math.random() * 3 + 1,
-          vx: (Math.random() * 0.5 - 0.25) * speed,
-          vy: (Math.random() * 1 + 0.3) * speed,
-          wobble: Math.random() * Math.PI * 2,
-        };
-      case 'rain':
-        return {
-          x: Math.random() * w,
-          y: randomY ? Math.random() * h : -20,
-          len: Math.random() * 15 + 5,
-          vy: (Math.random() * 8 + 4) * speed,
-        };
-      case 'matrix':
-        return {
-          x: Math.random() * w,
-          y: randomY ? Math.random() * h : -20,
-          char: String.fromCharCode(0x30A0 + Math.random() * 96),
-          vy: (Math.random() * 3 + 1) * speed,
-          size: Math.random() * 10 + 10,
-          opacity: Math.random(),
-        };
-      case 'dots':
-        return {
-          x: Math.random() * w,
-          y: Math.random() * h,
-          r: Math.random() * 2 + 0.5,
-          vx: (Math.random() * 0.3 - 0.15) * speed,
-          vy: (Math.random() * 0.3 - 0.15) * speed,
-          opacity: Math.random() * 0.5 + 0.2,
-          pulsePhase: Math.random() * Math.PI * 2,
-        };
-      case 'embers':
-        return {
-          x: Math.random() * w,
-          y: randomY ? Math.random() * h : h + 10,
-          r: Math.random() * 2 + 0.5,
-          vx: (Math.random() * 1 - 0.5) * speed,
-          vy: -(Math.random() * 1.5 + 0.5) * speed,
-          opacity: Math.random() * 0.7 + 0.3,
-          life: 1.0,
-          decay: Math.random() * 0.003 + 0.001,
-        };
-      default:
-        return { x: 0, y: 0, r: 1, vx: 0, vy: 0 };
-    }
-  }
-
-  _draw() {
-    const { ctx, canvas, particles, type } = this;
-    if (!ctx || !canvas) return;
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    const color = this.config.color;
-    const w = canvas.width;
-    const h = canvas.height;
-
-    for (let i = particles.length - 1; i >= 0; i--) {
-      const p = particles[i];
-
-      switch (type) {
-        case 'snow':
-          p.wobble += 0.01;
-          p.x += p.vx + Math.sin(p.wobble) * 0.3;
-          p.y += p.vy;
-          ctx.beginPath();
-          ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-          ctx.fillStyle = color;
-          ctx.globalAlpha = 0.7;
-          ctx.fill();
-          if (p.y > h) { p.y = -5; p.x = Math.random() * w; }
-          if (p.x < -5) p.x = w + 5;
-          if (p.x > w + 5) p.x = -5;
-          break;
-
-        case 'rain':
-          p.y += p.vy;
-          ctx.beginPath();
-          ctx.moveTo(p.x, p.y);
-          ctx.lineTo(p.x + 0.5, p.y + p.len);
-          ctx.strokeStyle = color;
-          ctx.globalAlpha = 0.3;
-          ctx.lineWidth = 1;
-          ctx.stroke();
-          if (p.y > h) { p.y = -p.len; p.x = Math.random() * w; }
-          break;
-
-        case 'matrix':
-          p.y += p.vy;
-          p.opacity -= 0.003;
-          ctx.font = `${p.size}px monospace`;
-          ctx.fillStyle = color;
-          ctx.globalAlpha = p.opacity;
-          ctx.fillText(p.char, p.x, p.y);
-          if (p.y > h || p.opacity <= 0) {
-            p.y = -20;
-            p.x = Math.random() * w;
-            p.opacity = 1;
-            p.char = String.fromCharCode(0x30A0 + Math.random() * 96);
-          }
-          break;
-
-        case 'dots': {
-          p.pulsePhase += 0.005;
-          p.x += p.vx;
-          p.y += p.vy;
-          const pulse = 0.5 + Math.sin(p.pulsePhase) * 0.3;
-          ctx.beginPath();
-          ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-          ctx.fillStyle = color;
-          ctx.globalAlpha = p.opacity * pulse;
-          ctx.fill();
-          if (p.x < 0 || p.x > w) p.vx *= -1;
-          if (p.y < 0 || p.y > h) p.vy *= -1;
-          break;
-        }
-
-        case 'embers': {
-          p.x += p.vx + Math.sin(p.life * 10) * 0.3;
-          p.y += p.vy;
-          p.life -= p.decay;
-          if (p.life <= 0) {
-            particles[i] = this._createParticle(w, h, false);
-            break;
-          }
-          const emberR = p.r * p.life;
-          ctx.beginPath();
-          ctx.arc(p.x, p.y, emberR, 0, Math.PI * 2);
-          ctx.fillStyle = color;
-          ctx.globalAlpha = p.opacity * p.life;
-          ctx.fill();
-          ctx.beginPath();
-          ctx.arc(p.x, p.y, emberR * 2, 0, Math.PI * 2);
-          ctx.fillStyle = color;
-          ctx.globalAlpha = p.opacity * p.life * 0.2;
-          ctx.fill();
-          break;
-        }
-      }
-    }
-    ctx.globalAlpha = 1;
-  }
-
-  _loop() {
-    if (this.paused) { this.raf = null; return; }
-    this._draw();
-    this.raf = requestAnimationFrame(() => this._loop());
-  }
-
-  destroy() {
-    if (this.raf) cancelAnimationFrame(this.raf);
-    this.raf = null;
-    if (this._boundVisibility) {
-      document.removeEventListener('visibilitychange', this._boundVisibility);
-    }
-    this.canvas?.remove();
-    this.canvas = null;
-    this.ctx = null;
-    this.particles = [];
-  }
-}
-
-
-// ─── Cursor Trail ─────────────────────────────────────────────────────────────
-
-class SFThemerCursorTrail {
-  constructor(config) {
-    this.config = {
-      color: '#ffffff',
-      length: 20,
-      size: 4,
-      opacity: 0.5,
-      style: 'glow', // glow | comet | sparkle | line
-      ...config,
-    };
-    this.points = [];
-    this.canvas = null;
-    this.ctx = null;
-    this.active = false;
-    this.raf = null;
-    this._boundMove = null;
-    this._boundVisibility = null;
-  }
-
-  init() {
-    document.getElementById('sf-themer-fx-canvas')?.remove();
-
-    this.canvas = document.createElement('canvas');
-    this.canvas.id = 'sf-themer-fx-canvas';
-    Object.assign(this.canvas.style, {
-      position: 'fixed',
-      top: '0',
-      left: '0',
-      width: '100vw',
-      height: '100vh',
-      pointerEvents: 'none',
-      zIndex: '998',
-    });
-    this.canvas.width = window.innerWidth;
-    this.canvas.height = window.innerHeight;
-    document.body.appendChild(this.canvas);
-    this.ctx = this.canvas.getContext('2d');
-
-    this.active = true;
-    this._boundMove = (e) => {
-      this.points.push({ x: e.clientX, y: e.clientY, life: 1.0 });
-      if (this.points.length > this.config.length) this.points.shift();
-    };
-    document.addEventListener('mousemove', this._boundMove, { passive: true });
-
-    this._boundVisibility = () => {
-      if (document.hidden) this.points = [];
-    };
-    document.addEventListener('visibilitychange', this._boundVisibility);
-
-    this._draw();
-
-    window.addEventListener('resize', () => {
-      if (!this.canvas) return;
-      this.canvas.width = window.innerWidth;
-      this.canvas.height = window.innerHeight;
-    });
-  }
-
-  _draw() {
-    if (!this.active || !this.ctx) return;
-    const { ctx, canvas, points } = this;
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    const style = this.config.style || 'glow';
-
-    if (style === 'line' && points.length > 1) {
-      // LINE: continuous stroke through points, tapered by progress
-      for (let i = 1; i < points.length; i++) {
-        const p0 = points[i - 1], p1 = points[i];
-        const progress = i / points.length;
-        ctx.beginPath();
-        ctx.moveTo(p0.x, p0.y);
-        ctx.lineTo(p1.x, p1.y);
-        ctx.strokeStyle = this.config.color;
-        ctx.lineWidth = this.config.size * progress;
-        ctx.lineCap = 'round';
-        ctx.globalAlpha = progress * this.config.opacity;
-        ctx.stroke();
-      }
-    } else {
-      for (let i = 0; i < points.length; i++) {
-        const p = points[i];
-        const progress = (i + 1) / points.length;
-
-        if (style === 'comet') {
-          // COMET: elongated teardrop growing toward the head
-          const size = this.config.size * progress * 2.2;
-          const alpha = progress * this.config.opacity;
-          ctx.beginPath();
-          ctx.arc(p.x, p.y, size, 0, Math.PI * 2);
-          ctx.fillStyle = this.config.color;
-          ctx.globalAlpha = alpha;
-          ctx.fill();
-          // Connect with a line to the previous point for streak effect
-          if (i > 0) {
-            const prev = points[i - 1];
-            ctx.beginPath();
-            ctx.moveTo(prev.x, prev.y);
-            ctx.lineTo(p.x, p.y);
-            ctx.strokeStyle = this.config.color;
-            ctx.lineWidth = size * 0.9;
-            ctx.lineCap = 'round';
-            ctx.globalAlpha = alpha * 0.7;
-            ctx.stroke();
-          }
-        } else if (style === 'sparkle') {
-          // SPARKLE: small bright core + radiating glow halo
-          const size = this.config.size * (0.5 + progress * 0.7);
-          const alpha = progress * this.config.opacity;
-          const grad = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, size * 4);
-          grad.addColorStop(0, this.config.color);
-          grad.addColorStop(0.3, this.config.color);
-          grad.addColorStop(1, 'rgba(255,255,255,0)');
-          ctx.fillStyle = grad;
-          ctx.globalAlpha = alpha;
-          ctx.beginPath();
-          ctx.arc(p.x, p.y, size * 4, 0, Math.PI * 2);
-          ctx.fill();
-        } else {
-          // GLOW (default): original soft dot behavior
-          const size = this.config.size * progress;
-          const alpha = progress * this.config.opacity;
-          ctx.beginPath();
-          ctx.arc(p.x, p.y, size, 0, Math.PI * 2);
-          ctx.fillStyle = this.config.color;
-          ctx.globalAlpha = alpha;
-          ctx.fill();
-        }
-
-        p.life -= 0.02;
-      }
-    }
-
-    // Life decrement for line/other modes not in the inner loop
-    if (style === 'line') {
-      for (const p of points) p.life -= 0.02;
-    }
-    this.points = this.points.filter(p => p.life > 0);
-    ctx.globalAlpha = 1;
-    this.raf = requestAnimationFrame(() => this._draw());
-  }
-
-  destroy() {
-    this.active = false;
-    if (this.raf) cancelAnimationFrame(this.raf);
-    this.raf = null;
-    if (this._boundMove) document.removeEventListener('mousemove', this._boundMove);
-    if (this._boundVisibility) document.removeEventListener('visibilitychange', this._boundVisibility);
-    this.canvas?.remove();
-    this.canvas = null;
-    this.ctx = null;
-    this.points = [];
-  }
-}
-
 
 // ─── Body Class Manager ──────────────────────────────────────────────────────
 
@@ -956,46 +394,53 @@ function applyEffectsClasses(config) {
 
 
 /**
- * Build particle runtime config from effects config + theme.
- * Pulls density/speed/opacity from intensity level; color from theme accent.
+ * Aggregate runtimeConfig across the three canvas-based effects (aurora,
+ * particles, cursorTrail). Consumed by content.js, which passes the result
+ * to SFThemerCanvasRuntime.manager.sync() to mount/unmount canvases and
+ * drive their render loops. Per-effect math lives in core/effects/engine.js
+ * — this function is just a thin aggregator.
+ *
+ * @param {Object} effectsConfig - Active effects config (flat keys)
+ * @param {Object} themeColors   - Current theme colors (.accent, .colorScheme)
+ * @returns {Object} runtimeConfig — keys: aurora? / particles? / cursorTrail?
  */
-function buildParticleRuntimeConfig(effectsConfig, themeColors) {
-  const level = effectsConfig.particlesIntensity || 'medium';
-  const defaults = PARTICLE_INTENSITY[level] || PARTICLE_INTENSITY.medium;
-  return {
-    color: effectsConfig.particleColor || themeColors?.accent || '#ffffff',
-    density: effectsConfig.particleDensity || defaults.density,
-    speed: effectsConfig.particleSpeed || defaults.speed,
-    opacity: effectsConfig.particleOpacity || defaults.opacity,
-  };
+function generateEffectsRuntimeConfig(effectsConfig, themeColors) {
+  if (!effectsConfig) return {};
+  const engine = (typeof self !== 'undefined' && self.SFThemerEffectsEngine) ||
+                 (typeof window !== 'undefined' && window.SFThemerEffectsEngine);
+  if (!engine) return {};
+
+  const accent = (themeColors && themeColors.accent) || '#4a6fa5';
+  const isDark = !!(themeColors && themeColors.colorScheme === 'dark');
+  const runtime = {};
+
+  const aurora = engine.renderRules('aurora', effectsConfig, accent, { scale: 1.0, isDark });
+  if (aurora && aurora.runtimeConfig && aurora.runtimeConfig.aurora) {
+    runtime.aurora = aurora.runtimeConfig.aurora;
+  }
+
+  const particles = engine.renderRules('particles', effectsConfig, accent);
+  if (particles && particles.runtimeConfig && particles.runtimeConfig.particles) {
+    runtime.particles = particles.runtimeConfig.particles;
+  }
+
+  const cursor = engine.renderRules('cursorTrail', effectsConfig, accent);
+  if (cursor && cursor.runtimeConfig && cursor.runtimeConfig.cursorTrail) {
+    runtime.cursorTrail = cursor.runtimeConfig.cursorTrail;
+  }
+
+  return runtime;
 }
 
-/**
- * Build cursor trail runtime config from effects config + theme.
- */
-function buildCursorTrailRuntimeConfig(effectsConfig, themeColors) {
-  const level = effectsConfig.cursorTrailIntensity || 'medium';
-  const m = INTENSITY_MULT[level] || 1.0;
-  return {
-    color: effectsConfig.cursorTrailColor || themeColors?.accent || '#ffffff',
-    length: Math.round(20 * m),
-    size: Math.round(4 * m),
-    opacity: 0.4 + (m - 1) * 0.2,
-    style: effectsConfig.cursorTrailStyle || 'glow',
-  };
-}
 
-
-// Export for content.js + Node tests
+// Export for content.js + Node tests. SFThemerParticles / SFThemerCursorTrail
+// moved to effects/canvas-runtime.js (global.SFThemerCanvasRuntime).
+// PARTICLE_INTENSITY moved to core/effects/engine.js.
 if (typeof module !== 'undefined') {
   module.exports = {
     generateEffectsCSS,
-    SFThemerParticles,
-    SFThemerCursorTrail,
+    generateEffectsRuntimeConfig,
     applyEffectsClasses,
-    buildParticleRuntimeConfig,
-    buildCursorTrailRuntimeConfig,
-    PARTICLE_INTENSITY,
     INTENSITY_MULT,
   };
 }

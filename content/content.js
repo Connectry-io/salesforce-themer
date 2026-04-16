@@ -56,9 +56,8 @@
   const TRANSITION_CLASS = 'sf-themer-transitioning';
   const TRANSITION_DURATION = 150;
 
-  // Effects state
-  let particleSystem = null;
-  let cursorTrailSystem = null;
+  // Effects state — canvas-based effects (aurora, particles, cursorTrail)
+  // are managed by effects/canvas-runtime.js via SFThemerCanvasRuntime.manager.
   let currentEffectsConfig = null;
 
   // Diagnostic panel (lazy-init)
@@ -369,20 +368,24 @@
   }
 
   function destroyCanvasEffects() {
-    if (particleSystem) { particleSystem.destroy(); particleSystem = null; }
-    if (cursorTrailSystem) { cursorTrailSystem.destroy(); cursorTrailSystem = null; }
+    const cr = self.SFThemerCanvasRuntime;
+    if (cr && cr.manager) cr.manager.destroyAll();
   }
 
   /**
    * Apply effects based on config + current theme colors.
+   * Canvas-based effects (aurora, particles, cursorTrail) are delegated to
+   * SFThemerCanvasRuntime.manager.sync(), which diffs desired vs. active and
+   * mounts/unmounts canvases without flashing through a destroy/recreate on
+   * in-place config changes.
    * @param {Object} config - Effects config from resolveEffectsConfig()
    * @param {Object} themeColors - Current theme's color values
    */
   function applyEffects(config, themeColors) {
     currentEffectsConfig = config;
 
-    // Respect prefers-reduced-motion
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (reducedMotion) {
       destroyCanvasEffects();
       removeEffectsStyles();
       if (typeof applyEffectsClasses === 'function') applyEffectsClasses(null);
@@ -400,24 +403,15 @@
       applyEffectsClasses(config);
     }
 
-    // Manage canvas-based effects
-    destroyCanvasEffects();
-
-    if (config && config.particles && config.particles !== false) {
-      const pType = typeof config.particles === 'string' ? config.particles : 'dots';
-      const runtime = typeof buildParticleRuntimeConfig === 'function'
-        ? buildParticleRuntimeConfig(config, themeColors)
-        : { color: themeColors?.accent || '#ffffff', density: 50, speed: 1, opacity: 0.5 };
-      particleSystem = new SFThemerParticles(pType, runtime);
-      particleSystem.init();
-    }
-
-    if (config && config.cursorTrail) {
-      const runtime = typeof buildCursorTrailRuntimeConfig === 'function'
-        ? buildCursorTrailRuntimeConfig(config, themeColors)
-        : { color: themeColors?.accent || '#ffffff', length: 20, size: 4, opacity: 0.5 };
-      cursorTrailSystem = new SFThemerCursorTrail(runtime);
-      cursorTrailSystem.init();
+    // Sync canvas-based effects (aurora, particles, cursorTrail) via the
+    // shared runtime manager. Pass the aggregated runtimeConfig from the
+    // engine adapter; manager diffs and reconciles in-place.
+    const runtime = (typeof generateEffectsRuntimeConfig === 'function')
+      ? generateEffectsRuntimeConfig(config, themeColors)
+      : {};
+    const cr = self.SFThemerCanvasRuntime;
+    if (cr && cr.manager) {
+      cr.manager.sync(runtime, { reducedMotion });
     }
   }
 

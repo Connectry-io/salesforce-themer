@@ -42,6 +42,15 @@ const INTENSITY_LADDER = {
   strong: { mult: 1.6, speed: 0.65 },
 };
 
+// Canvas particle counts/speed/opacity by intensity. Separate from the
+// generic INTENSITY_LADDER because particle feel maps to three independent
+// axes (how many, how fast, how bright), not a single multiplier.
+const PARTICLE_INTENSITY = {
+  subtle: { density: 25,  speed: 0.6, opacity: 0.35 },
+  medium: { density: 50,  speed: 1.0, opacity: 0.5  },
+  strong: { density: 100, speed: 1.3, opacity: 0.7  },
+};
+
 function getIntensity(config, effectId) {
   const level = (config && config[effectId + 'Intensity']) || 'medium';
   return INTENSITY_LADDER[level] || INTENSITY_LADDER.medium;
@@ -83,7 +92,12 @@ const EFFECT_METADATA = {
     name: 'Aurora Background',
     short: 'Slow-moving ambient background',
     supportsIntensity: true,
-    canvasBased: false,
+    // Canvas-based on SF (2026-04-16): CSS gradient animation on a 200%-
+    // viewport fixed element crashed Aura pages under DOM mutation load.
+    // Canvas avoids the CSS recomposite cost. Preview surfaces (Builder,
+    // Guide) still render the CSS variant — they're small frames without
+    // the occluder-wrapper / mutation-pressure problem.
+    canvasBased: true,
   },
   neonFlicker: {
     name: 'Neon Flicker',
@@ -598,76 +612,115 @@ function buildAuroraRules(intensityLevel, accentHex, opts) {
   const s = (opts && typeof opts.scale === 'number') ? opts.scale : 1.0;
   const isDark = !!(opts && opts.isDark);
 
-  // Aurora sits BEHIND cards (adapter transparentizes SF's viewport-
-  // filling wrappers so aurora shows through the gaps between cards).
-  // 0.35 base → 0.56 peak. Higher than that and the 3 blobs merge
-  // into a solid-looking wash; lower and the effect disappears.
-  const auroraOpacity = (0.35 * mult * s).toFixed(3);
-  const auroraSpeed = Math.round(25000 / mult);
+  // Aurora is now CANVAS-based on SF (2026-04-16). The canvas paints at
+  // z-index:-1 behind SF's content; the CSS side only needs to:
+  //   1. Make body a stacking context so the -1 stays scoped
+  //   2. Transparentize body + SF's viewport-filling wrappers so the
+  //      canvas shows through the gaps between cards
+  // The blob rendering itself happens in effects/canvas-runtime.js via
+  // the runtimeConfig below — no CSS keyframes, no expensive filters.
+  const auroraOpacity = Math.min(1, 0.45 * mult * s);
+  const cycleMs = Math.round(25000 / mult);
   const [a1, a2, a3] = _deriveAuroraBlobs(accentHex, isDark);
 
-  // IMPORTANT: do NOT animate filter here. Blur is one of the most
-  // expensive CSS properties — re-running a 120px blur on a 200%-viewport
-  // element every animation frame will stall Chrome and surface a "Page
-  // Unresponsive" prompt. Static blur in the declarations + only animate
-  // background-position. The effect still reads as moving ambient light;
-  // dropping the hue-rotate is an acceptable simplification for stability.
-  const prelude = `
-@keyframes sf-themer-aurora {
-  0%   { background-position: 0% 50%; }
-  50%  { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
-}`.trim();
-
   return {
-    cssPrelude: prelude,
+    cssPrelude: null,
     cssRules: [
+      // Body stacking context + transparent bg so the canvas at z-index:-1
+      // is visible. Compatible with backgroundPattern's bodyWrapper (which
+      // also sets position:relative / z-index:0) — declarations merge.
       { selectorRole: 'bodyWrapper',
         declarations: {
-          content: "''",
-          position: 'fixed',
-          inset: '-50%',
-          // pointer-events:none is load-bearing — aurora paints ABOVE SF
-          // content at a max-ish z-index, so without this every click
-          // would be swallowed by the overlay. Blob gradients fade to
-          // transparent at 50% radius, so between blob centers the layer
-          // is fully see-through; only the blob regions tint content.
-          'pointer-events': 'none',
-          // z-index: -1 puts aurora BEHIND body's content within body's
-          // stacking context. Requires body + the viewport-filling
-          // wrappers (.flexipagePage, .sellerHomeContainer, etc.) to be
-          // transparentized by the SF adapter so aurora can peek through
-          // the gaps between cards. Cards keep their opaque bg and paint
-          // above aurora — the exact "behind cards" effect we want.
-          'z-index': '-1',
-          opacity: String(auroraOpacity),
-          // Blob radius 35% (down from 50%) — tighter blobs with clear
-          // gaps between them so the effect reads as 3 distinct colored
-          // regions rather than a solid-color wash.
-          background:
-            `radial-gradient(ellipse at 20% 50%, ${a1} 0%, transparent 35%),` +
-            `radial-gradient(ellipse at 80% 20%, ${a2} 0%, transparent 35%),` +
-            `radial-gradient(ellipse at 50% 80%, ${a3} 0%, transparent 35%)`,
-          'background-size': '200% 200%',
-          animation: `sf-themer-aurora ${auroraSpeed}ms ease-in-out infinite`,
-          // No filter:blur. Tried 120px and 80px — both caused "Page
-          // Unresponsive" on SF pages with heavy DOM mutation (Aura/LWC
-          // constantly update, even a static blur on a GPU-promoted layer
-          // stalls compositing under load). The radial gradients fade to
-          // transparent at 50% radius naturally, which provides the soft-
-          // edge look without needing a filter.
-          // Also dropped :has() on html (was triggering selector match on
-          // every SF DOM mutation — O(n) cost, unacceptable on Aura pages).
-          'will-change': 'background-position',
-          // No blend mode — plain alpha compositing. See SF-DOM-MAP
-          // 2026-04-16 blend-mode table: overlay fails on white cards
-          // (screen math returns white regardless of blend color),
-          // soft-light too subtle, multiply/screen are one-direction-only.
-          // Plain alpha tints predictably on any bg.
+          position: 'relative',
+          'z-index': '0',
+          background: 'transparent',
+          'background-color': 'transparent',
+        },
+      },
+      // SF's opaque viewport-filling wrappers occlude anything at z-index
+      // ≤ 0. Transparentize them so the canvas aurora shows through the
+      // gaps between cards. Cards keep their own bg and paint above.
+      { selectorRole: 'occluderWrapper',
+        declarations: {
+          background: 'transparent',
+          'background-color': 'transparent',
         },
       },
     ],
-    runtimeConfig: null,
+    // Canvas lifecycle manager consumes this. Blobs are defined in
+    // normalized canvas coords (0..1) with a relative radius; the runtime
+    // multiplies by canvas dimensions each frame and drifts the centers
+    // along sine paths to produce the "moving ambient light" effect.
+    runtimeConfig: {
+      aurora: {
+        blobs: [
+          { color: a1, x: 0.2, y: 0.5, radius: 0.6 },
+          { color: a2, x: 0.8, y: 0.2, radius: 0.55 },
+          { color: a3, x: 0.5, y: 0.8, radius: 0.65 },
+        ],
+        opacity: Number(auroraOpacity.toFixed(3)),
+        cycleMs,
+        zIndex: -1,
+      },
+    },
+  };
+}
+
+// ────────────────────────────────────────────────────────────────────────────
+// Particles — canvas particle system. Config math lives here so preset
+// values match across SF + previews. Runtime (canvas-runtime.js) consumes
+// runtimeConfig.particles and spawns/draws per frame.
+// ────────────────────────────────────────────────────────────────────────────
+
+function buildParticlesRules(intensityLevel, style, accentHex, config, scale) {
+  const level = PARTICLE_INTENSITY[intensityLevel] || PARTICLE_INTENSITY.medium;
+  const s = typeof scale === 'number' ? scale : 1.0;
+  // config is the full effects config — lets callers pass overrides
+  // (particleColor, particleDensity, particleSpeed, particleOpacity).
+  const color   = (config && config.particleColor)   || accentHex || '#ffffff';
+  const density = (config && config.particleDensity) || level.density;
+  const speed   = (config && config.particleSpeed)   || level.speed;
+  const opacity = (config && config.particleOpacity) || (level.opacity * s);
+  return {
+    cssPrelude: null,
+    cssRules: [],
+    runtimeConfig: {
+      particles: {
+        type: style || 'snow',
+        color,
+        density,
+        speed,
+        opacity: Number(opacity.toFixed(3)),
+        zIndex: 997,
+      },
+    },
+  };
+}
+
+// ────────────────────────────────────────────────────────────────────────────
+// Cursor Trail — canvas follows the mouse. length/size scale with
+// intensity; style is a shape variant (glow | comet | sparkle | line).
+// ────────────────────────────────────────────────────────────────────────────
+
+function buildCursorTrailRules(intensityLevel, style, accentHex, config) {
+  const mult = (INTENSITY_LADDER[intensityLevel] || INTENSITY_LADDER.medium).mult;
+  const color   = (config && config.cursorTrailColor)   || accentHex || '#ffffff';
+  const length  = Math.max(4, Math.round(20 * mult));
+  const size    = Math.max(1, Math.round(4 * mult));
+  const opacity = (config && config.cursorTrailOpacity) || (0.4 + (mult - 1) * 0.2);
+  return {
+    cssPrelude: null,
+    cssRules: [],
+    runtimeConfig: {
+      cursorTrail: {
+        style: style || 'glow',
+        color,
+        length,
+        size,
+        opacity: Number(Math.max(0.1, Math.min(1, opacity)).toFixed(3)),
+        zIndex: 998,
+      },
+    },
   };
 }
 
@@ -772,6 +825,22 @@ function renderRules(effectId, config, accentHex, opts) {
       if (!config.aurora) return null;
       return buildAuroraRules(intensity, accentHex, { scale, isDark: !!(opts && opts.isDark) });
 
+    case 'particles': {
+      // config.particles is either false/'none' or a style string (snow,
+      // rain, matrix, dots, embers). Accept legacy boolean true as 'dots'.
+      const style = config.particles;
+      if (!style || style === 'none') return null;
+      const particleStyle = typeof style === 'string' ? style : 'dots';
+      return buildParticlesRules(intensity, particleStyle, accentHex, config, scale);
+    }
+
+    case 'cursorTrail': {
+      if (!config.cursorTrail) return null;
+      // cursorTrailStyle: glow | comet | sparkle | line
+      const style = config.cursorTrailStyle || 'glow';
+      return buildCursorTrailRules(intensity, style, accentHex, config);
+    }
+
     // Other effects not yet migrated — fall through to legacy in consumers.
     default:
       return null;
@@ -798,6 +867,7 @@ function cssFromDeclarations(declarations, opts) {
 const API = {
   // Primitives
   INTENSITY_LADDER,
+  PARTICLE_INTENSITY,
   EFFECT_METADATA,
   EFFECT_PAIRING_MATRIX,
   // Helpers
@@ -812,11 +882,13 @@ const API = {
   buildGradientBordersRules,
   buildNeonFlickerRules,
   buildAuroraRules,
+  buildParticlesRules,
+  buildCursorTrailRules,
   // Main adapter API
   renderRules,
   cssFromDeclarations,
   // Version marker — consumers check this exists before using new paths
-  VERSION: '1.0.0',
+  VERSION: '1.1.0',
 };
 
 global.SFThemerEffectsEngine = API;
