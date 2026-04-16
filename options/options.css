@@ -782,6 +782,9 @@
   letter-spacing: 0.03em;
   text-transform: uppercase;
   flex-shrink: 0;
+  /* Always pin to the right edge of the card header — consistent across
+     every surface (gallery, popup, anatomy, builder mini card). */
+  margin-left: auto;
 }
 .theme-category-badge.light {
   color: var(--cx-text-subtle);
