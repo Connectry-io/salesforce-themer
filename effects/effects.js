@@ -325,12 +325,20 @@ body.sf-themer-fx-hover .slds-popover {
     }
   }
 
-  // ─── Aurora Background (via core engine) ──────────────────────────────────
-  // Same z-index fix pattern as backgroundPattern: body::before goes to
-  // z-index: -1 inside body's own stacking context (set below). Drops the
-  // old fragile wrapper-hoisting list; SF has too many wrapper layers to
-  // enumerate reliably.
-  if (config.aurora) {
+  // ─── Aurora Background ────────────────────────────────────────────────────
+  // DISABLED on SF (2026-04-16). CSS gradient animation on a 200%-viewport
+  // fixed element crashes SF pages with heavy Aura/LWC DOM mutation —
+  // tried blur/no-blur, blend-modes, z-index strategies, wrapper
+  // transparentizing; every approach either crashed or was invisible.
+  //
+  // Aurora will be reimplemented as a CANVAS-based effect (same batch as
+  // particles + cursorTrail) in the next session. Canvas is GPU-optimized
+  // for animated colored blobs — no CSS recomposite, no layout thrash.
+  //
+  // Preview rendering in Builder/Guide is unaffected (works fine there).
+  // Body class sf-themer-fx-aurora is still added so the toggle state
+  // persists; it just doesn't emit any CSS for the SF page.
+  if (false && config.aurora) {
     const ir = engine && engine.renderRules('aurora', config, accent, { scale: 1.0, isDark });
     if (ir && ir.cssRules) {
       const imp = { important: true };
