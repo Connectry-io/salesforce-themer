@@ -644,12 +644,14 @@ function buildAuroraRules(intensityLevel, accentHex, opts) {
           'background-size': '200% 200%',
           animation: `sf-themer-aurora ${auroraSpeed}ms ease-in-out infinite`,
           filter: 'blur(120px)',
-          // Paint aurora above SF content (z-index max above) but blend it
-          // into the pixels underneath so content stays readable and cards
-          // get tinted by the blobs instead of occluded. `soft-light` is
-          // gentle — darkens shadows, lightens highlights, preserves hue.
-          // `overlay` is more dramatic if user wants stronger ambient.
-          'mix-blend-mode': 'soft-light',
+          // Paint aurora above SF content (z-index max) and blend it into
+          // the pixels underneath. SF-DOM-MAP observation (2026-04-16): on
+          // light-bg custom themes, `soft-light` blend was near-invisible
+          // even at 0.55 opacity — its math produces tiny luminance shifts.
+          // `overlay` multiplies shadows and screens highlights, giving
+          // meaningful contrast on both light and dark theme backgrounds
+          // while keeping the "lit-from-behind" ambient feel.
+          'mix-blend-mode': 'overlay',
         },
       },
     ],
