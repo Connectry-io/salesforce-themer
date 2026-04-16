@@ -615,6 +615,9 @@
   // ─── Message listener (from popup + background) ──────────────────────────
 
   chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
+    // Log every message so we can see if the listener is firing at all.
+    // Expected: we should see this for every theme click from the popup.
+    console.log('[SFT] onMessage:', message?.action, 'from', _sender?.url?.slice?.(0, 80) || _sender?.id);
     if (message.action === 'setTheme') {
       console.log('[SFT] setTheme received:', message.theme, 'contextDead=', contextDead);
       applyTheme(message.theme, true).then(async () => {

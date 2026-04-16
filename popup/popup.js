@@ -706,9 +706,13 @@
       const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
       if (!tab?.id) { console.warn('[SFT popup] no active tab'); return; }
       console.log('[SFT popup] sending setTheme to tab', tab.id, tab.url);
+      const timeoutId = setTimeout(
+        () => console.warn('[SFT popup] setTheme response TIMED OUT after 5s — content script listener may have detached'),
+        5000
+      );
       chrome.tabs.sendMessage(tab.id, { action: 'setTheme', theme })
-        .then(rsp => console.log('[SFT popup] setTheme response:', rsp))
-        .catch(err => console.warn('[SFT popup] setTheme send error:', err?.message || err));
+        .then(rsp => { clearTimeout(timeoutId); console.log('[SFT popup] setTheme response:', rsp); })
+        .catch(err => { clearTimeout(timeoutId); console.warn('[SFT popup] setTheme send error:', err?.message || err); });
     } catch (err) {
       console.warn('[SFT popup] applyThemeToTab threw:', err?.message || err);
     }
