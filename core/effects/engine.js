@@ -609,11 +609,17 @@ function buildAuroraRules(intensityLevel, accentHex, opts) {
   const auroraSpeed = Math.round(25000 / mult);
   const [a1, a2, a3] = _deriveAuroraBlobs(accentHex, isDark);
 
+  // IMPORTANT: do NOT animate filter here. Blur is one of the most
+  // expensive CSS properties — re-running a 120px blur on a 200%-viewport
+  // element every animation frame will stall Chrome and surface a "Page
+  // Unresponsive" prompt. Static blur in the declarations + only animate
+  // background-position. The effect still reads as moving ambient light;
+  // dropping the hue-rotate is an acceptable simplification for stability.
   const prelude = `
 @keyframes sf-themer-aurora {
-  0%   { background-position: 0% 50%; filter: blur(120px) hue-rotate(0deg); }
-  50%  { background-position: 100% 50%; filter: blur(120px) hue-rotate(30deg); }
-  100% { background-position: 0% 50%; filter: blur(120px) hue-rotate(0deg); }
+  0%   { background-position: 0% 50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
 }`.trim();
 
   return {
@@ -643,7 +649,13 @@ function buildAuroraRules(intensityLevel, accentHex, opts) {
             `radial-gradient(ellipse at 50% 80%, ${a3} 0%, transparent 50%)`,
           'background-size': '200% 200%',
           animation: `sf-themer-aurora ${auroraSpeed}ms ease-in-out infinite`,
-          filter: 'blur(120px)',
+          // Static blur (not in keyframe) — blur is expensive; animating
+          // it stalls the renderer. 80px still reads as soft ambient light
+          // on fullscreen; 120px was overkill AND unstable.
+          filter: 'blur(80px)',
+          // Promote to GPU layer so blur is cached instead of re-computed
+          // every frame of the position animation.
+          'will-change': 'background-position',
           // No blend mode — plain alpha compositing. See SF-DOM-MAP
           // 2026-04-16 blend-mode table: overlay fails on white cards
           // (screen math returns white regardless of blend color),
