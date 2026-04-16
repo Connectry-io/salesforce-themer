@@ -600,10 +600,9 @@ function buildAuroraRules(intensityLevel, accentHex, opts) {
 
   // Aurora sits BEHIND cards (adapter transparentizes SF's viewport-
   // filling wrappers so aurora shows through the gaps between cards).
-  // Since aurora isn't overlaying card content anymore, we can run at
-  // higher opacity without washing out text — it's only visible in
-  // empty space between cards + around edges. 0.5 base → 0.8 peak.
-  const auroraOpacity = (0.5 * mult * s).toFixed(3);
+  // 0.35 base → 0.56 peak. Higher than that and the 3 blobs merge
+  // into a solid-looking wash; lower and the effect disappears.
+  const auroraOpacity = (0.35 * mult * s).toFixed(3);
   const auroraSpeed = Math.round(25000 / mult);
   const [a1, a2, a3] = _deriveAuroraBlobs(accentHex, isDark);
 
@@ -642,10 +641,13 @@ function buildAuroraRules(intensityLevel, accentHex, opts) {
           // above aurora — the exact "behind cards" effect we want.
           'z-index': '-1',
           opacity: String(auroraOpacity),
+          // Blob radius 35% (down from 50%) — tighter blobs with clear
+          // gaps between them so the effect reads as 3 distinct colored
+          // regions rather than a solid-color wash.
           background:
-            `radial-gradient(ellipse at 20% 50%, ${a1} 0%, transparent 50%),` +
-            `radial-gradient(ellipse at 80% 20%, ${a2} 0%, transparent 50%),` +
-            `radial-gradient(ellipse at 50% 80%, ${a3} 0%, transparent 50%)`,
+            `radial-gradient(ellipse at 20% 50%, ${a1} 0%, transparent 35%),` +
+            `radial-gradient(ellipse at 80% 20%, ${a2} 0%, transparent 35%),` +
+            `radial-gradient(ellipse at 50% 80%, ${a3} 0%, transparent 35%)`,
           'background-size': '200% 200%',
           animation: `sf-themer-aurora ${auroraSpeed}ms ease-in-out infinite`,
           // No filter:blur. Tried 120px and 80px — both caused "Page

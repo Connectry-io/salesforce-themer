@@ -365,13 +365,14 @@ body.sf-themer-fx-aurora {
 
 body.sf-themer-fx-aurora .flexipagePage,
 body.sf-themer-fx-aurora .sellerHomeContainer,
-body.sf-themer-fx-aurora .responsiveContents,
 body.sf-themer-fx-aurora .forceRecordLayout,
-body.sf-themer-fx-aurora .slds-template_default,
-body.sf-themer-fx-aurora .oneContent {
+body.sf-themer-fx-aurora .slds-template_default {
   background: transparent !important;
   background-color: transparent !important;
 }
+/* .oneContent and .responsiveContents deliberately NOT transparentized —
+   they carry theme-engine bg colors that paint cards/content surfaces.
+   Removing them turns themed cards back to plain white. */
 
 body.sf-themer-fx-aurora::before {
 ${rect}
