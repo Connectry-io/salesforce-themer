@@ -337,20 +337,48 @@ body.sf-themer-fx-hover .slds-popover {
       if (ir.cssPrelude) css += `\n/* ─── aurora prelude (engine) ─── */\n${ir.cssPrelude}\n`;
       const rule = ir.cssRules.find(r => r.selectorRole === 'bodyWrapper');
       if (rule) {
-        // Aurora paints ABOVE body's background layer (z-index:0), which
-        // means body needs to not paint its own bg over it. SF themes set
-        // body bg themselves; we keep that but layer aurora on top with
-        // its low opacity so the theme shows through. Content wrappers
-        // don't need hoisting if we don't try to sink aurora to z-index:-1.
+        // Aurora paints BEHIND the cards, visible in the gap regions
+        // between them. For that to work, SF's viewport-filling wrappers
+        // have to be made transparent — otherwise they paint opaque on
+        // top of body::before and aurora is invisible.
+        //
+        // Transparentized layers (from SF-DOM-MAP 2026-04-16):
+        //   body.sf-themer-fx-aurora          — theme-set bg
+        //   .flexipagePage                    — Lightning page container
+        //   .sellerHomeContainer              — Home-specific wrapper
+        //   .responsiveContents               — generic wrapper
+        //   .forceRecordLayout                — record-page wrapper
+        //   .slds-template_default            — layout template
+        // Cards (.slds-card, .forceRecordCard, .forceBaseCard) are NOT
+        // touched — they keep their solid bg. Aurora only shows in
+        // empty gaps between them.
+        const rect = engine.cssFromDeclarations(rule.declarations, imp);
         css += `
 /* ─── Aurora Background (intensity ${(config.auroraIntensity || 'medium')}, via core engine) ─── */
 
 body.sf-themer-fx-aurora {
   position: relative !important;
+  z-index: 0 !important;
+  background: transparent !important;
+  background-color: transparent !important;
+}
+
+html:has(body.sf-themer-fx-aurora) {
+  background: transparent !important;
+}
+
+body.sf-themer-fx-aurora .flexipagePage,
+body.sf-themer-fx-aurora .sellerHomeContainer,
+body.sf-themer-fx-aurora .responsiveContents,
+body.sf-themer-fx-aurora .forceRecordLayout,
+body.sf-themer-fx-aurora .slds-template_default,
+body.sf-themer-fx-aurora .oneContent {
+  background: transparent !important;
+  background-color: transparent !important;
 }
 
 body.sf-themer-fx-aurora::before {
-${engine.cssFromDeclarations(rule.declarations, imp)}
+${rect}
 }
 `;
       }

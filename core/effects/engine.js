@@ -598,14 +598,12 @@ function buildAuroraRules(intensityLevel, accentHex, opts) {
   const s = (opts && typeof opts.scale === 'number') ? opts.scale : 1.0;
   const isDark = !!(opts && opts.isDark);
 
-  // Aurora uses plain alpha compositing (no mix-blend-mode). Tried
-  // soft-light (too subtle on any bg) and overlay (invisible on white
-  // cards because overlay = screen for base > 50% gray, and screen with
-  // any color on white = white). Plain alpha is boring but predictable:
-  // tints whatever's below with the blob color at the given opacity.
-  // 0.28 base keeps text readable — peak at strong is 0.45 which reads
-  // as distinct colored regions on cards. Preview uses same model.
-  const auroraOpacity = (0.28 * mult * s).toFixed(3);
+  // Aurora sits BEHIND cards (adapter transparentizes SF's viewport-
+  // filling wrappers so aurora shows through the gaps between cards).
+  // Since aurora isn't overlaying card content anymore, we can run at
+  // higher opacity without washing out text — it's only visible in
+  // empty space between cards + around edges. 0.5 base → 0.8 peak.
+  const auroraOpacity = (0.5 * mult * s).toFixed(3);
   const auroraSpeed = Math.round(25000 / mult);
   const [a1, a2, a3] = _deriveAuroraBlobs(accentHex, isDark);
 
@@ -636,12 +634,13 @@ function buildAuroraRules(intensityLevel, accentHex, opts) {
           // transparent at 50% radius, so between blob centers the layer
           // is fully see-through; only the blob regions tint content.
           'pointer-events': 'none',
-          // High z-index: on real SF, body::before at z-index:0 gets
-          // occluded by the .desktop / .oneContent app shell that paints
-          // a full-viewport opaque background. Moving aurora ABOVE that
-          // shell (with pointer-events disabled) is the only reliable
-          // way to make it visible without per-wrapper hoisting.
-          'z-index': '2147483600',
+          // z-index: -1 puts aurora BEHIND body's content within body's
+          // stacking context. Requires body + the viewport-filling
+          // wrappers (.flexipagePage, .sellerHomeContainer, etc.) to be
+          // transparentized by the SF adapter so aurora can peek through
+          // the gaps between cards. Cards keep their opaque bg and paint
+          // above aurora — the exact "behind cards" effect we want.
+          'z-index': '-1',
           opacity: String(auroraOpacity),
           background:
             `radial-gradient(ellipse at 20% 50%, ${a1} 0%, transparent 50%),` +
