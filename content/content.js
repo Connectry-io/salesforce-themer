@@ -641,10 +641,25 @@
         ensureThemePresent();
       }
       if (needsEffectsReinjection && currentTheme && currentTheme !== 'none') {
-        loadAndApplyEffects(currentTheme);
+        // Only reapply if the effects style tag is actually missing. Without
+        // this guard, a normal theme swap (which removes+re-adds the effects
+        // <style>) would trigger the observer → loadAndApplyEffects →
+        // injectEffectsCSS → remove+add → observer → infinite loop pegging
+        // CPU at 100% and forcing a "Page Unresponsive" prompt.
+        // Symmetric with ensureThemePresent's existence check.
+        if (!document.getElementById(EFFECTS_STYLE_ID)) {
+          loadAndApplyEffects(currentTheme);
+        }
       }
       if (needsFaviconReinjection && _currentFaviconEnabled) {
-        applyFavicon(true, _currentFaviconConfig);
+        // Same guard as above. applyFavicon removes our own favicon as part
+        // of its own update cycle (line 320); without this check, that self-
+        // removal feeds back into the observer → applyFavicon → self-removal
+        // → infinite loop. Only reapply if the favicon is actually gone (SF
+        // removed it post-navigation, not our own update cycle).
+        if (!document.getElementById(FAVICON_LINK_ID)) {
+          applyFavicon(true, _currentFaviconConfig);
+        }
       }
       if (needsPatchReinjection && currentTheme && currentTheme !== 'none') {
         if (window.__sfThemerDiag?.injectPatches) {
