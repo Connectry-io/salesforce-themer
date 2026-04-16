@@ -1,22 +1,24 @@
 /**
- * Connectry Favicon Engine — canonical favicon SVG builder.
+ * Connectry Favicon Engine — content-script runtime mirror.
  *
- * Single source of truth for every surface that renders a theme favicon:
- *   - content.js       → the real Chrome tab favicon on SF pages
- *   - options.js       → Hero preview, theme cards, Builder preview iframe,
- *                        Guide tab interactive demo, Studio popup preview
+ * SSOT for favicon logic is themes/engine.js (FAVICON_ICONS, renderFavicon,
+ * defaultFaviconForTheme). This file is a SUBSET COPY loaded in content_scripts
+ * only, because content.js needs runtime favicon rendering on SF tabs (for
+ * custom themes at apply time) and themes/engine.js is too large to load on
+ * every SF page (Migration A2 removed it from the content-script path).
  *
- * Before monocode: each surface owned its own icon list and its own SVG
- * builder. Two lists could drift (icon added to Studio, never reached the
- * real tab) and two builders could disagree on shape math. Now everyone
- * calls ConnectryFavicon.buildSVG(config, size).
+ * Options + popup load themes/engine.js directly; its compat shim populates
+ * the same `self.ConnectryFavicon` global — so call sites work identically
+ * in every surface.
  *
- * Usage:
+ * Drift: scripts/check-theme-drift.js asserts that the ICONS array here
+ * matches the FAVICON_ICONS array in themes/engine.js. If you add an icon or
+ * change a glyph, update BOTH files. (If this becomes tedious, a future
+ * sync script can regenerate this file from themes/engine.js.)
+ *
+ * Usage (unchanged from the pre-A2 API):
  *   const svg = ConnectryFavicon.buildSVG({ shape, color, icon }, size);
- *   // returns '<svg …>…</svg>' as string
- *
  *   const icons = ConnectryFavicon.ICONS;
- *   // [{ id, label, svg }, …] for rendering pickers
  */
 (() => {
   'use strict';

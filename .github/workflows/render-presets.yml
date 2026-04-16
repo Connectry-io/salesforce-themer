@@ -1,0 +1,60 @@
+name: Verify preset artifacts match engine output
+
+# Runs whenever any file that participates in preset rendering changes —
+# the theme engine itself, its helpers, the preset data, the rendering
+# script, or (just in case) a checked-in preset artifact. If the renderer
+# produces output different from what's committed, the job fails and
+# prints the diff. Fix: run `node scripts/render-presets.mjs` locally and
+# commit the regenerated files.
+#
+# Part of Migration A2 (see ARCHITECTURE.md §V2.5). With the theme engine
+# no longer in the runtime binary, the content/themes/*.css + content/
+# favicons/*.svg files ARE the engine's output for customers. Drift
+# between them is silent breakage. CI catches it mechanically.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'themes/engine.js'
+      - 'themes/derive.js'
+      - 'themes/color-utils.js'
+      - 'themes/themes.json'
+      - 'scripts/render-presets.mjs'
+      - 'content/themes/**'
+      - 'content/favicons/**'
+  pull_request:
+    paths:
+      - 'themes/engine.js'
+      - 'themes/derive.js'
+      - 'themes/color-utils.js'
+      - 'themes/themes.json'
+      - 'scripts/render-presets.mjs'
+      - 'content/themes/**'
+      - 'content/favicons/**'
+  workflow_dispatch: {}
+
+jobs:
+  render-presets:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Render presets from engine
+        run: node scripts/render-presets.mjs
+
+      - name: Fail if output differs from checked-in artifacts
+        run: |
+          if ! git diff --exit-code -- content/themes content/favicons; then
+            echo ""
+            echo "::error::Preset artifacts drifted from engine output."
+            echo "::error::Run 'node scripts/render-presets.mjs' locally and commit the regenerated files."
+            exit 1
+          fi
+          echo "✓ preset artifacts match engine output"

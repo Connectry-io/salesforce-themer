@@ -1125,7 +1125,143 @@ function hexToRgb(hex) {
   return '74, 111, 165';
 }
 
-// Export for use in background.js (service worker context — no ES modules)
+// ────────────────────────────────────────────────────────────────────────────
+// Favicon rendering — folded into the theme engine so a theme is one config
+// that produces one pair of artifacts: { css, faviconSvg }. Single source of
+// truth for icon library + SVG builder; consumed by renderTheme() below,
+// by Studio (options.js) for live preview, and by the CI preset rebuild.
+//
+// Favicon glyphs render at 16px in browser tabs — they need to read as bold
+// solid marks. No opacity on the paths; transparency is owned by the
+// shape=none background, not the glyph.
+// ────────────────────────────────────────────────────────────────────────────
+
+const FAVICON_ICONS = [
+  { id: 'connectry', label: 'Connectry', svg: '<circle cx="8" cy="16" r="4" fill="white"/><line x1="12" y1="16" x2="20" y2="16" stroke="white" stroke-width="2" stroke-linecap="round"/><circle cx="24" cy="16" r="4" fill="white"/>' },
+  { id: 'cloud',     label: 'Cloud',     svg: '<circle cx="10" cy="19" r="5" fill="white"/><circle cx="16" cy="14" r="6" fill="white"/><circle cx="22" cy="19" r="5" fill="white"/><rect x="10" y="19" width="12" height="5" fill="white"/>' },
+  { id: 'snowflake', label: 'Snowflake', svg: '<path d="M16 4v24M4 16h24M8 8l16 16M24 8L8 24" stroke="white" stroke-width="2" stroke-linecap="round"/><circle cx="16" cy="16" r="2" fill="white"/>' },
+  { id: 'flame',     label: 'Flame',     svg: '<path d="M16 4c0 6-6 8-6 14a6 6 0 0012 0c0-6-6-8-6-14z" fill="white"/>' },
+  { id: 'moon',      label: 'Moon',      svg: '<path d="M20 6a10 10 0 11-8 20 12 12 0 008-20z" fill="white"/>' },
+  { id: 'bolt',      label: 'Bolt',      svg: '<path d="M18 4L8 18h7l-3 10 10-14h-7l3-10z" fill="white"/>' },
+  { id: 'leaf',      label: 'Leaf',      svg: '<path d="M8 24C8 12 16 4 28 4c0 12-8 20-20 20z" fill="white"/>' },
+  { id: 'star',      label: 'Star',      svg: '<path d="M16 4l3.5 8 8.5 1-6.5 6 2 8.5L16 23l-7.5 4.5 2-8.5L4 13l8.5-1z" fill="white"/>' },
+  { id: 'diamond',   label: 'Diamond',   svg: '<path d="M16 3l11 13-11 13L5 16z" fill="white"/>' },
+  { id: 'shield',    label: 'Shield',    svg: '<path d="M16 3L5 8v7c0 7 5 12 11 14 6-2 11-7 11-14V8L16 3z" fill="white"/>' },
+  { id: 'heart',     label: 'Heart',     svg: '<path d="M16 28s-10-6-10-14a5.5 5.5 0 0111 0 5.5 5.5 0 0111 0c0 8-12 14-12 14z" fill="white" transform="translate(0,-2)"/>' },
+  { id: 'waves',     label: 'Waves',     svg: '<path d="M4 12c4-3 8 3 12 0s8 3 12 0M4 18c4-3 8 3 12 0s8 3 12 0" stroke="white" stroke-width="2.5" stroke-linecap="round" fill="none"/>' },
+];
+
+const FAVICON_DEFAULT_CONFIG = { shape: 'circle', color: '#4A6FA5', icon: 'connectry', iconColor: '#ffffff' };
+
+/**
+ * Build a theme favicon SVG string.
+ * Pure function — safe to call in any context (service worker, Node/CI, DOM).
+ *
+ * @param {{shape?: string, color?: string, icon?: string, iconColor?: string}} config
+ * @param {number} [size=32] Rendered width/height in px. viewBox is always 32.
+ * @returns {string} '<svg …>…</svg>'
+ */
+function renderFavicon(config, size) {
+  const shape    = (config && config.shape)    || FAVICON_DEFAULT_CONFIG.shape;
+  const color    = (config && config.color)    || FAVICON_DEFAULT_CONFIG.color;
+  const iconId   = (config && config.icon)     || FAVICON_DEFAULT_CONFIG.icon;
+  // When there's no background, an unspecified iconColor falls back to the
+  // bg color so the glyph stays visible on a transparent tab — preserves
+  // the pre-iconColor behaviour users were relying on.
+  const iconColor = (config && config.iconColor)
+    || (shape === 'none' ? color : FAVICON_DEFAULT_CONFIG.iconColor);
+  const dim = size || 32;
+
+  const icon = FAVICON_ICONS.find(i => i.id === iconId) || FAVICON_ICONS[0];
+  let bg = '';
+  if (shape === 'circle')  bg = `<circle cx="16" cy="16" r="15" fill="${color}"/>`;
+  else if (shape === 'rounded') bg = `<rect x="1" y="1" width="30" height="30" rx="6" fill="${color}"/>`;
+  else if (shape === 'square')  bg = `<rect x="1" y="1" width="30" height="30" rx="1" fill="${color}"/>`;
+  // shape === 'none' leaves bg empty (transparent tab background).
+
+  const glyph = icon.svg.replace(/white/g, iconColor);
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="${dim}" height="${dim}">${bg}${glyph}</svg>`;
+}
+
+/**
+ * Resolve the default favicon config for a theme that hasn't set one.
+ * Monogram system — every preset uses the Connectry glyph tinted with its
+ * accent, consistent branding with the theme accent as the only differentiator.
+ */
+function defaultFaviconForTheme(themeId, accent) {
+  return {
+    shape: 'circle',
+    color: accent || FAVICON_DEFAULT_CONFIG.color,
+    icon: 'connectry',
+  };
+}
+
+
+// ────────────────────────────────────────────────────────────────────────────
+// renderTheme — the V2-portable primitive. Given a full theme object, returns
+// both artifacts the runtime needs. CI calls this per preset; Studio calls
+// this per save; a future Supabase Edge Function will call this server-side.
+//
+// Theme input shape:
+//   { id, colors, typography?, favicon? }
+// Returns:
+//   { css, faviconSvg }
+// ────────────────────────────────────────────────────────────────────────────
+
+function renderTheme(theme) {
+  if (!theme || !theme.colors) {
+    throw new Error('renderTheme: theme must have a .colors object');
+  }
+  const css = generateThemeCSS(theme);
+  const faviconConfig = theme.favicon || defaultFaviconForTheme(theme.id, theme.colors.accent);
+  const faviconSvg = renderFavicon(faviconConfig, 32);
+  return { css, faviconSvg };
+}
+
+
+// Browser-context globals.
+//   self.ConnectryThemer  — canonical engine surface (renderTheme, renderFavicon, ...)
+//   self.ConnectryFavicon — backward-compat shim for the old core/favicon/engine.js
+//                           API. Keeps existing call sites in content.js, options.js,
+//                           popup.js working unchanged during and after A2.
+// When themes/engine.js is loaded in a surface (options, popup) or Node (CI), both
+// globals populate. core/favicon/engine.js can be deleted — ConnectryFavicon still
+// exists because we re-export its shape here.
+if (typeof self !== 'undefined') {
+  self.ConnectryThemer = self.ConnectryThemer || {};
+  Object.assign(self.ConnectryThemer, {
+    generateThemeCSS,
+    renderFavicon,
+    renderTheme,
+    defaultFaviconForTheme,
+    hexToRgb,
+    FAVICON_ICONS,
+    FAVICON_DEFAULT_CONFIG,
+  });
+
+  // Compat shim: old API surface exactly as core/favicon/engine.js exposed it.
+  // Mark with _loaded so a re-load is idempotent.
+  const compat = (self.ConnectryFavicon = self.ConnectryFavicon || {});
+  if (!compat._loaded) {
+    compat._loaded = true;
+    compat.ICONS = FAVICON_ICONS;
+    compat.DEFAULT_CONFIG = FAVICON_DEFAULT_CONFIG;
+    compat.THEME_ICON_MAP = {};
+    compat.defaultForTheme = defaultFaviconForTheme;
+    compat.buildSVG = renderFavicon;
+  }
+}
+
+
+// Export for Node (CI preset rebuild, tests) + background.js service worker.
 if (typeof module !== 'undefined') {
-  module.exports = { generateThemeCSS, hexToRgb };
+  module.exports = {
+    generateThemeCSS,
+    renderFavicon,
+    renderTheme,
+    defaultFaviconForTheme,
+    hexToRgb,
+    FAVICON_ICONS,
+    FAVICON_DEFAULT_CONFIG,
+  };
 }

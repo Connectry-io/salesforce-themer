@@ -314,22 +314,44 @@
       return;
     }
     _saveOriginalFavicons();
-    // Nuke all existing favicons — ours AND SF's — so the browser is forced
-    // to re-evaluate. Chrome is sticky about favicons when only the href
-    // changes on the same <link> node; remove+re-add is the reliable path.
-    document.querySelectorAll('link[rel*="icon"]').forEach(link => link.remove());
-    const link = document.createElement('link');
-    link.id = FAVICON_LINK_ID;
-    link.rel = 'icon';
-    link.type = 'image/svg+xml';
-    link.setAttribute('sizes', 'any');
+
+    // Compute the new href up-front so we can do an atomic remove+update.
+    let newHref;
     if (config && config.icon) {
       const svg = self.ConnectryFavicon.buildSVG(config, 32);
-      link.href = 'data:image/svg+xml;base64,' + btoa(svg);
+      newHref = 'data:image/svg+xml;base64,' + btoa(svg);
     } else {
-      link.href = chrome.runtime.getURL('favicons/connectry.svg');
+      newHref = chrome.runtime.getURL('favicons/connectry.svg');
     }
-    (document.head || document.documentElement).appendChild(link);
+
+    // Remove only COMPETING favicons (SF's defaults + managed-package ones).
+    // Don't touch our own — that was the entire cause of the v2.5.77 infinite
+    // loop: self-removing our <link> triggered the MutationObserver's
+    // needsFaviconReinjection branch, which called applyFavicon again, which
+    // self-removed again, forever. Fixed there with an existence guard; fixed
+    // more fundamentally here by never self-removing in the first place.
+    document.querySelectorAll('link[rel*="icon"]').forEach(link => {
+      if (link.id !== FAVICON_LINK_ID) link.remove();
+    });
+
+    // Update our link in place (or create it if first apply). The
+    // empty-then-set trick forces Chrome to re-read the favicon even on
+    // href mutation, which it normally caches by <link> node identity.
+    // Same pattern the observer uses when SF's SPA re-adds a competitor
+    // (see competingFaviconAdded branch).
+    let ours = document.getElementById(FAVICON_LINK_ID);
+    if (!ours) {
+      ours = document.createElement('link');
+      ours.id = FAVICON_LINK_ID;
+      ours.rel = 'icon';
+      ours.type = 'image/svg+xml';
+      ours.setAttribute('sizes', 'any');
+      (document.head || document.documentElement).appendChild(ours);
+    }
+    if (ours.href !== newHref) {
+      ours.href = '';
+      ours.href = newHref;
+    }
   }
 
   function removeFavicon() {

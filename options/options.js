@@ -4096,17 +4096,41 @@
 
   async function _mirrorCustomThemeToSupabase(slug, custom) {
     if (!self.ConnectryIntel?.saveTheme) return;
-    // Ask background to (re-)render and cache the CSS; it's the only context
-    // with the full engine available (themes/engine.js is baked into
-    // background.js via scripts/sync-engine.py).
-    const rsp = await chrome.runtime.sendMessage({
-      action: 'themer.renderAndCacheTheme',
-      themeId: slug,
-    });
-    if (!rsp?.ok || !rsp.css) {
-      console.warn('[Themer] engine render failed; skipping Supabase mirror');
+    // Studio renders locally via the engine loaded directly in options.html
+    // (post-A2 — no more round-trip through background.js). renderTheme()
+    // returns { css, faviconSvg }: both artifacts pre-rendered at save time,
+    // cached to storage.local for zero-flash apply on SF tabs, and the CSS
+    // mirrors to Supabase for cross-device fetch.
+    const base = getThemeById(custom.basedOn);
+    if (!base) {
+      console.warn('[Themer] base theme not found for mirror:', custom.basedOn);
       return;
     }
+    const resolvedColors = (typeof resolveCustomTheme === 'function')
+      ? resolveCustomTheme(base.colors, custom.coreOverrides || {}, custom.advancedOverrides || {})
+      : base.colors;
+    const themeObj = {
+      id: slug,
+      colors: resolvedColors,
+      typography: custom.typography || null,
+      favicon: custom.favicon || null,
+    };
+    let css, faviconSvg;
+    try {
+      const rendered = (self.ConnectryThemer?.renderTheme || renderTheme)(themeObj);
+      css = rendered.css;
+      faviconSvg = rendered.faviconSvg;
+    } catch (err) {
+      console.warn('[Themer] renderTheme failed; skipping Supabase mirror', err);
+      return;
+    }
+    // Cache both artifacts locally so content.js apply is zero-flash.
+    try {
+      await chrome.storage.local.set({
+        [`themeCSS_${slug}`]: css,
+        [`faviconSvg_${slug}`]: faviconSvg,
+      });
+    } catch (_) {}
     // Split the stored config into base_tokens (input) + overrides (post-
     // derivation tweaks). Engine treats overrides as authoritative on
     // re-render (see ARCHITECTURE.md § V2.5 design note).
@@ -4118,7 +4142,7 @@
       name: custom.name,
       baseTokens: rest,
       overrides: advancedOverrides,
-      renderedCss: rsp.css,
+      renderedCss: css,
     });
     if (result?.error) {
       console.warn('[Themer] Supabase saveTheme returned error:', result.error);
