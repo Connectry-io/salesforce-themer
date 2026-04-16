@@ -701,32 +701,18 @@
   // ─── Theme application ───────────────────────────────────────────────────
 
   async function applyThemeToTab(theme) {
-    console.log('[SFT popup] applyThemeToTab:', theme);
     try {
       const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-      if (!tab?.id) { console.warn('[SFT popup] no active tab'); return; }
-      console.log('[SFT popup] sending setTheme to tab', tab.id, tab.url);
-      const timeoutId = setTimeout(
-        () => console.warn('[SFT popup] setTheme response TIMED OUT after 5s — content script listener may have detached'),
-        5000
-      );
-      chrome.tabs.sendMessage(tab.id, { action: 'setTheme', theme })
-        .then(rsp => { clearTimeout(timeoutId); console.log('[SFT popup] setTheme response:', rsp); })
-        .catch(err => { clearTimeout(timeoutId); console.warn('[SFT popup] setTheme send error:', err?.message || err); });
-    } catch (err) {
-      console.warn('[SFT popup] applyThemeToTab threw:', err?.message || err);
-    }
+      if (!tab?.id) return;
+      chrome.tabs.sendMessage(tab.id, { action: 'setTheme', theme }).catch(() => {});
+    } catch (_) {}
   }
 
   async function selectTheme(theme) {
-    console.log('[SFT popup] selectTheme:', theme, 'allIds.count=', getAllThemeIds().length, 'syncState keys=', Object.keys(syncState));
     const allIds = getAllThemeIds();
     const customThemes = syncState.customThemes || [];
     const customIds = new Set(customThemes.map(t => t.id));
-    if (theme !== 'none' && !allIds.includes(theme) && !customIds.has(theme)) {
-      console.warn('[SFT popup] selectTheme bailed — theme not in allIds or customIds:', theme);
-      return;
-    }
+    if (theme !== 'none' && !allIds.includes(theme) && !customIds.has(theme)) return;
 
     const updates = { theme };
     // Update lastLightTheme / lastDarkTheme for presets AND customs so
