@@ -620,25 +620,28 @@
     console.log('[SFT] onMessage:', message?.action, 'from', _sender?.url?.slice?.(0, 80) || _sender?.id);
     if (message.action === 'setTheme') {
       console.log('[SFT] setTheme received:', message.theme, 'contextDead=', contextDead);
-      applyTheme(message.theme, true).then(async () => {
-        console.log('[SFT] applyTheme resolved for', message.theme, '— style#sf-themer-styles present:', !!document.getElementById(STYLE_ID));
-        // Re-apply effects for new theme (colors may differ)
-        loadAndApplyEffects(message.theme);
-        // Swap the favicon to the new theme's config. Pull the enabled flag
-        // from sync storage in case this message arrives before the initial
-        // apply on this tab has stamped _currentFaviconEnabled.
-        try {
-          const { faviconEnabled = true } = await chrome.storage.sync.get({ faviconEnabled: true });
-          const cfg = await _resolveThemeFavicon(message.theme);
-          applyFavicon(faviconEnabled, cfg);
-        } catch (_) {}
-        // Keep diagnostic panel in sync with active theme
-        if (diagnosticPanel) diagnosticPanel.updateTheme(message.theme);
-        sendResponse({ success: true, theme: message.theme });
-      }).catch((err) => {
-        sendResponse({ success: false, error: err.message });
-      });
-      return true;
+      // Synchronous ack — don't hold the message port open. Holding ports
+      // open via `return true` + async sendResponse caused Chrome to stop
+      // routing follow-up messages to this tab after the first click (MV3
+      // has quirks around accumulated pending responses on popup→content
+      // channels). Fire-and-forget the actual work; popup doesn't need the
+      // completion signal for theme-switch UX.
+      sendResponse({ queued: true, theme: message.theme });
+      applyTheme(message.theme, true)
+        .then(async () => {
+          console.log('[SFT] applyTheme resolved for', message.theme, '— style#sf-themer-styles present:', !!document.getElementById(STYLE_ID));
+          loadAndApplyEffects(message.theme);
+          try {
+            const { faviconEnabled = true } = await chrome.storage.sync.get({ faviconEnabled: true });
+            const cfg = await _resolveThemeFavicon(message.theme);
+            applyFavicon(faviconEnabled, cfg);
+          } catch (_) {}
+          if (diagnosticPanel) diagnosticPanel.updateTheme(message.theme);
+        })
+        .catch((err) => {
+          console.warn('[SFT] setTheme apply failed:', err?.message || err);
+        });
+      return false; // sync response already sent
     }
 
     if (message.action === 'getTheme') {
