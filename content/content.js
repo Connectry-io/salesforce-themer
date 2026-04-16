@@ -118,57 +118,15 @@
 
   // ─── Transition helpers ──────────────────────────────────────────────────
 
-  function injectTransitionStyles() {
-    if (document.getElementById('sf-themer-transitions')) return;
-    const style = document.createElement('style');
-    style.id = 'sf-themer-transitions';
-    style.dataset.sftSource = 'engine:transitions';
-    style.textContent = `/* sft-source: engine:transitions */
-
-      ::view-transition-old(root),
-      ::view-transition-new(root) {
-        animation-duration: 150ms;
-        animation-timing-function: ease;
-      }
-      @media (prefers-reduced-motion: reduce) {
-        ::view-transition-old(root),
-        ::view-transition-new(root) {
-          animation-duration: 0.01ms;
-        }
-      }
-      .sf-themer-transitioning,
-      .sf-themer-transitioning *,
-      .sf-themer-transitioning *::before,
-      .sf-themer-transitioning *::after {
-        transition:
-          background-color ${TRANSITION_DURATION}ms ease,
-          color ${TRANSITION_DURATION}ms ease,
-          border-color ${TRANSITION_DURATION}ms ease !important;
-      }
-      @media (prefers-reduced-motion: reduce) {
-        .sf-themer-transitioning,
-        .sf-themer-transitioning *,
-        .sf-themer-transitioning *::before,
-        .sf-themer-transitioning *::after {
-          transition: none !important;
-        }
-      }
-    `;
-    const target = document.head || document.documentElement;
-    target.appendChild(style);
-  }
-
-  function beginTransition() {
-    const target = document.body || document.documentElement;
-    target.classList.add(TRANSITION_CLASS);
-  }
-
-  function endTransition() {
-    setTimeout(() => {
-      const target = document.body || document.documentElement;
-      target.classList.remove(TRANSITION_CLASS);
-    }, TRANSITION_DURATION + 50);
-  }
+  // Transition animations gutted 2026-04-16. The prior approach applied
+  // `transition: background-color ..., color ..., border-color ...` via a
+  // `.sf-themer-transitioning *` selector that matched every element +
+  // pseudo-element in the tree. On SF's Aura-heavy pages, combined with
+  // ~900-line theme CSS diffs, this froze the tab. No-ops kept for
+  // observer/ensure compatibility; theme swap is instant now.
+  function injectTransitionStyles() { /* no-op */ }
+  function beginTransition() { /* no-op */ }
+  function endTransition() { /* no-op */ }
 
   // ─── CSS injection ───────────────────────────────────────────────────────
 
@@ -475,23 +433,23 @@
 
   async function applyTheme(themeName, animate = true) {
     if (contextDead) return;
+    // Animation path removed 2026-04-16 for V1 stability. The prior code
+    // used document.startViewTransition (page-wide snapshot) OR a
+    // per-element `transition` class (`* *::before *::after` on body) to
+    // fade between themes. Both were fine on simple pages but stalled on
+    // Aura-heavy SF pages — the transition payload scaled with theme CSS
+    // size, and v2.6.0's ~900-line preset files pushed it past the
+    // compositor's tolerance, freezing the tab on theme switch. Instant
+    // swap is the stable choice until we can afford a V2 canvas-based
+    // cross-fade. The `animate` param is kept for call-site compatibility
+    // but ignored.
     if (themeName === 'none') {
-      const stripTheme = () => {
-        removeThemeStyles();
-        removeEffectsStyles();
-        destroyCanvasEffects();
-        currentEffectsConfig = null;
-        if (window.__sfThemerDiag?.removePatches) {
-          try { window.__sfThemerDiag.removePatches(); } catch (_) {}
-        }
-      };
-      if (animate && typeof document.startViewTransition === 'function') {
-        try { document.startViewTransition(stripTheme); }
-        catch (_) { beginTransition(); stripTheme(); endTransition(); }
-      } else {
-        if (animate) beginTransition();
-        stripTheme();
-        if (animate) endTransition();
+      removeThemeStyles();
+      removeEffectsStyles();
+      destroyCanvasEffects();
+      currentEffectsConfig = null;
+      if (window.__sfThemerDiag?.removePatches) {
+        try { window.__sfThemerDiag.removePatches(); } catch (_) {}
       }
       currentTheme = 'none';
       return;
@@ -501,15 +459,8 @@
       // Try local cache first (fast), fall back to fetch (first install edge case)
       const cached = await chrome.storage.local.get(`themeCSS_${themeName}`);
       const css = cached[`themeCSS_${themeName}`] || await fetchThemeCSS(themeName);
-
-      if (animate && swapThemeCSS(css)) {
-        currentTheme = themeName;
-      } else {
-        if (animate) beginTransition();
-        injectCSSText(css);
-        currentTheme = themeName;
-        if (animate) endTransition();
-      }
+      injectCSSText(css);
+      currentTheme = themeName;
     } catch (err) {
       if (isExtensionContextDead(err)) {
         handleDeadContext();

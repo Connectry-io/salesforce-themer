@@ -223,26 +223,21 @@ body.sf-themer-fx-hover .slds-popover {
     }
   }
 
-  // ─── Aurora Background (canvas-backed, via core engine) ──────────────────
-  // Aurora now renders on a <canvas> managed by effects/canvas-runtime.js.
-  // The CSS side only needs to:
-  //   1. Make body a stacking context (so the canvas at z-index:-1 stays
-  //      scoped to body and doesn't get pushed behind html).
-  //   2. Transparentize SF's viewport-filling wrappers so the canvas
-  //      behind them is visible in the gaps between cards.
-  // The blob painting + animation live in canvas-runtime.js — see the
-  // runtimeConfig returned by engine.renderRules('aurora', ...).
+  // ─── Aurora Background — DISABLED ON SF FOR V1 ────────────────────────────
+  // Third iteration on aurora, third round of stability issues. v2.5.72 tried
+  // CSS with blur → crashed Aura pages. v2.5.76 rewrote as canvas → still
+  // flaky under SF's DOM pressure. Decision 2026-04-16: decommission for V1
+  // entirely. Preview surfaces (Builder, Guide) still render their own CSS
+  // aurora at preview scale — those don't have the occluder/mutation problem.
   //
-  // Why this is different from the 2026-04-16 CSS attempt: canvas avoids
-  // the full-viewport CSS animation + composite cost that stalled Aura
-  // pages. The expensive repaint-every-DOM-mutation cycle is gone; RAF
-  // draws at the browser's natural cadence and pauses on visibilitychange.
+  // Revisit in V2 when Migration B gives us server-side rendering and a
+  // canvas pipeline that can ship blob data as a pre-rendered texture
+  // instead of computing gradients every frame.
   //
-  // Transparentized layers (from SF-DOM-MAP 2026-04-16): .flexipagePage,
-  // .sellerHomeContainer, .forceRecordLayout, .slds-template_default.
-  // .oneContent / .responsiveContents deliberately NOT transparentized —
-  // they carry theme-engine bg colors for cards.
-  if (config.aurora) {
+  // Preserved: sf-themer-fx-aurora body class still applied so the Studio
+  // preview + the visual toggle state persist. Just no SF-side CSS emitted
+  // and no canvas runtime mount (see generateEffectsRuntimeConfig below).
+  if (false && config.aurora) {
     const ir = engine && engine.renderRules('aurora', config, accent, { scale: 1.0, isDark });
     if (ir && ir.cssRules) {
       const imp = { important: true };
@@ -414,10 +409,8 @@ function generateEffectsRuntimeConfig(effectsConfig, themeColors) {
   const isDark = !!(themeColors && themeColors.colorScheme === 'dark');
   const runtime = {};
 
-  const aurora = engine.renderRules('aurora', effectsConfig, accent, { scale: 1.0, isDark });
-  if (aurora && aurora.runtimeConfig && aurora.runtimeConfig.aurora) {
-    runtime.aurora = aurora.runtimeConfig.aurora;
-  }
+  // Aurora canvas runtime DISABLED on SF for V1 — see generateEffectsCSS
+  // aurora block for decision rationale. Not mounted; not rendered.
 
   const particles = engine.renderRules('particles', effectsConfig, accent);
   if (particles && particles.runtimeConfig && particles.runtimeConfig.particles) {

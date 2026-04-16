@@ -111,25 +111,21 @@ const RULES = {
     },
   ],
   aurora: [
-    // Canvas-based since 2026-04-16. CSS keyframes, the 200%-viewport fixed
-    // body::before, and any local accent-to-blob palette helper are all drift
-    // — they were the shapes that crashed SF pages under Aura DOM mutation.
+    // DECOMMISSIONED on SF for V1 (2026-04-16, third iteration). Both CSS
+    // and canvas approaches destabilised under Aura DOM pressure. The
+    // aurora block in effects.js is deliberately guarded with `if (false
+    // && config.aurora)` — do NOT remove that guard without a new canvas
+    // strategy (texture pre-render or lower frame rate). Preview surfaces
+    // still render their own CSS aurora at preview scale.
     {
       file: 'effects/effects.js',
       forbid: /@keyframes\s+sf-themer-aurora\b/,
-      reason: 'aurora is canvas-based; CSS keyframes for aurora indicate the CSS-gradient regression',
+      reason: 'aurora CSS keyframes indicate a regression — the CSS-gradient path crashed pages. Canvas path is also disabled until V2.',
     },
     {
       file: 'effects/effects.js',
       forbid: /_deriveAuroraColors\s*\(/,
       reason: 'aurora blob colors are derived in core/effects/engine.js (_deriveAuroraBlobs); no local helper in effects.js',
-    },
-    {
-      file: 'effects/effects.js',
-      // Guard against accidentally disabling the canvas path again by
-      // re-wrapping the block in `if (false && ...)`.
-      forbid: /if\s*\(\s*false\s*&&\s*config\.aurora\b/,
-      reason: 'aurora canvas path must stay enabled; remove the `false &&` guard',
     },
   ],
   particles: [
