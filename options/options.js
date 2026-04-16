@@ -2168,7 +2168,14 @@
   }
 
   function _resolveThemeForMeta(id) {
-    return getThemeById(id) || (syncState.customThemes || []).find(t => t.id === id);
+    const preset = getThemeById(id);
+    if (preset) return preset;
+    // Custom themes store deltas (coreOverrides + advancedOverrides) on top of
+    // a base preset, not a flat .colors object. Resolve it so the header
+    // mini-swatch, anatomy card, etc. all see a consistent shape.
+    const custom = (syncState.customThemes || []).find(t => t.id === id);
+    if (!custom) return null;
+    return { ...custom, colors: resolveCustomColors(custom) };
   }
 
   function updateHeaderMeta(activeThemeId) {
@@ -4738,7 +4745,7 @@
         ? (syncState.lastDarkTheme || 'connectry-dark')
         : (syncState.lastLightTheme || 'connectry');
     }
-    const theme = getThemeById(activeId) || getThemeById('connectry');
+    const theme = _resolveThemeForMeta(activeId) || getThemeById('connectry');
     if (!theme) return;
 
     // Each data-part wraps its content and holds an .anatomy-marker as a
@@ -4890,7 +4897,7 @@
     const target = document.getElementById('guideColorsMock');
     if (!target) return;
     const activeId = syncState.theme && syncState.theme !== 'none' ? syncState.theme : 'connectry';
-    const theme = getThemeById(activeId) || getThemeById('connectry');
+    const theme = _resolveThemeForMeta(activeId) || getThemeById('connectry');
     if (!theme) return;
 
     const c = theme.colors;
