@@ -648,12 +648,14 @@ function buildAuroraRules(intensityLevel, accentHex, opts) {
             `radial-gradient(ellipse at 50% 80%, ${a3} 0%, transparent 50%)`,
           'background-size': '200% 200%',
           animation: `sf-themer-aurora ${auroraSpeed}ms ease-in-out infinite`,
-          // Static blur (not in keyframe) — blur is expensive; animating
-          // it stalls the renderer. 80px still reads as soft ambient light
-          // on fullscreen; 120px was overkill AND unstable.
-          filter: 'blur(80px)',
-          // Promote to GPU layer so blur is cached instead of re-computed
-          // every frame of the position animation.
+          // No filter:blur. Tried 120px and 80px — both caused "Page
+          // Unresponsive" on SF pages with heavy DOM mutation (Aura/LWC
+          // constantly update, even a static blur on a GPU-promoted layer
+          // stalls compositing under load). The radial gradients fade to
+          // transparent at 50% radius naturally, which provides the soft-
+          // edge look without needing a filter.
+          // Also dropped :has() on html (was triggering selector match on
+          // every SF DOM mutation — O(n) cost, unacceptable on Aura pages).
           'will-change': 'background-position',
           // No blend mode — plain alpha compositing. See SF-DOM-MAP
           // 2026-04-16 blend-mode table: overlay fails on white cards

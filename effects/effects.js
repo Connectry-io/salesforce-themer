@@ -363,10 +363,6 @@ body.sf-themer-fx-aurora {
   background-color: transparent !important;
 }
 
-html:has(body.sf-themer-fx-aurora) {
-  background: transparent !important;
-}
-
 body.sf-themer-fx-aurora .flexipagePage,
 body.sf-themer-fx-aurora .sellerHomeContainer,
 body.sf-themer-fx-aurora .responsiveContents,
