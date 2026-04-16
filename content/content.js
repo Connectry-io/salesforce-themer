@@ -616,7 +616,9 @@
 
   chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
     if (message.action === 'setTheme') {
+      console.log('[SFT] setTheme received:', message.theme, 'contextDead=', contextDead);
       applyTheme(message.theme, true).then(async () => {
+        console.log('[SFT] applyTheme resolved for', message.theme, '— style#sf-themer-styles present:', !!document.getElementById(STYLE_ID));
         // Re-apply effects for new theme (colors may differ)
         loadAndApplyEffects(message.theme);
         // Swap the favicon to the new theme's config. Pull the enabled flag
