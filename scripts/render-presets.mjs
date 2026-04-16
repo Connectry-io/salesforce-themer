@@ -40,6 +40,23 @@ const themes = require(resolve(REPO, 'themes/themes.json'));
 const THEMES_OUT = resolve(REPO, 'content/themes');
 const FAVICONS_OUT = resolve(REPO, 'content/favicons');
 
+// Handwritten preset CSS exceptions (A2 climbdown, 2026-04-16): seven
+// curated preset CSS files pre-dated A2 and were field-tested against
+// Salesforce's Aura DOM. When render-presets.mjs regenerated them from
+// the engine, they grew ~500 lines each — which caused Chrome to stall
+// on theme-switch (recalculate-style + layout on thousands of Aura
+// elements). Keeping the handwritten versions for these 7 themes.
+// The other 10 preset themes had no handwritten files before A2 — they
+// were engine-rendered at install time by background.js — so their
+// engine output IS the canonical CSS and gets regenerated here.
+//
+// Favicons for the handwritten 7 are STILL regenerated (small, safe).
+// If the engine's CSS-gen ever gets a performance-conscious refactor,
+// clear this list and the drift detector exception.
+const HANDWRITTEN_CSS_SKIP = new Set([
+  'arctic', 'connectry', 'connectry-dark', 'midnight', 'obsidian', 'slate', 'tron',
+]);
+
 for (const dir of [THEMES_OUT, FAVICONS_OUT]) {
   if (!existsSync(dir)) mkdirSync(dir, { recursive: true });
 }
@@ -70,14 +87,20 @@ function svgHeader(themeId) {
 let rendered = 0;
 const errors = [];
 
+let cssSkipped = 0;
 for (const theme of themes.themes || []) {
   if (!theme?.id) continue;
   try {
     const { css, faviconSvg } = engine.renderTheme(theme);
-    const cssPath = resolve(THEMES_OUT, `${theme.id}.css`);
     const svgPath = resolve(FAVICONS_OUT, `${theme.id}.svg`);
-    writeFileSync(cssPath, cssHeader(theme.id) + css, 'utf8');
     writeFileSync(svgPath, svgHeader(theme.id) + faviconSvg, 'utf8');
+
+    if (HANDWRITTEN_CSS_SKIP.has(theme.id)) {
+      cssSkipped++;
+    } else {
+      const cssPath = resolve(THEMES_OUT, `${theme.id}.css`);
+      writeFileSync(cssPath, cssHeader(theme.id) + css, 'utf8');
+    }
     rendered++;
   } catch (err) {
     errors.push({ id: theme.id, err: err.message });
@@ -85,7 +108,7 @@ for (const theme of themes.themes || []) {
 }
 
 console.log(`✓ render-presets: ${rendered}/${(themes.themes || []).length} themes rendered`);
-console.log(`  CSS out: ${THEMES_OUT}`);
+console.log(`  CSS out: ${THEMES_OUT}  (${cssSkipped} handwritten CSS preserved)`);
 console.log(`  SVG out: ${FAVICONS_OUT}`);
 
 if (errors.length) {
