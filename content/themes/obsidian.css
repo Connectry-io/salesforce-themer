@@ -198,14 +198,14 @@ body,
   color: #a39e93 !important;
 }
 
-/* Global header controls — hamburger, environment switcher, edition badges.
- * Use header#oneHeader scoping (matches SF's actual nav DOM) for specificity
- * above SF defaults. Targets the three common "blended control" surfaces:
- *   - Icon-only buttons (hamburger, waffle, notifications)
- *   - Badges / edition pills (Developer Edition, Sandbox, Trial)
- *   - System message bar (gray-1 strip when present)
- * Recolor-only — preserves borders/radius/padding.
- */
+
+/* Global header controls (DARK themes only) — hamburger, env switcher, edition
+ * badges, system message bar. On dark themes the global header is painted
+ * c.nav; icons and text need c.navIcon / c.navText to stay visible.
+ * On LIGHT themes the global header is white (SF default) and SF's own slate
+ * icon colors work fine — no override needed, and overriding with c.navIcon
+ * (often white on pink/dark nav themes) would render icons invisible on the
+ * white header. */
 header#oneHeader button,
 header#oneHeader .slds-button,
 .slds-global-header_container button,
@@ -224,8 +224,6 @@ header#oneHeader .slds-button__icon,
   color: #a39e93 !important;
 }
 
-/* Environment / edition pill (Developer Edition, Sandbox, Trial).
- * Use a clear accent-tint so it reads as a distinct pill against the header. */
 header#oneHeader .slds-badge,
 header#oneHeader .slds-badge_inverse,
 header#oneHeader .slds-badge--inverse,
@@ -241,7 +239,6 @@ header#oneHeader .slds-pill,
   border: 1px solid #2a2a2a !important;
 }
 
-/* System message bar (org-edition banner, trial countdown, etc.) */
 header#oneHeader .oneSystemMessage,
 header#oneHeader .oneSystemMessage.slds-color__background_gray-1,
 .slds-global-header_container .oneSystemMessage {

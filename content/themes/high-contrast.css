@@ -192,57 +192,7 @@ body,
 
 
 
-/* Global header controls — hamburger, environment switcher, edition badges.
- * Use header#oneHeader scoping (matches SF's actual nav DOM) for specificity
- * above SF defaults. Targets the three common "blended control" surfaces:
- *   - Icon-only buttons (hamburger, waffle, notifications)
- *   - Badges / edition pills (Developer Edition, Sandbox, Trial)
- *   - System message bar (gray-1 strip when present)
- * Recolor-only — preserves borders/radius/padding.
- */
-header#oneHeader button,
-header#oneHeader .slds-button,
-.slds-global-header_container button,
-.slds-global-header_container .slds-button {
-  color: #ffffff !important;
-}
 
-header#oneHeader button svg,
-header#oneHeader .slds-button svg,
-header#oneHeader .slds-icon,
-header#oneHeader .slds-button__icon,
-.slds-global-header_container svg,
-.slds-global-header_container .slds-icon,
-.slds-global-header_container .slds-button__icon {
-  fill: #ffffff !important;
-  color: #ffffff !important;
-}
-
-/* Environment / edition pill (Developer Edition, Sandbox, Trial).
- * Use a clear accent-tint so it reads as a distinct pill against the header. */
-header#oneHeader .slds-badge,
-header#oneHeader .slds-badge_inverse,
-header#oneHeader .slds-badge--inverse,
-header#oneHeader .slds-badge_lightest,
-.slds-global-header_container .slds-badge,
-.slds-global-header_container .slds-badge_inverse,
-.slds-global-header_container .slds-badge--inverse,
-.slds-global-header_container .slds-badge_lightest,
-header#oneHeader .slds-pill,
-.slds-global-header_container .slds-pill {
-  background-color: rgba(0, 0, 238, 0.12) !important;
-  color: #0000ee !important;
-  border: 1px solid #333333 !important;
-}
-
-/* System message bar (org-edition banner, trial countdown, etc.) */
-header#oneHeader .oneSystemMessage,
-header#oneHeader .oneSystemMessage.slds-color__background_gray-1,
-.slds-global-header_container .oneSystemMessage {
-  background-color: #c8d8ff !important;
-  color: #ffffff !important;
-  border-bottom: 1px solid #333333 !important;
-}
 
 
 /* Search box in header — themed for dark or non-white-header themes */
