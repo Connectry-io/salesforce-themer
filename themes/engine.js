@@ -314,6 +314,58 @@ ${isDark ? `
   color: ${c.navText} !important;
 }` : ''}
 
+/* Global header controls — hamburger, environment switcher, edition badges.
+ * Use header#oneHeader scoping (matches SF's actual nav DOM) for specificity
+ * above SF defaults. Targets the three common "blended control" surfaces:
+ *   - Icon-only buttons (hamburger, waffle, notifications)
+ *   - Badges / edition pills (Developer Edition, Sandbox, Trial)
+ *   - System message bar (gray-1 strip when present)
+ * Recolor-only — preserves borders/radius/padding.
+ */
+header#oneHeader button,
+header#oneHeader .slds-button,
+.slds-global-header_container button,
+.slds-global-header_container .slds-button {
+  color: ${c.navIcon} !important;
+}
+
+header#oneHeader button svg,
+header#oneHeader .slds-button svg,
+header#oneHeader .slds-icon,
+header#oneHeader .slds-button__icon,
+.slds-global-header_container svg,
+.slds-global-header_container .slds-icon,
+.slds-global-header_container .slds-button__icon {
+  fill: ${c.navIcon} !important;
+  color: ${c.navIcon} !important;
+}
+
+/* Environment / edition pill (Developer Edition, Sandbox, Trial).
+ * Use a clear accent-tint so it reads as a distinct pill against the header. */
+header#oneHeader .slds-badge,
+header#oneHeader .slds-badge_inverse,
+header#oneHeader .slds-badge--inverse,
+header#oneHeader .slds-badge_lightest,
+.slds-global-header_container .slds-badge,
+.slds-global-header_container .slds-badge_inverse,
+.slds-global-header_container .slds-badge--inverse,
+.slds-global-header_container .slds-badge_lightest,
+header#oneHeader .slds-pill,
+.slds-global-header_container .slds-pill {
+  background-color: ${c.accentLight} !important;
+  color: ${c.accent} !important;
+  border: 1px solid ${c.navBorder} !important;
+}
+
+/* System message bar (org-edition banner, trial countdown, etc.) */
+header#oneHeader .oneSystemMessage,
+header#oneHeader .oneSystemMessage.slds-color__background_gray-1,
+.slds-global-header_container .oneSystemMessage {
+  background-color: ${c.surfaceHighlight || c.accentLight} !important;
+  color: ${c.navText} !important;
+  border-bottom: 1px solid ${c.navBorder} !important;
+}
+
 ${isDark || !c.globalHeaderWhite ? `
 /* Search box in header — themed for dark or non-white-header themes */
 .slds-global-header .slds-input,
@@ -362,11 +414,14 @@ one-app-nav-bar,
   color: ${c.navActiveText} !important;` : ''}
 }
 
-/* Active nav tab — target all SF variations with max specificity */
+/* Active nav tab — paint ONLY the outer list item.
+ * SF stacks three possible layers on an active tab (.slds-context-bar__item,
+ * one-app-nav-bar-item-root wrapper, inner <a>). Painting more than one layer
+ * produces a "chip inside a bubble" double-highlight. Keep the background on
+ * the outer <li> and null every inner layer, including SF's own SLDS tokens,
+ * so the highlight reads as ONE pill. */
 .slds-context-bar__item.slds-is-active,
 .slds-context-bar__item.slds-is-active.slds-is-unsaved,
-one-app-nav-bar-item-root.slds-is-active,
-one-app-nav-bar-item-root.navItem.slds-is-active,
 .navexConsoleTabItem.active {
   background-color: ${c.navActive} !important;
   border-bottom-color: ${c.navActiveBorder} !important;${fx && fx.navActiveBoxShadow ? `
@@ -388,8 +443,12 @@ one-app-nav-bar-item-root.slds-is-active a::after {
   border-color: ${c.navActiveBorder} !important;
 }
 
-/* Active tab inner link — beat SF's aria-current="page" pill styling.
-   Only override color and background — let borders/radius/shadow inherit. */
+/* Null ALL inner active-tab backgrounds — prevents double-chip visual.
+ * Also override SLDS/LWC tokens SF uses internally for the active state,
+ * so customer orgs on SLDS 2 (Cosmos) don't re-introduce the inner pill. */
+.slds-context-bar__item.slds-is-active one-app-nav-bar-item-root,
+one-app-nav-bar-item-root.slds-is-active,
+one-app-nav-bar-item-root.navItem.slds-is-active,
 .slds-context-bar__item.slds-is-active .slds-context-bar__label-action,
 .slds-context-bar__item.slds-is-active a,
 one-app-nav-bar-item-root.slds-is-active a,
@@ -397,7 +456,9 @@ one-app-nav-bar-item-root.slds-is-active a.dndItem,
 one-app-nav-bar-item-root.slds-is-active .slds-context-bar__label-action,
 .slds-context-bar a[aria-current="page"] {
   color: ${c.navActiveText} !important;
-  background-color: inherit !important;
+  background-color: transparent !important;
+  --slds-c-context-bar-item-color-background-active: transparent !important;
+  --lwc-brandNavigationColorBackgroundActive: transparent !important;
 }
 
 /* Nav text and icons */
@@ -616,12 +677,20 @@ ${fx ? `
 }
 
 .slds-backdrop {
-  background-color: ${c.modalBackdrop} !important;${fx ? `
-  backdrop-filter: blur(2px) !important;` : ''}
+  background-color: ${c.modalBackdrop} !important;
 }
 
 /* App Launcher — uses viewport-filling overlay, not a standard modal.
-   Must NOT inherit modal container sizing. Only recolor backgrounds. */
+ * The <one-app-launcher-modal> wrapper itself ships with a default tinted
+ * background that shows as a visible layer between the modal and the
+ * backdrop — a "frame" effect. Null it so only the backdrop + inner modal
+ * render. Recolor-only (no structural changes to sizing). */
+one-app-launcher-modal,
+one-app-launcher-modal > .slds-modal,
+one-app-launcher-modal .slds-modal {
+  background-color: transparent !important;
+}
+
 one-app-launcher-modal .modal-container,
 one-app-launcher-modal .slds-modal__container {
   background-color: ${c.modalBg} !important;
@@ -641,7 +710,7 @@ one-app-launcher-modal .slds-modal__header {
   position: relative !important;
 }
 
-/* App Launcher backdrop — scoped to prevent full-viewport bleed */
+/* App Launcher backdrop — use the theme's standard modal backdrop tint */
 one-app-launcher-modal + .slds-backdrop,
 one-app-launcher-modal ~ .slds-backdrop {
   background-color: ${c.modalBackdrop} !important;
