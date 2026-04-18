@@ -543,10 +543,17 @@ one-app-nav-bar-item-root.slds-is-active .slds-context-bar__label-action,
 }
 
 /* App Launcher — uses viewport-filling overlay, not a standard modal.
- * Only recolor the inner modal container + contents; leave the
- * <one-app-launcher-modal> wrapper and its .slds-modal child alone —
- * they carry the backdrop/overlay behavior and should inherit SF's
- * defaults plus the .slds-backdrop rule below. */
+ * The <one-app-launcher-modal> wrapper ships with SF's default light
+ * surface background, which shows as a near-white band behind the modal
+ * on every theme and reads as a "weird backdrop layer." Paint it with
+ * the theme's page background so the app launcher feels like a themed
+ * fullscreen view rather than a modal dropped on an unthemed page.
+ * (Using background rather than transparent — transparency exposes
+ * SF unthemed page-home layer underneath, which is worse.) */
+one-app-launcher-modal {
+  background-color: #282a36 !important;
+}
+
 one-app-launcher-modal .modal-container,
 one-app-launcher-modal .slds-modal__container {
   background-color: #343746 !important;
