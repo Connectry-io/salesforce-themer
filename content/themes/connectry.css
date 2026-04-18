@@ -518,14 +518,28 @@ one-app-nav-bar-item-root.slds-is-active .slds-context-bar__label-action,
   background-color: rgba(0, 0, 0, 0.4) !important;
 }
 
-/* App Launcher — uses viewport-filling overlay, not a standard modal.
- * The <one-app-launcher-modal> wrapper ships with SF's default light
- * surface background, which shows as a near-white band behind the modal
- * on every theme and reads as a "weird backdrop layer." Paint it with
- * the theme's page background so the app launcher feels like a themed
- * fullscreen view rather than a modal dropped on an unthemed page.
- * (Using background rather than transparent — transparency exposes
- * SF unthemed page-home layer underneath, which is worse.) */
+/* App Launcher — the Aura-hosted modal wraps a pure-LWC content tree
+ * in a standard .slds-modal__container painted white. That wide white
+ * card around the app grid is what users read as a "weird backdrop
+ * layer." For the app launcher specifically, null the outer modal
+ * chrome (container + header) so the LWC content reads as a themed
+ * fullscreen page rather than a card-inside-a-card. :has() scopes
+ * this to the app-launcher modal only — standard modals (New Contact,
+ * etc.) keep their card appearance. */
+.slds-modal__container:has(one-app-launcher-modal),
+.slds-modal:has(one-app-launcher-modal) .slds-modal__container {
+  background-color: transparent !important;
+  border-color: transparent !important;
+}
+
+.slds-modal__container:has(one-app-launcher-modal) .slds-modal__header,
+.slds-modal:has(one-app-launcher-modal) .slds-modal__header {
+  background-color: transparent !important;
+  border-color: transparent !important;
+}
+
+/* LWC root inside the launcher modal — paint with theme background so
+ * the app grid sits on a themed surface instead of SF default white. */
 one-app-launcher-modal {
   background-color: #f7f7f5 !important;
 }
