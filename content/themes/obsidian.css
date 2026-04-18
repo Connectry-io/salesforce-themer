@@ -543,16 +543,10 @@ one-app-nav-bar-item-root.slds-is-active .slds-context-bar__label-action,
 }
 
 /* App Launcher — uses viewport-filling overlay, not a standard modal.
- * The <one-app-launcher-modal> wrapper itself ships with a default tinted
- * background that shows as a visible layer between the modal and the
- * backdrop — a "frame" effect. Null it so only the backdrop + inner modal
- * render. Recolor-only (no structural changes to sizing). */
-one-app-launcher-modal,
-one-app-launcher-modal > .slds-modal,
-one-app-launcher-modal .slds-modal {
-  background-color: transparent !important;
-}
-
+ * Only recolor the inner modal container + contents; leave the
+ * <one-app-launcher-modal> wrapper and its .slds-modal child alone —
+ * they carry the backdrop/overlay behavior and should inherit SF's
+ * defaults plus the .slds-backdrop rule below. */
 one-app-launcher-modal .modal-container,
 one-app-launcher-modal .slds-modal__container {
   background-color: #161616 !important;
