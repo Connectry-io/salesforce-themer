@@ -546,6 +546,25 @@ ${fx ? `
   border-bottom-color: ${isDark ? 'rgba(255,255,255,0.06)' : c.border} !important;
 }
 
+/* Card + page headings — force textPrimary so headings are always the
+ * most readable text. Without this, SF defaults route headings through
+ * --lwc-colorTextLabel which for dark themes (Dracula in particular:
+ * #6272a4 comment-blue) is intentionally muted and lands too
+ * low-contrast for a title. Applies to: card headers, page headings
+ * (Seller Home, dashboard titles), section headings. */
+.slds-card__header-title,
+.slds-card__header-title a,
+.slds-card__header-link,
+.slds-card__header .slds-text-heading_small,
+.slds-card__header .slds-text-heading_medium,
+.slds-card__header .slds-text-heading_large,
+.slds-text-heading_large,
+.slds-text-heading_medium,
+.slds-text-heading--large,
+.slds-text-heading--medium {
+  color: ${c.textPrimary} !important;
+}
+
 /* ─── Buttons ────────────────────────────────────────────────────────────── */
 
 .slds-button_brand,

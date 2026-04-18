@@ -363,6 +363,25 @@ one-app-nav-bar-item-root.slds-is-active .slds-context-bar__label-action,
   border-bottom-color: #e5e5e5 !important;
 }
 
+/* Card + page headings — force textPrimary so headings are always the
+ * most readable text. Without this, SF defaults route headings through
+ * --lwc-colorTextLabel which for dark themes (Dracula in particular:
+ * #6272a4 comment-blue) is intentionally muted and lands too
+ * low-contrast for a title. Applies to: card headers, page headings
+ * (Seller Home, dashboard titles), section headings. */
+.slds-card__header-title,
+.slds-card__header-title a,
+.slds-card__header-link,
+.slds-card__header .slds-text-heading_small,
+.slds-card__header .slds-text-heading_medium,
+.slds-card__header .slds-text-heading_large,
+.slds-text-heading_large,
+.slds-text-heading_medium,
+.slds-text-heading--large,
+.slds-text-heading--medium {
+  color: #181818 !important;
+}
+
 /* ─── Buttons ────────────────────────────────────────────────────────────── */
 
 .slds-button_brand,
