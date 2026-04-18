@@ -2044,8 +2044,9 @@
 
   // ─── Effects volume knob (matches popup) ─────────────────────────────────
   //
-  // The 4 buttons are the Volume knob: 'off' | 'subtle' | 'default' | 'immersive'.
-  // They scale the active theme's SHIPPED effects rather than overwriting them.
+  // The 4 buttons are the Volume knob: 'off' | 'subtle' | 'medium' | 'strong'.
+  // They set every enabled effect on the active theme to that intensity
+  // (or disable all for 'off'). Everything scales together for cohesion.
   // Free users can adjust volume; Premium can also clone themes to customize
   // individual effects in the Theme Builder.
 
@@ -2054,7 +2055,7 @@
     if (!pills.length) return;
 
     // Initial state from sync
-    const activeVolume = syncState.effectsVolume || 'default';
+    const activeVolume = syncState.effectsVolume || 'medium';
     pills.forEach(p => p.classList.toggle('is-active', p.dataset.effectVolume === activeVolume));
 
     pills.forEach(pill => {
@@ -2093,7 +2094,7 @@
         '• Switch back to the Connectry theme\n' +
         '• Turn off Follow System mode\n' +
         '• Apply theme to Lightning pages only\n' +
-        '• Set effects volume to Default\n' +
+        '• Set effects volume to Medium\n' +
         '• Clear all per-org overrides\n\n' +
         'Custom themes you\'ve created will be kept.'
       );
@@ -2106,7 +2107,7 @@
         lastDarkTheme: 'connectry-dark',
         orgThemes: {},
         themeScope: 'lightning',
-        effectsVolume: 'default',
+        effectsVolume: 'medium',
       };
       await chrome.storage.sync.set(defaults);
       pushThemeToAllSfTabs('connectry');
@@ -2258,7 +2259,7 @@
       lastDarkTheme: 'connectry-dark',
       orgThemes: {},
       themeScope: 'lightning',
-      effectsVolume: 'default',
+      effectsVolume: 'medium',
       customThemes: [],
     });
 
@@ -2359,7 +2360,7 @@
         syncState.effectsVolume = changes.effectsVolume.newValue;
         renderEffectsTabForActiveTheme();
         // Sync the Theme Application effects volume pills
-        const activeVolume = syncState.effectsVolume || 'default';
+        const activeVolume = syncState.effectsVolume || 'medium';
         document.querySelectorAll('#optEffectsPills .opt-scope-pill[data-effect-volume]').forEach(p => {
           p.classList.toggle('is-active', p.dataset.effectVolume === activeVolume);
         });
@@ -4409,7 +4410,7 @@
     const shipped = (typeof getThemeEffects === 'function')
       ? getThemeEffects(activeId)
       : { ...NONE_EFFECTS };
-    const volume = syncState.effectsVolume || 'default';
+    const volume = syncState.effectsVolume || 'medium';
     const scaled = (typeof applyVolume === 'function')
       ? applyVolume(shipped, volume)
       : shipped;
@@ -4425,7 +4426,7 @@
     const { mode, theme } = resolveEffectsEditingTarget();
     const activeThemeObj = getThemeById(syncState.theme);
     const themeName = activeThemeObj?.name || syncState.theme;
-    const volume = syncState.effectsVolume || 'default';
+    const volume = syncState.effectsVolume || 'medium';
 
     if (mode === 'custom' && theme) {
       // Custom themes still editable here for now (Commit B will move this

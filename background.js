@@ -113,7 +113,7 @@ chrome.runtime.onInstalled.addListener(async (details) => {
       lastDarkTheme: 'connectry-dark',
       orgThemes: {},
       themeScope: 'lightning',
-      effectsVolume: 'default',
+      effectsVolume: 'medium',
     });
   } else if (details.reason === 'update') {
     // Backfill new defaults for existing installs that predate them.
@@ -149,9 +149,14 @@ async function migrateDefaultsForExistingInstall() {
       await chrome.storage.sync.remove('effectsConfig');
     }
 
-    // V3: backfill effectsVolume to 'default' if missing
+    // V3: backfill effectsVolume to 'medium' if missing; normalize legacy
+    // values ('default', 'immersive', 'alive', 'none') from pre-v2.7.1
+    // installs. The new vocabulary is 'off' | 'subtle' | 'medium' | 'strong'.
+    const VOLUME_LEGACY = { default: 'medium', alive: 'medium', immersive: 'strong', none: 'off' };
     if (current.effectsVolume === undefined) {
-      updates.effectsVolume = 'default';
+      updates.effectsVolume = 'medium';
+    } else if (VOLUME_LEGACY[current.effectsVolume]) {
+      updates.effectsVolume = VOLUME_LEGACY[current.effectsVolume];
     }
 
     // Scope: only set if completely missing (legacy installs predating the

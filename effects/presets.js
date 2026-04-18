@@ -150,40 +150,49 @@ const EFFECT_DESCRIPTIONS = {
 // Effect colors are derived from theme accent at render time — we don't store
 // curated colors here, which means suggestions stay portable across themes.
 
+// Each preset lists WHICH effects it ships with; the user's Volume knob
+// sets the intensity for all of them in lockstep. `base` seeds the config,
+// `extras` layers on effect-type choices (particles style, border style)
+// and enablement booleans. Per-effect intensity overrides are intentionally
+// absent — volume owns intensity.
 const THEME_EFFECTS_MAP = {
-  // ─── Light themes: hover lift by default
-  'connectry':       { base: 'subtle' },
-  'slate':           { base: 'subtle' },
+  // ─── Baselines with zero effects (SF defaults + a11y)
+  'salesforce':        { base: 'none' },
+  'salesforce-cosmos': { base: 'none' },
+  'high-contrast':     { base: 'none' },
+
+  // ─── Light themes
+  'connectry': { base: 'subtle' },
+  'slate':     { base: 'subtle' },
   'arctic': {
-    base: 'alive',
-    extras: { aurora: true, auroraIntensity: 'medium', particles: 'snow', particlesIntensity: 'medium' },
+    base: 'subtle',
+    extras: { ambientGlow: true, borderEffect: 'shimmer', aurora: true, particles: 'snow' },
   },
   'sakura': {
     base: 'subtle',
-    extras: { borderEffect: 'shimmer', borderEffectIntensity: 'subtle' },
+    extras: { borderEffect: 'shimmer' },
   },
-  'high-contrast':   { base: 'none' },
 
-  // ─── Dark themes: richer effects
+  // ─── Dark themes
   'connectry-dark': {
     base: 'subtle',
-    extras: { ambientGlow: true, ambientGlowIntensity: 'subtle' },
+    extras: { ambientGlow: true },
   },
   'tron': {
-    base: 'immersive',
-    extras: { neonFlicker: true, neonFlickerIntensity: 'strong', ambientGlow: true, ambientGlowIntensity: 'strong' },
+    base: 'subtle',
+    extras: { ambientGlow: true, borderEffect: 'gradient', cursorTrail: true, neonFlicker: true },
   },
   'obsidian': {
     base: 'subtle',
-    extras: { ambientGlow: true, ambientGlowIntensity: 'subtle' },
+    extras: { ambientGlow: true },
   },
   'nord': {
     base: 'subtle',
-    extras: { aurora: true, auroraIntensity: 'subtle' },
+    extras: { aurora: true },
   },
   'dracula': {
     base: 'subtle',
-    extras: { ambientGlow: true, ambientGlowIntensity: 'medium', borderEffect: 'shimmer', borderEffectIntensity: 'medium' },
+    extras: { ambientGlow: true, borderEffect: 'shimmer' },
   },
 };
 
@@ -211,20 +220,32 @@ function getThemeEffects(themeId) {
 }
 
 /**
- * Apply the Volume knob to a shipped effects config. Volume scales the
- * theme's designed effects without changing WHICH effects are on:
- *   - 'off':       all effects disabled
- *   - 'subtle':    every enabled effect clamped to 'subtle' intensity
- *   - 'default':   exactly as the theme designer set them
- *   - 'immersive': every enabled effect clamped to 'strong' intensity
+ * Apply the Volume knob to a shipped effects config. Volume sets the
+ * intensity of every enabled effect in lockstep:
+ *   - 'off':    all effects disabled
+ *   - 'subtle': every enabled effect → 'subtle' intensity
+ *   - 'medium': every enabled effect → 'medium' intensity (theme baseline)
+ *   - 'strong': every enabled effect → 'strong' intensity
  *
- * The point: the theme's identity (which effects make Tron feel like Tron)
- * is preserved at every volume; only loudness changes.
+ * The theme's identity (which effects are enabled, what particle style,
+ * what border style) is preserved at every volume; only loudness changes.
+ * Everything scales together for cohesion.
+ *
+ * Accepts legacy values for forward-compat: 'default' → 'medium',
+ * 'immersive' → 'strong', 'alive' → 'medium', 'none' → 'off'.
  */
+function _normalizeVolume(v) {
+  if (v === 'default' || v === 'alive') return 'medium';
+  if (v === 'immersive') return 'strong';
+  if (v === 'none') return 'off';
+  if (v === 'off' || v === 'subtle' || v === 'medium' || v === 'strong') return v;
+  return 'medium';
+}
+
 function applyVolume(config, volume) {
   if (!config) return { ...EFFECTS_PRESETS.none };
-  if (volume === 'off') {
-    // Disable all effect toggles, keep intensities as-is
+  const v = _normalizeVolume(volume);
+  if (v === 'off') {
     return {
       ...config,
       hoverLift: false,
@@ -237,15 +258,11 @@ function applyVolume(config, volume) {
       backgroundPattern: 'none',
     };
   }
-  if (volume === 'default' || !volume) {
-    return { ...config };
-  }
-  // 'subtle' or 'immersive' → clamp every intensity field
-  const targetIntensity = volume === 'immersive' ? 'strong' : 'subtle';
+  // 'subtle' | 'medium' | 'strong' → clamp every intensity field
   const out = { ...config };
   const effects = ['hoverLift', 'ambientGlow', 'borderEffect', 'aurora', 'neonFlicker', 'particles', 'cursorTrail', 'backgroundPattern'];
   for (const eff of effects) {
-    out[eff + 'Intensity'] = targetIntensity;
+    out[eff + 'Intensity'] = v;
   }
   return out;
 }
@@ -266,12 +283,14 @@ function getSuggestedPreset(themeId) {
  *   - OOTB themes:  use the theme's SHIPPED effects, scaled by the user's Volume
  *   - Missing/unknown theme: return 'none' preset
  *
- * The Volume knob ('off' | 'subtle' | 'default' | 'immersive') is the only
- * effect-related setting free users can touch on OOTB themes. It scales the
- * theme's designed effects, never replacing them.
+ * The Volume knob ('off' | 'subtle' | 'medium' | 'strong') is the only
+ * effect-related setting free users can touch on OOTB themes. It sets the
+ * intensity of every enabled effect in lockstep; it never changes which
+ * effects are on. Legacy values ('default', 'immersive', 'alive', 'none')
+ * are auto-normalized for back-compat.
  *
  * @param {string} activeThemeId - Current theme ID
- * @param {string} volume - Effects volume: 'off' | 'subtle' | 'default' | 'immersive'
+ * @param {string} volume - Effects volume: 'off' | 'subtle' | 'medium' | 'strong'
  * @param {Object|null} customTheme - The custom theme object if one is active
  * @returns {Object} Complete effects config
  */
@@ -335,6 +354,7 @@ if (typeof module !== 'undefined') {
     THEME_EFFECTS_MAP,
     getThemeEffects,
     applyVolume,
+    _normalizeVolume,
     getSuggestedConfig,    // backwards-compat alias
     getSuggestedPreset,    // backwards-compat alias
     resolveActiveEffects,

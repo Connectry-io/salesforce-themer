@@ -447,7 +447,7 @@
     if (contextDead) return;
     try {
       const [syncData, themeData] = await Promise.all([
-        chrome.storage.sync.get({ effectsVolume: 'default', customThemes: [] }),
+        chrome.storage.sync.get({ effectsVolume: 'medium', customThemes: [] }),
         fetch(chrome.runtime.getURL('themes/themes.json')).then(r => r.json()),
       ]);
 

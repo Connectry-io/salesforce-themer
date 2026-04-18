@@ -824,9 +824,20 @@
     },
   };
 
+  // Inlined volume normalizer — popup runs in its own script context and
+  // can't import from effects/presets.js. Mirrors _normalizeVolume there.
+  function _normalizeStoredVolume(v) {
+    if (v === 'default' || v === 'alive') return 'medium';
+    if (v === 'immersive') return 'strong';
+    if (v === 'none') return 'off';
+    if (v === 'off' || v === 'subtle' || v === 'medium' || v === 'strong') return v;
+    return 'medium';
+  }
+
   function bindEffectsSelector() {
-    // The 4 buttons are the Volume knob: 'off' | 'subtle' | 'default' | 'immersive'.
-    // They scale the active theme's SHIPPED effects rather than overwriting them.
+    // The 4 buttons are the Volume knob: 'off' | 'subtle' | 'medium' | 'strong'.
+    // They set every enabled effect on the active theme to that intensity
+    // (or disable all for 'off'). Everything scales together for cohesion.
     const pills = document.querySelectorAll('.effects-pill[data-volume]');
     pills.forEach(pill => {
       pill.addEventListener('click', async () => {
@@ -1063,7 +1074,7 @@
         lastDarkTheme: 'connectry-dark',
         orgThemes: {},
         themeScope: 'lightning',
-        effectsVolume: 'default',
+        effectsVolume: 'medium',
       };
       await chrome.storage.sync.set(defaults);
       // Re-apply to active tab
@@ -1148,7 +1159,7 @@
         lastDarkTheme: 'connectry-dark',
         orgThemes: {},
         themeScope: 'lightning',
-        effectsVolume: 'default',
+        effectsVolume: 'medium',
         customThemes: [],
       }),
       detectCurrentOrg(),
@@ -1158,8 +1169,9 @@
     currentOrgHostname = orgHostname;
     setScopeUI(result.themeScope || 'both');
 
-    // Set effects UI from the Volume knob (default = "as designer intended")
-    setEffectsUI(result.effectsVolume || 'default');
+    // Set effects UI from the Volume knob — normalize legacy values so old
+    // users on 'default' / 'immersive' / 'alive' / 'none' map cleanly.
+    setEffectsUI(_normalizeStoredVolume(result.effectsVolume));
 
     let effectiveTheme = result.theme;
     if (orgHostname && result.orgThemes[orgHostname]) {
