@@ -28,7 +28,7 @@
   --lwc-colorBackgroundSelection: #f8bbd0 !important;
   --lwc-colorBackgroundButtonBrand: #e11d48 !important;
   --lwc-colorBackgroundButtonBrandHover: #be185d !important;
-  --lwc-colorBackgroundButtonBrandActive: #153e73 !important;
+  --lwc-colorBackgroundButtonBrandActive: #9d174d !important;
   --lwc-colorBackgroundButtonDefault: #ffffff !important;
   --lwc-colorBackgroundButtonDefaultHover: #fff0f0 !important;
   --lwc-headerColorBackground: #be185d !important;
@@ -41,7 +41,7 @@
   --lwc-colorTextLink: #be185d !important;
   --lwc-colorTextLinkHover: #9d174d !important;
   --lwc-colorBorder: #f5d0d8 !important;
-  --lwc-colorBorderSeparator: #dde5ef !important;
+  --lwc-colorBorderSeparator: #f5d0d8 !important;
   --lwc-colorBorderInput: #e8b4c0 !important;
   --lwc-colorBorderInputActive: #e11d48 !important;
   --lwc-brandPrimary: #e11d48 !important;
@@ -64,7 +64,7 @@
   --slds-g-color-border-2: #e8b4c0 !important;
   --slds-g-color-brand-1: #e11d48 !important;
   --slds-g-color-brand-2: #be185d !important;
-  --slds-g-color-brand-3: #153e73 !important;
+  --slds-g-color-brand-3: #9d174d !important;
   --slds-g-color-neutral-1: #fff5f5 !important;
   --slds-g-color-neutral-2: #fff0f0 !important;
   --slds-g-color-neutral-3: #f5d0d8 !important;
@@ -82,7 +82,7 @@
   /* Legacy LWC — brand */
   --lwc-colorBrand: #e11d48 !important;
   --lwc-colorBrandDark: #e11d48 !important;
-  --lwc-colorBrandDarker: #153e73 !important;
+  --lwc-colorBrandDarker: #9d174d !important;
   --lwc-colorTextBrand: #e11d48 !important;
   --lwc-colorTextBrandPrimary: #e11d48 !important;
 
@@ -106,7 +106,7 @@
   --lwc-colorBackgroundButtonDefaultActive: #ffe8e8 !important;
   --lwc-colorBackgroundButtonDefaultDisabled: #ffffff !important;
   --lwc-buttonColorBackgroundPrimary: #e11d48 !important;
-  --lwc-buttonColorBorderPrimary: #2b6cb0 !important;
+  --lwc-buttonColorBorderPrimary: #e11d48 !important;
 
   /* Legacy LWC — text (buttons, icons, actions) */
   --lwc-colorTextButtonBrandHover: #ffffff !important;
@@ -126,7 +126,7 @@
   /* Legacy LWC — borders */
   --lwc-colorBorderPrimary: #f5d0d8 !important;
   --lwc-colorBorderBrand: #e11d48 !important;
-  --lwc-colorBorderButtonBrand: #2b6cb0 !important;
+  --lwc-colorBorderButtonBrand: #e11d48 !important;
   --lwc-colorBorderButtonBrandDisabled: transparent !important;
   --lwc-colorBorderButtonDefault: #e8b4c0 !important;
 
@@ -140,7 +140,7 @@
 
   /* Component hooks — buttons */
   --slds-c-button-brand-color-background: #e11d48 !important;
-  --slds-c-button-brand-color-border: #2b6cb0 !important;
+  --slds-c-button-brand-color-border: #e11d48 !important;
   --slds-c-button-brand-color-background-hover: #be185d !important;
   --slds-c-button-neutral-color-background: #ffffff !important;
   --slds-c-button-neutral-color-border: #e8b4c0 !important;
@@ -159,7 +159,7 @@
   --lwc-colorBackgroundToggleHover: #ffe8e8 !important;
   --lwc-colorTextPrimary: #1f1215 !important;
   --lwc-colorTextLinkDisabled: #718096 !important;
-  --lwc-colorTextLinkActive: #153e73 !important;
+  --lwc-colorTextLinkActive: #9d174d !important;
   /* Kebab-case aliases SF uses alongside camelCase */
   --lwc-color-background: #fff5f5 !important;
   --lwc-color-background-alt: #ffffff !important;
@@ -167,9 +167,9 @@
 
   /* Component hooks — tabs */
   --slds-c-tabs-item-text-color: #4a5568 !important;
-  --slds-c-tabs-item-text-color-active: #2b6cb0 !important;
-  --slds-c-tabs-item-color-border-hover: #2b6cb0 !important;
-  --slds-c-tabs-item-color-border-active: #2b6cb0 !important;
+  --slds-c-tabs-item-text-color-active: #e11d48 !important;
+  --slds-c-tabs-item-color-border-hover: #e11d48 !important;
+  --slds-c-tabs-item-color-border-active: #e11d48 !important;
 }
 
 /* ─── Base ───────────────────────────────────────────────────────────────── */
@@ -387,7 +387,7 @@ one-app-nav-bar-item-root.slds-is-active .slds-context-bar__label-action,
 .slds-button_brand,
 .slds-button--brand {
   background-color: #e11d48 !important;
-  border: 1px solid #2b6cb0 !important;
+  border: 1px solid #e11d48 !important;
   color: #ffffff !important;
 }
 
@@ -465,13 +465,13 @@ one-app-nav-bar-item-root.slds-is-active .slds-context-bar__label-action,
 }
 
 .slds-table tbody tr:hover {
-  background-color: #ebf4ff !important;
+  background-color: #ffe8e8 !important;
 }
 
 .slds-table td,
 .slds-table th {
   color: #1f1215 !important;
-  border-right: 1px solid #edf2f7 !important;
+  border-right: 1px solid #f5d0d8 !important;
 }
 
 /* ─── Modals ─────────────────────────────────────────────────────────────── */
@@ -483,7 +483,7 @@ one-app-nav-bar-item-root.slds-is-active .slds-context-bar__label-action,
 }
 
 .slds-modal__header {
-  background-color: #f7faff !important;
+  background-color: #fff0f0 !important;
   border-bottom: 1px solid #f5d0d8 !important;
   color: #1f1215 !important;
 }
@@ -494,7 +494,7 @@ one-app-nav-bar-item-root.slds-is-active .slds-context-bar__label-action,
 }
 
 .slds-modal__footer {
-  background-color: #f0f4f8 !important;
+  background-color: #fff0f0 !important;
   border-top: 1px solid #f5d0d8 !important;
 }
 
@@ -543,7 +543,7 @@ one-app-launcher-modal .slds-modal__content {
 
 one-app-launcher-modal .modal-header,
 one-app-launcher-modal .slds-modal__header {
-  background-color: #f7faff !important;
+  background-color: #fff0f0 !important;
   position: relative !important;
 }
 
@@ -570,7 +570,7 @@ one-app-launcher-modal ~ .slds-backdrop {
 .slds-dropdown__item:hover > a,
 .slds-dropdown__item:hover > span,
 .slds-dropdown__item:focus > a {
-  background-color: #ebf4ff !important;
+  background-color: #ffe8e8 !important;
   color: #1a202c !important;
 }
 
@@ -585,7 +585,7 @@ one-app-launcher-modal ~ .slds-backdrop {
 
 .slds-tabs_default__nav,
 .slds-tabs--default__nav {
-  border-bottom: 2px solid #d2dce8 !important;
+  border-bottom: 2px solid #f5d0d8 !important;
   background-color: transparent !important;
 }
 
@@ -596,14 +596,14 @@ one-app-launcher-modal ~ .slds-backdrop {
 
 .slds-tabs_default__item.slds-is-active,
 .slds-tabs--default__item.slds-active {
-  color: #2b6cb0 !important;
-  border-bottom-color: #2b6cb0 !important;
+  color: #e11d48 !important;
+  border-bottom-color: #e11d48 !important;
 }
 
 /* Override SF's ::after pseudo-element tab indicator */
 .slds-tabs_default__item.slds-is-active::after,
 .slds-tabs--default__item.slds-active::after {
-  background-color: #2b6cb0 !important;
+  background-color: #e11d48 !important;
 }
 
 .slds-tabs_default__content,
