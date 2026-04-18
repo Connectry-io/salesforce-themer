@@ -836,19 +836,6 @@
       });
     });
 
-    // "What are effects?" → open Guide tab, scrolled to effects section
-    const learnMore = document.getElementById('effectsLearnMore');
-    if (learnMore) {
-      learnMore.addEventListener('click', () => {
-        chrome.storage.local.set({
-          openOptionsTab: 'effects',
-          openOptionsScroll: 'guide-effects',
-        }).then(() => {
-          chrome.runtime.openOptionsPage();
-          window.close();
-        });
-      });
-    }
   }
 
   function setEffectsUI(volume) {
@@ -908,10 +895,16 @@
       });
     });
 
-    // Effects tooltip → open options page on Effects tab
+    // Effects tooltip → open Guide tab, scrolled to effects section
     document.getElementById('effectsTooltipLink')?.addEventListener('click', (e) => {
       e.preventDefault();
-      openOptionsOnTab('effects');
+      chrome.storage.local.set({
+        openOptionsTab: 'effects',
+        openOptionsScroll: 'guide-effects',
+      }).then(() => {
+        chrome.runtime.openOptionsPage();
+        window.close();
+      });
     });
 
     // Click outside closes any open tooltip

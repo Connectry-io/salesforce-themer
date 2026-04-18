@@ -62,32 +62,34 @@ body {
   border-bottom: 1px solid var(--color-border);
 }
 
-/* Expand button — opens options page (labeled for clear affordance) */
+/* Expand button — opens options page (labeled CTA, reads as primary action) */
 .header-expand-btn {
   margin-left: auto;
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  padding: 5px 10px;
-  background: var(--color-bg);
-  border: 1px solid var(--color-border);
+  padding: 6px 11px;
+  background: var(--color-accent);
+  border: 1px solid var(--color-accent);
   border-radius: var(--radius-sm);
   cursor: pointer;
-  color: var(--color-text-muted);
+  color: #ffffff;
   font-family: var(--font);
   font-size: 11px;
   font-weight: 600;
   letter-spacing: -0.1px;
-  transition: color var(--transition), border-color var(--transition), background-color var(--transition);
+  box-shadow: 0 1px 3px rgba(74, 111, 165, 0.25);
+  transition: background-color var(--transition), border-color var(--transition), box-shadow var(--transition), transform var(--transition);
   flex-shrink: 0;
   outline: none;
   -webkit-tap-highlight-color: transparent;
 }
 
 .header-expand-btn:hover {
-  color: var(--color-accent);
-  border-color: var(--color-accent);
-  background: var(--color-accent-light, rgba(74, 111, 165, 0.08));
+  background: var(--color-accent-hover);
+  border-color: var(--color-accent-hover);
+  box-shadow: 0 2px 6px rgba(74, 111, 165, 0.35);
+  transform: translateY(-1px);
 }
 
 .header-expand-btn svg {
@@ -145,7 +147,7 @@ body {
   overflow: hidden;
 }
 
-/* Card header — collapse toggle */
+/* Card header — status + inline toggle + collapse button */
 .settings-card-header {
   display: flex;
   align-items: center;
@@ -153,26 +155,13 @@ body {
   width: 100%;
   padding: 9px 12px;
   background: var(--color-surface);
-  border: none;
   border-bottom: 1px solid var(--color-border);
-  cursor: pointer;
   font-family: var(--font);
-  outline: none;
-  transition: background-color var(--transition), border-bottom-color var(--transition);
-  -webkit-tap-highlight-color: transparent;
+  transition: border-bottom-color var(--transition);
 }
 
-.settings-card-header[aria-expanded="false"] {
+.settings-card-header:has(.settings-card-collapse[aria-expanded="false"]) {
   border-bottom-color: transparent;
-}
-
-.settings-card-header:hover {
-  background: var(--color-bg);
-}
-
-.settings-card-header:focus-visible {
-  outline: 2px solid var(--color-accent);
-  outline-offset: -2px;
 }
 
 .settings-card-status {
@@ -182,6 +171,36 @@ body {
   font-size: 12px;
   font-weight: 600;
   color: var(--color-text);
+}
+
+/* Inline toggle in header — scaled down slightly since it sits next to status */
+.settings-card-head-toggle {
+  margin-left: 4px;
+}
+
+/* Collapse sub-button inside the header row */
+.settings-card-collapse {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 8px;
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-family: var(--font);
+  outline: none;
+  transition: background-color var(--transition);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.settings-card-collapse:hover {
+  background: var(--color-bg);
+}
+
+.settings-card-collapse:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 1px;
 }
 
 .status-dot {
@@ -215,8 +234,7 @@ body {
   flex-shrink: 0;
 }
 
-.settings-card[aria-collapsed="true"] .settings-card-chevron,
-.settings-card-header[aria-expanded="false"] .settings-card-chevron {
+.settings-card-collapse[aria-expanded="false"] .settings-card-chevron {
   transform: rotate(-90deg);
 }
 
@@ -801,6 +819,7 @@ body {
    Conceptually belongs to those themes since custom themes manage their
    own per-effect intensities. */
 .themes-effects-strip {
+  position: relative;
   display: flex;
   align-items: center;
   gap: 8px;
@@ -827,19 +846,12 @@ body {
   margin-left: auto;
 }
 
-.effects-learn-more {
-  border: none;
-  background: none;
-  font-size: 9px;
-  font-weight: 600;
-  color: var(--color-accent);
-  cursor: pointer;
-  white-space: nowrap;
-  padding: 2px 0;
-  flex-shrink: 0;
-}
-.effects-learn-more:hover {
-  text-decoration: underline;
+/* Strip-anchored tooltip — positioned below the whole strip via CSS so it
+   doesn't need the settings-card-based positionTooltipBelow helper. */
+.popup-tooltip--strip {
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
 }
 
 /* ─── Share menu (popup) ────────────────────────────────────────────────── */
@@ -951,10 +963,19 @@ body {
 
 .theme-group-label-count {
   margin-left: auto;
-  font-size: 9px;
-  font-weight: 600;
-  color: var(--color-text-subtle);
-  letter-spacing: 0.02em;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 16px;
+  padding: 0 6px;
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: 100px;
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--color-text-muted);
+  letter-spacing: 0;
 }
 
 .theme-group.is-collapsed .themes-grid {
