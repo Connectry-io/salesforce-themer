@@ -4,7 +4,7 @@
       "id": "salesforce",
       "name": "Salesforce Lightning",
       "description": "Stock Salesforce Lightning Experience (SLDS 1) — matches orgs running the Lightning brand theme",
-      "tagline": "Classic Salesforce blue. For orgs on SLDS 1 / Lightning.",
+      "tagline": "Starting point for a custom theme. Matches SF Lightning (SLDS 1).",
       "bestFor": "SLDS 1 orgs (most existing customers)",
       "category": "light",
       "author": "Salesforce",
@@ -100,13 +100,14 @@
         "colorScheme": "light",
         "globalHeaderWhite": false
       },
-      "suggestedEffects": "none"
+      "suggestedEffects": "none",
+      "role": "template"
     },
     {
       "id": "salesforce-cosmos",
       "name": "Salesforce Cosmos",
       "description": "Stock Salesforce Cosmos (SLDS 2) — the default for new orgs on the latest design system",
-      "tagline": "Cobalt blue. Salesforce's 2024+ visual refresh.",
+      "tagline": "Starting point for a custom theme. Matches SF Cosmos (SLDS 2).",
       "bestFor": "SLDS 2 orgs (new Salesforce installs)",
       "category": "light",
       "author": "Salesforce",
@@ -202,7 +203,8 @@
         "colorScheme": "light",
         "globalHeaderWhite": false
       },
-      "suggestedEffects": "none"
+      "suggestedEffects": "none",
+      "role": "template"
     },
     {
       "id": "connectry",

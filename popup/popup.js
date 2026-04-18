@@ -107,8 +107,11 @@
     const section = document.getElementById('themesSection');
     section.innerHTML = '';
 
-    const lightThemes = THEMES.filter(t => t.category === 'light');
-    const darkThemes = THEMES.filter(t => t.category === 'dark');
+    // Exclude Builder templates (SF baselines) — those live in the Builder's
+    // "From scratch" picker only, not in the user-facing popup.
+    const visible = THEMES.filter(t => t.role !== 'template');
+    const lightThemes = visible.filter(t => t.category === 'light');
+    const darkThemes = visible.filter(t => t.category === 'dark');
 
     const groups = [
       { key: 'light', label: 'Light Themes', themes: lightThemes },

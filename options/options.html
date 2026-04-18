@@ -253,9 +253,18 @@
               </span>
               <span class="builder-startfrom-body">
                 <span class="builder-startfrom-name">From scratch</span>
-                <span class="builder-startfrom-desc">Tweak any of the 23 core colors</span>
+                <span class="builder-startfrom-desc">Pick a Salesforce baseline to start from</span>
               </span>
             </button>
+            <!-- Scratch-picker sub-panel — lists SF baselines + Blank -->
+            <div class="builder-clone-picker" id="builderScratchPicker" hidden>
+              <div class="builder-clone-picker-section">
+                <div class="builder-clone-picker-label">Pick a starting point</div>
+                <div class="builder-clone-picker-grid" id="builderScratchPickerGrid">
+                  <!-- Populated by JS -->
+                </div>
+              </div>
+            </div>
             <button type="button" class="builder-create-menu-item" data-startfrom="clone" role="menuitem">
               <span class="builder-startfrom-icon">
                 <svg width="14" height="14" viewBox="0 0 22 22" fill="none" aria-hidden="true">

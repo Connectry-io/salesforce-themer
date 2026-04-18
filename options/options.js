@@ -2747,6 +2747,47 @@
     const clonePicker = document.getElementById('builderClonePicker');
     const cloneGrid = document.getElementById('builderClonePickerGrid');
 
+    // Scratch picker sub-panel — SF baselines + Blank
+    const scratchPicker = document.getElementById('builderScratchPicker');
+
+    function populateScratchPicker() {
+      const grid = document.getElementById('builderScratchPickerGrid');
+      if (!grid || grid.children.length > 0) return;
+
+      function addScratchBadge(id, name, desc, category, colors) {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'builder-clone-badge';
+        btn.dataset.scratchTheme = id;
+        btn.dataset.category = category || 'light';
+        btn.title = desc;
+        const c = colors || {};
+        const swatchColors = [c.background || '#ddd', c.accent || '#ddd', c.textPrimary || '#ddd'];
+        btn.innerHTML = `
+          <span class="builder-clone-badge-swatch">${swatchColors.map(col => `<span style="background:${col}"></span>`).join('')}</span>
+          <span>${Connectry.Settings.escape(name)}</span>
+        `;
+        btn.addEventListener('click', () => {
+          closeMenu();
+          if (scratchPicker) scratchPicker.hidden = true;
+          _pendingCreateEffects = getSuggestedEffectsFor(id);
+          openEditor(id, null);
+        });
+        grid.appendChild(btn);
+      }
+
+      // SF baselines (role === 'template')
+      for (const theme of THEMES) {
+        if (theme.role !== 'template') continue;
+        addScratchBadge(theme.id, theme.name, theme.tagline || '', theme.category, theme.colors);
+      }
+      // Blank = Connectry baseline (the previous "From scratch" behavior)
+      const connectry = getThemeById('connectry');
+      if (connectry) {
+        addScratchBadge('connectry', 'Blank (Connectry)', 'Connectry default palette', 'light', connectry.colors);
+      }
+    }
+
     function populateClonePicker() {
       const standardGrid = document.getElementById('builderCloneStandardGrid');
       const customGrid = document.getElementById('builderCloneCustomGrid');
@@ -2781,8 +2822,10 @@
         grid.appendChild(btn);
       }
 
-      // Standard (preset) themes
+      // Standard (preset) themes — skip Builder templates (SF baselines),
+      // those are surfaced via the "From scratch" picker only.
       for (const theme of THEMES) {
+        if (theme.role === 'template') continue;
         addCloneBadge(standardGrid, theme.id, theme.name, theme.category, theme.colors, false);
       }
 
@@ -2821,18 +2864,23 @@
           // Toggle the clone picker sub-panel instead of closing the menu
           e.stopPropagation();
           populateClonePicker();
+          if (scratchPicker) scratchPicker.hidden = true;
           if (clonePicker) clonePicker.hidden = !clonePicker.hidden;
+          return;
+        }
+
+        if (which === 'manual') {
+          // Toggle the scratch picker — user picks an SF baseline or Blank
+          e.stopPropagation();
+          populateScratchPicker();
+          if (clonePicker) clonePicker.hidden = true;
+          if (scratchPicker) scratchPicker.hidden = !scratchPicker.hidden;
           return;
         }
 
         closeMenu();
         if (clonePicker) clonePicker.hidden = true;
-
-        if (which === 'manual') {
-          _pendingCreateEffects = getSuggestedEffectsFor('connectry');
-          openEditor('connectry', null);
-          return;
-        }
+        if (scratchPicker) scratchPicker.hidden = true;
         if (which === 'import') {
           if (!isPremium()) { openUpgradeDialog(); return; }
           document.getElementById('editorImportFile')?.click();
