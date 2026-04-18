@@ -42,19 +42,14 @@
     'salesforce':      [],
     'connectry':       ['hoverLift'],
     'connectry-dark':  ['hoverLift', 'ambientGlow'],
-    'midnight':        ['hoverLift', 'aurora', 'particles'],
     'slate':           ['hoverLift'],
     'tron':            ['hoverLift', 'ambientGlow', 'borderEffect', 'cursorTrail', 'neonFlicker'],
     'obsidian':        ['hoverLift', 'ambientGlow'],
     'arctic':          ['hoverLift', 'ambientGlow', 'borderEffect', 'aurora', 'particles'],
     'sakura':          ['hoverLift', 'borderEffect'],
-    'ember':           ['hoverLift', 'ambientGlow', 'particles'],
     'nord':            ['hoverLift', 'aurora'],
-    'terminal':        ['hoverLift', 'ambientGlow', 'borderEffect', 'neonFlicker', 'particles'],
     'high-contrast':   [],
     'dracula':         ['hoverLift', 'ambientGlow', 'borderEffect'],
-    'solarized-light': ['hoverLift'],
-    'solarized-dark':  ['hoverLift', 'ambientGlow'],
   };
 
   const POPUP_EFFECT_LABELS = {

@@ -163,16 +163,11 @@ const THEME_EFFECTS_MAP = {
     extras: { borderEffect: 'shimmer', borderEffectIntensity: 'subtle' },
   },
   'high-contrast':   { base: 'none' },
-  'solarized-light': { base: 'subtle' },
 
   // ─── Dark themes: richer effects
   'connectry-dark': {
     base: 'subtle',
     extras: { ambientGlow: true, ambientGlowIntensity: 'subtle' },
-  },
-  'midnight': {
-    base: 'subtle',
-    extras: { aurora: true, auroraIntensity: 'subtle', particles: 'dots', particlesIntensity: 'subtle' },
   },
   'tron': {
     base: 'immersive',
@@ -182,25 +177,13 @@ const THEME_EFFECTS_MAP = {
     base: 'subtle',
     extras: { ambientGlow: true, ambientGlowIntensity: 'subtle' },
   },
-  'ember': {
-    base: 'subtle',
-    extras: { ambientGlow: true, ambientGlowIntensity: 'medium', particles: 'embers', particlesIntensity: 'subtle' },
-  },
   'nord': {
     base: 'subtle',
     extras: { aurora: true, auroraIntensity: 'subtle' },
   },
-  'terminal': {
-    base: 'alive',
-    extras: { neonFlicker: true, neonFlickerIntensity: 'medium', particles: 'matrix', particlesIntensity: 'medium' },
-  },
   'dracula': {
     base: 'subtle',
     extras: { ambientGlow: true, ambientGlowIntensity: 'medium', borderEffect: 'shimmer', borderEffectIntensity: 'medium' },
-  },
-  'solarized-dark': {
-    base: 'subtle',
-    extras: { ambientGlow: true, ambientGlowIntensity: 'subtle' },
   },
 };
 

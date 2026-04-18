@@ -237,19 +237,14 @@ function suggestedEffectsFor(themeId) {
   const MAP = {
     'connectry': SUBTLE,
     'connectry-dark': { ...SUBTLE, ambientGlow: true, ambientGlowIntensity: 'subtle' },
-    'midnight': { ...SUBTLE, aurora: true, auroraIntensity: 'subtle', particles: 'dots', particlesIntensity: 'subtle' },
     'slate': SUBTLE,
     'tron': { ...IMMERSIVE, neonFlicker: true, neonFlickerIntensity: 'strong', ambientGlow: true, ambientGlowIntensity: 'strong' },
     'obsidian': { ...SUBTLE, ambientGlow: true, ambientGlowIntensity: 'subtle' },
     'arctic': { ...ALIVE, aurora: true, auroraIntensity: 'medium', particles: 'snow', particlesIntensity: 'medium' },
     'sakura': { ...SUBTLE, borderEffect: 'shimmer', borderEffectIntensity: 'subtle' },
-    'ember': { ...SUBTLE, ambientGlow: true, ambientGlowIntensity: 'medium', particles: 'embers', particlesIntensity: 'subtle' },
     'nord': { ...SUBTLE, aurora: true, auroraIntensity: 'subtle' },
-    'terminal': { ...ALIVE, neonFlicker: true, neonFlickerIntensity: 'medium', particles: 'matrix', particlesIntensity: 'medium' },
     'high-contrast': NONE,
     'dracula': { ...SUBTLE, ambientGlow: true, ambientGlowIntensity: 'medium', borderEffect: 'shimmer', borderEffectIntensity: 'medium' },
-    'solarized-light': SUBTLE,
-    'solarized-dark': { ...SUBTLE, ambientGlow: true, ambientGlowIntensity: 'subtle' },
   };
 
   return MAP[themeId] || NONE;
