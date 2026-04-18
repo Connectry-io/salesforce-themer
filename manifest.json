@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Salesforce Themer by Connectry",
-  "version": "2.6.0",
+  "version": "2.6.1",
   "description": "Transform your Salesforce experience with stunning themes. 16 handcrafted themes for Lightning Experience.",
   "permissions": [
     "storage",
@@ -9,12 +9,13 @@
     "tabs"
   ],
   "host_permissions": [
-    "https://*.salesforce.com/*",
     "https://*.lightning.force.com/*",
     "https://*.my.salesforce.com/*",
+    "https://*.my.salesforce-setup.com/*",
     "https://*.visualforce.com/*",
     "https://*.salesforce-setup.com/*",
     "https://*.cloudforce.com/*",
+    "https://*.force.com/*",
     "https://pemofbbniuzogxzzioyp.supabase.co/*"
   ],
   "action": {
@@ -51,14 +52,16 @@
   "content_scripts": [
     {
       "matches": [
-        "https://*.salesforce.com/*",
         "https://*.lightning.force.com/*",
         "https://*.my.salesforce.com/*",
+        "https://*.my.salesforce-setup.com/*",
         "https://*.visualforce.com/*",
         "https://*.salesforce-setup.com/*",
-        "https://*.cloudforce.com/*"
+        "https://*.cloudforce.com/*",
+        "https://*.force.com/*"
       ],
       "js": [
+        "lib/host-gate.js",
         "lib/source-tag.js",
         "lib/intelligence-client.js",
         "lib/scan-enrichment.js",
@@ -101,12 +104,13 @@
         "lib/intelligence-client.js"
       ],
       "matches": [
-        "https://*.salesforce.com/*",
         "https://*.lightning.force.com/*",
         "https://*.my.salesforce.com/*",
+        "https://*.my.salesforce-setup.com/*",
         "https://*.visualforce.com/*",
         "https://*.salesforce-setup.com/*",
-        "https://*.cloudforce.com/*"
+        "https://*.cloudforce.com/*",
+        "https://*.force.com/*"
       ]
     }
   ],
