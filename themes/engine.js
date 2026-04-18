@@ -291,13 +291,27 @@ body,
   background-attachment: fixed !important;` : ''}
 }
 
-/* ─── Global Header — always white so SF logo/icons remain visible ────── */
-${c.globalHeaderWhite ? `
+/* ─── Global Header ──────────────────────────────────────────────────────
+ * Light themes with globalHeaderWhite force a white header so the SF logo
+ * and slate icons stay legible.
+ * Dark themes paint the header to match the nav band underneath — avoids
+ * the jarring white strip above an otherwise dark app.
+ * Light themes with globalHeaderWhite=false inherit SF's default white.
+ */
+${c.globalHeaderWhite && !isDark ? `
 .slds-global-header,
 .slds-global-header_container,
 .forceSearchDesktopHeader {
   background-color: #ffffff !important;
   color: #2d2d2d !important;
+}` : ''}
+
+${isDark ? `
+.slds-global-header,
+.slds-global-header_container,
+.forceSearchDesktopHeader {
+  background-color: ${c.nav} !important;
+  color: ${c.navText} !important;
 }` : ''}
 
 ${isDark || !c.globalHeaderWhite ? `
@@ -1081,14 +1095,24 @@ body .slds-path__item.slds-is-lost .slds-path__title {
   background-color: transparent !important;
 }
 
-${c.globalHeaderWhite ? `
-/* Header stays white — ensure icons are dark/visible, not washed out */
+${c.globalHeaderWhite && !isDark ? `
+/* Light white header: slate icons for legibility on white */
 .slds-global-header .slds-global-header__icon,
 .slds-global-header .slds-button__icon,
 .slds-global-header .forceIcon .slds-icon,
 .slds-global-actions .slds-icon {
   fill: #54698d !important;
   color: #54698d !important;
+}` : ''}
+
+${isDark ? `
+/* Dark header: icons match theme navIcon for visibility on dark surfaces */
+.slds-global-header .slds-global-header__icon,
+.slds-global-header .slds-button__icon,
+.slds-global-header .forceIcon .slds-icon,
+.slds-global-actions .slds-icon {
+  fill: ${c.navIcon} !important;
+  color: ${c.navIcon} !important;
 }` : ''}
 
 /* Profile avatar container — keep structure, just hide border visually */

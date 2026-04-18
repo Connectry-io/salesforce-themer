@@ -181,7 +181,15 @@ body,
   color: #1f1215 !important;
 }
 
-/* ─── Global Header — always white so SF logo/icons remain visible ────── */
+/* ─── Global Header ──────────────────────────────────────────────────────
+ * Light themes with globalHeaderWhite force a white header so the SF logo
+ * and slate icons stay legible.
+ * Dark themes paint the header to match the nav band underneath — avoids
+ * the jarring white strip above an otherwise dark app.
+ * Light themes with globalHeaderWhite=false inherit SF's default white.
+ */
+
+
 
 
 
@@ -930,6 +938,8 @@ body .slds-path__item.slds-is-lost .slds-path__title {
 .slds-global-actions__item > div > button {
   background-color: transparent !important;
 }
+
+
 
 
 
