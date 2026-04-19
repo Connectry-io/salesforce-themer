@@ -165,6 +165,12 @@
   text-transform: uppercase;
 }
 
+.diag-header-subtitle strong {
+  color: rgba(74, 111, 165, 0.85);
+  font-weight: 700;
+  letter-spacing: 0.06em;
+}
+
 .diag-header-actions {
   display: flex;
   align-items: center;
@@ -1442,29 +1448,24 @@
 .diag-footer {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  padding: 8px 14px;
+  justify-content: center;
+  padding: 10px 14px;
   border-top: 1px solid var(--dp-border);
   background: var(--dp-surface);
   flex-shrink: 0;
 }
 
-.diag-footer-actions {
-  display: flex;
-  gap: 4px;
-  align-items: center;
-}
-
-.diag-footer-brand {
-  font-size: 9px;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
+.diag-footer-signature {
+  font-size: 10px;
   color: var(--dp-text-3);
+  letter-spacing: 0.02em;
+  font-style: italic;
 }
 
-.diag-footer-brand strong {
-  color: rgba(74, 111, 165, 0.6);
-  font-weight: 700;
+.diag-footer-signature strong {
+  color: var(--dp-text-2);
+  font-weight: 600;
+  font-style: normal;
 }
 
 .diag-copy-btn {
@@ -1722,6 +1723,47 @@
   color: var(--dp-text-2);
   white-space: nowrap;
   margin-left: auto;
+}
+
+/* ─── Info-bar tools cluster (Inspect · QA · DOM) ──────────────────────── */
+
+.diag-info-tools {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  margin-left: 4px;
+  padding-left: 6px;
+  border-left: 1px solid var(--dp-border);
+  flex-shrink: 0;
+}
+
+.diag-tool-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 24px;
+  height: 22px;
+  padding: 0 5px;
+  border: none;
+  border-radius: 5px;
+  background: transparent;
+  color: var(--dp-text-3);
+  font-family: inherit;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  cursor: pointer;
+  transition: all 150ms ease;
+}
+
+.diag-tool-btn:hover {
+  background: var(--dp-surface-hover);
+  color: var(--dp-text);
+}
+
+.diag-tool-btn svg {
+  width: 11px;
+  height: 11px;
 }
 
 /* ─── Info-bar patches pill (B29c) ─────────────────────────────────────── */

@@ -434,15 +434,9 @@
           <div class="diag-header-logo">${ICONS.logo}</div>
           <div class="diag-header-text">
             <div class="diag-header-title">Theme Diagnostic</div>
-            <div class="diag-header-subtitle">Powered by Connectry AI</div>
+            <div class="diag-header-subtitle">Powered by Connectry <strong>AI</strong></div>
           </div>
           <div class="diag-header-actions">
-            <button class="diag-icon-btn" data-action="explainPicker" title="Explain: click any element on the page to see which layer (engine, preset, patch) painted it">
-              ${ICONS.magnifier}
-            </button>
-            <button class="diag-icon-btn" data-action="toggleQAMode" title="QA mode: also load draft-tier engine patches in this tab (Connectry HQ only)" style="font-size:9px;font-weight:600;letter-spacing:0.04em;width:auto;padding:0 8px;">
-              <span data-qa-label>QA</span>
-            </button>
             <button class="diag-icon-btn" data-action="togglePanelTheme" title="Toggle light/dark panel">
               <svg viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="5" stroke="currentColor" stroke-width="1.4"/><path d="M7 2a5 5 0 0 1 0 10z" fill="currentColor"/></svg>
             </button>
@@ -547,6 +541,17 @@
             <span class="diag-minicard-org" title="${this._escapeHtml(fullHost)}">${this._escapeHtml(host)}</span>
             ${orgBadge}
             ${patchesPill}
+            <div class="diag-info-tools">
+              <button class="diag-tool-btn" data-action="explainPicker" title="Inspect: click any element to see which layer painted it">
+                ${ICONS.magnifier}
+              </button>
+              <button class="diag-tool-btn" data-action="toggleQAMode" title="QA mode: also load draft-tier engine patches (Connectry HQ)">
+                <span data-qa-label>QA</span>
+              </button>
+              <button class="diag-tool-btn" data-action="copyDOM" title="Copy DOM snapshot for debugging">
+                <span>DOM</span>
+              </button>
+            </div>
           </div>
           <div class="diag-heartbeat" id="diagHeartbeat"></div>
         </div>`;
@@ -1539,12 +1544,7 @@
     _footerHTML() {
       return `
         <div class="diag-footer">
-          <span class="diag-footer-brand">Powered by <strong>Connectry AI</strong></span>
-          <div class="diag-footer-actions">
-            <button class="diag-copy-btn" data-action="copyDOM" title="Copy DOM structure snapshot to clipboard (debugging)">
-              <span>DOM</span>
-            </button>
-          </div>
+          <span class="diag-footer-signature">Built with care by <strong>Connectry</strong></span>
         </div>`;
     }
 
