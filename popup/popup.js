@@ -1012,33 +1012,44 @@
 
   // ─── Collapsible settings card ────────────────────────────────────────────
 
-  const COLLAPSE_KEY = 'sft-popup-settings-collapsed';
+  // ─── Settings popover ─────────────────────────────────────────────────────
+  // Replaces the old expand/collapse settings card. Gear button on the strip
+  // toggles a floating popover containing the secondary settings (sync, scope,
+  // per-org). Click-outside + Esc dismiss. State is NOT persisted — popover
+  // always starts closed so themes own the popup's visual real estate.
 
-  function bindSettingsCollapse() {
-    const header = document.getElementById('settingsCardToggle');
+  function bindSettingsPopover() {
+    const gear = document.getElementById('settingsCardToggle');
     const body = document.getElementById('settingsCardBody');
-    if (!header || !body) return;
+    if (!gear || !body) return;
 
-    // Restore persisted state — default to COLLAPSED so themes are the
-    // first thing the user sees. The settings card is for configuration
-    // they only touch occasionally; surfacing it expanded by default
-    // pushes the theme grid below the fold.
-    const stored = localStorage.getItem(COLLAPSE_KEY);
-    const collapsed = stored === null ? true : stored === '1';
-    setCollapsed(collapsed);
+    const setOpen = (open) => {
+      body.hidden = !open;
+      gear.setAttribute('aria-expanded', String(open));
+      if (!open) hideAllTooltips();
+    };
 
-    header.addEventListener('click', () => {
-      const nowCollapsed = !body.classList.contains('is-collapsed');
-      setCollapsed(nowCollapsed);
-      try { localStorage.setItem(COLLAPSE_KEY, nowCollapsed ? '1' : '0'); } catch (_) {}
+    setOpen(false);
+
+    gear.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const willOpen = body.hidden;
+      setOpen(willOpen);
     });
 
-    function setCollapsed(c) {
-      body.classList.toggle('is-collapsed', c);
-      header.setAttribute('aria-expanded', String(!c));
-      // Hide any open tooltips when collapsing
-      if (c) hideAllTooltips();
-    }
+    // Click-outside closes the popover. Allow clicks inside the popover or
+    // on the gear button itself to pass through.
+    document.addEventListener('click', (e) => {
+      if (body.hidden) return;
+      if (e.target.closest('#settingsCardBody') || e.target.closest('#settingsCardToggle')) return;
+      // Tooltips are children of the popover so they're already covered.
+      setOpen(false);
+    });
+
+    // Esc closes
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && !body.hidden) setOpen(false);
+    });
   }
 
   // ─── Theme on/off toggle ──────────────────────────────────────────────────
@@ -1155,7 +1166,7 @@
     bindScopeToggle();
     bindEffectsSelector();
     bindUpgradeCta();
-    bindSettingsCollapse();
+    bindSettingsPopover();
     bindThemeOnToggle();
     bindPerOrgToggle();
     applyPremiumStateToPopup();

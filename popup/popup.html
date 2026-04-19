@@ -30,10 +30,12 @@
       </button>
     </header>
 
-    <!-- ─── Settings card (collapsible, cohesive) ─────────────────────────── -->
+    <!-- ─── Status strip: theme toggle (left) + gear popover trigger (right) ─
+         Replaces the old collapsible settings card. The gear opens a popover
+         that contains all secondary settings (sync, scope, per-org). Themes
+         are now the hero — they sit immediately under this strip. -->
     <section class="settings-card" aria-label="Theme settings">
 
-      <!-- Card header — status + toggle (inline) + collapse button -->
       <div class="settings-card-header">
         <span class="settings-card-status" id="settingsCardStatus">
           <span class="status-dot status-dot--on" id="statusDot"></span>
@@ -44,16 +46,17 @@
           <span class="toggle-track"><span class="toggle-thumb"></span></span>
         </label>
         <span class="settings-card-header-spacer"></span>
-        <button class="settings-card-collapse" id="settingsCardToggle" type="button" aria-expanded="false" aria-controls="settingsCardBody">
-          <span class="settings-card-collapse-label">Settings</span>
-          <svg class="settings-card-chevron" width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
-            <path d="M3 4.5L6 7.5L9 4.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+        <button class="settings-gear-btn" id="settingsCardToggle" type="button" aria-expanded="false" aria-controls="settingsCardBody" aria-label="Open settings" title="Settings">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+            <circle cx="8" cy="8" r="2.2" stroke="currentColor" stroke-width="1.4"/>
+            <path d="M8 1.5v2M8 12.5v2M14.5 8h-2M3.5 8h-2M12.6 3.4l-1.4 1.4M4.8 11.2l-1.4 1.4M12.6 12.6l-1.4-1.4M4.8 4.8L3.4 3.4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
           </svg>
         </button>
       </div>
 
-      <!-- Collapsible body — starts collapsed to avoid flash on first paint -->
-      <div class="settings-card-body is-collapsed" id="settingsCardBody">
+      <!-- Settings popover — anchored to the status strip via CSS, opens
+           on gear click. Contains all secondary toggles. -->
+      <div class="settings-card-body" id="settingsCardBody" hidden>
 
         <!-- Row: Follow system theme -->
         <div class="settings-row" id="autoModeRow">
@@ -195,8 +198,8 @@
           <svg width="13" height="13" viewBox="0 0 16 16" fill="none" aria-hidden="true">
             <path d="M8 1l1.8 4.2L14 6l-3.2 2.8L12 13 8 10.6 4 13l1.2-4.2L2 6l4.2-0.8L8 1z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/>
           </svg>
-          <span>Effects</span>
-          <button class="settings-help-btn" data-tooltip="effectsTooltip" aria-label="About effects" title="About effects">
+          <span>Preset effects</span>
+          <button class="settings-help-btn" data-tooltip="effectsTooltip" aria-label="About preset effects" title="About preset effects — per-theme controls in the Builder">
             <svg width="12" height="12" viewBox="0 0 14 14" fill="none" aria-hidden="true">
               <circle cx="7" cy="7" r="6" stroke="currentColor" stroke-width="1.3"/>
               <path d="M7 6.5v3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>

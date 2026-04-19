@@ -1096,13 +1096,12 @@
   display: flex;
   align-items: center;
   gap: 6px;
-  padding: 8px 14px;
+  padding: 10px 14px 4px;
   font-size: 10px;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.08em;
   color: var(--dp-text-3);
-  border-bottom: 1px solid var(--dp-border-row);
   font-variant-numeric: tabular-nums;
 }
 
@@ -1129,7 +1128,7 @@
 /* ─── Coverage meter ──────────────────────────────────────────────────── */
 
 .diag-coverage {
-  padding: 12px 14px;
+  padding: 6px 14px 12px;
   border-bottom: 1px solid var(--dp-border);
 }
 
@@ -1250,7 +1249,6 @@
   text-transform: uppercase;
   letter-spacing: 0.08em;
   color: var(--dp-text-2);
-  border-top: 1px solid var(--dp-border);
 }
 
 /* ─── Token sections ──────────────────────────────────────────────────── */
