@@ -58,8 +58,6 @@
       this.includeScreenshot = false; // user-toggled on each scan
       this.activeTab = 'scan';       // 'scan' | 'validate' — B29 tab split
       this.scanMode = 'current';     // 'current' | 'presets' | 'mine' | 'all'
-      this._advancedOpen = false;    // user-toggled Advanced disclosure state
-      this._scanBarCollapsed = false; // auto-collapses after a scan completes
       this._isPro = false;           // Pro-tier flag — gates screenshot feature until backend is finalized
       this._panelTheme = 'dark';     // 'dark' | 'light'
       this._configuredThemeName = null;
@@ -589,56 +587,10 @@
       const pageType = ns.detectPageType?.();
       const pageLabel = pageType ? ` · ${pageType.label}` : '';
 
-      // Post-scan: compact summary button that re-scans on click, with
-      // Advanced still accessible below so users can tweak settings without
-      // an extra expand step.
-      if (this.hasScanned && this._scanBarCollapsed) {
-        const themeName = this._escapeHtml(this.themeDisplayName || this.currentTheme || 'theme');
-        const camBadge = this.includeScreenshot
-          ? `<span class="diag-scan-summary-cam" title="Screenshot included">${ICONS.camera}</span>`
-          : '';
-        const page = pageType ? this._escapeHtml(pageType.label) : 'this page';
-        const advOpenLocal = this._advancedOpen ? ' open' : '';
-        const camActiveLocal = this.includeScreenshot;
-        const modeChipLocal = (id, label) => `
-          <button class="diag-mode-chip${this.scanMode === id ? ' is-active' : ''}" data-action="setScanMode" data-mode="${id}">
-            <span>${label}</span>
-          </button>`;
-        return `
-          <div class="diag-scan-bar diag-scan-bar--collapsed">
-            <button class="diag-scan-summary" data-action="scanAll" title="Re-scan with current settings">
-              <span class="diag-scan-summary-icon">${ICONS.scan}</span>
-              <span class="diag-scan-summary-main">
-                <span class="diag-scan-summary-primary">Scan · ${page}</span>
-                <span class="diag-scan-summary-sub">current theme · ${themeName}</span>
-              </span>
-              ${camBadge}
-            </button>
-            <details class="diag-advanced"${advOpenLocal}>
-              <summary>Advanced — scan options</summary>
-              <div class="diag-advanced-body">
-                <div class="diag-advanced-label">Scan against</div>
-                <div class="diag-scan-row">
-                  ${modeChipLocal('current', 'Current')}
-                  ${modeChipLocal('presets', 'Presets')}
-                  ${modeChipLocal('mine', 'My Themes')}
-                  ${modeChipLocal('all', 'All')}
-                </div>
-                <div class="diag-advanced-label">Capture</div>
-                <label class="diag-screenshot-switch${camActiveLocal ? ' is-active' : ''}" tabindex="0" data-diag-tooltip="Captures a PNG of the visible page and attaches it to Copy, View Report, and AI Suggest.&#10;&#10;⚠ Avoid if sensitive data is on screen — no customer PII, financial records, or confidential info.&#10;&#10;Privacy: Connectry uses the screenshot only to generate a fix, then deletes it. We do not retain images." data-diag-tooltip-align="right">
-                  <span class="diag-switch-icon">${ICONS.camera}</span>
-                  <span class="diag-switch-label">Include screenshot</span>
-                  <input type="checkbox" class="diag-sr-only" data-action="toggleIncludeScreenshot" ${camActiveLocal ? 'checked' : ''}>
-                  <span class="diag-switch-track" aria-hidden="true">
-                    <span class="diag-switch-thumb"></span>
-                  </span>
-                </label>
-              </div>
-            </details>
-          </div>`;
-      }
 
-      // Scan tab — idle state. Walk-through status is Validate-tab-only.
+      // Scan tab — single-row layout: [Scan button | caret popover].
+      // Popover holds mode chips + screenshot toggle. Walk-through status
+      // is Validate-tab-only.
       const modeSubLabels = {
         current: 'current theme',
         presets: 'all presets',
@@ -648,43 +600,49 @@
       const primaryLabel = `Scan${pageLabel}`;
       const subLabel = modeSubLabels[this.scanMode] || modeSubLabels.current;
       const camActive = this.includeScreenshot;
-      const advOpen = this._advancedOpen ? ' open' : '';
       const modeChip = (id, label) => `
         <button class="diag-mode-chip${this.scanMode === id ? ' is-active' : ''}" data-action="setScanMode" data-mode="${id}">
           <span>${label}</span>
         </button>`;
+      const camBadge = camActive
+        ? `<span class="diag-scan-cam-badge" title="Screenshot included on next scan">${ICONS.camera}</span>`
+        : '';
+
       return `
         <div class="diag-scan-bar">
-          <div class="diag-scan-row">
+          <div class="diag-scan-row" style="gap:6px">
             <button class="diag-scan-btn diag-scan-btn--primary" data-action="scanAll" style="flex:1;min-width:0">
               ${ICONS.scan}
               <span class="diag-scan-label">
                 <span class="diag-scan-primary">${primaryLabel}</span>
                 <span class="diag-scan-sub">${subLabel}</span>
               </span>
+              ${camBadge}
             </button>
-          </div>
-          <details class="diag-advanced"${advOpen}>
-            <summary>Advanced — scan options</summary>
-            <div class="diag-advanced-body">
-              <div class="diag-advanced-label">Scan against</div>
-              <div class="diag-scan-row">
-                ${modeChip('current', 'Current')}
-                ${modeChip('presets', 'Presets')}
-                ${modeChip('mine', 'My Themes')}
-                ${modeChip('all', 'All')}
+            <details class="diag-scan-options">
+              <summary class="diag-scan-options-trigger" title="Scan options">
+                <svg viewBox="0 0 14 14" fill="none" width="12" height="12"><path d="M3 5.5l4 4 4-4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </summary>
+              <div class="diag-scan-options-menu">
+                <div class="diag-advanced-label">Scan against</div>
+                <div class="diag-scan-row">
+                  ${modeChip('current', 'Current')}
+                  ${modeChip('presets', 'Presets')}
+                  ${modeChip('mine', 'My Themes')}
+                  ${modeChip('all', 'All')}
+                </div>
+                <div class="diag-advanced-label">Capture</div>
+                <label class="diag-screenshot-switch${camActive ? ' is-active' : ''}" tabindex="0" data-diag-tooltip="Captures a PNG of the visible page and attaches it to Copy, View Report, and AI Suggest.&#10;&#10;⚠ Avoid if sensitive data is on screen — no customer PII, financial records, or confidential info.&#10;&#10;Privacy: Connectry uses the screenshot only to generate a fix, then deletes it. We do not retain images." data-diag-tooltip-align="right">
+                  <span class="diag-switch-icon">${ICONS.camera}</span>
+                  <span class="diag-switch-label">Include screenshot</span>
+                  <input type="checkbox" class="diag-sr-only" data-action="toggleIncludeScreenshot" ${camActive ? 'checked' : ''}>
+                  <span class="diag-switch-track" aria-hidden="true">
+                    <span class="diag-switch-thumb"></span>
+                  </span>
+                </label>
               </div>
-              <div class="diag-advanced-label">Capture</div>
-              <label class="diag-screenshot-switch${camActive ? ' is-active' : ''}" tabindex="0" data-diag-tooltip="Captures a PNG of the visible page and attaches it to Copy, View Report, and AI Suggest.&#10;&#10;⚠ Avoid if sensitive data is on screen — no customer PII, financial records, or confidential info.&#10;&#10;Privacy: Connectry uses the screenshot only to generate a fix, then deletes it. We do not retain images." data-diag-tooltip-align="right">
-                <span class="diag-switch-icon">${ICONS.camera}</span>
-                <span class="diag-switch-label">Include screenshot</span>
-                <input type="checkbox" class="diag-sr-only" data-action="toggleIncludeScreenshot" ${camActive ? 'checked' : ''}>
-                <span class="diag-switch-track" aria-hidden="true">
-                  <span class="diag-switch-thumb"></span>
-                </span>
-              </label>
-            </div>
-          </details>
+            </details>
+          </div>
         </div>`;
     }
 
@@ -1132,24 +1090,21 @@
 
       let html = '';
 
-      // ── 0. Snapshot banner — makes it explicit everything below is from a
-      // single scan taken at a specific time, not stored/recalled. ──
-      html += this._snapshotBannerHTML();
+      // ── Cluster 1 — Scan result (snapshot + Page Health as one unit) ──
+      html += `<div class="diag-result-cluster">
+        ${this._snapshotBannerHTML()}
+        ${this._healthSummaryHTML()}
+      </div>`;
 
-      // ── 1. Health summary (token coverage + component health combined) ──
-      html += this._healthSummaryHTML();
-
-      // ── 1a. Primary actions row (AI Fix · Copy · View Report) ──
+      // ── Cluster 2 — Primary actions (AI Fix · Copy · View Report) ──
       html += this._primaryActionsHTML();
 
-      // ── 1b. AI suggestion card (if present or in progress) ──
+      // AI suggestion card slots between clusters 2 and 3 when active.
       if (this.aiSuggestion || this.aiBusy) html += this._aiSuggestionHTML();
 
-      // ── 2. "On this page" subhead + page-scoped sections ──
-      // Always render the subhead + a Tokens row + a Components row so the
-      // drill-down mirrors the KPI row on the Page Health card (tokens /
-      // components / issues). If a category is clean, it reads as "all good"
-      // instead of silently disappearing.
+      // ── Cluster 3 — Drill-down: "On this page" subhead + sections. ──
+      // Always render Tokens + Components rows (even when clean) so the
+      // drill-down mirrors the KPI row one-to-one.
       const cs = this.componentResults?.summary;
       html += '<div class="diag-scope-label">On this page</div>';
       if (this.fixReport?.tokenFixes?.fixes?.length > 0) {
@@ -1166,7 +1121,7 @@
         html += this._lwcPatchesSection();
       }
 
-      // ── 3. Active patches (org-level, not page-scoped) ──
+      // Active patches (org-level, not page-scoped) — trails the drill-down.
       if (this.patchSummary?.total > 0) {
         html += this._activePatchesSection();
       }
@@ -1721,11 +1676,6 @@
           const cb = this.shadow?.querySelector('.diag-screenshot-switch input[type="checkbox"]');
           if (cb) cb.checked = this.includeScreenshot;
         }
-        else if (action === 'expandScanBar') {
-          this._scanBarCollapsed = false;
-          const scanBar = this.shadow?.querySelector('.diag-scan-bar');
-          if (scanBar) scanBar.outerHTML = this._scanBarHTML();
-        }
         else if (action === 'setScanMode') {
           const mode = btn.dataset.mode;
           if (['current', 'presets', 'mine', 'all'].includes(mode)) {
@@ -1777,12 +1727,12 @@
         if (section) section.classList.toggle('is-open');
       });
 
-      // Remember Advanced disclosure open/closed across subsequent re-renders.
-      // 'toggle' doesn't bubble, so attach directly to the <details>.
-      const adv = this.panel.querySelector('.diag-advanced');
-      if (adv) {
-        adv.addEventListener('toggle', () => { this._advancedOpen = adv.open; });
-      }
+      // Close the scan-options popover when clicking anywhere outside it.
+      this.panel.addEventListener('click', (e) => {
+        const open = this.panel.querySelector('.diag-scan-options[open]');
+        if (!open) return;
+        if (!open.contains(e.target)) open.open = false;
+      });
     }
 
     // ── Scan execution ────────────────────────────────────────────────────
@@ -1890,9 +1840,6 @@
 
       this.hasScanned = true;
       this._lastScanTime = new Date();
-      // Auto-collapse the scan controls into a summary bar so results have
-      // the room. User can click the summary to re-expand for another scan.
-      this._scanBarCollapsed = true;
 
       // Wait for minimum animation time so heartbeat is visible
       const elapsed = Date.now() - scanStart;

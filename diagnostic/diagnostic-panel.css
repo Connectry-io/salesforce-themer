@@ -452,93 +452,96 @@
   max-width: 100%;
 }
 
-/* ─── Post-scan collapsed summary (replaces scan controls after scan) ── */
+/* ─── Scan options popover (caret next to Scan button) ─────────────────── */
 
-.diag-scan-bar--collapsed {
-  padding: 8px 14px;
+.diag-scan-options {
+  position: relative;
+  flex-shrink: 0;
 }
 
-.diag-scan-summary {
-  width: 100%;
+.diag-scan-options-trigger {
+  list-style: none;
+  cursor: pointer;
+  width: 36px;
+  height: 36px;
+  border: 1px solid var(--dp-border);
+  border-radius: 9px;
+  background: var(--dp-surface);
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 8px 12px;
-  background: var(--dp-surface);
-  border: 1px solid var(--dp-border);
-  border-radius: 8px;
+  justify-content: center;
   color: var(--dp-text-2);
-  font-family: inherit;
-  font-size: 11px;
-  cursor: pointer;
-  text-align: left;
   transition: all 150ms ease;
 }
 
-.diag-scan-summary:hover {
+.diag-scan-options-trigger::-webkit-details-marker { display: none; }
+
+.diag-scan-options-trigger:hover {
   background: var(--dp-surface-hover);
+  color: var(--dp-text);
   border-color: var(--dp-accent-border);
-  color: var(--dp-text);
 }
 
-.diag-scan-summary-icon {
-  display: inline-flex;
-  color: var(--dp-good);
-  flex-shrink: 0;
+.diag-scan-options[open] > .diag-scan-options-trigger {
+  background: var(--dp-accent-bg);
+  border-color: var(--dp-accent-border);
+  color: var(--dp-accent-text);
 }
 
-.diag-scan-summary-icon svg {
-  width: 14px;
-  height: 14px;
+.diag-scan-options-trigger svg {
+  transition: transform 180ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.diag-scan-summary-main {
-  display: flex;
-  flex-direction: column;
-  gap: 1px;
-  flex: 1;
-  min-width: 0;
-  line-height: 1.2;
+.diag-scan-options[open] .diag-scan-options-trigger svg {
+  transform: rotate(180deg);
 }
 
-.diag-scan-summary-primary {
-  font-weight: 600;
-  color: var(--dp-text);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+.diag-scan-options-menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  width: 320px;
+  padding: 12px 14px 14px;
+  background: var(--dp-bg);
+  border: 1px solid var(--dp-border);
+  border-radius: 10px;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.35);
+  z-index: 100;
 }
 
-.diag-scan-summary-sub {
-  font-size: 10px;
-  color: var(--dp-text-3);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.diag-scan-summary-cam {
+/* Screenshot indicator badge inside the main Scan button */
+.diag-scan-cam-badge {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 20px;
-  height: 20px;
+  width: 18px;
+  height: 18px;
   border-radius: 4px;
-  background: var(--dp-accent-bg);
-  color: var(--dp-accent-text);
+  background: rgba(74, 111, 165, 0.3);
+  color: inherit;
   flex-shrink: 0;
+  margin-left: 4px;
 }
 
-.diag-scan-summary-cam svg {
-  width: 12px;
-  height: 12px;
+.diag-scan-cam-badge svg {
+  width: 11px;
+  height: 11px;
 }
 
-.diag-scan-summary-chevron {
-  font-size: 12px;
-  color: var(--dp-text-3);
-  flex-shrink: 0;
-  opacity: 0.6;
+/* ─── Post-scan result cluster (scan confirmation + Page Health) ──────── */
+
+.diag-result-cluster {
+  background: var(--dp-surface);
+  border-bottom: 2px solid var(--dp-accent-border);
+}
+
+.diag-result-cluster .diag-snapshot {
+  padding-top: 12px;
+}
+
+.diag-result-cluster .diag-coverage {
+  padding-top: 4px;
+  border-bottom: none; /* cluster owns the bottom separator */
 }
 
 /* ─── Scan bar layout ──────────────────────────────────────────────────── */
