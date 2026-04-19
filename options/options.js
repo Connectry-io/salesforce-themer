@@ -2783,15 +2783,12 @@
         grid.appendChild(btn);
       }
 
-      // SF baselines (role === 'template')
+      // SF baselines only (role === 'template'). "From scratch" = start
+      // from a Salesforce baseline; cloning a Connectry preset belongs in
+      // the "Clone an existing theme" picker, not here.
       for (const theme of THEMES) {
         if (theme.role !== 'template') continue;
         addScratchBadge(theme.id, theme.name, theme.tagline || '', theme.category, theme.colors);
-      }
-      // Blank = Connectry baseline (the previous "From scratch" behavior)
-      const connectry = getThemeById('connectry');
-      if (connectry) {
-        addScratchBadge('connectry', 'Blank (Connectry)', 'Connectry default palette', 'light', connectry.colors);
       }
     }
 
@@ -2848,16 +2845,24 @@
         }
       }
 
-      // Tab filtering
-      clonePicker.querySelectorAll('.builder-clone-tab').forEach(tab => {
-        tab.addEventListener('click', () => {
-          const filter = tab.dataset.filter;
-          clonePicker.querySelectorAll('.builder-clone-tab').forEach(t => t.classList.toggle('is-active', t === tab));
-          // Show/hide badges based on category
-          clonePicker.querySelectorAll('.builder-clone-badge').forEach(badge => {
-            if (filter === 'all') { badge.hidden = false; return; }
-            badge.hidden = badge.dataset.category !== filter;
-          });
+      // (Tab filtering moved out of populateClonePicker — see the
+      // delegated listener attached to clonePicker below. That binds once
+      // on init and works whether badges are populated yet or not.)
+    }
+
+    // Tab filter — delegation so it works even if badges get re-rendered.
+    // Was previously bound inside populateClonePicker which only ran on
+    // first open; refactored out to be more robust.
+    if (clonePicker) {
+      clonePicker.addEventListener('click', (e) => {
+        const tab = e.target.closest('.builder-clone-tab');
+        if (!tab || !clonePicker.contains(tab)) return;
+        e.stopPropagation();
+        const filter = tab.dataset.filter;
+        clonePicker.querySelectorAll('.builder-clone-tab').forEach(t => t.classList.toggle('is-active', t === tab));
+        clonePicker.querySelectorAll('.builder-clone-badge').forEach(badge => {
+          if (filter === 'all') { badge.hidden = false; return; }
+          badge.hidden = badge.dataset.category !== filter;
         });
       });
     }
