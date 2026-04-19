@@ -3226,15 +3226,97 @@ body .slds-path__item.slds-is-lost .slds-path__title {
   background-color: transparent !important;
 }
 
-${c.globalHeaderWhite && !isDark ? `
-/* Light white header: slate icons for legibility on white */
-.slds-global-header .slds-global-header__icon,
+${!isDark ? `
+/* B27 — Light-theme global header icons. Applies to ALL light themes
+ * regardless of globalHeaderWhite. SF hardcodes these icons white
+ * expecting a dark branded header; on our light themes they become
+ * invisible. Override to textSecondary / textPrimary so the Favorites
+ * star, + create, Setup gear, notifications, help, and hamburger are
+ * readable. The diagnostic on Sakura showed 14+ unstyled header
+ * buttons computing color: rgb(255,255,255) on a white header. */
+.slds-global-header,
+.slds-global-header_container,
+.slds-global-header__item button,
+.slds-global-header__item a,
+.slds-global-actions__item button,
+.slds-global-actions__item-action,
+.forceHeaderButton button,
+.forceHeaderMenuTrigger a,
+.oneGlobalCreate a {
+  color: ${c.textPrimary} !important;
+}
+
+.slds-global-header svg,
+.slds-global-header .slds-icon,
 .slds-global-header .slds-button__icon,
-.slds-global-header .forceIcon .slds-icon,
-.slds-global-actions .slds-icon {
-  fill: #54698d !important;
-  color: #54698d !important;
-}` : ''}
+.slds-global-header__icon,
+.slds-global-actions .slds-icon,
+.slds-global-actions svg,
+.forceHeaderButton svg,
+.forceHeaderMenuTrigger svg,
+.oneGlobalCreate svg,
+.slds-icon-waffle > div {
+  fill: ${c.textSecondary} !important;
+  color: ${c.textSecondary} !important;
+}
+
+.slds-global-header button:hover svg,
+.slds-global-header button:hover .slds-icon,
+.slds-global-actions__item:hover svg,
+.slds-global-actions__item:hover .slds-icon {
+  fill: ${c.accent} !important;
+  color: ${c.accent} !important;
+}
+
+/* Waffle app-launcher button — paint the 9 squares as textSecondary
+ * dots instead of the white-on-white default */
+.slds-icon-waffle .slds-r1,
+.slds-icon-waffle .slds-r2,
+.slds-icon-waffle .slds-r3,
+.slds-icon-waffle .slds-r4,
+.slds-icon-waffle .slds-r5,
+.slds-icon-waffle .slds-r6,
+.slds-icon-waffle .slds-r7,
+.slds-icon-waffle .slds-r8,
+.slds-icon-waffle .slds-r9 {
+  background-color: ${c.textSecondary} !important;
+}
+
+/* Search bar placeholder — textPlaceholder is often too pale on light
+ * themes (Sakura's is #c4a0af, barely readable on white). Bump to
+ * textSecondary for legibility. */
+.slds-global-header .slds-input::placeholder,
+.slds-global-header input::placeholder,
+.forceSearchInputDesktop input::placeholder {
+  color: ${c.textSecondary} !important;
+  opacity: 0.85 !important;
+}
+
+.slds-global-header .slds-input,
+.slds-global-header input,
+.forceSearchInputDesktop input {
+  color: ${c.textPrimary} !important;
+}
+
+/* Active Home tab on context-bar — currently same bg as bar (white
+ * text on colored bar). Add a distinctive active indicator so the
+ * current tab is pronounced. */
+.slds-context-bar__item.slds-is-active,
+.slds-context-bar__item_tab.slds-is-active,
+.oneConsoleTabItem.slds-is-active,
+.navexConsoleTabItem.slds-is-active {
+  background-color: ${c.surface} !important;
+  box-shadow: inset 0 -3px 0 0 ${c.accent} !important;
+}
+
+.slds-context-bar__item.slds-is-active .slds-context-bar__label-action,
+.slds-context-bar__item_tab.slds-is-active a.tabHeader,
+.oneConsoleTabItem.slds-is-active a[aria-selected="true"],
+.oneConsoleTabItem.slds-is-active .slds-truncate {
+  color: ${c.accent} !important;
+  font-weight: 600 !important;
+}
+` : ''}
 
 ${isDark ? `
 /* Dark header: icons match theme navIcon for visibility on dark surfaces */
