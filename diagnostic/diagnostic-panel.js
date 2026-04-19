@@ -55,6 +55,7 @@
       this.screenshotDataUrl = null; // base64 PNG when checkbox enabled
       this.includeScreenshot = false; // user-toggled on each scan
       this.activeTab = 'scan';       // 'scan' | 'validate' — B29 tab split
+      this.scanMode = 'current';     // 'current' | 'presets' | 'mine' | 'all'
       this._panelTheme = 'dark';     // 'dark' | 'light'
       this._configuredThemeName = null;
       this._dragState = null;
@@ -258,6 +259,14 @@
       // Skip: scanning against no-theme produces misleading numbers.
       if (this.currentTheme === 'none') return;
       console.log('[SFT Diag] Auto-scanning on navigation...');
+
+      // Visible scan feedback so the user sees the scan actually happen on
+      // open / navigate (otherwise numbers appear out of nowhere and it's
+      // unclear whether they're fresh or cached).
+      const hb = this.shadow?.getElementById('diagHeartbeat');
+      if (hb) hb.classList.add('is-active');
+      this.panel?.classList.add('is-scanning');
+      const scanStart = Date.now();
 
       // Small delay — let SF finish rendering the new page
       await new Promise(r => setTimeout(r, 500));
@@ -562,33 +571,40 @@
       const pageLabel = pageType ? ` · ${pageType.label}` : '';
 
       // Scan tab — idle state. Walk-through status is Validate-tab-only.
-      const camActive = this.includeScreenshot ? ' is-active' : '';
+      const modeLabels = {
+        current: `Scan${pageLabel}`,
+        presets: 'Scan · All Presets',
+        mine: 'Scan · My Themes',
+        all: 'Scan · All Themes',
+      };
+      const scanLabel = modeLabels[this.scanMode] || modeLabels.current;
+      const camActive = this.includeScreenshot;
+      const modeChip = (id, label) => `
+        <button class="diag-mode-chip${this.scanMode === id ? ' is-active' : ''}" data-action="setScanMode" data-mode="${id}">
+          <span>${label}</span>
+        </button>`;
       return `
         <div class="diag-scan-bar">
-          <div class="diag-scan-row" style="gap:6px">
-            <button class="diag-scan-btn diag-scan-btn--primary" data-action="scanAll" style="flex:1">
+          <div class="diag-scan-row" style="gap:8px">
+            <button class="diag-scan-btn diag-scan-btn--primary" data-action="scanAll" style="flex:1;min-width:0">
               ${ICONS.scan}
-              <span>Scan${pageLabel}</span>
+              <span>${scanLabel}</span>
             </button>
-            <button class="diag-scan-btn diag-scan-cam${camActive}" data-action="toggleIncludeScreenshot" tabindex="0" data-diag-tooltip="Include viewport screenshot in AI suggestions (~50 KB PNG).&#10;&#10;⚠ Avoid if sensitive data is visible — no customer PII, financial records, or confidential info.&#10;&#10;Screenshots are used for one-time diagnosis and deleted after the patch is generated. We never retain them.">
-              ${ICONS.camera}
-            </button>
+            <label class="diag-screenshot-switch${camActive ? ' is-active' : ''}" tabindex="0" data-diag-tooltip="Include a ~50 KB screenshot of the current viewport with AI suggestions.&#10;&#10;⚠ Avoid if sensitive data is visible — no customer PII, financial records, or confidential info.&#10;&#10;Screenshots are used once for diagnosis then deleted. Never retained." data-diag-tooltip-align="right">
+              <span class="diag-switch-label">Screenshot</span>
+              <input type="checkbox" class="diag-sr-only" data-action="toggleIncludeScreenshot" ${camActive ? 'checked' : ''}>
+              <span class="diag-switch-track" aria-hidden="true">
+                <span class="diag-switch-thumb"></span>
+              </span>
+            </label>
           </div>
           <details class="diag-advanced">
-            <summary>Advanced — pick a theme to scan</summary>
+            <summary>Advanced — scan against other themes</summary>
             <div class="diag-scan-row" style="margin-top:6px">
-              <button class="diag-scan-btn diag-scan-btn--secondary" data-action="scanAll" title="Scan this page against your current theme (same as the main Scan button)">
-                <span>Current</span>
-              </button>
-              <button class="diag-scan-btn diag-scan-btn--secondary" data-action="scanThemesPresets" title="Scan this page against every preset theme">
-                <span>Presets</span>
-              </button>
-              <button class="diag-scan-btn diag-scan-btn--secondary" data-action="scanThemesMine" title="Scan this page against your custom themes">
-                <span>My Themes</span>
-              </button>
-              <button class="diag-scan-btn diag-scan-btn--secondary" data-action="scanThemesAll" title="Scan this page against every preset + custom theme">
-                <span>All</span>
-              </button>
+              ${modeChip('current', 'Current')}
+              ${modeChip('presets', 'Presets')}
+              ${modeChip('mine', 'My Themes')}
+              ${modeChip('all', 'All')}
             </div>
           </details>
         </div>`;
@@ -1555,12 +1571,31 @@
         else if (action === 'scrollToPatches') this._scrollToPatches();
         else if (action === 'activateConfiguredTheme') this._activateConfiguredTheme(btn);
         else if (action === 'toggleIncludeScreenshot') {
-          this.includeScreenshot = !this.includeScreenshot;
-          // Redraw scan bar so the camera button reflects is-active state.
+          // Checkbox input (from the Advanced label) — use its .checked.
+          // Pill toggle would fall through here too if we ever wire one.
+          this.includeScreenshot = btn.tagName === 'INPUT'
+            ? btn.checked === true
+            : !this.includeScreenshot;
+          // Refresh scan bar so the camera badge on Scan reflects state.
           const scanBar = this.shadow?.querySelector('.diag-scan-bar');
           if (scanBar) scanBar.outerHTML = this._scanBarHTML();
         }
-        else if (action === 'scanAll') this._runScanAll(btn);
+        else if (action === 'setScanMode') {
+          const mode = btn.dataset.mode;
+          if (['current', 'presets', 'mine', 'all'].includes(mode)) {
+            this.scanMode = mode;
+            const scanBar = this.shadow?.querySelector('.diag-scan-bar');
+            if (scanBar) scanBar.outerHTML = this._scanBarHTML();
+          }
+        }
+        else if (action === 'scanAll') {
+          // Dispatch based on selected scan mode.
+          if (this.scanMode === 'presets') this._runMultiThemeScan('presets');
+          else if (this.scanMode === 'mine') this._runMultiThemeScan('custom');
+          else if (this.scanMode === 'all') this._runMultiThemeScan('all');
+          else this._runScanAll(btn);
+        }
+        // Legacy direct-action handlers (Re-run button in multi-scan results)
         else if (action === 'scanThemesPresets') this._runMultiThemeScan('presets');
         else if (action === 'scanThemesMine') this._runMultiThemeScan('custom');
         else if (action === 'scanThemesAll') this._runMultiThemeScan('all');
