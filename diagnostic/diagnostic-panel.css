@@ -488,6 +488,20 @@
   border-color: var(--dp-accent-border);
 }
 
+.diag-switch-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+}
+
+.diag-switch-icon svg {
+  width: 14px;
+  height: 14px;
+}
+
 .diag-switch-label {
   font-variant-numeric: tabular-nums;
 }
@@ -554,17 +568,25 @@
 /* ─── Advanced disclosure (power-user scan modes) ──────────────────────── */
 
 .diag-advanced {
-  margin-top: 8px;
+  margin-top: 10px;
   font-size: 11px;
 }
 
 .diag-advanced > summary {
   cursor: pointer;
-  color: var(--dp-text-3);
-  padding: 4px 0;
+  color: var(--dp-text-2);
+  padding: 7px 10px;
+  border: 1px solid var(--dp-border);
+  border-radius: 7px;
+  background: var(--dp-surface);
   user-select: none;
   list-style: none;
-  transition: color 150ms ease;
+  transition: all 150ms ease;
+  font-size: 11px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .diag-advanced > summary::-webkit-details-marker {
@@ -572,19 +594,31 @@
 }
 
 .diag-advanced > summary::before {
-  content: '▸';
-  display: inline-block;
-  margin-right: 4px;
-  font-size: 9px;
-  transition: transform 150ms ease;
+  content: '';
+  width: 7px;
+  height: 7px;
+  border-right: 1.5px solid currentColor;
+  border-bottom: 1.5px solid currentColor;
+  transform: rotate(-45deg);
+  transition: transform 180ms cubic-bezier(0.16, 1, 0.3, 1);
+  flex-shrink: 0;
+  margin-left: 2px;
 }
 
 .diag-advanced[open] > summary::before {
-  transform: rotate(90deg);
+  transform: rotate(45deg);
 }
 
 .diag-advanced > summary:hover {
-  color: var(--dp-text-2);
+  background: var(--dp-surface-hover);
+  color: var(--dp-text);
+  border-color: var(--dp-accent-border);
+}
+
+.diag-advanced[open] > summary {
+  background: var(--dp-accent-bg);
+  border-color: var(--dp-accent-border);
+  color: var(--dp-accent-text);
 }
 
 .diag-advanced[open] {
@@ -747,6 +781,79 @@
 .diag-results::-webkit-scrollbar-thumb {
   background: var(--dp-scrollbar);
   border-radius: 3px;
+}
+
+/* ─── Primary actions row (AI Fix · Copy · Report) ─────────────────────── */
+
+.diag-primary-actions {
+  display: flex;
+  gap: 6px;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--dp-border);
+}
+
+.diag-primary-btn {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 9px 8px;
+  border: 1px solid var(--dp-border);
+  border-radius: 8px;
+  background: var(--dp-surface);
+  color: var(--dp-text-2);
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 150ms ease;
+  white-space: nowrap;
+}
+
+.diag-primary-btn:hover:not(:disabled) {
+  background: var(--dp-surface-hover);
+  color: var(--dp-text);
+  border-color: var(--dp-accent-border);
+}
+
+.diag-primary-btn:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+.diag-primary-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.diag-primary-btn--ai {
+  background: var(--dp-accent-bg);
+  border-color: var(--dp-accent-border);
+  color: var(--dp-accent-text);
+}
+
+.diag-primary-btn--ai:hover:not(:disabled) {
+  background: rgba(74, 111, 165, 0.25);
+  border-color: rgba(74, 111, 165, 0.5);
+  color: #b5d0f0;
+}
+
+.diag-primary-btn svg {
+  width: 12px;
+  height: 12px;
+  flex-shrink: 0;
+}
+
+.diag-primary-icon {
+  font-size: 12px;
+  flex-shrink: 0;
+}
+
+.diag-primary-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
 }
 
 /* ─── Snapshot freshness banner (above Page Health) ────────────────────── */

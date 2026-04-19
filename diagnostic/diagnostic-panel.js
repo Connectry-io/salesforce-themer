@@ -609,8 +609,9 @@
               ${modeChip('mine', 'My Themes')}
               ${modeChip('all', 'All')}
             </div>
-            <label class="diag-screenshot-switch${camActive ? ' is-active' : ''}" tabindex="0" data-diag-tooltip="Capture a ~50 KB viewport PNG when you Scan, and include it in AI Suggest / Copy / View Report.&#10;&#10;⚠ Avoid if sensitive data is visible — no customer PII, financial records, or confidential info.&#10;&#10;Used once for diagnosis then deleted. Never retained." data-diag-tooltip-align="right">
-              <span class="diag-switch-label">Include viewport screenshot</span>
+            <label class="diag-screenshot-switch${camActive ? ' is-active' : ''}" tabindex="0" data-diag-tooltip="Captures a ~50 KB PNG of the visible page and attaches it to AI Suggest, Copy, and View Report.&#10;&#10;⚠ Avoid if sensitive data is on screen — no customer PII, financial records, or confidential info.&#10;&#10;Privacy: Connectry uses the screenshot once to generate a fix, then deletes it. We do not retain images." data-diag-tooltip-align="right">
+              <span class="diag-switch-icon">${ICONS.camera}</span>
+              <span class="diag-switch-label">Include screenshot</span>
               <input type="checkbox" class="diag-sr-only" data-action="toggleIncludeScreenshot" ${camActive ? 'checked' : ''}>
               <span class="diag-switch-track" aria-hidden="true">
                 <span class="diag-switch-thumb"></span>
@@ -718,24 +719,41 @@
             ${compPct !== null ? `<span class="diag-coverage-stat"><strong>${compPct}%</strong> components</span>` : ''}
             <span class="diag-coverage-stat"><strong>${issueCount}</strong> issue${issueCount !== 1 ? 's' : ''}</span>
           </div>
-          ${this.hasScanned ? (() => {
-            const hasIssues = issueCount > 0;
-            const disabled = !hasIssues || this.aiBusy;
-            const label = this.aiBusy
-              ? 'Thinking…'
-              : hasIssues
-                ? `✨ Suggest Fix with AI (${issueCount})`
-                : '✨ All clean — nothing to suggest';
-            return `
-              <div style="display:flex;gap:6px;margin-top:10px">
-                <button class="diag-scan-btn diag-scan-btn--primary"
-                        ${disabled ? 'disabled' : `data-action="suggestAIFix"`}
-                        style="flex:1;${disabled ? 'opacity:0.45;cursor:not-allowed' : ''}"
-                        title="${hasIssues ? 'Send these gaps to Claude for a CSS patch' : 'No gaps detected on this page — try another page'}">
-                  ${label}
-                </button>
-              </div>`;
-          })() : ''}
+        </div>`;
+    }
+
+    _primaryActionsHTML() {
+      const gapCount = this.scanResults?.gaps?.length || 0;
+      const s = this.componentResults?.summary;
+      const unstyledCount = s?.totalUnstyled || 0;
+      const hardcodedCount = s?.totalHardcoded || 0;
+      const issueCount = gapCount + unstyledCount + hardcodedCount;
+      const hasIssues = issueCount > 0;
+      const aiDisabled = !hasIssues || this.aiBusy;
+      const aiLabel = this.aiBusy
+        ? 'Thinking…'
+        : hasIssues
+          ? `AI Fix (${issueCount})`
+          : 'All clean';
+      const aiTitle = hasIssues
+        ? 'Send these gaps to Claude for a CSS patch'
+        : 'No gaps detected on this page — nothing to fix';
+      return `
+        <div class="diag-primary-actions">
+          <button class="diag-primary-btn diag-primary-btn--ai"
+                  ${aiDisabled ? 'disabled' : 'data-action="suggestAIFix"'}
+                  title="${aiTitle}">
+            <span class="diag-primary-icon">✨</span>
+            <span class="diag-primary-label">${aiLabel}</span>
+          </button>
+          <button class="diag-primary-btn" data-action="copy" title="Copy scan report as Markdown">
+            ${ICONS.copy}
+            <span class="diag-primary-label">Copy</span>
+          </button>
+          <button class="diag-primary-btn" data-action="viewReport" title="Open interactive HTML report in a new tab">
+            <svg viewBox="0 0 14 14" fill="none"><path d="M5 3H3.5A1.5 1.5 0 0 0 2 4.5v6A1.5 1.5 0 0 0 3.5 12h6A1.5 1.5 0 0 0 11 10.5V9" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/><path d="M8 2h4v4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/><path d="M6 8l6-6" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+            <span class="diag-primary-label">Report</span>
+          </button>
         </div>`;
     }
 
@@ -1032,6 +1050,9 @@
 
       // ── 1. Health summary (token coverage + component health combined) ──
       html += this._healthSummaryHTML();
+
+      // ── 1a. Primary actions row (AI Fix · Copy · View Report) ──
+      html += this._primaryActionsHTML();
 
       // ── 1b. AI suggestion card (if present or in progress) ──
       if (this.aiSuggestion || this.aiBusy) html += this._aiSuggestionHTML();
@@ -1515,23 +1536,12 @@
     }
 
     _footerHTML() {
-      const scanned = this.hasScanned;
-      const disabledAttr = scanned ? '' : 'disabled';
-      const disabledClass = scanned ? '' : ' is-disabled';
-      const scanHint = scanned ? '' : ' — run a scan first';
       return `
         <div class="diag-footer">
           <span class="diag-footer-brand">Powered by <strong>Connectry AI</strong></span>
           <div class="diag-footer-actions">
-            <button class="diag-copy-btn" data-action="copyDOM" title="Copy DOM structure snapshot to clipboard">
+            <button class="diag-copy-btn" data-action="copyDOM" title="Copy DOM structure snapshot to clipboard (debugging)">
               <span>DOM</span>
-            </button>
-            <button class="diag-copy-btn${disabledClass}" ${disabledAttr} data-action="copy" title="Copy scan report to clipboard${scanHint}">
-              ${ICONS.copy}
-              <span>Copy</span>
-            </button>
-            <button class="diag-copy-btn diag-report-btn${disabledClass}" ${disabledAttr} data-action="viewReport" title="Open full interactive report in new tab${scanHint}">
-              <span>View Report</span>
             </button>
           </div>
         </div>`;
