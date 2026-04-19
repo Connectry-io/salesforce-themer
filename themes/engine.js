@@ -546,6 +546,36 @@ function generateThemeCSS(theme) {
   color: ${c.textSecondary} !important;
 }
 
+/* Setup Home + Brand Band wrappers — SF paints these with a light band
+ * regardless of theme. Make them transparent to let body bg show through.
+ * Confirmed via DOM inspection 2026-04-19: forceBrandBand wraps the whole
+ * Setup Home page; without this override the welcome hero + section
+ * headers render theme text colors on an SF-light background = invisible. */
+.slds-brand-band,
+.slds-brand-band_cover,
+.slds-brand-band_none,
+.slds-brand-band_medium,
+.slds-brand-band_small,
+.forceBrandBand {
+  background-color: ${c.background} !important;
+  background-image: none !important;
+}
+
+.setup-card,
+.home-screen,
+.enhancedSetupHome,
+.recent-items-card {
+  background-color: transparent !important;
+  color: ${c.textPrimary} !important;
+}
+
+/* Setup Home hero logo/welcome title — inherit theme text color */
+.welcome-title,
+.welcome-subtitle,
+.topic-text {
+  color: inherit !important;
+}
+
 /* ─── Base ───────────────────────────────────────────────────────────────── */
 
 html,
