@@ -91,13 +91,11 @@
           <span id="optStatusText">Theme on</span>
         </label>
         <span class="opt-status-bar-sep"></span>
-        <span class="opt-status-bar-label">Apply to</span>
-        <button class="opt-tip-btn" data-tip="Where the theme applies: Lightning (everyday pages), Setup (admin area), or Both" type="button" aria-label="What is Apply to?">?</button>
-        <div class="opt-scope-pills opt-scope-pills--bar" id="optionsScopePills" role="group" aria-label="Theme scope">
-          <button class="opt-scope-pill" data-scope="both">Both</button>
-          <button class="opt-scope-pill" data-scope="lightning">Lightning</button>
-          <button class="opt-scope-pill" data-scope="setup">Setup</button>
-        </div>
+        <label class="opt-status-bar-auto">
+          <input type="checkbox" id="optSetupScopeToggle" />
+          <span>Also theme Setup</span>
+          <button class="opt-tip-btn" data-tip="By default the theme applies to Lightning pages. Turn this on to also theme the Setup admin area." type="button" aria-label="What does this do?">?</button>
+        </label>
         <span class="opt-status-bar-sep"></span>
         <label class="opt-status-bar-auto">
           <input type="checkbox" id="autoModeToggle" />
@@ -130,7 +128,7 @@
 
       <!-- Floating tooltips (positioned by JS, shared across the tab) -->
       <div class="opt-settings-tooltip" id="optAutoTooltip" hidden>Pick a light and a dark theme — Themer switches automatically when your computer toggles dark mode.</div>
-      <div class="opt-settings-tooltip" id="optScopeTooltip" hidden>Where the theme applies. <strong>Lightning</strong> = the everyday user-facing Salesforce. <strong>Setup</strong> = admin only. <strong>Both</strong> = everywhere.</div>
+      <div class="opt-settings-tooltip" id="optScopeTooltip" hidden>By default the theme applies to Lightning pages (everyday Salesforce). Turn on <strong>Also theme Setup</strong> to extend it to the admin Setup area. Off by default — most admins prefer Setup looking native.</div>
       <div class="opt-settings-tooltip" id="optEffectsTooltip" hidden>Each preset theme ships with curated effects. The volume knob scales intensity.</div>
       <div class="opt-settings-tooltip" id="optOrgTooltip" hidden>Each Salesforce org can have its own theme override. Useful for keeping production and sandbox visually distinct.</div>
 

@@ -82,15 +82,17 @@
           <span class="auto-status-item">&#9790; <span id="autoDarkName">Connectry Dark</span></span>
         </div>
 
-        <!-- Row 3: Apply to -->
-        <div class="settings-row settings-row--stacked" id="scopeRow">
+        <!-- Row 3: Also theme Setup pages (was a 3-pill scope picker; collapsed
+             to a single toggle since "Setup only, not Lightning" is a useless
+             state. OFF = Lightning only (default). ON = both. -->
+        <div class="settings-row" id="scopeRow">
           <div class="settings-row-label">
             <svg class="settings-row-icon" width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true">
               <rect x="2" y="3" width="12" height="10" rx="1.5" stroke="currentColor" stroke-width="1.4"/>
               <path d="M2 6h12" stroke="currentColor" stroke-width="1.4"/>
             </svg>
-            <span class="settings-row-text">Apply to</span>
-            <button class="settings-help-btn" data-tooltip="scopeTooltip" aria-label="About apply scope" title="What does this do?">
+            <span class="settings-row-text">Also theme Setup pages</span>
+            <button class="settings-help-btn" data-tooltip="scopeTooltip" aria-label="About Setup theming" title="What does this do?">
               <svg width="12" height="12" viewBox="0 0 14 14" fill="none" aria-hidden="true">
                 <circle cx="7" cy="7" r="6" stroke="currentColor" stroke-width="1.3"/>
                 <path d="M7 6.5v3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
@@ -98,24 +100,27 @@
               </svg>
             </button>
           </div>
-          <div class="scope-pills" id="scopePills">
-            <button class="scope-pill" data-scope="both">Both</button>
-            <button class="scope-pill" data-scope="lightning">Lightning</button>
-            <button class="scope-pill" data-scope="setup">Setup</button>
-          </div>
+          <label class="toggle-switch" title="Apply the theme to Salesforce Setup pages too (off by default)">
+            <input type="checkbox" id="setupScopeToggle" />
+            <span class="toggle-track"><span class="toggle-thumb"></span></span>
+          </label>
         </div>
 
         <!-- Effects volume moved out of Settings — it lives at the top of the
              pre-built themes section since it only applies to those themes.
              See #themesEffectsStrip below. -->
 
-        <!-- Row 5: Per-org override (only visible on Salesforce tabs) -->
+        <!-- Row 5: Per-org override (only visible on Salesforce tabs)
+             Premium-gated for V1 — without an "all my pinned orgs" overview UI
+             the feature accumulates silent state. When users have Premium they
+             also get the org list in Studio status bar (orgSettingsRow). -->
         <div class="settings-row" id="perOrgRow" hidden>
           <div class="settings-row-label">
             <svg class="settings-row-icon" width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true">
               <path d="M3 14h10M3 14V6l5-3 5 3v8M6 14V9h4v5" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/>
             </svg>
             <span class="settings-row-text">Just this org</span>
+            <span class="settings-row-badge settings-row-badge--premium" id="perOrgBadge">Premium</span>
             <button class="settings-help-btn" data-tooltip="orgTooltip" aria-label="About per-org themes" title="What does this do?">
               <svg width="12" height="12" viewBox="0 0 14 14" fill="none" aria-hidden="true">
                 <circle cx="7" cy="7" r="6" stroke="currentColor" stroke-width="1.3"/>
@@ -124,7 +129,7 @@
               </svg>
             </button>
           </div>
-          <label class="toggle-switch" title="Pin this theme to the current Salesforce org">
+          <label class="toggle-switch" title="Pin this theme to the current Salesforce org (Premium)">
             <input type="checkbox" id="perOrgToggle" />
             <span class="toggle-track"><span class="toggle-thumb"></span></span>
           </label>
@@ -142,7 +147,7 @@
         Pick a light and a dark theme below — Themer switches automatically when your computer toggles dark mode.
       </div>
       <div class="popup-tooltip" id="scopeTooltip" hidden>
-        Where the theme applies. <strong>Lightning</strong> = the everyday user-facing Salesforce app pages. <strong>Setup</strong> = the admin Setup area only. <strong>Both</strong> = everywhere (default).
+        By default the theme applies to Lightning pages (your everyday Salesforce). Turn this on to also theme the <strong>Setup</strong> admin area. Most admins prefer to keep Setup looking native — so it's off by default.
       </div>
       <div class="popup-tooltip" id="orgTooltip" hidden>
         Pin the current theme to <em>just this Salesforce org</em>.

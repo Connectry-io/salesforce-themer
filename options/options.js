@@ -1502,13 +1502,6 @@
     // Scope pills, theme toggle, and follow-system are wired separately.
   }
 
-  function updateStatusBarScope() {
-    const el = document.getElementById('optStatusScope');
-    if (!el) return;
-    const labels = { both: 'Both', lightning: 'Lightning', setup: 'Setup' };
-    el.textContent = labels[syncState.themeScope] || 'Lightning';
-  }
-
   // ─── Theme Manager: Smart Apply (stub) ────────────────────────────────────
 
   function renderSmartApply() {
@@ -2267,6 +2260,13 @@
       customThemes: [],
     });
 
+    // One-time silent migration: deprecated 'setup'-only scope → 'both' under
+    // the new toggle model (mirrors popup migration).
+    if (syncState.themeScope === 'setup') {
+      syncState.themeScope = 'both';
+      chrome.storage.sync.set({ themeScope: 'both' }).catch(() => {});
+    }
+
     let activeTheme = syncState.theme;
     if (syncState.autoMode) {
       const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
@@ -2284,7 +2284,6 @@
     bindDetailPanelClose();
     bindMyThemesNewBtn();
     bindEmptyBuilderBtn();
-    updateStatusBarScope();
     renderBuilderSidebar(activeTheme);
     updateHeaderMeta(activeTheme);
     syncOptSettingsCardStatus(activeTheme);
@@ -2296,19 +2295,19 @@
     autoToggle.checked = syncState.autoMode;
     autoToggle.addEventListener('change', handleAutoModeToggle);
 
-    // Theme scope pills (segmented control matching popup pattern)
-    const scopePills = document.querySelectorAll('#optionsScopePills .opt-scope-pill');
-    const currentScope = syncState.themeScope || 'lightning';
-    scopePills.forEach(pill => {
-      pill.classList.toggle('is-active', pill.dataset.scope === currentScope);
-      pill.addEventListener('click', async () => {
-        const scope = pill.dataset.scope;
-        scopePills.forEach(p => p.classList.toggle('is-active', p === pill));
+    // Setup-scope toggle (replaces 3-pill picker — see popup.js comment block).
+    // Storage stays as themeScope: 'lightning' | 'both'. Legacy 'setup'-only
+    // value migrates to 'both' silently below in init.
+    const scopeToggle = document.getElementById('optSetupScopeToggle');
+    if (scopeToggle) {
+      const currentScope = syncState.themeScope || 'lightning';
+      scopeToggle.checked = currentScope === 'both' || currentScope === 'setup';
+      scopeToggle.addEventListener('change', async () => {
+        const scope = scopeToggle.checked ? 'both' : 'lightning';
         await chrome.storage.sync.set({ themeScope: scope });
         syncState.themeScope = scope;
-        updateStatusBarScope();
       });
-    });
+    }
 
     // Theme Application tooltips (mirror popup floating tooltip pattern)
     bindOptThemeApplicationTooltips();
@@ -2374,9 +2373,10 @@
       }
       if (changes.themeScope) {
         syncState.themeScope = changes.themeScope.newValue;
-        document.querySelectorAll('#optionsScopePills .opt-scope-pill').forEach(p => {
-          p.classList.toggle('is-active', p.dataset.scope === syncState.themeScope);
-        });
+        const scopeToggle = document.getElementById('optSetupScopeToggle');
+        if (scopeToggle) {
+          scopeToggle.checked = syncState.themeScope === 'both' || syncState.themeScope === 'setup';
+        }
       }
     });
 

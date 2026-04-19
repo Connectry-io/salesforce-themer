@@ -331,6 +331,25 @@ body {
   min-width: 0;
 }
 
+/* Inline Premium badge for gated settings rows (e.g. "Just this org").
+   Same gold gradient as the upsell CTA + cx-tab-badge--premium in Studio. */
+.settings-row-badge {
+  display: inline-flex;
+  align-items: center;
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  padding: 2px 5px;
+  border-radius: 999px;
+  flex-shrink: 0;
+}
+.settings-row-badge--premium {
+  background: linear-gradient(135deg, #d4a22a 0%, #b07d1a 100%);
+  color: #ffffff;
+}
+.settings-row-badge[hidden] { display: none; }
+
 /* In stacked rows the label sits on its own line above the control, so the
    text should NOT grow to fill the row — otherwise the help button gets
    pushed to the right edge. Shrink to content so help sits next to text. */

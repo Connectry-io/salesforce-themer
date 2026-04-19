@@ -988,6 +988,9 @@
       const isPremium = !!premiumOverride;
       const cta = document.getElementById('upgradeCta');
       if (cta) cta.hidden = isPremium;
+      // Hide the Premium badge on the per-org row once they're unlocked
+      const perOrgBadge = document.getElementById('perOrgBadge');
+      if (perOrgBadge) perOrgBadge.hidden = isPremium;
     } catch (_) {}
   }
 
@@ -1048,6 +1051,15 @@
     const toggle = document.getElementById('perOrgToggle');
     if (!toggle) return;
     toggle.addEventListener('change', async () => {
+      // Premium gate — feature is locked until paid; defer the actual override
+      // write and bounce them to the upgrade tab instead.
+      const { premiumOverride = false } = await chrome.storage.local.get({ premiumOverride: false });
+      const isPremium = !!premiumOverride;
+      if (!isPremium) {
+        toggle.checked = false; // revert the visual flip
+        openOptionsOnTab('upgrade');
+        return;
+      }
       if (toggle.checked) {
         await setOrgTheme();
       } else {
@@ -1092,25 +1104,25 @@
     });
   }
 
-  // ─── Scope selector ──────────────────────────────────────────────────────
+  // ─── Scope toggle (Also theme Setup pages) ───────────────────────────────
+  // Storage stays as themeScope: 'lightning' | 'both'. The deprecated
+  // 'setup'-only state migrates to 'both' silently on read so legacy users
+  // keep their Setup theming after the UI collapse.
 
-  function bindScopeSelector() {
-    const pills = document.querySelectorAll('.scope-pill');
-    pills.forEach(pill => {
-      pill.addEventListener('click', async () => {
-        const scope = pill.dataset.scope;
-        pills.forEach(p => p.classList.remove('is-active'));
-        pill.classList.add('is-active');
-        await chrome.storage.sync.set({ themeScope: scope });
-      });
+  function bindScopeToggle() {
+    const toggle = document.getElementById('setupScopeToggle');
+    if (!toggle) return;
+    toggle.addEventListener('change', async () => {
+      const scope = toggle.checked ? 'both' : 'lightning';
+      await chrome.storage.sync.set({ themeScope: scope });
     });
   }
 
   function setScopeUI(scope) {
-    const pills = document.querySelectorAll('.scope-pill');
-    pills.forEach(p => {
-      p.classList.toggle('is-active', p.dataset.scope === scope);
-    });
+    const toggle = document.getElementById('setupScopeToggle');
+    if (!toggle) return;
+    // 'both' or legacy 'setup' → ON; 'lightning' or undefined → OFF
+    toggle.checked = scope === 'both' || scope === 'setup';
   }
 
   // ─── Detect current org ───────────────────────────────────────────────────
@@ -1150,7 +1162,7 @@
     bindOptionsButton();
     bindDiagnosticButton();
     bindHelpTooltip();
-    bindScopeSelector();
+    bindScopeToggle();
     bindEffectsSelector();
     bindUpgradeCta();
     bindSettingsCollapse();
@@ -1175,7 +1187,16 @@
 
     syncState = result;
     currentOrgHostname = orgHostname;
-    setScopeUI(result.themeScope || 'both');
+
+    // One-time silent migration: the deprecated 'setup'-only scope (theme on
+    // Setup but NOT Lightning) maps to 'both' under the new toggle model.
+    if (result.themeScope === 'setup') {
+      result.themeScope = 'both';
+      syncState.themeScope = 'both';
+      chrome.storage.sync.set({ themeScope: 'both' }).catch(() => {});
+    }
+
+    setScopeUI(result.themeScope || 'lightning');
 
     // Set effects UI from the Volume knob — normalize legacy values so old
     // users on 'default' / 'immersive' / 'alive' / 'none' map cleanly.
