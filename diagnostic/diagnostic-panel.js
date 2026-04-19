@@ -195,6 +195,18 @@
       this._renderPanel();
     }
 
+    _scrollToPatches() {
+      // Active Patches lives on the Scan tab — hop there first if needed.
+      if (this.activeTab !== 'scan') this._switchTab('scan');
+      // Re-query after potential re-render.
+      requestAnimationFrame(() => {
+        const section = this.shadow?.querySelector('.diag-section[data-section="activePatches"]');
+        if (!section) return;
+        section.classList.add('is-open');
+        section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
+    }
+
     _toggleAutoScan() {
       this.autoScanEnabled = !this.autoScanEnabled;
       // Persist preference
@@ -477,6 +489,10 @@
         ? `<span class="diag-org-badge" title="${orgDetect.likely ? 'Brand colors match ' + orgDetect.likely + ' factory defaults — admins can still customize, so this is a hint, not a guarantee' : 'SLDS version detected from :root tokens'}">${this._escapeHtml(orgDetect.slds)}${orgDetect.likely ? ' · ~' + this._escapeHtml(orgDetect.likely) : ''}</span>`
         : '';
 
+      const patchesPill = (this.patchSummary?.total > 0)
+        ? `<button class="diag-patches-pill" data-action="scrollToPatches" data-diag-tooltip="Jump to Active Patches">${this.patchSummary.enabled}/${this.patchSummary.total} patches</button>`
+        : '';
+
       return `
         <div class="diag-info-bar">
           <div class="diag-minicard">
@@ -485,6 +501,7 @@
             <span class="diag-info-dot ${injected ? 'is-on' : 'is-off'}"></span>
             <span class="diag-minicard-org" title="${this._escapeHtml(fullHost)}">${this._escapeHtml(host)}</span>
             ${orgBadge}
+            ${patchesPill}
           </div>
           <div class="diag-heartbeat" id="diagHeartbeat"></div>
         </div>`;
@@ -525,7 +542,7 @@
               <input type="checkbox" data-action="toggleIncludeScreenshot" ${this.includeScreenshot ? 'checked' : ''} style="cursor:pointer">
               <span>Include screenshot</span>
             </label>
-            <span class="diag-screenshot-info" data-diag-tooltip="Captures a PNG of the current viewport (~50 KB) to help diagnose visual issues.&#10;&#10;⚠ Avoid including sensitive data. Before enabling, make sure no customer PII, financial records, or confidential info is visible.&#10;&#10;Screenshots sent to Connectry AI are used only for one-time diagnosis and are permanently deleted after the patch is generated. We never retain screenshots." style="display:inline-flex;align-items:center;justify-content:center;width:14px;height:14px;border-radius:50%;background:rgba(128,128,128,0.25);color:currentColor;font-size:10px;font-weight:700;cursor:help">?</span>
+            <span class="diag-screenshot-info" tabindex="0" data-diag-tooltip="Captures a PNG of the current viewport (~50 KB) to help diagnose visual issues.&#10;&#10;⚠ Avoid including sensitive data. Before enabling, make sure no customer PII, financial records, or confidential info is visible.&#10;&#10;Screenshots sent to Connectry AI are used only for one-time diagnosis and are permanently deleted after the patch is generated. We never retain screenshots." style="display:inline-flex;align-items:center;justify-content:center;width:14px;height:14px;border-radius:50%;background:rgba(128,128,128,0.25);color:currentColor;font-size:10px;font-weight:700;cursor:help">?</span>
           </div>
           <details class="diag-advanced">
             <summary>Advanced</summary>
@@ -578,16 +595,20 @@
     }
 
     _emptyHTML() {
+      const last = this._lastScanTime
+        ? `<div class="diag-empty-meta">Last scan: ${this._lastScanTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>`
+        : '';
       return `
         <div class="diag-empty">
           <div class="diag-empty-icon">
             <svg width="32" height="32" viewBox="0 0 24 24" fill="none">
-              <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.5"/>
-              <path d="M12 8v4M12 15v.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+              <circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="1.5"/>
+              <path d="M16 16l4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
             </svg>
           </div>
           <div class="diag-empty-title">No scan yet</div>
-          <div class="diag-empty-desc">Hit "Scan This Page" to check how your theme is landing.</div>
+          <div class="diag-empty-desc">Coverage for this page appears after Scan.</div>
+          ${last}
         </div>`;
     }
 
@@ -666,7 +687,6 @@
             <span class="diag-section-badge">
               <span class="diag-section-badge-item is-gap">${fr.tokenFixes.fixes.length}</span>
             </span>
-            <button class="diag-copy-inline" data-action="suggestAIFix" title="Ask Claude to generate a patch from these gaps">${this.aiBusy ? 'Thinking…' : 'Suggest Fix with AI'}</button>
             <button class="diag-copy-inline" data-action="copyTokenFixes" title="Copy CSS for Connectry to fix in engine">Copy for Connectry</button>
             <span class="diag-section-chevron">${ICONS.chevron}</span>
           </div>
@@ -746,7 +766,7 @@
       if (!this.patchSummary?.total) return '';
 
       return `
-        <div class="diag-section is-open" data-section="activePatches">
+        <div class="diag-section" data-section="activePatches">
           <div class="diag-section-header">
             <span class="diag-section-title">Active Patches</span>
             <span class="diag-section-badge">
@@ -1470,6 +1490,7 @@
         else if (action === 'togglePanelTheme') this._togglePanelTheme();
         else if (action === 'toggleQAMode') this._toggleQAMode(btn);
         else if (action === 'switchTab') this._switchTab(btn.dataset.tab);
+        else if (action === 'scrollToPatches') this._scrollToPatches();
         else if (action === 'toggleIncludeScreenshot') {
           this.includeScreenshot = btn.checked === true;
         }

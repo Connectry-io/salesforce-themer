@@ -1357,3 +1357,95 @@
   white-space: nowrap;
   margin-left: auto;
 }
+
+/* ─── Info-bar patches pill (B29c) ─────────────────────────────────────── */
+
+.diag-patches-pill {
+  font-family: inherit;
+  font-size: 10px;
+  font-weight: 600;
+  padding: 2px 7px;
+  border-radius: 10px;
+  background: var(--dp-accent-bg);
+  border: 1px solid var(--dp-accent-border);
+  color: var(--dp-accent-text);
+  white-space: nowrap;
+  cursor: pointer;
+  transition: all 150ms ease;
+  font-variant-numeric: tabular-nums;
+}
+
+.diag-patches-pill:hover {
+  background: rgba(74, 111, 165, 0.25);
+  border-color: rgba(74, 111, 165, 0.5);
+}
+
+/* ─── Refined empty state (B29c) ───────────────────────────────────────── */
+
+.diag-empty-meta {
+  margin-top: 8px;
+  font-size: 10px;
+  color: var(--dp-text-3);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ─── Custom tooltip component [data-diag-tooltip] (B29c) ──────────────────
+   Replaces native title= with an instant (120ms), themed popup. Apply to
+   any element with data-diag-tooltip="..." — newlines render via \n or
+   &#10;. Pairs with tabindex="0" for keyboard accessibility. ─────────── */
+
+[data-diag-tooltip] {
+  position: relative;
+}
+
+[data-diag-tooltip]::before,
+[data-diag-tooltip]::after {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 120ms ease;
+  z-index: 100;
+}
+
+[data-diag-tooltip]::after {
+  content: attr(data-diag-tooltip);
+  position: absolute;
+  top: calc(100% + 10px);
+  left: 50%;
+  transform: translateX(-50%);
+  max-width: 280px;
+  width: max-content;
+  padding: 10px 12px;
+  background: var(--dp-bg);
+  border: 1px solid var(--dp-border);
+  border-radius: 8px;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.35);
+  color: var(--dp-text);
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 400;
+  line-height: 1.5;
+  white-space: pre-line;
+  text-align: left;
+  text-transform: none;
+  letter-spacing: normal;
+}
+
+[data-diag-tooltip]::before {
+  content: '';
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 50%;
+  transform: translateX(-50%) rotate(45deg);
+  width: 8px;
+  height: 8px;
+  background: var(--dp-bg);
+  border-left: 1px solid var(--dp-border);
+  border-top: 1px solid var(--dp-border);
+}
+
+[data-diag-tooltip]:hover::before,
+[data-diag-tooltip]:hover::after,
+[data-diag-tooltip]:focus-visible::before,
+[data-diag-tooltip]:focus-visible::after {
+  opacity: 1;
+}
