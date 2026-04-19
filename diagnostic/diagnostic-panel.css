@@ -401,6 +401,38 @@
   flex-shrink: 0;
 }
 
+/* Two-line primary scan label: bold primary + faded mode subtext */
+.diag-scan-label {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1px;
+  line-height: 1.15;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.diag-scan-primary {
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+.diag-scan-sub {
+  font-size: 10px;
+  font-weight: 400;
+  opacity: 0.65;
+  text-transform: none;
+  letter-spacing: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
 /* ─── Scan bar layout ──────────────────────────────────────────────────── */
 
 .diag-scan-row {
@@ -684,6 +716,42 @@
 .diag-results::-webkit-scrollbar-thumb {
   background: var(--dp-scrollbar);
   border-radius: 3px;
+}
+
+/* ─── Snapshot freshness banner (above Page Health) ────────────────────── */
+
+.diag-snapshot {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--dp-text-3);
+  border-bottom: 1px solid var(--dp-border-row);
+  font-variant-numeric: tabular-nums;
+}
+
+.diag-snapshot-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--dp-good);
+  box-shadow: 0 0 6px rgba(34, 197, 94, 0.4);
+  flex-shrink: 0;
+}
+
+.diag-snapshot-label {
+  color: var(--dp-text-2);
+}
+
+.diag-snapshot-time {
+  margin-left: auto;
+  font-weight: 500;
+  text-transform: none;
+  letter-spacing: 0;
 }
 
 /* ─── Coverage meter ──────────────────────────────────────────────────── */

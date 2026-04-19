@@ -126,16 +126,20 @@
 
     close() {
       if (!this.isOpen) return;
+      this.isOpen = false;
+      this.isMinimized = false;
       try { chrome.storage.local.set({ diagnosticPanelOpen: false }); } catch (_) {}
       const el = this.shadow?.querySelector('.diag-panel, .diag-badge');
       if (el && el.classList.contains('diag-panel')) {
         el.classList.add('is-closing');
-        el.addEventListener('animationend', () => this._destroyHost(), { once: true });
+        const destroy = () => { if (this.host) this._destroyHost(); };
+        el.addEventListener('animationend', destroy, { once: true });
+        // Safety net — if animationend misses (re-entrancy, conflicting
+        // animations), guarantee teardown at ~animation duration + buffer.
+        setTimeout(destroy, 260);
       } else {
         this._destroyHost();
       }
-      this.isOpen = false;
-      this.isMinimized = false;
     }
 
     minimize() {
@@ -571,13 +575,14 @@
       const pageLabel = pageType ? ` · ${pageType.label}` : '';
 
       // Scan tab — idle state. Walk-through status is Validate-tab-only.
-      const modeLabels = {
-        current: `Scan${pageLabel}`,
-        presets: 'Scan · All Presets',
-        mine: 'Scan · My Themes',
-        all: 'Scan · All Themes',
+      const modeSubLabels = {
+        current: 'current theme',
+        presets: 'all presets',
+        mine: 'my themes',
+        all: 'all themes',
       };
-      const scanLabel = modeLabels[this.scanMode] || modeLabels.current;
+      const primaryLabel = `Scan${pageLabel}`;
+      const subLabel = modeSubLabels[this.scanMode] || modeSubLabels.current;
       const camActive = this.includeScreenshot;
       const modeChip = (id, label) => `
         <button class="diag-mode-chip${this.scanMode === id ? ' is-active' : ''}" data-action="setScanMode" data-mode="${id}">
@@ -588,7 +593,10 @@
           <div class="diag-scan-row" style="gap:8px">
             <button class="diag-scan-btn diag-scan-btn--primary" data-action="scanAll" style="flex:1;min-width:0">
               ${ICONS.scan}
-              <span>${scanLabel}</span>
+              <span class="diag-scan-label">
+                <span class="diag-scan-primary">${primaryLabel}</span>
+                <span class="diag-scan-sub">${subLabel}</span>
+              </span>
             </button>
             <label class="diag-screenshot-switch${camActive ? ' is-active' : ''}" tabindex="0" data-diag-tooltip="Include a ~50 KB screenshot of the current viewport with AI suggestions.&#10;&#10;⚠ Avoid if sensitive data is visible — no customer PII, financial records, or confidential info.&#10;&#10;Screenshots are used once for diagnosis then deleted. Never retained." data-diag-tooltip-align="right">
               <span class="diag-switch-label">Screenshot</span>
@@ -660,6 +668,19 @@
 
     // ── Unified section builders ──────────────────────────────────────────
 
+    _snapshotBannerHTML() {
+      if (!this._lastScanTime) return '';
+      const ts = this._lastScanTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+      const ageSec = Math.round((Date.now() - this._lastScanTime.getTime()) / 1000);
+      const freshness = ageSec < 10 ? 'just now' : `${ageSec}s ago`;
+      return `
+        <div class="diag-snapshot">
+          <span class="diag-snapshot-dot"></span>
+          <span class="diag-snapshot-label">Scanned</span>
+          <span class="diag-snapshot-time">${freshness} · ${ts}</span>
+        </div>`;
+    }
+
     _healthSummaryHTML() {
       const tokenPct = this.scanResults ? Math.round(this.scanResults.coverage * 100) : null;
       const s = this.componentResults?.summary;
@@ -681,16 +702,10 @@
       const hardcodedCount = s?.totalHardcoded || 0;
       const issueCount = gapCount + unstyledCount + hardcodedCount;
 
-      // Last scan timestamp
-      const timeStr = this._lastScanTime
-        ? this._lastScanTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })
-        : '';
-
       return `
         <div class="diag-coverage">
           <div class="diag-coverage-header">
             <span class="diag-coverage-label" title="Average of token coverage + component health on this page">Page Health</span>
-            ${timeStr ? `<span class="diag-scan-time">${timeStr}</span>` : ''}
             <span class="diag-coverage-pct is-${overallLevel}">${overallPct}%</span>
           </div>
           <div class="diag-coverage-bar">
@@ -1008,6 +1023,10 @@
       if (!this.hasScanned) return this._emptyHTML();
 
       let html = '';
+
+      // ── 0. Snapshot banner — makes it explicit everything below is from a
+      // single scan taken at a specific time, not stored/recalled. ──
+      html += this._snapshotBannerHTML();
 
       // ── 1. Health summary (token coverage + component health combined) ──
       html += this._healthSummaryHTML();
