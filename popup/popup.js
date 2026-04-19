@@ -759,6 +759,14 @@
     updateOrgRow(syncState.orgThemes, theme);
     if (syncState.autoMode) setAutoModeUI(true);
     await applyThemeToTab(theme);
+
+    // V1 telemetry — track which preset themes are popular. Custom theme
+    // IDs (theme_*, custom-*) are intentionally collapsed to 'custom' so
+    // we never send user-named theme IDs that could leak company info.
+    const safeThemeId = (typeof theme === 'string' && /^[a-z0-9-]+$/.test(theme) && !theme.startsWith('custom-') && !theme.startsWith('theme_'))
+      ? theme
+      : 'custom';
+    self.ConnectryIntel?.track?.('theme_applied', { theme_id: safeThemeId });
   }
 
   // ─── Auto mode ───────────────────────────────────────────────────────────
@@ -1171,6 +1179,11 @@
     bindPerOrgToggle();
     applyPremiumStateToPopup();
 
+    // V1 telemetry — every popup open counts as DAU; trackDaily ensures
+    // the heartbeat fires at most once per UTC day per install.
+    self.ConnectryIntel?.track?.('popup_opened');
+    self.ConnectryIntel?.trackDaily?.('heartbeat');
+
     // Footer version — pulled from manifest so it never drifts
     const verEl = document.getElementById('footerVersion');
     let manifestVersion = '';
@@ -1265,6 +1278,7 @@
     );
     const mailto = `mailto:feedback@connectry.io?subject=${subject}&body=${body}`;
     const openMailto = () => {
+      self.ConnectryIntel?.track?.('feedback_clicked', { source: 'popup_quick' });
       try { chrome.tabs.create({ url: mailto }); }
       catch (_) { window.location.href = mailto; }
     };
@@ -1280,11 +1294,13 @@
       try {
         const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
         if (tab?.id && _isSalesforceUrl(tab.url)) {
+          self.ConnectryIntel?.track?.('feedback_clicked', { source: 'popup_scan' });
           await chrome.tabs.sendMessage(tab.id, { action: 'toggleDiagnostic' });
           window.close();
           return;
         }
       } catch (_) {}
+      self.ConnectryIntel?.track?.('feedback_clicked', { source: 'popup_scan_fallback' });
       // Not on a SF tab — open mailto with a nudge
       const altSubject = encodeURIComponent(`Themer Beta · Scan request (not on SF tab)`);
       const altMailto = `mailto:feedback@connectry.io?subject=${altSubject}&body=${body}`;

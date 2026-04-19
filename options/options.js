@@ -2243,6 +2243,11 @@
   async function init() {
     await loadThemes();
 
+    // V1 telemetry — every Studio open is an activity signal. Daily-
+    // debounced heartbeat fires once per UTC day per install.
+    self.ConnectryIntel?.track?.('studio_opened');
+    self.ConnectryIntel?.trackDaily?.('heartbeat');
+
     // Load dev premium override from local storage (hidden dev toggle)
     try {
       const local = await chrome.storage.local.get({ premiumOverride: false });
@@ -2406,6 +2411,10 @@
             } else {
               stopEffectPreviews();
             }
+            // V1 telemetry — tab navigation is the cheapest intent signal.
+            self.ConnectryIntel?.track?.('studio_tab_opened', { tab: tabName });
+            if (tabName === 'builder')  self.ConnectryIntel?.track?.('builder_opened');
+            if (tabName === 'upgrade')  self.ConnectryIntel?.track?.('upgrade_viewed');
           },
         });
       }
@@ -4628,6 +4637,9 @@
       `Browser: ${navigator.userAgent}\n`
     );
     cta.href = `mailto:feedback@connectry.io?subject=${subject}&body=${body}`;
+    cta.addEventListener('click', () => {
+      self.ConnectryIntel?.track?.('feedback_clicked', { source: 'studio' });
+    });
   }
 
   function bindDevPanel() {

@@ -333,6 +333,25 @@
       this.hasScanned = true;
       this._lastScanTime = new Date();
 
+      // V1 telemetry — count scans + token-coverage gaps. NO token names,
+      // NO DOM data, NO custom-theme content. Just counts so we can see
+      // "average user has X gaps" aggregated across the install base.
+      try {
+        const gapCount = this.scanResults?.gaps?.length || 0;
+        const coverage = this.scanResults?.coverage != null
+          ? Math.round(this.scanResults.coverage * 100)
+          : null;
+        const componentSummary = this.componentResults?.summary || {};
+        const compStandard = componentSummary.totalStandardFound || 0;
+        const pageType = ns.detectPageType?.();
+        self.ConnectryIntel?.track?.('scan_run', {
+          gap_count: gapCount,
+          coverage_pct: coverage,
+          standard_components: compStandard,
+          page_type: pageType?.id || 'unknown',
+        });
+      } catch (_) {}
+
       // Update info bar (page may have changed)
       this._updateInfoBar();
 
