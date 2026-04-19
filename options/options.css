@@ -5564,24 +5564,24 @@ td.upgrade-compare-col-premium,
   pointer-events: none;
 }
 
-/* Highlight choreography — applied via .is-focusing on the mock root +
-   .is-highlight on the matching data-color elements. Pure CSS dim/ring. */
+/* Highlight choreography — "spotlight" pattern: matching elements stay
+   sharp + full-clarity, everything else blurs and dims. Inverts the old
+   "ring the highlight" approach which read poorly when the highlighted
+   element was tiny (Accent + Text). Now your eye snaps straight to the
+   sharp region instead of hunting for an outline. */
 .guide-colors-mock [data-color] {
   position: relative;
-  transition: opacity 220ms ease, box-shadow 220ms ease;
+  transition: opacity 220ms ease, filter 220ms ease;
   cursor: pointer;
 }
 .guide-colors-mock.is-focusing [data-color]:not(.is-highlight) {
-  /* Was 0.20 — too aggressive, made the whole mock read as "greyed out"
-     when small accent/text elements were highlighted. 0.45 keeps the
-     non-matching context legible while still letting the matching
-     elements pop via their accent ring. */
-  opacity: 0.45;
+  opacity: 0.55;
+  filter: blur(2px);
 }
 .guide-colors-mock.is-focusing [data-color].is-highlight {
-  box-shadow:
-    0 0 0 2px var(--cx-accent),
-    0 0 0 5px rgba(74, 111, 165, 0.28);
+  /* Sharp + clear — no ring, no glow. Clarity does the work. */
+  filter: none;
+  opacity: 1;
   z-index: 2;
 }
 

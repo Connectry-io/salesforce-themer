@@ -872,21 +872,34 @@
   margin-top: 10px;
 }
 
-/* Full-width screenshot switch row when embedded in Advanced */
-.diag-advanced .diag-screenshot-switch {
+/* Full-width screenshot switch row inside the scan-options popover */
+.diag-scan-options-menu .diag-screenshot-switch {
   display: flex;
   width: 100%;
-  margin-top: 10px;
+  margin-top: 6px;
   padding: 6px 12px;
   height: 32px;
 }
 
-.diag-advanced .diag-switch-label {
+.diag-scan-options-menu .diag-switch-label {
   flex: 1;
   min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.diag-screenshot-note {
+  margin-top: 8px;
+  padding: 0 2px;
+  font-size: 10.5px;
+  color: var(--dp-text-3);
+  line-height: 1.5;
+}
+
+.diag-screenshot-note strong {
+  color: var(--dp-warn);
+  font-weight: 700;
 }
 
 /* ─── Auto-scan toggle ─────────────────────────────────────────────────── */
@@ -2114,6 +2127,6 @@
 
 [data-diag-tooltip-align="right"]::before {
   left: auto;
-  right: 14px;
-  transform: rotate(45deg);
+  right: 4px;
+  transform: translateX(50%) rotate(45deg);
 }

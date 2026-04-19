@@ -632,7 +632,7 @@
                   ${modeChip('all', 'All')}
                 </div>
                 <div class="diag-advanced-label">Capture</div>
-                <label class="diag-screenshot-switch${camActive ? ' is-active' : ''}" tabindex="0" data-diag-tooltip="Captures a PNG of the visible page and attaches it to Copy, View Report, and AI Suggest.&#10;&#10;⚠ Avoid if sensitive data is on screen — no customer PII, financial records, or confidential info.&#10;&#10;Privacy: Connectry uses the screenshot only to generate a fix, then deletes it. We do not retain images." data-diag-tooltip-align="right">
+                <label class="diag-screenshot-switch${camActive ? ' is-active' : ''}">
                   <span class="diag-switch-icon">${ICONS.camera}</span>
                   <span class="diag-switch-label">Include screenshot</span>
                   <input type="checkbox" class="diag-sr-only" data-action="toggleIncludeScreenshot" ${camActive ? 'checked' : ''}>
@@ -640,6 +640,11 @@
                     <span class="diag-switch-thumb"></span>
                   </span>
                 </label>
+                <p class="diag-screenshot-note">
+                  Captures a PNG of the visible page and attaches it to Copy, View Report, and AI Suggest.
+                  <br><strong>⚠</strong> Avoid if sensitive data is on screen.
+                  <br>Connectry uses the screenshot only to generate a fix, then deletes it. We do not retain images.
+                </p>
               </div>
             </details>
           </div>
