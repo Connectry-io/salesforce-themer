@@ -549,13 +549,13 @@
             ${orgBadge}
             ${patchesPill}
             <div class="diag-info-tools">
-              <button class="diag-tool-btn" data-action="explainPicker" title="Inspect: click any element to see which layer painted it">
+              <button class="diag-tool-btn" data-action="explainPicker" data-diag-tooltip="Inspect · click any element on the page to see which layer (engine / preset / intel patch / custom) painted each color" data-diag-tooltip-align="right">
                 ${ICONS.magnifier}
               </button>
-              <button class="diag-tool-btn" data-action="toggleQAMode" title="QA mode: also load draft-tier engine patches (Connectry HQ)">
+              <button class="diag-tool-btn" data-action="toggleQAMode" data-diag-tooltip="QA mode · also load draft-tier engine patches. Connectry HQ only — see unshipped fixes before they go live." data-diag-tooltip-align="right">
                 <span data-qa-label>QA</span>
               </button>
-              <button class="diag-tool-btn" data-action="copyDOM" title="Copy DOM snapshot for debugging">
+              <button class="diag-tool-btn" data-action="copyDOM" data-diag-tooltip="DOM snapshot · copy the page's DOM structure to clipboard for debugging or sharing with Connectry" data-diag-tooltip-align="right">
                 <span>DOM</span>
               </button>
             </div>
@@ -801,9 +801,9 @@
       const s = this.componentResults?.summary;
       const total = s?.totalStandardFound || 0;
       return `
-        <div class="diag-clean-row" data-section="componentsClean">
+        <div class="diag-clean-row" data-section="componentsClean" data-diag-tooltip="Standard Salesforce components + managed-package components on this page. Matches the Components KPI above." data-diag-tooltip-align="right">
           <span class="diag-clean-dot is-pass"></span>
-          <span class="diag-clean-title">Components</span>
+          <span class="diag-clean-title">Components <span class="diag-section-sublabel">standard &amp; managed</span></span>
           <span class="diag-clean-note">${total > 0 ? `${total} fully styled` : 'No standard components on this page'}</span>
         </div>`;
     }
@@ -843,8 +843,8 @@
 
       let html = `
         <div class="diag-section" data-section="componentIssues">
-          <div class="diag-section-header">
-            <span class="diag-section-title">Components</span>
+          <div class="diag-section-header" data-diag-tooltip="Standard Salesforce components + managed-package components on this page. Matches the Components KPI above." data-diag-tooltip-align="right">
+            <span class="diag-section-title">Components <span class="diag-section-sublabel">standard &amp; managed</span></span>
             <span class="diag-section-badge">
               ${s.totalUnstyled ? `<span class="diag-section-badge-item is-fail">${s.totalUnstyled} unstyled</span>` : ''}
               ${s.totalPartial ? `<span class="diag-section-badge-item is-gap">${s.totalPartial} partial</span>` : ''}
@@ -884,12 +884,14 @@
             <span class="diag-section-badge">
               <span class="diag-section-badge-item is-pass">${patches.length} fixable</span>
             </span>
-            <button class="diag-copy-inline" data-action="copyComponentPatches" title="Copy CSS patches">Copy CSS</button>
             <span class="diag-section-chevron">${ICONS.chevron}</span>
           </div>
           <div class="diag-section-body">
-            <div class="diag-route-hint">Your org's custom components — click Enable to apply a local patch</div>
+            <div class="diag-route-hint">Your org's custom components — click Enable to apply a local patch per tag, or Copy CSS to grab them all.</div>
             ${patches.map(p => this._patchRowHTML(p)).join('')}
+            <div class="diag-section-footer">
+              <button class="diag-copy-inline" data-action="copyComponentPatches" title="Copy all patch CSS for these components — paste into your own theme or save for review">Copy CSS for all ${patches.length}</button>
+            </div>
           </div>
         </div>`;
     }
