@@ -230,6 +230,36 @@
     return walk(el, 0);
   }
 
+  // B24 — DOM sample capture for partial/unstyled components. Trims the
+  // outerHTML so the report stays copy-paste friendly and so we don't spam
+  // data: URIs or giant SVG paths into the clipboard. Parent chain (2
+  // levels up) is captured so the selector context is visible without the
+  // user having to Inspect and copy manually.
+  function captureOuterHTMLSample(el, maxLen = 1800) {
+    try {
+      let html = el.outerHTML || '';
+      // Strip inline data: URIs (SVG payloads bloat the sample)
+      html = html.replace(/(data:[^"')]+)/g, 'data:...');
+      // Collapse runs of whitespace
+      html = html.replace(/\s+/g, ' ').trim();
+      if (html.length > maxLen) html = html.slice(0, maxLen) + '…[truncated]';
+
+      const parents = [];
+      let p = el.parentElement;
+      for (let i = 0; i < 2 && p && p.tagName !== 'BODY'; i++) {
+        const tag = p.tagName.toLowerCase();
+        const cls = typeof p.className === 'string'
+          ? p.className.trim().split(/\s+/).slice(0, 3).join('.')
+          : '';
+        parents.push(cls ? `${tag}.${cls}` : tag);
+        p = p.parentElement;
+      }
+      return { outerHTML: html, parentChain: parents.reverse() };
+    } catch (_err) {
+      return null;
+    }
+  }
+
   function detectHardcodedColors(el) {
     const issues = [];
     const inlineStyle = el.getAttribute('style');
@@ -312,6 +342,14 @@
         }
       }
 
+      // B24 — capture outerHTML sample only for partial/unstyled so I can
+      // see the real selector chain without the user having to Inspect and
+      // paste DOM manually. Cheap because we only grab one sample per
+      // identity and only for the ~20-30 failing components.
+      const domSample = sample && (styled === 'partial' || styled === 'unstyled')
+        ? captureOuterHTMLSample(sample)
+        : null;
+
       entries.push({
         identity: entry.identity,
         tag: entry.tag,
@@ -324,6 +362,7 @@
         styled,
         computedStyles: styles,
         domStructure: structure,
+        domSample,
         hardcodedIssues: hardcoded,
       });
     }
@@ -359,6 +398,8 @@
           namespace: e.namespaceLabel,
           found: 0, styled: 0, partial: 0, unstyled: 0,
           hardcodedIssues: [],
+          domSample: null,
+          domSampleStatus: null,
         };
       }
       standard[key].found += e.visibleInstances;
@@ -367,6 +408,12 @@
       else if (e.styled === 'unstyled') standard[key].unstyled += e.visibleInstances;
       if (e.hardcodedIssues.length) {
         standard[key].hardcodedIssues.push(...e.hardcodedIssues.slice(0, 10));
+      }
+      // First partial/unstyled sample wins (discover() sort is stable)
+      if (e.domSample && !standard[key].domSample) {
+        standard[key].domSample = e.domSample;
+        standard[key].domSampleStatus = e.styled;
+        standard[key].computedStyles = e.computedStyles;
       }
     }
 
