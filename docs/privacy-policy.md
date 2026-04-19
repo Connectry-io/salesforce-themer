@@ -26,7 +26,7 @@ If that's all you needed, you can stop here. The full version is below.
 **Connectry** ("we", "us", "our") publishes the Salesforce Themer browser extension for Google Chrome.
 
 - **Product:** Salesforce Themer
-- **Publisher:** Connectry, Inc. — an S Corporation registered in the United States _(TODO: confirm exact state of incorporation, e.g. Delaware / California, and add EIN if you want it referenced)_
+- **Publisher:** Connectry, Inc. — a Delaware corporation (EIN 41-4071270)
 - **Contact:** privacy@connectry.io
 - **General feedback:** feedback@connectry.io
 - **Website:** https://connectry.io
@@ -148,7 +148,12 @@ We will update this policy when our practices change. The "Last updated" date at
 - **Privacy questions, data requests:** privacy@connectry.io
 - **Security disclosures:** security@connectry.io
 - **General feedback / bug reports:** feedback@connectry.io
-- **Postal address:** _(TODO: insert your registered S-corp business address — required for CCPA compliance if any users are California residents, and recommended in any case)_
+- **Postal address:**
+  Connectry, Inc.
+  c/o Legalinc Corporate Services Inc.
+  131 Continental Dr, Suite 305
+  Newark, DE 19713
+  United States
 
 ---
 
