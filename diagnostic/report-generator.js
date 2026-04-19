@@ -160,6 +160,10 @@
   .report-btn svg { width: 14px; height: 14px; }
   .report-btn--primary { background: var(--cx-accent-light); color: var(--cx-accent-2); border-color: rgba(74,111,165,0.3); }
 
+  /* Theme toggle icon/label swap — purely CSS, no JS innerHTML (which breaks SVG namespace) */
+  [data-theme="dark"] .icon-moon, [data-theme="dark"] .icon-label-light { display: none; }
+  [data-theme="light"] .icon-sun, [data-theme="light"] .icon-label-dark { display: none; }
+
   /* Header */
   .report-header {
     background: var(--cx-bg-grad);
@@ -353,8 +357,15 @@
   </div>
   <div class="report-toolbar-actions">
     <button class="report-btn" id="themeToggleBtn" title="Toggle light/dark">
-      <svg viewBox="0 0 14 14" fill="none" id="themeToggleIcon"></svg>
-      <span id="themeToggleLabel">Light</span>
+      <svg class="icon-sun" viewBox="0 0 14 14" fill="none" width="14" height="14">
+        <circle cx="7" cy="7" r="2.8" stroke="currentColor" stroke-width="1.4"/>
+        <path d="M7 1.2v1.4M7 11.4v1.4M1.2 7h1.4M11.4 7h1.4M2.9 2.9l1 1M10.1 10.1l1 1M2.9 11.1l1-1M10.1 3.9l1-1" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+      </svg>
+      <svg class="icon-moon" viewBox="0 0 14 14" fill="none" width="14" height="14">
+        <path d="M11.5 8.5a4.5 4.5 0 0 1-5.9-5.9 4.8 4.8 0 1 0 5.9 5.9z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/>
+      </svg>
+      <span class="icon-label-dark">Light</span>
+      <span class="icon-label-light">Dark</span>
     </button>
     <button class="report-btn report-btn--primary" id="savePdfBtn" title="Open print dialog — choose 'Save as PDF'">
       <svg viewBox="0 0 14 14" fill="none"><path d="M4 2v6M4 8l-2-2M4 8l2-2" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M2 10v1.5A1.5 1.5 0 0 0 3.5 13h7A1.5 1.5 0 0 0 12 11.5V10" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
@@ -406,13 +417,13 @@
     </div>
   </div>
 
-  <!-- Sections -->
+  <!-- Sections (testing/walkthrough progress is a Validate-tab flow — not
+       included in a per-page scan report) -->
   ${screenshotSection}
   ${tokenGapsSection}
   ${componentSection}
   ${lwcPatchesSection}
   ${activePatchesSection}
-  ${testingSection}
   ${cssFixBlock}
 
   <div class="report-footer">
@@ -439,30 +450,28 @@
   });
 
   // Save as PDF — opens the native print dialog, user picks "Save as PDF"
-  document.getElementById('savePdfBtn').addEventListener('click', () => window.print());
+  const pdfBtn = document.getElementById('savePdfBtn');
+  if (pdfBtn) pdfBtn.addEventListener('click', () => { try { window.print(); } catch (e) { console.warn('print failed', e); } });
 
-  // Light/dark toggle — persists in localStorage, respects OS preference on first visit
-  const SUN = '<path d="M7 1.2v1.4M7 11.4v1.4M1.2 7h1.4M11.4 7h1.4M2.9 2.9l1 1M10.1 10.1l1 1M2.9 11.1l1-1M10.1 3.9l1-1" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><circle cx="7" cy="7" r="2.8" stroke="currentColor" stroke-width="1.4"/>';
-  const MOON = '<path d="M11.5 8.5a4.5 4.5 0 0 1-5.9-5.9 4.8 4.8 0 1 0 5.9 5.9z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/>';
-  const body = document.body;
-  const icon = document.getElementById('themeToggleIcon');
-  const label = document.getElementById('themeToggleLabel');
-  const btn = document.getElementById('themeToggleBtn');
-  function applyTheme(t) {
-    body.setAttribute('data-theme', t);
-    icon.innerHTML = t === 'dark' ? SUN : MOON;
-    label.textContent = t === 'dark' ? 'Light' : 'Dark';
-    btn.title = 'Switch to ' + (t === 'dark' ? 'light' : 'dark');
+  // Light/dark toggle — CSS-only icon/label swap driven by [data-theme] on <body>
+  const themeBtn = document.getElementById('themeToggleBtn');
+  const applyTheme = (t) => {
+    document.body.setAttribute('data-theme', t);
+    if (themeBtn) themeBtn.title = 'Switch to ' + (t === 'dark' ? 'light' : 'dark');
+  };
+  try {
+    const saved = localStorage.getItem('cx-report-theme');
+    const prefers = window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+    applyTheme(saved || prefers);
+  } catch (_) { applyTheme('dark'); }
+  if (themeBtn) {
+    themeBtn.addEventListener('click', () => {
+      const cur = document.body.getAttribute('data-theme');
+      const next = cur === 'dark' ? 'light' : 'dark';
+      applyTheme(next);
+      try { localStorage.setItem('cx-report-theme', next); } catch (_) {}
+    });
   }
-  const saved = localStorage.getItem('cx-report-theme');
-  const prefers = window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
-  applyTheme(saved || prefers);
-  btn.addEventListener('click', () => {
-    const cur = body.getAttribute('data-theme');
-    const next = cur === 'dark' ? 'light' : 'dark';
-    applyTheme(next);
-    localStorage.setItem('cx-report-theme', next);
-  });
 </script>
 </body>
 </html>`;

@@ -1127,7 +1127,34 @@
     /** Validate tab — cross-page walk-through + checklist coverage. */
     _validateTabHTML() {
       if (this.currentTheme === 'none') return this._themeOffHTML();
+      if (!this._isPro) return this._validateProGateHTML();
       return this._walkThroughBannerHTML() + this._testingChecklistSection();
+    }
+
+    _validateProGateHTML() {
+      return `
+        <div class="diag-progate">
+          <div class="diag-progate-badge">
+            <span class="diag-pro-badge">Pro</span>
+          </div>
+          <div class="diag-progate-title">Validate your theme across the whole org</div>
+          <div class="diag-progate-desc">
+            Walk through your Salesforce pages — Home, List Views, Record pages,
+            Setup — and Themer tracks coverage for each. Useful when you're
+            designing a custom theme and want to confirm it holds up everywhere.
+          </div>
+          <ul class="diag-progate-list">
+            <li>Auto-scan on page navigation</li>
+            <li>Per-page tokens + components coverage</li>
+            <li>Cross-page checklist with completion status</li>
+            <li>Progress persists per theme</li>
+          </ul>
+          <div class="diag-progate-note">
+            Presets are already validated across the full SF surface, so this
+            mostly matters when you're authoring a theme. Coming with
+            <strong>Connectry Pro</strong>.
+          </div>
+        </div>`;
     }
 
     /** Shown on both tabs when no theme is active. */
