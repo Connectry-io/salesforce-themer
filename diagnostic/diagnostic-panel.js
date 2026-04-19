@@ -1472,15 +1472,21 @@
     // ── Event binding ─────────────────────────────────────────────────────
 
     _bindEvents() {
-      if (!this.shadow) return;
+      if (!this.panel) return;
 
       // Initial advanced-mode + QA-mode chip state.
       // B28 — ADV button removed; advancedMode state is no longer toggled
       // from UI. Screenshot inclusion is now per-scan via the checkbox.
       this._refreshQAChip().catch(() => {});
 
+      // NOTE: Listeners go on this.panel (recreated every _renderPanel via
+      // shadow.innerHTML swap) rather than this.shadow (persistent). Binding
+      // to shadow stacked listeners on every re-render; an even number of
+      // section-toggle listeners meant each header click flipped is-open an
+      // even number of times → net no change (B29 regression).
+
       // Action buttons
-      this.shadow.addEventListener('click', (e) => {
+      this.panel.addEventListener('click', (e) => {
         const btn = e.target.closest('[data-action]');
         if (!btn) return;
 
@@ -1517,7 +1523,7 @@
       });
 
       // Section collapse toggles
-      this.shadow.addEventListener('click', (e) => {
+      this.panel.addEventListener('click', (e) => {
         const header = e.target.closest('.diag-section-header');
         if (!header) return;
         const section = header.closest('.diag-section');
