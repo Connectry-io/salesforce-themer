@@ -549,13 +549,13 @@
             ${orgBadge}
             ${patchesPill}
             <div class="diag-info-tools">
-              <button class="diag-tool-btn" data-action="explainPicker" data-diag-tooltip="Inspect · click any element on the page to see which layer (engine / preset / intel patch / custom) painted each color" data-diag-tooltip-align="right">
+              <button class="diag-tool-btn" data-action="explainPicker" data-diag-tooltip="Inspect element" data-diag-tooltip-align="right">
                 ${ICONS.magnifier}
               </button>
-              <button class="diag-tool-btn" data-action="toggleQAMode" data-diag-tooltip="QA mode · also load draft-tier engine patches. Connectry HQ only — see unshipped fixes before they go live." data-diag-tooltip-align="right">
+              <button class="diag-tool-btn" data-action="toggleQAMode" data-diag-tooltip="QA mode (draft patches)" data-diag-tooltip-align="right">
                 <span data-qa-label>QA</span>
               </button>
-              <button class="diag-tool-btn" data-action="copyDOM" data-diag-tooltip="DOM snapshot · copy the page's DOM structure to clipboard for debugging or sharing with Connectry" data-diag-tooltip-align="right">
+              <button class="diag-tool-btn" data-action="copyDOM" data-diag-tooltip="Copy DOM snapshot" data-diag-tooltip-align="right">
                 <span>DOM</span>
               </button>
             </div>
@@ -610,8 +610,8 @@
 
       return `
         <div class="diag-scan-bar">
-          <div class="diag-scan-row" style="gap:6px">
-            <button class="diag-scan-btn diag-scan-btn--primary" data-action="scanAll" style="flex:1;min-width:0">
+          <div class="diag-scan-splitgroup">
+            <button class="diag-scan-btn diag-scan-btn--primary" data-action="scanAll">
               ${ICONS.scan}
               <span class="diag-scan-label">
                 <span class="diag-scan-primary">${primaryLabel}</span>
@@ -801,9 +801,12 @@
       const s = this.componentResults?.summary;
       const total = s?.totalStandardFound || 0;
       return `
-        <div class="diag-clean-row" data-section="componentsClean" data-diag-tooltip="Standard Salesforce components + managed-package components on this page. Matches the Components KPI above." data-diag-tooltip-align="right">
+        <div class="diag-clean-row" data-section="componentsClean">
           <span class="diag-clean-dot is-pass"></span>
-          <span class="diag-clean-title">Components <span class="diag-section-sublabel">standard &amp; managed</span></span>
+          <span class="diag-section-title-group">
+            <span class="diag-clean-title">Components</span>
+            <span class="diag-section-sublabel">standard &amp; managed</span>
+          </span>
           <span class="diag-clean-note">${total > 0 ? `${total} fully styled` : 'No standard components on this page'}</span>
         </div>`;
     }
@@ -843,8 +846,11 @@
 
       let html = `
         <div class="diag-section" data-section="componentIssues">
-          <div class="diag-section-header" data-diag-tooltip="Standard Salesforce components + managed-package components on this page. Matches the Components KPI above." data-diag-tooltip-align="right">
-            <span class="diag-section-title">Components <span class="diag-section-sublabel">standard &amp; managed</span></span>
+          <div class="diag-section-header">
+            <span class="diag-section-title-group">
+              <span class="diag-section-title">Components</span>
+              <span class="diag-section-sublabel">standard &amp; managed</span>
+            </span>
             <span class="diag-section-badge">
               ${s.totalUnstyled ? `<span class="diag-section-badge-item is-fail">${s.totalUnstyled} unstyled</span>` : ''}
               ${s.totalPartial ? `<span class="diag-section-badge-item is-gap">${s.totalPartial} partial</span>` : ''}

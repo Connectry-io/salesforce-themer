@@ -452,40 +452,71 @@
   max-width: 100%;
 }
 
-/* ─── Scan options popover (caret next to Scan button) ─────────────────── */
+/* ─── Scan split-button: [Scan button | caret] as one visual unit ────── */
+
+.diag-scan-splitgroup {
+  display: flex;
+  width: 100%;
+  border: 1px solid var(--dp-accent-border);
+  border-radius: 9px;
+  overflow: hidden;
+  background: var(--dp-accent-bg);
+  transition: all 180ms ease;
+}
+
+.diag-scan-splitgroup:hover {
+  border-color: rgba(74, 111, 165, 0.55);
+  box-shadow: 0 0 16px rgba(74, 111, 165, 0.15);
+}
+
+.diag-scan-splitgroup .diag-scan-btn--primary {
+  flex: 1;
+  min-width: 0;
+  border: none;
+  border-radius: 0;
+  background: transparent;
+  padding: 6px 14px;
+}
+
+.diag-scan-splitgroup .diag-scan-btn--primary:hover {
+  background: rgba(74, 111, 165, 0.12);
+  box-shadow: none;
+}
 
 .diag-scan-options {
   position: relative;
   flex-shrink: 0;
 }
 
+.diag-scan-splitgroup .diag-scan-options {
+  border-left: 1px solid var(--dp-accent-border);
+}
+
 .diag-scan-options-trigger {
   list-style: none;
   cursor: pointer;
-  width: 36px;
-  height: 36px;
-  border: 1px solid var(--dp-border);
-  border-radius: 9px;
-  background: var(--dp-surface);
+  width: 32px;
+  height: 100%;
+  border: none;
+  border-radius: 0;
+  background: transparent;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--dp-text-2);
+  color: var(--dp-accent-text);
   transition: all 150ms ease;
 }
 
 .diag-scan-options-trigger::-webkit-details-marker { display: none; }
 
 .diag-scan-options-trigger:hover {
-  background: var(--dp-surface-hover);
-  color: var(--dp-text);
-  border-color: var(--dp-accent-border);
+  background: rgba(74, 111, 165, 0.18);
+  color: #b5d0f0;
 }
 
 .diag-scan-options[open] > .diag-scan-options-trigger {
-  background: var(--dp-accent-bg);
-  border-color: var(--dp-accent-border);
-  color: var(--dp-accent-text);
+  background: rgba(74, 111, 165, 0.22);
+  color: #b5d0f0;
 }
 
 .diag-scan-options-trigger svg {
@@ -1299,8 +1330,14 @@
   color: var(--dp-text-2);
 }
 
+.diag-section-title-group {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  line-height: 1.1;
+}
+
 .diag-section-sublabel {
-  margin-left: 6px;
   font-size: 9px;
   font-weight: 500;
   text-transform: none;
@@ -2017,13 +2054,13 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 28px;
+  width: 30px;
   height: 22px;
   padding: 0;
-  border: 1px solid transparent;
+  border: 1px solid var(--dp-border);
   border-radius: 5px;
-  background: transparent;
-  color: var(--dp-text-3);
+  background: var(--dp-surface);
+  color: var(--dp-text-2);
   font-family: inherit;
   font-size: 9px;
   font-weight: 700;
@@ -2035,7 +2072,7 @@
 .diag-tool-btn:hover {
   background: var(--dp-surface-hover);
   color: var(--dp-text);
-  border-color: var(--dp-border);
+  border-color: var(--dp-accent-border);
 }
 
 .diag-tool-btn svg {
