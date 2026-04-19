@@ -5564,21 +5564,30 @@ td.upgrade-compare-col-premium,
   pointer-events: none;
 }
 
-/* Highlight choreography — matching elements stay EXACTLY as they are
-   (no ring, no glow, no transform). Non-matching dim to a calm grey
-   so your eye lands naturally on the still-clear region. No blur —
-   the previous blur made adjacent areas read muddy and contaminated
-   the highlighted element's clarity. */
+/* Highlight choreography — matching element stays EXACTLY as-is;
+   non-matching elements get their themed background replaced with a
+   neutral grey wash. Background doesn't cascade to children (opacity
+   does, which was the bug), so a highlighted accent child inside a
+   dimmed surface parent stays fully coloured. */
 .guide-colors-mock [data-color] {
   position: relative;
-  transition: opacity 220ms ease;
+  transition: background-color 220ms ease, border-color 220ms ease;
   cursor: pointer;
 }
+
 .guide-colors-mock.is-focusing [data-color]:not(.is-highlight) {
-  opacity: 0.25;
+  /* Neutral wash that reads as "dimmed" without cascading to children.
+     Each non-matching element loses its themed colour identity; each
+     matching element keeps it via the inline --gcm-* vars. */
+  background: color-mix(in srgb, var(--cx-text-subtle) 22%, var(--cx-surface)) !important;
+  border-color: transparent !important;
 }
-.guide-colors-mock.is-focusing [data-color].is-highlight {
-  opacity: 1;
+
+/* Card title sits INSIDE the card — its text shouldn't go invisible
+   on the neutral wash, so restore a muted text colour when it's the
+   non-matching element. */
+.guide-colors-mock.is-focusing .gcm-card-title:not(.is-highlight) {
+  color: var(--cx-text-subtle) !important;
 }
 
 /* Right-side callout list — same look as the Anatomy callouts but each
@@ -5659,118 +5668,60 @@ td.upgrade-compare-col-premium,
   padding: var(--cx-space-6);
 }
 
-/* Engine derivation grid (Option A, condensed L→R) — inputs strip on
-   the left, arrow + "engine" caption in the middle, derived 4×3 grid
-   on the right. Compact, single-row, no scrolling. Live from active
-   theme via CSS color-mix(). */
-.ged {
-  display: grid;
-  grid-template-columns: auto auto 1fr;
+/* Engine explainer flow — classic "23 → ⚙ → 150+" multiplier story.
+   Horizontal single row, compact. */
+.guide-engine-flow {
+  display: flex;
   align-items: center;
-  gap: var(--cx-space-4);
-  margin-bottom: var(--cx-space-3);
+  justify-content: center;
+  gap: var(--cx-space-5);
+  flex-wrap: wrap;
+  margin-bottom: var(--cx-space-4);
 }
 
-.ged-side {
+.guide-engine-stat,
+.guide-engine-engine {
   display: flex;
   flex-direction: column;
-  gap: 6px;
-  min-width: 0;
+  align-items: center;
+  text-align: center;
+  min-width: 110px;
 }
 
-.ged-side-label {
-  display: flex;
-  align-items: baseline;
-  gap: 4px;
-  font-size: 10px;
-  font-weight: 600;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  color: var(--cx-text-subtle);
-}
-
-.ged-side-num {
-  font-size: 14px;
+.guide-engine-num {
+  font-size: 38px;
   font-weight: 800;
-  letter-spacing: -0.02em;
   color: var(--cx-accent);
+  line-height: 1;
+  margin-bottom: 8px;
   font-variant-numeric: tabular-nums;
-  text-transform: none;
+  letter-spacing: -0.02em;
 }
 
-/* INPUTS — vertical strip of 4 small chips with a colour swatch + label */
-.ged-input-strip {
-  display: flex;
-  flex-direction: column;
-  gap: 3px;
+.guide-engine-icon {
+  width: 38px;
+  height: 38px;
+  color: var(--cx-accent);
+  margin-bottom: 8px;
+  animation: guide-engine-spin 14s linear infinite;
 }
 
-.ged-chip-input {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 4px 8px 4px 4px;
-  background: var(--cx-surface);
-  border: 1px solid var(--cx-border);
-  border-radius: 999px;
-  font-size: 10px;
-  font-weight: 500;
+@keyframes guide-engine-spin {
+  to { transform: rotate(360deg); }
+}
+
+.guide-engine-label {
+  font-size: 11px;
   color: var(--cx-text-muted);
-  white-space: nowrap;
+  line-height: 1.35;
+  font-weight: 500;
 }
 
-.ged-chip-swatch {
-  display: inline-block;
-  width: 14px;
-  height: 14px;
-  border-radius: 50%;
-  border: 1px solid color-mix(in srgb, var(--cx-text) 14%, transparent);
-  flex-shrink: 0;
-}
-
-/* ARROW between inputs and outputs */
-.ged-arrow {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 4px;
+.guide-engine-arrow {
+  width: 22px;
+  height: 22px;
   color: var(--cx-text-subtle);
   flex-shrink: 0;
-}
-
-.ged-arrow-label {
-  font-size: 9px;
-  font-weight: 600;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-}
-
-/* OUTPUTS — tight 4×3 grid of small swatch tiles, label-on-hover via
-   the title attribute. No visible label so the grid stays dense. */
-.ged-output-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 4px;
-}
-
-.ged-chip-output {
-  display: block;
-  height: 22px;
-  border-radius: var(--cx-radius-sm);
-  border: 1px solid color-mix(in srgb, var(--cx-text) 8%, transparent);
-}
-
-@media (max-width: 720px) {
-  .ged {
-    grid-template-columns: 1fr;
-  }
-  .ged-arrow {
-    flex-direction: row;
-    justify-self: center;
-  }
-  .ged-arrow svg {
-    transform: rotate(90deg);
-  }
 }
 
 .guide-engine-caption {

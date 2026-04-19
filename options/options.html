@@ -600,40 +600,38 @@
           </ul>
         </div>
 
-        <!-- Engine derivation — compact L→R: inputs on the left, an arrow,
-             a tight grid of derived chips on the right. Live from the
-             active theme via CSS color-mix(). -->
+        <!-- Engine explainer — the multiplier story. Compact L→R flow:
+             "23 core colours → engine → 150+ painted values". Kept
+             abstract (not showing derived swatches) because the 23
+             tunable inputs aren't easy to visualize as a small grid,
+             and the cardinal-colour derivation is already covered by
+             the mock above. -->
         <div class="guide-engine-card">
-          <div class="ged" id="guideEngineDerivation">
-            <!-- LEFT: 4 input chips stacked vertically -->
-            <div class="ged-side ged-side-inputs">
-              <div class="ged-side-label">
-                <span class="ged-side-num">4</span>
-                <span>inputs</span>
-              </div>
-              <div class="ged-input-strip" id="gedInputGrid"></div>
+          <div class="guide-engine-flow">
+            <div class="guide-engine-stat">
+              <div class="guide-engine-num">23</div>
+              <div class="guide-engine-label">core colors<br>you set</div>
             </div>
-
-            <!-- ARROW — engine transforms the row above -->
-            <div class="ged-arrow" aria-hidden="true">
-              <svg width="22" height="14" viewBox="0 0 22 14" fill="none">
-                <path d="M1 7h18M14 1l6 6-6 6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+            <svg class="guide-engine-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M5 12h14M13 5l7 7-7 7"/>
+            </svg>
+            <div class="guide-engine-engine">
+              <svg class="guide-engine-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <circle cx="12" cy="12" r="3"/>
+                <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
               </svg>
-              <span class="ged-arrow-label">engine</span>
+              <div class="guide-engine-label">Theme engine<br>derives the rest</div>
             </div>
-
-            <!-- RIGHT: 12 derived chips in a tight grid -->
-            <div class="ged-side ged-side-outputs">
-              <div class="ged-side-label">
-                <span class="ged-side-num">150+</span>
-                <span>painted across SF · a taste</span>
-              </div>
-              <div class="ged-output-grid" id="gedOutputGrid"></div>
+            <svg class="guide-engine-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M5 12h14M13 5l7 7-7 7"/>
+            </svg>
+            <div class="guide-engine-stat">
+              <div class="guide-engine-num">150+</div>
+              <div class="guide-engine-label">CSS values<br>painted across Salesforce</div>
             </div>
           </div>
-
           <p class="guide-engine-caption">
-            Hover states, focus rings, borders, dividers, link colors, modal scrims — all derived from those 4 inputs. You pick what matters; we paint the rest.
+            Hover states, focus rings, modal backdrops, scrollbar tints, link colors, borders — all derived from those 23 inputs. Without the engine you'd be tuning every value by hand. With it, you pick what matters and we fill in the rest.
           </p>
         </div>
       </section>

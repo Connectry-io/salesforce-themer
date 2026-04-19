@@ -4796,20 +4796,18 @@
   function renderGuideTab() {
     renderGuideAnatomyDiagram();
     renderGuideColorsMock();
-    renderGuideEngineDerivation();
     renderGuideEffectsGrid();
     _bindGuideTypeDemo();
     _bindGuideFaviconDemo();
   }
 
   /**
-   * Render the engine derivation grid (replaces the old "23 → ⚙ → 150+"
-   * abstract flow). Top row = the 4 source colors; bottom grid = a curated
-   * set of 16 derived swatches showing where the engine actually paints
-   * across Salesforce. Every chip is computed live from the active theme
-   * via CSS color-mix() — no JS color math needed, and the grid updates
-   * the moment the user switches themes.
+   * (Unused — kept here as a reference for a future attempt. The
+   * derivation-grid design was too cramped at real page widths and mis-
+   * specced the 23 tunable inputs as 4. Engine card reverted to the
+   * classic "23 → ⚙ → 150+" flow for now.)
    */
+  // eslint-disable-next-line no-unused-vars
   function renderGuideEngineDerivation() {
     const inputGrid = document.getElementById('gedInputGrid');
     const outputGrid = document.getElementById('gedOutputGrid');
