@@ -76,16 +76,21 @@
             <span class="toggle-track"><span class="toggle-thumb"></span></span>
           </label>
         </div>
-        <div class="auto-mode-status" id="autoModeStatus" hidden>
-          <span class="auto-status-item">
+        <!-- Sub-panel that accordions open when Sync with system is on.
+             Mirrors the Slack/Discord pattern: explicitly labels which
+             theme runs in light vs dark mode rather than cramming both
+             into one centered status line. -->
+        <div class="auto-mode-panel" id="autoModeStatus" hidden>
+          <div class="auto-mode-panel-row">
+            <span class="auto-mode-panel-label">Light</span>
             <span class="auto-status-icon" id="autoLightIcon" aria-hidden="true"></span>
-            <span id="autoLightName">Connectry Light</span>
-          </span>
-          <span class="auto-status-dot">·</span>
-          <span class="auto-status-item">
+            <span class="auto-mode-panel-name" id="autoLightName">Connectry Light</span>
+          </div>
+          <div class="auto-mode-panel-row">
+            <span class="auto-mode-panel-label">Dark</span>
             <span class="auto-status-icon" id="autoDarkIcon" aria-hidden="true"></span>
-            <span id="autoDarkName">Connectry Dark</span>
-          </span>
+            <span class="auto-mode-panel-name" id="autoDarkName">Connectry Dark</span>
+          </div>
         </div>
 
         <!-- Row: Apply theme to Setup pages (was a 3-pill scope picker;

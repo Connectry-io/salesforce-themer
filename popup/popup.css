@@ -441,30 +441,46 @@ body {
   outline-offset: 2px;
 }
 
-/* Auto mode status line — sub-row under the Sync-with-system toggle.
-   Left-aligned with the row label text above it (icon=14px + 6px gap = 20px)
-   so it reads as a continuation of the Sync row, not a centered orphan. */
-.auto-mode-status {
+/* Sync-with-system sub-panel — accordions open when the toggle is on.
+   Two clean labelled rows (Light / Dark) so the user can read at a
+   glance which theme runs in which mode. */
+.auto-mode-panel {
   display: flex;
-  align-items: center;
-  justify-content: flex-start;
-  gap: 8px;
-  font-size: 11px;
-  color: var(--color-text-muted);
-  padding: 0 0 9px 20px;
-  margin-top: -2px;
-  border-bottom: 1px solid var(--color-border);
+  flex-direction: column;
+  gap: 4px;
+  margin: 4px 0 10px 20px;
+  padding: 8px 10px;
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  animation: auto-mode-panel-in 180ms ease both;
 }
 
-.auto-mode-status[hidden] {
+.auto-mode-panel[hidden] {
   display: none !important;
 }
 
-.auto-status-item {
-  display: inline-flex;
+@keyframes auto-mode-panel-in {
+  from { opacity: 0; transform: translateY(-2px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.auto-mode-panel-row {
+  display: flex;
   align-items: center;
-  gap: 5px;
-  font-weight: 500;
+  gap: 8px;
+  font-size: 11px;
+  color: var(--color-text);
+}
+
+.auto-mode-panel-label {
+  flex-shrink: 0;
+  width: 36px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--color-text-subtle);
 }
 
 .auto-status-icon {
@@ -480,9 +496,9 @@ body {
   height: 100%;
 }
 
-.auto-status-dot {
-  color: var(--color-text-subtle);
-  opacity: 0.6;
+.auto-mode-panel-name {
+  font-weight: 500;
+  color: var(--color-text);
 }
 
 /* ─── Pill groups (used by Apply To and Effects rows) ────────────────────── */
