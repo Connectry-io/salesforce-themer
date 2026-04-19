@@ -589,25 +589,52 @@
       const pageType = ns.detectPageType?.();
       const pageLabel = pageType ? ` · ${pageType.label}` : '';
 
-      // Post-scan: show a one-line summary bar instead of the full controls.
-      // Click expands back to the full scan controls (for re-scan).
+      // Post-scan: compact summary button that re-scans on click, with
+      // Advanced still accessible below so users can tweak settings without
+      // an extra expand step.
       if (this.hasScanned && this._scanBarCollapsed) {
         const themeName = this._escapeHtml(this.themeDisplayName || this.currentTheme || 'theme');
         const camBadge = this.includeScreenshot
           ? `<span class="diag-scan-summary-cam" title="Screenshot included">${ICONS.camera}</span>`
           : '';
         const page = pageType ? this._escapeHtml(pageType.label) : 'this page';
+        const advOpenLocal = this._advancedOpen ? ' open' : '';
+        const camActiveLocal = this.includeScreenshot;
+        const modeChipLocal = (id, label) => `
+          <button class="diag-mode-chip${this.scanMode === id ? ' is-active' : ''}" data-action="setScanMode" data-mode="${id}">
+            <span>${label}</span>
+          </button>`;
         return `
           <div class="diag-scan-bar diag-scan-bar--collapsed">
-            <button class="diag-scan-summary" data-action="expandScanBar" title="Click to re-scan or change options">
+            <button class="diag-scan-summary" data-action="scanAll" title="Re-scan with current settings">
               <span class="diag-scan-summary-icon">${ICONS.scan}</span>
               <span class="diag-scan-summary-main">
                 <span class="diag-scan-summary-primary">Scan · ${page}</span>
                 <span class="diag-scan-summary-sub">current theme · ${themeName}</span>
               </span>
               ${camBadge}
-              <span class="diag-scan-summary-chevron">&#8617;</span>
             </button>
+            <details class="diag-advanced"${advOpenLocal}>
+              <summary>Advanced — scan options</summary>
+              <div class="diag-advanced-body">
+                <div class="diag-advanced-label">Scan against</div>
+                <div class="diag-scan-row">
+                  ${modeChipLocal('current', 'Current')}
+                  ${modeChipLocal('presets', 'Presets')}
+                  ${modeChipLocal('mine', 'My Themes')}
+                  ${modeChipLocal('all', 'All')}
+                </div>
+                <div class="diag-advanced-label">Capture</div>
+                <label class="diag-screenshot-switch${camActiveLocal ? ' is-active' : ''}" tabindex="0" data-diag-tooltip="Captures a PNG of the visible page and attaches it to Copy, View Report, and AI Suggest.&#10;&#10;⚠ Avoid if sensitive data is on screen — no customer PII, financial records, or confidential info.&#10;&#10;Privacy: Connectry uses the screenshot only to generate a fix, then deletes it. We do not retain images." data-diag-tooltip-align="right">
+                  <span class="diag-switch-icon">${ICONS.camera}</span>
+                  <span class="diag-switch-label">Include screenshot</span>
+                  <input type="checkbox" class="diag-sr-only" data-action="toggleIncludeScreenshot" ${camActiveLocal ? 'checked' : ''}>
+                  <span class="diag-switch-track" aria-hidden="true">
+                    <span class="diag-switch-thumb"></span>
+                  </span>
+                </label>
+              </div>
+            </details>
           </div>`;
       }
 

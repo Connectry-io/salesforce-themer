@@ -38,8 +38,11 @@
         generatedAt: new Date().toISOString().replace('T', ' ').slice(0, 19),
       };
       await chrome.storage.session.set({ [key]: payload });
-      const url = chrome.runtime.getURL(`diagnostic/report.html?id=${id}`);
-      window.open(url, '_blank');
+      // Delegate tab creation to the background worker — content scripts
+      // can't reliably window.open a chrome-extension:// URL (user gesture
+      // lost across the storage.set await), and popup blockers sometimes
+      // intervene. Background has unrestricted chrome.tabs access.
+      await chrome.runtime.sendMessage({ action: 'openReportTab', reportId: id });
     } catch (err) {
       console.error('[SFT Diag] openReport failed:', err);
     }

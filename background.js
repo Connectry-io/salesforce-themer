@@ -371,10 +371,23 @@ async function broadcastThemeToActiveTabs(themeId) {
 // removed in A2: Studio renders locally and writes to storage.local directly,
 // so no message round-trip is needed.)
 chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
-  if (msg?.action !== 'intel.captureScreenshot') return false;
-  const windowId = sender.tab?.windowId;
-  chrome.tabs.captureVisibleTab(windowId, { format: 'png' })
-    .then((dataUrl) => sendResponse({ ok: true, dataUrl }))
-    .catch((err) => sendResponse({ ok: false, error: String(err) }));
-  return true; // async response
+  if (msg?.action === 'intel.captureScreenshot') {
+    const windowId = sender.tab?.windowId;
+    chrome.tabs.captureVisibleTab(windowId, { format: 'png' })
+      .then((dataUrl) => sendResponse({ ok: true, dataUrl }))
+      .catch((err) => sendResponse({ ok: false, error: String(err) }));
+    return true; // async response
+  }
+  // Open the interactive report in a new tab. Content script can't reliably
+  // navigate to chrome-extension:// URLs (user-gesture lost across awaits
+  // and some blob: CSP carry-over), so we delegate to the background worker
+  // which has full tab APIs.
+  if (msg?.action === 'openReportTab' && msg.reportId) {
+    const url = chrome.runtime.getURL(`diagnostic/report.html?id=${msg.reportId}`);
+    chrome.tabs.create({ url })
+      .then(() => sendResponse({ ok: true }))
+      .catch((err) => sendResponse({ ok: false, error: String(err) }));
+    return true;
+  }
+  return false;
 });
