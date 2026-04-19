@@ -157,4 +157,4 @@ We will update this policy when our practices change. The "Last updated" date at
 
 ---
 
-_Salesforce, Lightning, and related marks are trademarks of Salesforce, Inc. Connectry is not affiliated with or endorsed by Salesforce, Inc._
+_Salesforce, Lightning, and related marks are trademarks of Salesforce, Inc. Connectry is a registered Salesforce ISV Partner. The Salesforce Themer extension is not an official Salesforce product and is not endorsed by Salesforce, Inc._
