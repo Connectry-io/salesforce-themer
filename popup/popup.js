@@ -41,6 +41,7 @@
   const POPUP_THEME_EFFECTS = {
     'salesforce':        [],
     'salesforce-cosmos': [],
+    'salesforce-dark':   [],
     'connectry':         ['hoverLift'],
     'connectry-dark':    ['hoverLift', 'ambientGlow'],
     'slate':             ['hoverLift'],

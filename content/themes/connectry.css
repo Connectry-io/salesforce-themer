@@ -295,6 +295,160 @@
   --slds-c-accordion-heading-color: #2d2d2d !important;
   --slds-c-accordion-heading-text-color: #2d2d2d !important;
   --slds-c-accordion-heading-text-color-hover: #4a6fa5 !important;
+
+  /* Component hooks — Select (picker) */
+  --slds-c-select-color-border: #c4cdd6 !important;
+  --slds-c-select-color-background: #ffffff !important;
+  --slds-c-select-text-color: #2d2d2d !important;
+  --slds-c-select-color-border-focus: #4a6fa5 !important;
+  --slds-c-select-color-background-focus: #ffffff !important;
+  --slds-c-select-text-color-focus: #2d2d2d !important;
+  --slds-c-select-shadow-focus: 0 0 0 3px rgba(74, 111, 165, 0.3) !important;
+
+  /* Component hooks — Slider */
+  --slds-c-slider-thumb-color-foreground: #4a6fa5 !important;
+  --slds-c-slider-thumb-color-foreground-hover: #3d5e8c !important;
+  --slds-c-slider-thumb-color-foreground-active: #2d4a72 !important;
+  --slds-c-slider-thumb-color-foreground-focus: #4a6fa5 !important;
+  --slds-c-slider-thumb-shadow-focus: 0 0 0 3px rgba(74, 111, 165, 0.3) !important;
+  --slds-c-slider-track-color-background: #eeeeed !important;
+  --lwc-sliderTrackColorBackground: #eeeeed !important;
+  --lwc-sliderColorBackgroundDisabled: #eeeeed !important;
+
+  /* Component hooks — Toggle switch (slds-checkbox-toggle) */
+  --slds-c-checkbox-toggle-color-border: #c4cdd6 !important;
+  --lwc-colorBackgroundToggle: #eeeeed !important;
+  --slds-c-checkbox-toggle-color-background: #eeeeed !important;
+  --slds-c-checkbox-toggle-color-background-hover: #f0f0ee !important;
+  --slds-c-checkbox-toggle-color-border-hover: #c4cdd6 !important;
+  --slds-c-checkbox-toggle-switch-color-background: #ffffff !important;
+  --slds-c-checkbox-toggle-color-background-focus: #f0f0ee !important;
+  --slds-c-checkbox-toggle-shadow-focus: 0 0 0 3px rgba(74, 111, 165, 0.3) !important;
+  --slds-c-checkbox-toggle-color-border-checked: #4a6fa5 !important;
+  --slds-c-checkbox-toggle-color-background-checked: #4a6fa5 !important;
+  --slds-c-checkbox-toggle-color-background-checked-hover: #3d5e8c !important;
+  --slds-c-checkbox-toggle-switch-color-background-checked: #ffffff !important;
+  --slds-c-checkbox-toggle-mark-color-foreground: #ffffff !important;
+  --lwc-colorBorderToggleChecked: #4a6fa5 !important;
+  --slds-c-checkbox-toggle-color-background-checked-focus: #4a6fa5 !important;
+  --lwc-colorBackgroundToggleDisabled: #eeeeed !important;
+  --lwc-colorBackgroundInputCheckboxDisabled: #eeeeed !important;
+
+  /* Component hooks — Alert */
+  --slds-c-alert-text-color: #2d2d2d !important;
+  --slds-c-alert-color-background: #ffffff !important;
+  --slds-c-alert-color-border: #e8e8e6 !important;
+  --slds-c-alert-text-color-active: #2d2d2d !important;
+
+  /* Component hooks — Progress (bar + ring) */
+  --lwc-progressBarColorBackground: #eeeeed !important;
+  --lwc-progressBarColorBackgroundFill: #4a6fa5 !important;
+  --lwc-progressBarColorBackgroundFillSuccess: #059669 !important;
+  --lwc-progressColorBackgroundShade: #eeeeed !important;
+  --lwc-progressColorBorderShade: #e8e8e6 !important;
+  --lwc-progressColorBackground: #ffffff !important;
+  --lwc-progressColorBorderActive: #4a6fa5 !important;
+  --lwc-progressColorBorderHover: #3d5e8c !important;
+  --lwc-progressColorBorder: #e8e8e6 !important;
+  --lwc-colorBackgroundProgressRingContent: #ffffff !important;
+  --lwc-colorBackgroundSpinnerDot: #6b7280 !important;
+
+  /* Component hooks — Popover walkthrough */
+  --lwc-popoverWalkthroughColorBackground: #ffffff !important;
+  --lwc-popoverWalkthroughHeaderColorBackground: #eeeeed !important;
+  --lwc-popoverColorText: #2d2d2d !important;
+  --lwc-popoverWalkthroughColorBackgroundAlt: #eeeeed !important;
+  --lwc-popoverWalkthroughAltNubbinColorBackground: #eeeeed !important;
+
+  /* Component hooks — Docked panel + Einstein header + Illustrations */
+  --lwc-colorBackgroundDockedPanel: #ffffff !important;
+  --lwc-colorBackgroundDockedPanelHeader: #eeeeed !important;
+  --lwc-einsteinHeaderBackgroundColor: rgba(74, 111, 165, 0.15) !important;
+  --lwc-einsteinHeaderBackground: rgba(74, 111, 165, 0.15) !important;
+  --lwc-einsteinHeaderTextShadow: none !important;
+  --lwc-illustrationColorPrimary: #4a6fa5 !important;
+  --lwc-illustrationColorSecondary: #4a5568 !important;
+
+  /* Legacy LWC — Table headers (post-B7 coverage) */
+  --lwc-tableColorBackgroundHeader: #f0f0ee !important;
+  --lwc-tableColorTextHeader: #4a5568 !important;
+  --lwc-tableColorBackgroundHeaderHover: #f0f0ee !important;
+  --lwc-tableColorBackgroundHeaderResizableHandle: #e8e8e6 !important;
+
+  /* Component hooks — Avatar hover + inverse */
+  --slds-c-avatar-text-color-hover: #2d2d2d !important;
+  --slds-c-avatar-initials-text-color-hover: #ffffff !important;
+  --slds-c-avatar-inverse-text-color: #ffffff !important;
+  --slds-c-avatar-initials-inverse-text-color: #ffffff !important;
+  --slds-c-avatar-initials-inverse-text-color-hover: #ffffff !important;
+
+  /* Component hooks — Pill error states */
+  --slds-c-pill-error-color-border: #dc2626 !important;
+  --slds-c-pill-error-color-border-active: #dc2626 !important;
+  --slds-c-pill-error-text-color: #dc2626 !important;
+  --slds-c-pill-text-color-error: #dc2626 !important;
+  --slds-c-pill-label-shadow-focus: 0 0 0 3px rgba(74, 111, 165, 0.3) !important;
+
+  /* Legacy LWC — orphan hardcoded-light tokens used across Lightning + Setup */
+  --lwc-colorBackgroundBackdrop: rgba(0, 0, 0, 0.4) !important;
+  --lwc-colorBackgroundIconWaffle: #ffffff !important;
+  --lwc-colorBackgroundPost: #ffffff !important;
+  --lwc-colorBackgroundInfo: #eeeeed !important;
+  --lwc-colorBackgroundIndicatorDot: #4a6fa5 !important;
+  --lwc-colorBackgroundImageOverlay: rgba(0, 0, 0, 0.45) !important;
+  --lwc-colorBorderWarning: #d97706 !important;
+  --lwc-colorBorderInputDisabled: #c4cdd6 !important;
+  --lwc-colorTextInputDisabled: #6b7280 !important;
+  --lwc-inputStaticColor: #2d2d2d !important;
+  --lwc-colorBorderReminder: #e8e8e6 !important;
+  --lwc-colorBackgroundReminderHover: #f0f0ee !important;
+  --lwc-colorBackgroundGuidance: #ffffff !important;
+  --slds-c-color-brand-dark: #2d4a72 !important;
+  --slds-g-color-border-brand-2: #e8e8e6 !important;
+
+  /* Notification utility-bar tokens (Setup uses these) */
+  --lwc-utilityBarColorBackgroundNotificationBadge: #dc2626 !important;
+  --lwc-utilityBarColorBackgroundNotificationFocus: #4a6fa5 !important;
+
+  /* Global nav item accent-active/focus (Setup chrome) */
+  --lwc-globalnavigationItemHeightAccentActive: #4a6fa5 !important;
+  --lwc-globalnavigationItemHeightAccentFocus: #3d5e8c !important;
+
+  /* Path chevron — hover + stage-specific states (B7 added the basics) */
+  --lwc-colorBorderPathCurrentHover: #3d5e8c !important;
+  --lwc-colorTextPathCurrentHover: #ffffff !important;
+  --lwc-colorBackgroundPathActive: #4a6fa5 !important;
+  --lwc-colorBackgroundPathActiveHover: #3d5e8c !important;
+  --lwc-colorBackgroundPathLost: #dc2626 !important;
+  --lwc-colorBackgroundPathWon: #059669 !important;
+}
+
+/* ─── SF utility-class background overrides (not token-driven) ──────────────
+ * Some SF classes hardcode background-color in their CSS rules (no custom
+ * property to override). .slds-theme_default is the biggest offender —
+ * it is used on the Setup Home hero + various surfaces and hardcodes white.
+ * We recolor these directly per DESIGN-RULES.md (recolor, not restructure).
+ */
+.slds-theme_default,
+.slds-theme_default-solid {
+  background-color: #ffffff !important;
+  color: #2d2d2d !important;
+}
+
+.slds-color__background_gray-1,
+.slds-color__background_gray-2,
+.slds-color__background_gray-3,
+.slds-color__background_gray-4,
+.slds-color__background_gray-5 {
+  background-color: #eeeeed !important;
+}
+
+.slds-text-color_default {
+  color: #2d2d2d !important;
+}
+
+.slds-text-color_weak {
+  color: #4a5568 !important;
 }
 
 /* ─── Base ───────────────────────────────────────────────────────────────── */

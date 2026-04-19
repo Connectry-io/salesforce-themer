@@ -159,6 +159,7 @@ const THEME_EFFECTS_MAP = {
   // ─── Baselines with zero effects (SF defaults + a11y)
   'salesforce':        { base: 'none' },
   'salesforce-cosmos': { base: 'none' },
+  'salesforce-dark':   { base: 'none' },
   'high-contrast':     { base: 'none' },
 
   // ─── Light themes

@@ -390,6 +390,160 @@ function generateThemeCSS(theme) {
   --slds-c-accordion-heading-color: ${c.textPrimary} !important;
   --slds-c-accordion-heading-text-color: ${c.textPrimary} !important;
   --slds-c-accordion-heading-text-color-hover: ${c.accent} !important;
+
+  /* Component hooks — Select (picker) */
+  --slds-c-select-color-border: ${c.borderInput} !important;
+  --slds-c-select-color-background: ${isDark ? c.background : c.surface} !important;
+  --slds-c-select-text-color: ${c.textPrimary} !important;
+  --slds-c-select-color-border-focus: ${c.accent} !important;
+  --slds-c-select-color-background-focus: ${isDark ? c.background : c.surface} !important;
+  --slds-c-select-text-color-focus: ${c.textPrimary} !important;
+  --slds-c-select-shadow-focus: ${c.focusRing || '0 0 0 2px ' + c.accent} !important;
+
+  /* Component hooks — Slider */
+  --slds-c-slider-thumb-color-foreground: ${c.accent} !important;
+  --slds-c-slider-thumb-color-foreground-hover: ${c.accentHover} !important;
+  --slds-c-slider-thumb-color-foreground-active: ${c.accentActive} !important;
+  --slds-c-slider-thumb-color-foreground-focus: ${c.accent} !important;
+  --slds-c-slider-thumb-shadow-focus: ${c.focusRing || '0 0 0 2px ' + c.accent} !important;
+  --slds-c-slider-track-color-background: ${c.surfaceAlt} !important;
+  --lwc-sliderTrackColorBackground: ${c.surfaceAlt} !important;
+  --lwc-sliderColorBackgroundDisabled: ${c.surfaceAlt} !important;
+
+  /* Component hooks — Toggle switch (slds-checkbox-toggle) */
+  --slds-c-checkbox-toggle-color-border: ${c.borderInput} !important;
+  --lwc-colorBackgroundToggle: ${c.surfaceAlt} !important;
+  --slds-c-checkbox-toggle-color-background: ${c.surfaceAlt} !important;
+  --slds-c-checkbox-toggle-color-background-hover: ${c.surfaceHover} !important;
+  --slds-c-checkbox-toggle-color-border-hover: ${c.borderInput} !important;
+  --slds-c-checkbox-toggle-switch-color-background: ${isDark ? c.textSecondary : '#ffffff'} !important;
+  --slds-c-checkbox-toggle-color-background-focus: ${c.surfaceHover} !important;
+  --slds-c-checkbox-toggle-shadow-focus: ${c.focusRing || '0 0 0 2px ' + c.accent} !important;
+  --slds-c-checkbox-toggle-color-border-checked: ${c.accent} !important;
+  --slds-c-checkbox-toggle-color-background-checked: ${c.accent} !important;
+  --slds-c-checkbox-toggle-color-background-checked-hover: ${c.accentHover} !important;
+  --slds-c-checkbox-toggle-switch-color-background-checked: ${c.buttonBrandText || '#ffffff'} !important;
+  --slds-c-checkbox-toggle-mark-color-foreground: ${c.buttonBrandText || '#ffffff'} !important;
+  --lwc-colorBorderToggleChecked: ${c.accent} !important;
+  --slds-c-checkbox-toggle-color-background-checked-focus: ${c.accent} !important;
+  --lwc-colorBackgroundToggleDisabled: ${c.surfaceAlt} !important;
+  --lwc-colorBackgroundInputCheckboxDisabled: ${c.surfaceAlt} !important;
+
+  /* Component hooks — Alert */
+  --slds-c-alert-text-color: ${c.textPrimary} !important;
+  --slds-c-alert-color-background: ${c.surface} !important;
+  --slds-c-alert-color-border: ${c.border} !important;
+  --slds-c-alert-text-color-active: ${c.textPrimary} !important;
+
+  /* Component hooks — Progress (bar + ring) */
+  --lwc-progressBarColorBackground: ${c.surfaceAlt} !important;
+  --lwc-progressBarColorBackgroundFill: ${c.accent} !important;
+  --lwc-progressBarColorBackgroundFillSuccess: ${c.success} !important;
+  --lwc-progressColorBackgroundShade: ${c.surfaceAlt} !important;
+  --lwc-progressColorBorderShade: ${c.border} !important;
+  --lwc-progressColorBackground: ${c.surface} !important;
+  --lwc-progressColorBorderActive: ${c.accent} !important;
+  --lwc-progressColorBorderHover: ${c.accentHover} !important;
+  --lwc-progressColorBorder: ${c.border} !important;
+  --lwc-colorBackgroundProgressRingContent: ${c.surface} !important;
+  --lwc-colorBackgroundSpinnerDot: ${c.textMuted} !important;
+
+  /* Component hooks — Popover walkthrough */
+  --lwc-popoverWalkthroughColorBackground: ${c.surface} !important;
+  --lwc-popoverWalkthroughHeaderColorBackground: ${c.surfaceAlt} !important;
+  --lwc-popoverColorText: ${c.textPrimary} !important;
+  --lwc-popoverWalkthroughColorBackgroundAlt: ${c.surfaceAlt} !important;
+  --lwc-popoverWalkthroughAltNubbinColorBackground: ${c.surfaceAlt} !important;
+
+  /* Component hooks — Docked panel + Einstein header + Illustrations */
+  --lwc-colorBackgroundDockedPanel: ${c.surface} !important;
+  --lwc-colorBackgroundDockedPanelHeader: ${c.surfaceAlt} !important;
+  --lwc-einsteinHeaderBackgroundColor: ${c.accentLight || c.surface} !important;
+  --lwc-einsteinHeaderBackground: ${c.accentLight || c.surface} !important;
+  --lwc-einsteinHeaderTextShadow: none !important;
+  --lwc-illustrationColorPrimary: ${c.accent} !important;
+  --lwc-illustrationColorSecondary: ${c.textSecondary} !important;
+
+  /* Legacy LWC — Table headers (post-B7 coverage) */
+  --lwc-tableColorBackgroundHeader: ${c.tableHeaderBg || c.surfaceAlt} !important;
+  --lwc-tableColorTextHeader: ${c.tableHeaderText || c.textSecondary} !important;
+  --lwc-tableColorBackgroundHeaderHover: ${c.surfaceHover} !important;
+  --lwc-tableColorBackgroundHeaderResizableHandle: ${c.border} !important;
+
+  /* Component hooks — Avatar hover + inverse */
+  --slds-c-avatar-text-color-hover: ${c.textPrimary} !important;
+  --slds-c-avatar-initials-text-color-hover: ${c.buttonBrandText || '#ffffff'} !important;
+  --slds-c-avatar-inverse-text-color: ${c.buttonBrandText || '#ffffff'} !important;
+  --slds-c-avatar-initials-inverse-text-color: ${c.buttonBrandText || '#ffffff'} !important;
+  --slds-c-avatar-initials-inverse-text-color-hover: ${c.buttonBrandText || '#ffffff'} !important;
+
+  /* Component hooks — Pill error states */
+  --slds-c-pill-error-color-border: ${c.error} !important;
+  --slds-c-pill-error-color-border-active: ${c.error} !important;
+  --slds-c-pill-error-text-color: ${c.error} !important;
+  --slds-c-pill-text-color-error: ${c.error} !important;
+  --slds-c-pill-label-shadow-focus: ${c.focusRing || '0 0 0 2px ' + c.accent} !important;
+
+  /* Legacy LWC — orphan hardcoded-light tokens used across Lightning + Setup */
+  --lwc-colorBackgroundBackdrop: ${c.modalBackdrop || 'rgba(0, 0, 0, 0.5)'} !important;
+  --lwc-colorBackgroundIconWaffle: ${c.navText} !important;
+  --lwc-colorBackgroundPost: ${c.surface} !important;
+  --lwc-colorBackgroundInfo: ${c.surfaceAlt} !important;
+  --lwc-colorBackgroundIndicatorDot: ${c.accent} !important;
+  --lwc-colorBackgroundImageOverlay: rgba(0, 0, 0, ${isDark ? 0.7 : 0.45}) !important;
+  --lwc-colorBorderWarning: ${c.warning} !important;
+  --lwc-colorBorderInputDisabled: ${c.borderInput} !important;
+  --lwc-colorTextInputDisabled: ${c.textMuted} !important;
+  --lwc-inputStaticColor: ${c.textPrimary} !important;
+  --lwc-colorBorderReminder: ${c.border} !important;
+  --lwc-colorBackgroundReminderHover: ${c.surfaceHover} !important;
+  --lwc-colorBackgroundGuidance: ${c.surface} !important;
+  --slds-c-color-brand-dark: ${c.accentActive} !important;
+  --slds-g-color-border-brand-2: ${c.border} !important;
+
+  /* Notification utility-bar tokens (Setup uses these) */
+  --lwc-utilityBarColorBackgroundNotificationBadge: ${c.error} !important;
+  --lwc-utilityBarColorBackgroundNotificationFocus: ${c.accent} !important;
+
+  /* Global nav item accent-active/focus (Setup chrome) */
+  --lwc-globalnavigationItemHeightAccentActive: ${c.accent} !important;
+  --lwc-globalnavigationItemHeightAccentFocus: ${c.accentHover} !important;
+
+  /* Path chevron — hover + stage-specific states (B7 added the basics) */
+  --lwc-colorBorderPathCurrentHover: ${c.accentHover} !important;
+  --lwc-colorTextPathCurrentHover: ${c.buttonBrandText || '#ffffff'} !important;
+  --lwc-colorBackgroundPathActive: ${c.accent} !important;
+  --lwc-colorBackgroundPathActiveHover: ${c.accentHover} !important;
+  --lwc-colorBackgroundPathLost: ${c.error} !important;
+  --lwc-colorBackgroundPathWon: ${c.success} !important;
+}
+
+/* ─── SF utility-class background overrides (not token-driven) ──────────────
+ * Some SF classes hardcode background-color in their CSS rules (no custom
+ * property to override). .slds-theme_default is the biggest offender —
+ * it is used on the Setup Home hero + various surfaces and hardcodes white.
+ * We recolor these directly per DESIGN-RULES.md (recolor, not restructure).
+ */
+.slds-theme_default,
+.slds-theme_default-solid {
+  background-color: ${c.surface} !important;
+  color: ${c.textPrimary} !important;
+}
+
+.slds-color__background_gray-1,
+.slds-color__background_gray-2,
+.slds-color__background_gray-3,
+.slds-color__background_gray-4,
+.slds-color__background_gray-5 {
+  background-color: ${c.surfaceAlt} !important;
+}
+
+.slds-text-color_default {
+  color: ${c.textPrimary} !important;
+}
+
+.slds-text-color_weak {
+  color: ${c.textSecondary} !important;
 }
 
 /* ─── Base ───────────────────────────────────────────────────────────────── */
