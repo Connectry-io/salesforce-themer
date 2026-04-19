@@ -20,16 +20,8 @@
   const key = 'sft-report-' + id;
   let opts;
   try {
-    // Try session storage first, then local as fallback (matches
-    // the write path in report-generator.js).
-    if (chrome.storage.session) {
-      const s = await chrome.storage.session.get(key);
-      opts = s[key];
-    }
-    if (!opts) {
-      const l = await chrome.storage.local.get(key);
-      opts = l[key];
-    }
+    const l = await chrome.storage.local.get(key);
+    opts = l[key];
   } catch (err) {
     console.error('[SFT Report] storage read failed', err);
     showFailure('Could not read report data.');
@@ -44,10 +36,7 @@
   wireInteractivity();
 
   // Release the stored blob after rendering.
-  try {
-    if (chrome.storage.session) await chrome.storage.session.remove(key);
-    await chrome.storage.local.remove(key);
-  } catch (_) {}
+  try { await chrome.storage.local.remove(key); } catch (_) {}
 
   function showFailure(msg) {
     const app = document.getElementById('app') || document.body;

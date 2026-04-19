@@ -37,15 +37,13 @@
       generatedAt: new Date().toISOString().replace('T', ' ').slice(0, 19),
     };
 
-    // Try session storage first (ephemeral, preferred). Fall back to
-    // local storage if session isn't available (older Chrome or MV2
-    // compatibility mode).
+    // Content scripts don't have access to chrome.storage.session by
+    // default (its accessLevel is TRUSTED_CONTEXTS only). Use local —
+    // works in every context, payload gets cleaned up by report.js after
+    // render, and the size limits are fine for our payload (~100KB max
+    // with a screenshot).
     try {
-      if (chrome.storage.session) {
-        await chrome.storage.session.set({ [key]: payload });
-      } else {
-        await chrome.storage.local.set({ [key]: payload });
-      }
+      await chrome.storage.local.set({ [key]: payload });
     } catch (err) {
       console.error('[SFT Diag] openReport: storage write failed', err);
       alert('Could not prepare report — storage write failed. Check the console.');
