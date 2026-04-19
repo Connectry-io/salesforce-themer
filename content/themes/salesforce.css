@@ -1027,20 +1027,60 @@ li[role="presentation"].active,
   text-shadow: none !important;
 }
 
-/* Pseudo-element kill — SF paints active tabs via ::before/::after in
- * some variants (cyan fill across the pill). Neutralize them so our
- * transparent bg wins. */
-.oneConsoleTabItem.slds-active::before,
-.oneConsoleTabItem.slds-active::after,
-.oneConsoleTabItem.active::before,
-.oneConsoleTabItem.active::after,
-.slds-sub-tabs__item.slds-active::before,
-.slds-sub-tabs__item.slds-active::after,
-[role="tab"][aria-selected="true"]::before,
-[role="tab"][aria-selected="true"]::after {
+/* Pseudo-element kill for active tabs — DevTools Computed panel on
+ * 2026-04-19 pinned the cyan fill to app.css line 609:
+ *   .slds-context-bar__item.slds-is-active::before,
+ *   .slds-context-bar__item.slds-is-active::after,
+ *   one-app-nav-bar-item-root.slds-is-active::before,
+ *   one-app-nav-bar-item-root.slds-is-active::after,
+ *   .slds-context-bar__item.slds-is-active a::before,
+ *   .slds-context-bar__item.slds-is-active a::after
+ *     { background-color: var(--lwc-colorBrand) !important; }
+ *
+ * My earlier kills targeted .oneConsoleTabItem.slds-active (different
+ * class — note: slds-active vs slds-is-active). SF's rule won on
+ * cascade order (their app.css loads after our document_start injection)
+ * despite tied specificity.
+ *
+ * Fix: prefix with body to boost specificity above SF's rule, and
+ * include EVERY variant SF uses (context-bar, app-nav-bar, sub-tabs,
+ * console-tab, role-tab). */
+body .slds-context-bar__item.slds-is-active::before,
+body .slds-context-bar__item.slds-is-active::after,
+body .slds-context-bar__item.slds-is-active a::before,
+body .slds-context-bar__item.slds-is-active a::after,
+body one-app-nav-bar-item-root.slds-is-active::before,
+body one-app-nav-bar-item-root.slds-is-active::after,
+body .oneConsoleTabItem.slds-active::before,
+body .oneConsoleTabItem.slds-active::after,
+body .oneConsoleTabItem.active::before,
+body .oneConsoleTabItem.active::after,
+body .slds-sub-tabs__item.slds-active::before,
+body .slds-sub-tabs__item.slds-active::after,
+body [role="tab"][aria-selected="true"]::before,
+body [role="tab"][aria-selected="true"]::after,
+body .tabHeader[aria-selected="true"]::before,
+body .tabHeader[aria-selected="true"]::after {
   background: transparent !important;
   background-color: transparent !important;
   background-image: none !important;
+  box-shadow: none !important;
+}
+
+/* Active-tab underline via ::after — replaces the pseudo-element
+ * fill with a thin accent underline that won't obscure text. */
+body .slds-context-bar__item.slds-is-active::after,
+body one-app-nav-bar-item-root.slds-is-active::after,
+body .oneConsoleTabItem.slds-active::after,
+body [role="tab"][aria-selected="true"]::after {
+  content: '' !important;
+  position: absolute !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  height: 3px !important;
+  background-color: #0176d3 !important;
+  pointer-events: none !important;
 }
 
 /* Aloha Page wrapper — SF's classic Visualforce-style container that
@@ -1103,6 +1143,324 @@ iframe.apexIframe,
 iframe.vfFrameId {
   color-scheme: light !important;
   background-color: transparent !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+ * EXTJS 3.2.2 + Classic Aura-Aloha page coverage
+ *
+ * Profiles, Permission Set detail, Object Manager legacy screens etc.
+ * render inside an Aura-Aloha iframe using the ~2010-era ExtJS 3.2.2
+ * grid (x-grid3-* classes) on top of SF's classic Setup CSS
+ * (sCSS/.../setup.css + profile.css + AuraAlohaSetupContentFrame.css).
+ * These stylesheets load AFTER our content_scripts inject, so we need
+ * body prefixes + very specific selectors to beat cascade order.
+ *
+ * DOM confirmed 2026-04-19 on /lightning/setup/EnhancedProfiles/home.
+ * ════════════════════════════════════════════════════════════════════ */
+
+/* Body + outer wrapper classes — body may have combos of:
+ * hasMotif setupTab listPage ext-webkit ext-chrome ext-mac sfdcBody
+ * brandQuaternaryBgr + themer effects classes. */
+body.sfdcBody,
+body.hasMotif,
+body.setupTab,
+body.listPage,
+body.brandQuaternaryBgr,
+body.ext-webkit,
+body[class*="ext-"] {
+  background-color: #f3f3f3 !important;
+  color: #181818 !important;
+}
+
+/* Page title + breadcrumb area (.bPageTitle > .ptBody > .content + .links) */
+body .bPageTitle,
+body .bPageTitle .ptBody,
+body .bPageTitle .content,
+body .bPageTitle .links,
+body .ptBreadcrumb {
+  background-color: transparent !important;
+  color: #181818 !important;
+  border-color: #e5e5e5 !important;
+}
+
+body .bPageTitle h1,
+body .bPageTitle h2,
+body .bPageTitle .pageType,
+body .bPageTitle .noSecondHeader {
+  color: #181818 !important;
+}
+
+body .bPageTitle .helpLink,
+body .bPageTitle a {
+  color: #0176d3 !important;
+}
+
+/* List viewport wrappers (.individualPalette, .listViewportWrapper,
+ * .listViewport, .setupBlock) */
+body .individualPalette,
+body .listViewportWrapper,
+body .listViewport,
+body .listViewport.setupBlock,
+body .feedContainer,
+body .feedBody,
+body .listBody {
+  background-color: transparent !important;
+  color: #181818 !important;
+}
+
+/* Top nav bar + sub nav bar (.topNav.primaryPalette, .subNav with
+ * .linkBar.brandSecondaryBrd). Contains: view dropdown, filter links,
+ * new button, refresh button, rolodex A-Z. */
+body .topNav,
+body .topNav.primaryPalette,
+body .subNav,
+body .linkBar,
+body .linkBar.brandSecondaryBrd,
+body .listButtons,
+body .listButtons ul,
+body .listButtons li {
+  background-color: #ffffff !important;
+  color: #181818 !important;
+  border-color: #e5e5e5 !important;
+}
+
+body .topNav .controls,
+body .topNav .title,
+body .topNav .filterLinks,
+body .topNav .filterLinks a,
+body .topNav .divisionLabel,
+body .topNav .topNavTab {
+  color: #181818 !important;
+  background-color: transparent !important;
+}
+
+body .topNav select,
+body .topNav .title select,
+body select.title {
+  background-color: #ffffff !important;
+  color: #181818 !important;
+  border-color: #c9c9c9 !important;
+  color-scheme: light !important;
+}
+
+body .filterLinks a,
+body .subNav a {
+  color: #0176d3 !important;
+}
+
+/* Rolodex (A-Z Other All letter filter across the top of list views) */
+body .rolodex,
+body .rolodex a,
+body .rolodex .listItem,
+body .rolodex .listItemPad {
+  background-color: transparent !important;
+  color: #444444 !important;
+}
+
+body .rolodex a:hover,
+body .rolodex a:focus {
+  background-color: #f3f3f3 !important;
+  color: #0176d3 !important;
+}
+
+body .rolodex .listItemSelected {
+  background-color: rgba(1, 118, 211, 0.1) !important;
+  color: #0176d3 !important;
+  border-color: #0176d3 !important;
+}
+
+/* ExtJS 3.2.2 grid — the actual table is rendered by ExtJS, not HTML.
+ * Uses .x-grid3 container with .x-grid3-header + .x-grid3-body of
+ * .x-grid3-row > .x-grid3-col cells. Notoriously heavy specificity. */
+body .x-grid3,
+body .x-grid3-viewport,
+body .x-grid3-body,
+body .x-grid3-scroller,
+body .x-panel,
+body .x-panel-body,
+body .x-panel-bwrap,
+body .x-grid-panel {
+  background-color: #ffffff !important;
+  color: #181818 !important;
+  border-color: #e5e5e5 !important;
+}
+
+body .x-grid3-header,
+body .x-grid3-header-inner,
+body .x-grid3-header-offset,
+body .x-grid3-hd-row,
+body .x-grid3-hd,
+body .x-grid3-hd-inner,
+body .x-grid3-hd table,
+body .x-grid3-hd thead,
+body .x-grid3-hd th {
+  background-color: #fafaf9 !important;
+  color: #444444 !important;
+  border-color: #e5e5e5 !important;
+}
+
+body .x-grid3-hd-inner a,
+body .x-grid3-hd a {
+  color: #444444 !important;
+  font-weight: 600 !important;
+}
+
+body .x-grid3-row,
+body .x-grid3-row td,
+body .x-grid3-row-table,
+body .x-grid3-cell,
+body .x-grid3-cell-inner,
+body .x-grid3-col,
+body [class*="x-grid3-td-"],
+body [class*="x-grid3-col-"] {
+  background-color: #ffffff !important;
+  color: #181818 !important;
+  border-color: #f3f3f3 !important;
+}
+
+body .x-grid3-row-alt,
+body .x-grid3-row-alt td {
+  background-color: #fafaf9 !important;
+}
+
+body .x-grid3-row-over,
+body .x-grid3-row-over td,
+body .x-grid3-row:hover,
+body .x-grid3-row:hover td {
+  background-color: #f3f3f3 !important;
+}
+
+body .x-grid3-row-selected,
+body .x-grid3-row-selected td {
+  background-color: #d8e6fe !important;
+}
+
+body .x-grid3-row a,
+body .x-grid3-cell a,
+body .x-grid3-col a,
+body .actionLink {
+  color: #0176d3 !important;
+}
+
+/* ExtJS column resize handles + focus outline */
+body .x-grid3-focus {
+  outline-color: #0176d3 !important;
+}
+
+body .x-dd-drag-proxy,
+body .x-dd-drag-ghost {
+  background-color: #ffffff !important;
+  color: #181818 !important;
+}
+
+/* Bottom pagination bar (.bottomNav > .paginator) */
+body .bottomNav,
+body .paginator,
+body .paginator .left,
+body .paginator .right,
+body .paginator .prevNextLinks,
+body .paginator .prevNext,
+body .paginator .selectorTarget,
+body .paginator .selectCount {
+  background-color: transparent !important;
+  color: #181818 !important;
+}
+
+body .paginator a,
+body .paginator .prevNext a {
+  color: #0176d3 !important;
+}
+
+body .paginator .pageInput {
+  background-color: #ffffff !important;
+  color: #181818 !important;
+  border-color: #c9c9c9 !important;
+}
+
+/* Selector dropdowns shown by pagination (rows-per-page, selection) */
+body .paginator .selector,
+body .paginator .selector .opt,
+body .paginator .selector .rpp,
+body .paginator .selector .selection {
+  background-color: #ffffff !important;
+  color: #181818 !important;
+  border-color: #e5e5e5 !important;
+}
+
+body .paginator .selector .opt:hover,
+body .paginator .selector .optHover {
+  background-color: #f3f3f3 !important;
+  color: #181818 !important;
+}
+
+/* Date picker (classic Aloha) */
+body #datePicker,
+body .datePicker,
+body .datePicker .calBody,
+body .datePicker .calDays {
+  background-color: #ffffff !important;
+  color: #181818 !important;
+  border-color: #e5e5e5 !important;
+}
+
+body .datePicker .dateBar,
+body .datePicker .dateBar select {
+  background-color: #f3f3f3 !important;
+  color: #181818 !important;
+  color-scheme: light !important;
+}
+
+body .datePicker .calRow td {
+  color: #181818 !important;
+}
+
+body .datePicker .calToday {
+  color: #0176d3 !important;
+}
+
+/* Modal dialog overlay (classic) */
+body #massEdit,
+body .overlayDialog,
+body .cssDialog,
+body .inlineEditDialog {
+  background-color: #ffffff !important;
+  color: #181818 !important;
+  border-color: #e5e5e5 !important;
+}
+
+/* Loading indicator (inline within list body) */
+body .waitingSearchDiv,
+body .waitingSearchDivOpacity {
+  background-color: rgba(255,255,255,0.7) !important;
+}
+
+body .waitingDescription {
+  color: #181818 !important;
+}
+
+/* Setup left-nav section headers (ADMINISTRATION, PLATFORM TOOLS, etc.) —
+ * scan flagged .slds-text-title_caps as 3 unstyled instances. These are
+ * the uppercase category labels in the Setup tree sidebar. Default color
+ * comes through as near-black on dark themes. Force textSecondary with
+ * proper letter-spacing for "category header" feel. */
+.slds-text-title_caps,
+.slds-section-title,
+.slds-section__title,
+.slds-setup-nav__section-title,
+.setup-tree-section-label,
+.setup-nav-section-title,
+setup-tree-node .slds-text-title_caps {
+  color: #444444 !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.08em !important;
+  text-transform: uppercase !important;
+}
+
+/* Generic slds-text-title (non-caps) also needs override for Dracula-
+ * style dark themes where default is too muted */
+.slds-text-title,
+.slds-text-title_bold {
+  color: #444444 !important;
 }
 
 /* ─── Legacy .bPageBlock pattern (Users, Profiles, Perm Sets, Roles,
