@@ -1043,6 +1043,68 @@ li[role="presentation"].active,
   background-image: none !important;
 }
 
+/* Aloha Page wrapper — SF's classic Visualforce-style container that
+ * hosts Profiles, Permission Sets detail, Object Manager legacy
+ * screens. Has its own white bg that sits outside .bPageBlock.
+ * force-aloha-page is an LWC wrapper; .aloha-page is the inner
+ * container. Both default to white; force to transparent so our
+ * body bg shows through. */
+force-aloha-page,
+.force-aloha-page,
+.aloha-page,
+.alohaOnboardingPage,
+.aloha-page-container,
+.aloha-iframe-container,
+.setupApp,
+.setup-app,
+.sfdcBody,
+.bodyDiv,
+.topBox,
+.setupTabContent {
+  background-color: transparent !important;
+  color: #000000 !important;
+}
+
+force-aloha-page > *,
+.aloha-page > *,
+.setupApp > *,
+.sfdcBody > * {
+  background-color: transparent !important;
+}
+
+/* Aloha content area backgrounds — Profiles, PermSets etc. wrap their
+ * content in these. The pbWrapper + related paints the light frame
+ * around the .bPageBlock. */
+.pbWrapper,
+.pbBody_full,
+.bLeft,
+.bRight,
+.bTitle,
+.bPageTitle,
+.bPageBlock.brandTertiaryBrd,
+.bPageBlock.brandSecondaryBrd,
+.bPageBlock.brandPrimaryBrd,
+.brandSecondaryBrd,
+.brandTertiaryBrd,
+.brandPrimaryBrd,
+.brandPrimaryBgd,
+.brandSecondaryBgd,
+.brandTertiaryBgd,
+.brandQuaternaryBgd {
+  background-color: transparent !important;
+  color: #000000 !important;
+  border-color: #000000 !important;
+}
+
+/* iframe containers — tell browser to paint native chrome in theme mode */
+iframe,
+iframe.setupIframe,
+iframe.apexIframe,
+iframe.vfFrameId {
+  color-scheme: light !important;
+  background-color: transparent !important;
+}
+
 /* ─── Legacy .bPageBlock pattern (Users, Profiles, Perm Sets, Roles,
  * Queues, Public Groups list screens) — the OLD old Setup UI. DOM
  * confirmed 2026-04-19: uses .bPageBlock.brandSecondaryBrd.secondaryPalette
