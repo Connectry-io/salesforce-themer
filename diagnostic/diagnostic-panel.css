@@ -587,6 +587,37 @@
   color: var(--dp-text-2);
 }
 
+.diag-advanced[open] {
+  padding-bottom: 4px;
+}
+
+.diag-advanced-label {
+  margin-top: 10px;
+  margin-bottom: 4px;
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--dp-text-3);
+}
+
+/* Full-width screenshot switch row when embedded in Advanced */
+.diag-advanced .diag-screenshot-switch {
+  display: flex;
+  width: 100%;
+  margin-top: 10px;
+  padding: 6px 12px;
+  height: 32px;
+}
+
+.diag-advanced .diag-switch-label {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 /* ─── Auto-scan toggle ─────────────────────────────────────────────────── */
 
 .diag-autoscan-btn {

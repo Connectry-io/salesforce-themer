@@ -56,6 +56,7 @@
       this.includeScreenshot = false; // user-toggled on each scan
       this.activeTab = 'scan';       // 'scan' | 'validate' — B29 tab split
       this.scanMode = 'current';     // 'current' | 'presets' | 'mine' | 'all'
+      this._advancedOpen = false;    // user-toggled Advanced disclosure state
       this._panelTheme = 'dark';     // 'dark' | 'light'
       this._configuredThemeName = null;
       this._dragState = null;
@@ -120,8 +121,9 @@
       this._renderPanel();
       await this._restorePosition();
 
-      // Run initial scan automatically
-      this._autoScan();
+      // NOTE: no auto-scan on open. Empty state stays until the user picks
+      // what to scan (current theme / presets / etc) and clicks Scan.
+      // Walk-through mode (Validate tab) still auto-scans on navigation.
     }
 
     close() {
@@ -173,16 +175,14 @@
       if (ns.clearThemeCache) ns.clearThemeCache();
       if (!this.isOpen || this.isMinimized) return;
 
-      // Resolve colors + display name for the new theme, then re-render and
-      // auto-scan (unless theme is off — in which case the scan-bar is
-      // hidden and _autoScan() no-ops anyway).
+      // Resolve colors + display name for the new theme, then re-render.
+      // No auto-scan — user clicks Scan when they're ready.
       this._loadThemeColors().then(async () => {
         if (ns.resolveThemeName) {
           try { this.themeDisplayName = await ns.resolveThemeName(themeName); } catch (_) {}
         }
         if (!this.isOpen || this.isMinimized) return;
         this._renderPanel();
-        if (!nowOff) this._autoScan();
       });
     }
 
@@ -584,13 +584,14 @@
       const primaryLabel = `Scan${pageLabel}`;
       const subLabel = modeSubLabels[this.scanMode] || modeSubLabels.current;
       const camActive = this.includeScreenshot;
+      const advOpen = this._advancedOpen ? ' open' : '';
       const modeChip = (id, label) => `
         <button class="diag-mode-chip${this.scanMode === id ? ' is-active' : ''}" data-action="setScanMode" data-mode="${id}">
           <span>${label}</span>
         </button>`;
       return `
         <div class="diag-scan-bar">
-          <div class="diag-scan-row" style="gap:8px">
+          <div class="diag-scan-row">
             <button class="diag-scan-btn diag-scan-btn--primary" data-action="scanAll" style="flex:1;min-width:0">
               ${ICONS.scan}
               <span class="diag-scan-label">
@@ -598,22 +599,23 @@
                 <span class="diag-scan-sub">${subLabel}</span>
               </span>
             </button>
-            <label class="diag-screenshot-switch${camActive ? ' is-active' : ''}" tabindex="0" data-diag-tooltip="Include a ~50 KB screenshot of the current viewport with AI suggestions.&#10;&#10;⚠ Avoid if sensitive data is visible — no customer PII, financial records, or confidential info.&#10;&#10;Screenshots are used once for diagnosis then deleted. Never retained." data-diag-tooltip-align="right">
-              <span class="diag-switch-label">Screenshot</span>
-              <input type="checkbox" class="diag-sr-only" data-action="toggleIncludeScreenshot" ${camActive ? 'checked' : ''}>
-              <span class="diag-switch-track" aria-hidden="true">
-                <span class="diag-switch-thumb"></span>
-              </span>
-            </label>
           </div>
-          <details class="diag-advanced">
-            <summary>Advanced — scan against other themes</summary>
-            <div class="diag-scan-row" style="margin-top:6px">
+          <details class="diag-advanced"${advOpen}>
+            <summary>Advanced — scan options</summary>
+            <div class="diag-advanced-label">Scan against</div>
+            <div class="diag-scan-row">
               ${modeChip('current', 'Current')}
               ${modeChip('presets', 'Presets')}
               ${modeChip('mine', 'My Themes')}
               ${modeChip('all', 'All')}
             </div>
+            <label class="diag-screenshot-switch${camActive ? ' is-active' : ''}" tabindex="0" data-diag-tooltip="Capture a ~50 KB viewport PNG when you Scan, and include it in AI Suggest / Copy / View Report.&#10;&#10;⚠ Avoid if sensitive data is visible — no customer PII, financial records, or confidential info.&#10;&#10;Used once for diagnosis then deleted. Never retained." data-diag-tooltip-align="right">
+              <span class="diag-switch-label">Include viewport screenshot</span>
+              <input type="checkbox" class="diag-sr-only" data-action="toggleIncludeScreenshot" ${camActive ? 'checked' : ''}>
+              <span class="diag-switch-track" aria-hidden="true">
+                <span class="diag-switch-thumb"></span>
+              </span>
+            </label>
           </details>
         </div>`;
     }
@@ -1590,21 +1592,29 @@
         else if (action === 'scrollToPatches') this._scrollToPatches();
         else if (action === 'activateConfiguredTheme') this._activateConfiguredTheme(btn);
         else if (action === 'toggleIncludeScreenshot') {
-          // Checkbox input (from the Advanced label) — use its .checked.
-          // Pill toggle would fall through here too if we ever wire one.
+          // Surgical: toggle state + update switch's is-active class.
+          // Avoids re-rendering the scan bar (which would collapse the
+          // <details> Advanced disclosure).
           this.includeScreenshot = btn.tagName === 'INPUT'
             ? btn.checked === true
             : !this.includeScreenshot;
-          // Refresh scan bar so the camera badge on Scan reflects state.
-          const scanBar = this.shadow?.querySelector('.diag-scan-bar');
-          if (scanBar) scanBar.outerHTML = this._scanBarHTML();
+          const sw = this.shadow?.querySelector('.diag-screenshot-switch');
+          if (sw) sw.classList.toggle('is-active', this.includeScreenshot);
+          const cb = this.shadow?.querySelector('.diag-screenshot-switch input[type="checkbox"]');
+          if (cb) cb.checked = this.includeScreenshot;
         }
         else if (action === 'setScanMode') {
           const mode = btn.dataset.mode;
           if (['current', 'presets', 'mine', 'all'].includes(mode)) {
             this.scanMode = mode;
-            const scanBar = this.shadow?.querySelector('.diag-scan-bar');
-            if (scanBar) scanBar.outerHTML = this._scanBarHTML();
+            // Surgical update: chip classes + scan button sub-label, no
+            // re-render (re-render collapses Advanced disclosure).
+            this.shadow?.querySelectorAll('.diag-mode-chip').forEach(chip => {
+              chip.classList.toggle('is-active', chip.dataset.mode === mode);
+            });
+            const subLabels = { current: 'current theme', presets: 'all presets', mine: 'my themes', all: 'all themes' };
+            const subEl = this.shadow?.querySelector('.diag-scan-sub');
+            if (subEl) subEl.textContent = subLabels[mode];
           }
         }
         else if (action === 'scanAll') {
@@ -1643,6 +1653,13 @@
         const section = header.closest('.diag-section');
         if (section) section.classList.toggle('is-open');
       });
+
+      // Remember Advanced disclosure open/closed across subsequent re-renders.
+      // 'toggle' doesn't bubble, so attach directly to the <details>.
+      const adv = this.panel.querySelector('.diag-advanced');
+      if (adv) {
+        adv.addEventListener('toggle', () => { this._advancedOpen = adv.open; });
+      }
     }
 
     // ── Scan execution ────────────────────────────────────────────────────
