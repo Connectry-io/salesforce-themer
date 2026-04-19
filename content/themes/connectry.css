@@ -483,23 +483,51 @@
 
 /* Active subtab contrast — SF paints .slds-is-active with a light bg +
  * faint text that disappears against dark themes. Force a readable combo.
- * Discovered via 2026-04-19 Tron Setup visual review. */
+ * Discovered via 2026-04-19 Tron Setup visual review. B12 broadened to
+ * include every descendant (.tabHeader, .title, .showTitleWhenPinned
+ * span, svg fills) — the title text uses .showTitleWhenPinned.title
+ * inside a .tabHeader anchor inside a .oneConsoleTabItem li. */
+.slds-tabs_default__item.slds-is-active,
 .slds-tabs_default__item.slds-is-active > .slds-tabs_default__link,
+.slds-tabs_default__item.slds-is-active .title,
+.slds-sub-tabs__item.slds-active,
 .slds-sub-tabs__item.slds-active > .tabHeader,
 .slds-sub-tabs__item.slds-active > a,
+.slds-sub-tabs__item.slds-active .title,
+.slds-sub-tabs__item.slds-active .showTitleWhenPinned,
+.oneConsoleTabItem.slds-active,
 .oneConsoleTabItem.slds-active > .tabHeader,
-.oneConsoleTabItem.active > .tabHeader {
+.oneConsoleTabItem.slds-active .title,
+.oneConsoleTabItem.slds-active .showTitleWhenPinned,
+.oneConsoleTabItem.active,
+.oneConsoleTabItem.active > .tabHeader,
+.oneConsoleTabItem.active .title,
+.oneConsoleTabItem.active .showTitleWhenPinned {
   color: #2d2d2d !important;
   text-shadow: none !important;
-  background-color: transparent !important;
 }
 
+/* Active tab container gets the subtle tinted bg, inner anchor stays
+ * transparent so bg shows through. Border = accent underline. */
 .slds-sub-tabs__item.slds-active,
-.slds-sub-tabs__item.active,
 .oneConsoleTabItem.slds-active,
 .oneConsoleTabItem.active {
   background-color: rgba(74, 111, 165, 0.15) !important;
   border-color: #4a6fa5 !important;
+}
+
+.slds-sub-tabs__item.slds-active > .tabHeader,
+.slds-sub-tabs__item.slds-active > a,
+.oneConsoleTabItem.slds-active > .tabHeader,
+.oneConsoleTabItem.active > .tabHeader {
+  background-color: transparent !important;
+}
+
+/* SVG icons inside active tabs — force navIcon or textPrimary fill. */
+.oneConsoleTabItem.slds-active svg,
+.oneConsoleTabItem.active svg,
+.slds-sub-tabs__item.slds-active svg {
+  fill: #2d2d2d !important;
 }
 
 /* Setup tree + left-nav hover — SF hardcodes a light hover bg that
