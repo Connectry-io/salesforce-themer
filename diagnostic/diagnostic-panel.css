@@ -452,34 +452,29 @@
   max-width: 100%;
 }
 
-/* ─── Scan split-button: [Scan button | caret] as one visual unit ────── */
+/* ─── Scan split-button: [Scan button | caret] as one visual unit ──────
+   NOTE: no overflow:hidden on the container — it would clip the popover
+   which renders absolutely positioned below the caret. Shared look is
+   achieved via matching borders on each half + seamless border radii. */
 
 .diag-scan-splitgroup {
   display: flex;
   width: 100%;
-  border: 1px solid var(--dp-accent-border);
-  border-radius: 9px;
-  overflow: hidden;
-  background: var(--dp-accent-bg);
-  transition: all 180ms ease;
-}
-
-.diag-scan-splitgroup:hover {
-  border-color: rgba(74, 111, 165, 0.55);
-  box-shadow: 0 0 16px rgba(74, 111, 165, 0.15);
 }
 
 .diag-scan-splitgroup .diag-scan-btn--primary {
   flex: 1;
   min-width: 0;
-  border: none;
-  border-radius: 0;
-  background: transparent;
+  border: 1px solid var(--dp-accent-border);
+  border-right: none;
+  border-radius: 9px 0 0 9px;
+  background: var(--dp-accent-bg);
   padding: 6px 14px;
 }
 
 .diag-scan-splitgroup .diag-scan-btn--primary:hover {
-  background: rgba(74, 111, 165, 0.12);
+  background: rgba(74, 111, 165, 0.22);
+  border-color: rgba(74, 111, 165, 0.55);
   box-shadow: none;
 }
 
@@ -488,18 +483,14 @@
   flex-shrink: 0;
 }
 
-.diag-scan-splitgroup .diag-scan-options {
-  border-left: 1px solid var(--dp-accent-border);
-}
-
 .diag-scan-options-trigger {
   list-style: none;
   cursor: pointer;
-  width: 32px;
+  width: 36px;
   height: 100%;
-  border: none;
-  border-radius: 0;
-  background: transparent;
+  border: 1px solid var(--dp-accent-border);
+  border-radius: 0 9px 9px 0;
+  background: var(--dp-accent-bg);
   display: flex;
   align-items: center;
   justify-content: center;
