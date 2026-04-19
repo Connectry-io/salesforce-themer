@@ -2098,6 +2098,72 @@ one-app-launcher-modal .slds-button_neutral {
   border-color: #0176d3 !important;
 }
 
+/* B23 — App Launcher deep fix. DOM capture 2026-04-18 revealed the real
+ * class names (SF uses .al-* internally + Shadow DOM parts for rich text).
+ * Previous batches missed these because they're not standard SLDS names. */
+
+/* .al-modal-* is the real App Launcher modal chrome */
+one-app-launcher-modal .al-modal-container,
+one-app-launcher-modal .al-modal-body,
+one-app-launcher-modal .al-modal-list {
+  background-color: #ffffff !important;
+  color: #181818 !important;
+}
+
+one-app-launcher-modal .al-modal-header {
+  background-color: #ffffff !important;
+  color: #181818 !important;
+  border-color: #e5e5e5 !important;
+}
+
+/* Tile description ("The Sales application." etc.) — real class is
+ * .al-app-tile-description, not .slds-text-body_small */
+one-app-launcher-app-tile .al-app-tile-description,
+body .al-app-tile-description {
+  color: #444444 !important;
+}
+
+/* Tile title renders inside lightning-formatted-rich-text with Shadow DOM.
+ * The content is in part="formatted-rich-text" (piercing via ::part) plus
+ * the legacy .slds-rich-text-editor__output wrapper. Both need the accent
+ * color so the app name reads as a link. */
+one-app-launcher-app-tile lightning-formatted-rich-text,
+one-app-launcher-app-tile .slds-rich-text-editor__output,
+one-app-launcher-app-tile .slds-rich-text-editor__output p,
+one-app-launcher-app-tile .slds-rich-text-editor__output span {
+  color: #0176d3 !important;
+  font-weight: 600 !important;
+  background-color: transparent !important;
+}
+
+one-app-launcher-app-tile lightning-formatted-rich-text::part(formatted-rich-text) {
+  color: #0176d3 !important;
+}
+
+/* Tab row (All Apps / All Items) — .al-tab-item + .label-display */
+one-app-launcher-tab-item,
+one-app-launcher-tab-item .al-tab-item,
+one-app-launcher-tab-item .label-display,
+body .al-tab-item,
+body .al-tab-item .label-display {
+  color: #181818 !important;
+  background-color: transparent !important;
+}
+
+one-app-launcher-tab-item .al-tab-item[aria-selected="true"],
+one-app-launcher-tab-item .al-tab-item.slds-is-active,
+body .al-tab-item[aria-selected="true"] {
+  color: #0176d3 !important;
+  border-bottom-color: #0176d3 !important;
+}
+
+/* Tile avatar wrapper — lightning-avatar contains the img, make sure
+ * the container doesn't force a white bg behind the icon */
+one-app-launcher-app-tile lightning-avatar .slds-avatar,
+one-app-launcher-app-tile lightning-avatar .slds-avatar_large {
+  background-color: transparent !important;
+}
+
 /* ═══════════════════════════════════════════════════════════════════════
  * Chatter publisher + feed (record page + record home Chatter tab)
  *
