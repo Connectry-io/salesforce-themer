@@ -265,6 +265,131 @@ function generateThemeCSS(theme) {
   --slds-c-tabs-item-text-color-active: ${c.tabActiveColor} !important;
   --slds-c-tabs-item-color-border-hover: ${c.tabActiveBorder} !important;
   --slds-c-tabs-item-color-border-active: ${c.tabActiveBorder} !important;
+  --slds-c-tabs-list-color-border: ${c.tabNavBorder || c.border} !important;
+  --lwc-colorTextTabLabel: ${c.tabInactiveColor} !important;
+  --lwc-colorTextTabLabelSelected: ${c.tabActiveColor} !important;
+  --lwc-colorBorderTabSelected: ${c.tabActiveBorder} !important;
+  --lwc-colorBorderTabActive: ${c.tabActiveBorder} !important;
+
+  /* Component hooks — Welcome Mat (Setup Home hero) */
+  --lwc-welcomeMatColorBackgroundProgressBar: ${c.surfaceAlt} !important;
+  --lwc-welcomeMatTextColorInfo: ${c.textPrimary} !important;
+  --lwc-welcomeMatBackgroundColorInfo: ${c.surface} !important;
+  --lwc-welcomeMatBackgroundImageInfo: none !important;
+  --lwc-welcomeMatColorActionShadow: 0 2px 4px rgba(0, 0, 0, ${isDark ? 0.4 : 0.08}) !important;
+  --lwc-welcomeMatColorIconComplete: ${c.accent} !important;
+
+  /* Component hooks — Brand Primary family (Setup cards + branded chrome) */
+  --lwc-colorBackgroundBrandPrimary: ${c.accent} !important;
+  --lwc-colorBackgroundBrandPrimaryActive: ${c.accentActive} !important;
+  --lwc-colorBackgroundBrandPrimaryFocus: ${c.accentHover} !important;
+  --lwc-colorBorderBrandPrimary: ${c.accent} !important;
+  --lwc-colorBorderBrandPrimaryActive: ${c.accentActive} !important;
+  --lwc-colorBorderBrandPrimaryFocus: ${c.accentHover} !important;
+  --lwc-colorBackgroundContextBar: ${c.nav} !important;
+  --lwc-brandBackgroundDark: ${c.nav} !important;
+  --lwc-brandBackgroundDarkTransparent: ${c.accentLight || 'transparent'} !important;
+  --lwc-brandBackgroundPrimaryTransparent: ${c.accentLight || 'transparent'} !important;
+
+  /* Component hooks — Cards (inner text + footer) */
+  --slds-c-card-text-color: ${c.textPrimary} !important;
+  --slds-c-card-footer-color-border: ${c.borderSeparator || c.border} !important;
+
+  /* Component hooks — Modal + Backdrop */
+  --slds-c-modal-color-background: ${c.modalBg || c.surface} !important;
+  --slds-c-modal-color-border: ${c.border} !important;
+  --slds-c-modal-header-color-background: ${c.modalHeaderBg || c.surface} !important;
+  --slds-c-modal-header-text-color: ${c.textPrimary} !important;
+  --slds-c-modal-content-color-background: ${c.modalBg || c.surface} !important;
+  --slds-c-modal-content-text-color: ${c.textPrimary} !important;
+  --slds-c-modal-text-color: ${c.textPrimary} !important;
+  --slds-c-modal-footer-color-background: ${c.modalFooterBg || c.surfaceAlt} !important;
+  --slds-c-modal-footer-text-color: ${c.textPrimary} !important;
+  --slds-c-backdrop-color-background: ${c.modalBackdrop || 'rgba(0, 0, 0, 0.5)'} !important;
+
+  /* Component hooks — Dropdown / Combobox items */
+  --slds-c-dropdown-color: ${c.dropdownBg || c.surface} !important;
+  --slds-c-dropdown-item-color-background: ${c.dropdownBg || c.surface} !important;
+  --slds-c-dropdown-item-color: ${c.textPrimary} !important;
+  --slds-c-dropdown-item-color-background-hover: ${c.dropdownItemHoverBg || c.surfaceHover} !important;
+  --slds-c-dropdown-item-color-hover: ${c.dropdownItemHoverText || c.textPrimary} !important;
+  --slds-c-dropdown-item-color-background-focus: ${c.dropdownItemHoverBg || c.surfaceHover} !important;
+  --slds-c-dropdown-item-color-focus: ${c.dropdownItemHoverText || c.textPrimary} !important;
+  --slds-c-dropdown-item-color-background-active: ${c.accentLight || c.surfaceSelection} !important;
+  --slds-c-dropdown-item-color-active: ${c.textPrimary} !important;
+  --slds-c-dropdown-item-color-background-disabled: ${c.surfaceAlt} !important;
+  --slds-c-dropdown-item-color-disabled: ${c.textMuted} !important;
+
+  /* Component hooks — Listbox (picker options) */
+  --slds-c-listbox-option-color: ${c.textPrimary} !important;
+  --slds-c-listbox-option-color-background: ${c.surface} !important;
+  --slds-c-listbox-option-color-hover: ${c.textPrimary} !important;
+  --slds-c-listbox-option-color-background-hover: ${c.surfaceHover} !important;
+  --slds-c-listbox-option-color-focus: ${c.textPrimary} !important;
+  --slds-c-listbox-option-color-background-focus: ${c.surfaceHover} !important;
+  --slds-c-listbox-option-color-disabled: ${c.textMuted} !important;
+  --slds-c-listbox-option-color-background-disabled: ${c.surfaceAlt} !important;
+  --slds-c-listbox-option-meta-color: ${c.textSecondary} !important;
+  --slds-c-listbox-option-meta-color-hover: ${c.textPrimary} !important;
+  --slds-c-listbox-option-meta-color-focus: ${c.textPrimary} !important;
+  --slds-c-listbox-option-meta-color-disabled: ${c.textMuted} !important;
+
+  /* Component hooks — Pills (chips/tags) */
+  --slds-c-pill-color-border: ${c.pillBorder || c.border} !important;
+  --slds-c-pill-color-background: ${c.pillBg || c.surfaceAlt} !important;
+  --slds-c-pill-color-background-hover: ${c.surfaceHover} !important;
+  --slds-c-pill-shadow-focus: ${c.focusRing || '0 0 0 2px ' + c.accent} !important;
+  --slds-c-pill-container-color-background: ${c.surface} !important;
+
+  /* Component hooks — Input focus + Textarea */
+  --slds-c-input-color-background-focus: ${isDark ? c.background : c.surface} !important;
+  --slds-c-input-text-color-focus: ${c.textPrimary} !important;
+  --slds-c-input-shadow-focus: ${c.focusRing || '0 0 0 2px ' + c.accent} !important;
+  --slds-c-textarea-color-background: ${isDark ? c.background : c.surface} !important;
+  --slds-c-textarea-text-color: ${c.textPrimary} !important;
+  --slds-c-textarea-color-border: ${c.borderInput} !important;
+  --slds-c-textarea-color-background-focus: ${isDark ? c.background : c.surface} !important;
+
+  /* Component hooks — Radio + Checkbox */
+  --slds-c-radio-color-background: ${isDark ? c.background : c.surface} !important;
+  --slds-c-radio-color-border: ${c.borderInput} !important;
+  --slds-c-radio-color-background-checked: ${c.accent} !important;
+  --slds-c-radio-color-border-checked: ${c.accent} !important;
+  --slds-c-radio-mark-color-foreground: ${c.buttonBrandText || '#ffffff'} !important;
+  --slds-c-radio-color-border-focus: ${c.accent} !important;
+  --slds-c-radio-shadow-focus: ${c.focusRing || '0 0 0 2px ' + c.accent} !important;
+  --slds-c-checkbox-color-background: ${isDark ? c.background : c.surface} !important;
+  --slds-c-checkbox-color-border: ${c.borderInput} !important;
+  --slds-c-checkbox-color-background-checked: ${c.accent} !important;
+  --slds-c-checkbox-color-border-checked: ${c.accent} !important;
+  --slds-c-checkbox-mark-color-foreground: ${c.buttonBrandText || '#ffffff'} !important;
+  --slds-c-checkbox-color-border-focus: ${c.accent} !important;
+  --slds-c-checkbox-shadow-focus: ${c.focusRing || '0 0 0 2px ' + c.accent} !important;
+
+  /* Component hooks — Tooltip + Toast */
+  --slds-c-tooltip-color-background: ${c.nav} !important;
+  --slds-c-tooltip-text-color: ${c.navText} !important;
+  --slds-c-toast-color-background: ${c.surface} !important;
+  --slds-c-toast-text-color: ${c.textPrimary} !important;
+  --lwc-notificationColorBackgroundInverse: ${c.nav} !important;
+
+  /* Component hooks — Avatar */
+  --slds-c-avatar-text-color: ${c.textPrimary} !important;
+  --slds-c-avatar-initials-text-color: ${c.buttonBrandText || '#ffffff'} !important;
+
+  /* Legacy LWC — Path chevrons (Opportunity stages etc.) */
+  --lwc-colorBackgroundPathIncomplete: ${c.surfaceAlt} !important;
+  --lwc-colorBackgroundPathIncompleteHover: ${c.surfaceHover} !important;
+  --lwc-colorBackgroundPathComplete: ${c.accentLight || c.accent} !important;
+  --lwc-colorBackgroundPathCompleteHover: ${c.accentLight || c.accent} !important;
+  --lwc-colorBackgroundPathCurrent: ${c.accent} !important;
+  --lwc-colorBorderPathCurrent: ${c.accent} !important;
+  --lwc-colorTextPathCurrent: ${c.buttonBrandText || '#ffffff'} !important;
+
+  /* Component hooks — Accordion */
+  --slds-c-accordion-heading-color: ${c.textPrimary} !important;
+  --slds-c-accordion-heading-text-color: ${c.textPrimary} !important;
+  --slds-c-accordion-heading-text-color-hover: ${c.accent} !important;
 }
 
 /* ─── Base ───────────────────────────────────────────────────────────────── */

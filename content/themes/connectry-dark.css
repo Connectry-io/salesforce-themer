@@ -170,6 +170,131 @@
   --slds-c-tabs-item-text-color-active: #6d9fd4 !important;
   --slds-c-tabs-item-color-border-hover: #6d9fd4 !important;
   --slds-c-tabs-item-color-border-active: #6d9fd4 !important;
+  --slds-c-tabs-list-color-border: #2f3540 !important;
+  --lwc-colorTextTabLabel: #9aa0a9 !important;
+  --lwc-colorTextTabLabelSelected: #6d9fd4 !important;
+  --lwc-colorBorderTabSelected: #6d9fd4 !important;
+  --lwc-colorBorderTabActive: #6d9fd4 !important;
+
+  /* Component hooks — Welcome Mat (Setup Home hero) */
+  --lwc-welcomeMatColorBackgroundProgressBar: #323640 !important;
+  --lwc-welcomeMatTextColorInfo: #e8eaed !important;
+  --lwc-welcomeMatBackgroundColorInfo: #2c3038 !important;
+  --lwc-welcomeMatBackgroundImageInfo: none !important;
+  --lwc-welcomeMatColorActionShadow: 0 2px 4px rgba(0, 0, 0, 0.4) !important;
+  --lwc-welcomeMatColorIconComplete: #6d9fd4 !important;
+
+  /* Component hooks — Brand Primary family (Setup cards + branded chrome) */
+  --lwc-colorBackgroundBrandPrimary: #6d9fd4 !important;
+  --lwc-colorBackgroundBrandPrimaryActive: #3d5e8e !important;
+  --lwc-colorBackgroundBrandPrimaryFocus: #4a6fa5 !important;
+  --lwc-colorBorderBrandPrimary: #6d9fd4 !important;
+  --lwc-colorBorderBrandPrimaryActive: #3d5e8e !important;
+  --lwc-colorBorderBrandPrimaryFocus: #4a6fa5 !important;
+  --lwc-colorBackgroundContextBar: #4a6fa5 !important;
+  --lwc-brandBackgroundDark: #4a6fa5 !important;
+  --lwc-brandBackgroundDarkTransparent: rgba(109, 159, 212, 0.15) !important;
+  --lwc-brandBackgroundPrimaryTransparent: rgba(109, 159, 212, 0.15) !important;
+
+  /* Component hooks — Cards (inner text + footer) */
+  --slds-c-card-text-color: #e8eaed !important;
+  --slds-c-card-footer-color-border: #2a2f3a !important;
+
+  /* Component hooks — Modal + Backdrop */
+  --slds-c-modal-color-background: #22262e !important;
+  --slds-c-modal-color-border: #2f3540 !important;
+  --slds-c-modal-header-color-background: #1e222a !important;
+  --slds-c-modal-header-text-color: #e8eaed !important;
+  --slds-c-modal-content-color-background: #22262e !important;
+  --slds-c-modal-content-text-color: #e8eaed !important;
+  --slds-c-modal-text-color: #e8eaed !important;
+  --slds-c-modal-footer-color-background: #1e222a !important;
+  --slds-c-modal-footer-text-color: #e8eaed !important;
+  --slds-c-backdrop-color-background: rgba(0, 0, 0, 0.65) !important;
+
+  /* Component hooks — Dropdown / Combobox items */
+  --slds-c-dropdown-color: #22262e !important;
+  --slds-c-dropdown-item-color-background: #22262e !important;
+  --slds-c-dropdown-item-color: #e8eaed !important;
+  --slds-c-dropdown-item-color-background-hover: #282d37 !important;
+  --slds-c-dropdown-item-color-hover: #e8eaed !important;
+  --slds-c-dropdown-item-color-background-focus: #282d37 !important;
+  --slds-c-dropdown-item-color-focus: #e8eaed !important;
+  --slds-c-dropdown-item-color-background-active: rgba(109, 159, 212, 0.15) !important;
+  --slds-c-dropdown-item-color-active: #e8eaed !important;
+  --slds-c-dropdown-item-color-background-disabled: #323640 !important;
+  --slds-c-dropdown-item-color-disabled: #6b7280 !important;
+
+  /* Component hooks — Listbox (picker options) */
+  --slds-c-listbox-option-color: #e8eaed !important;
+  --slds-c-listbox-option-color-background: #2c3038 !important;
+  --slds-c-listbox-option-color-hover: #e8eaed !important;
+  --slds-c-listbox-option-color-background-hover: #383d48 !important;
+  --slds-c-listbox-option-color-focus: #e8eaed !important;
+  --slds-c-listbox-option-color-background-focus: #383d48 !important;
+  --slds-c-listbox-option-color-disabled: #6b7280 !important;
+  --slds-c-listbox-option-color-background-disabled: #323640 !important;
+  --slds-c-listbox-option-meta-color: #9aa0a9 !important;
+  --slds-c-listbox-option-meta-color-hover: #e8eaed !important;
+  --slds-c-listbox-option-meta-color-focus: #e8eaed !important;
+  --slds-c-listbox-option-meta-color-disabled: #6b7280 !important;
+
+  /* Component hooks — Pills (chips/tags) */
+  --slds-c-pill-color-border: #3a4050 !important;
+  --slds-c-pill-color-background: #282d37 !important;
+  --slds-c-pill-color-background-hover: #383d48 !important;
+  --slds-c-pill-shadow-focus: 0 0 0 3px rgba(109, 159, 212, 0.3) !important;
+  --slds-c-pill-container-color-background: #2c3038 !important;
+
+  /* Component hooks — Input focus + Textarea */
+  --slds-c-input-color-background-focus: #252830 !important;
+  --slds-c-input-text-color-focus: #e8eaed !important;
+  --slds-c-input-shadow-focus: 0 0 0 3px rgba(109, 159, 212, 0.3) !important;
+  --slds-c-textarea-color-background: #252830 !important;
+  --slds-c-textarea-text-color: #e8eaed !important;
+  --slds-c-textarea-color-border: #3a4050 !important;
+  --slds-c-textarea-color-background-focus: #252830 !important;
+
+  /* Component hooks — Radio + Checkbox */
+  --slds-c-radio-color-background: #252830 !important;
+  --slds-c-radio-color-border: #3a4050 !important;
+  --slds-c-radio-color-background-checked: #6d9fd4 !important;
+  --slds-c-radio-color-border-checked: #6d9fd4 !important;
+  --slds-c-radio-mark-color-foreground: #1a1d23 !important;
+  --slds-c-radio-color-border-focus: #6d9fd4 !important;
+  --slds-c-radio-shadow-focus: 0 0 0 3px rgba(109, 159, 212, 0.3) !important;
+  --slds-c-checkbox-color-background: #252830 !important;
+  --slds-c-checkbox-color-border: #3a4050 !important;
+  --slds-c-checkbox-color-background-checked: #6d9fd4 !important;
+  --slds-c-checkbox-color-border-checked: #6d9fd4 !important;
+  --slds-c-checkbox-mark-color-foreground: #1a1d23 !important;
+  --slds-c-checkbox-color-border-focus: #6d9fd4 !important;
+  --slds-c-checkbox-shadow-focus: 0 0 0 3px rgba(109, 159, 212, 0.3) !important;
+
+  /* Component hooks — Tooltip + Toast */
+  --slds-c-tooltip-color-background: #4a6fa5 !important;
+  --slds-c-tooltip-text-color: #ffffff !important;
+  --slds-c-toast-color-background: #2c3038 !important;
+  --slds-c-toast-text-color: #e8eaed !important;
+  --lwc-notificationColorBackgroundInverse: #4a6fa5 !important;
+
+  /* Component hooks — Avatar */
+  --slds-c-avatar-text-color: #e8eaed !important;
+  --slds-c-avatar-initials-text-color: #1a1d23 !important;
+
+  /* Legacy LWC — Path chevrons (Opportunity stages etc.) */
+  --lwc-colorBackgroundPathIncomplete: #323640 !important;
+  --lwc-colorBackgroundPathIncompleteHover: #383d48 !important;
+  --lwc-colorBackgroundPathComplete: rgba(109, 159, 212, 0.15) !important;
+  --lwc-colorBackgroundPathCompleteHover: rgba(109, 159, 212, 0.15) !important;
+  --lwc-colorBackgroundPathCurrent: #6d9fd4 !important;
+  --lwc-colorBorderPathCurrent: #6d9fd4 !important;
+  --lwc-colorTextPathCurrent: #1a1d23 !important;
+
+  /* Component hooks — Accordion */
+  --slds-c-accordion-heading-color: #e8eaed !important;
+  --slds-c-accordion-heading-text-color: #e8eaed !important;
+  --slds-c-accordion-heading-text-color-hover: #6d9fd4 !important;
 }
 
 /* ─── Base ───────────────────────────────────────────────────────────────── */
