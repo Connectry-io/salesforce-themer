@@ -662,17 +662,38 @@
 }
 
 .diag-advanced[open] {
-  padding-bottom: 4px;
+  padding-bottom: 0;
+}
+
+/* Visual container so everything rendered inside the open disclosure
+   obviously belongs to Advanced — not sibling content sitting under it. */
+.diag-advanced > .diag-advanced-body,
+.diag-advanced > .diag-advanced-label,
+.diag-advanced > .diag-scan-row,
+.diag-advanced > .diag-screenshot-switch {
+  position: relative;
+}
+
+.diag-advanced-body {
+  margin-top: 6px;
+  padding: 10px 10px 12px;
+  border: 1px solid var(--dp-border);
+  border-top: 2px solid var(--dp-accent-border);
+  border-radius: 0 0 7px 7px;
+  background: var(--dp-surface);
 }
 
 .diag-advanced-label {
-  margin-top: 10px;
   margin-bottom: 4px;
   font-size: 10px;
-  font-weight: 600;
+  font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.08em;
   color: var(--dp-text-3);
+}
+
+.diag-advanced-label:not(:first-child) {
+  margin-top: 10px;
 }
 
 /* Full-width screenshot switch row when embedded in Advanced */
@@ -984,7 +1005,8 @@
 
 .diag-coverage-stats {
   display: flex;
-  gap: 12px;
+  align-items: center;
+  gap: 10px;
   margin-top: 8px;
   font-size: 11px;
   color: var(--dp-text-3);
@@ -993,6 +1015,57 @@
 .diag-coverage-stat strong {
   color: var(--dp-text-2);
   font-weight: 600;
+}
+
+.diag-coverage-stats-arrow {
+  color: var(--dp-text-3);
+  font-size: 10px;
+  opacity: 0.6;
+}
+
+.diag-coverage-stat--output {
+  color: var(--dp-text-3);
+}
+
+.diag-coverage-stat--output strong {
+  color: var(--dp-warn);
+}
+
+/* ─── Clean-state rows (drill-down mirrors KPIs even when clean) ──────── */
+
+.diag-clean-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--dp-border-row);
+  font-size: 11px;
+}
+
+.diag-clean-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.diag-clean-dot.is-pass {
+  background: var(--dp-good);
+  box-shadow: 0 0 6px rgba(34, 197, 94, 0.3);
+}
+
+.diag-clean-title {
+  font-weight: 600;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--dp-text-2);
+}
+
+.diag-clean-note {
+  color: var(--dp-text-3);
+  font-size: 10.5px;
+  margin-left: auto;
 }
 
 /* ─── "On this page" scope label (B29d) ────────────────────────────────── */

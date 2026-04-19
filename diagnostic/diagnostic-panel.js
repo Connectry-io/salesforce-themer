@@ -608,21 +608,24 @@
           </div>
           <details class="diag-advanced"${advOpen}>
             <summary>Advanced — scan options</summary>
-            <div class="diag-advanced-label">Scan against</div>
-            <div class="diag-scan-row">
-              ${modeChip('current', 'Current')}
-              ${modeChip('presets', 'Presets')}
-              ${modeChip('mine', 'My Themes')}
-              ${modeChip('all', 'All')}
+            <div class="diag-advanced-body">
+              <div class="diag-advanced-label">Scan against</div>
+              <div class="diag-scan-row">
+                ${modeChip('current', 'Current')}
+                ${modeChip('presets', 'Presets')}
+                ${modeChip('mine', 'My Themes')}
+                ${modeChip('all', 'All')}
+              </div>
+              <div class="diag-advanced-label">Capture</div>
+              <label class="diag-screenshot-switch${camActive ? ' is-active' : ''}" tabindex="0" data-diag-tooltip="Captures a PNG of the visible page and attaches it to Copy, View Report, and AI Suggest.&#10;&#10;⚠ Avoid if sensitive data is on screen — no customer PII, financial records, or confidential info.&#10;&#10;Privacy: Connectry uses the screenshot only to generate a fix, then deletes it. We do not retain images." data-diag-tooltip-align="right">
+                <span class="diag-switch-icon">${ICONS.camera}</span>
+                <span class="diag-switch-label">Include screenshot</span>
+                <input type="checkbox" class="diag-sr-only" data-action="toggleIncludeScreenshot" ${camActive ? 'checked' : ''}>
+                <span class="diag-switch-track" aria-hidden="true">
+                  <span class="diag-switch-thumb"></span>
+                </span>
+              </label>
             </div>
-            <label class="diag-screenshot-switch${camActive ? ' is-active' : ''}" tabindex="0" data-diag-tooltip="Captures a PNG of the visible page and attaches it to Copy, View Report, and AI Suggest.&#10;&#10;⚠ Avoid if sensitive data is on screen — no customer PII, financial records, or confidential info.&#10;&#10;Privacy: Connectry uses the screenshot only to generate a fix, then deletes it. We do not retain images." data-diag-tooltip-align="right">
-              <span class="diag-switch-icon">${ICONS.camera}</span>
-              <span class="diag-switch-label">Include screenshot</span>
-              <input type="checkbox" class="diag-sr-only" data-action="toggleIncludeScreenshot" ${camActive ? 'checked' : ''}>
-              <span class="diag-switch-track" aria-hidden="true">
-                <span class="diag-switch-thumb"></span>
-              </span>
-            </label>
           </details>
         </div>`;
     }
@@ -720,10 +723,11 @@
           <div class="diag-coverage-bar">
             <div class="diag-coverage-fill is-${overallLevel}" style="width:${overallPct}%"></div>
           </div>
-          <div class="diag-coverage-stats">
+          <div class="diag-coverage-stats" title="Token coverage + component health are averaged into Page Health; issues is the raw problem count">
             ${tokenPct !== null ? `<span class="diag-coverage-stat"><strong>${tokenPct}%</strong> tokens</span>` : ''}
             ${compPct !== null ? `<span class="diag-coverage-stat"><strong>${compPct}%</strong> components</span>` : ''}
-            <span class="diag-coverage-stat"><strong>${issueCount}</strong> issue${issueCount !== 1 ? 's' : ''}</span>
+            <span class="diag-coverage-stats-arrow">→</span>
+            <span class="diag-coverage-stat diag-coverage-stat--output"><strong>${issueCount}</strong> issue${issueCount !== 1 ? 's' : ''}</span>
           </div>
         </div>`;
     }
@@ -760,6 +764,26 @@
             <svg viewBox="0 0 14 14" fill="none"><path d="M5 3H3.5A1.5 1.5 0 0 0 2 4.5v6A1.5 1.5 0 0 0 3.5 12h6A1.5 1.5 0 0 0 11 10.5V9" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/><path d="M8 2h4v4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/><path d="M6 8l6-6" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
             <span class="diag-primary-label">Report</span>
           </button>
+        </div>`;
+    }
+
+    _tokensCleanRowHTML() {
+      return `
+        <div class="diag-clean-row" data-section="tokensClean">
+          <span class="diag-clean-dot is-pass"></span>
+          <span class="diag-clean-title">Tokens</span>
+          <span class="diag-clean-note">All covered — no gaps on this page.</span>
+        </div>`;
+    }
+
+    _componentsCleanRowHTML() {
+      const s = this.componentResults?.summary;
+      const total = s?.totalStandardFound || 0;
+      return `
+        <div class="diag-clean-row" data-section="componentsClean">
+          <span class="diag-clean-dot is-pass"></span>
+          <span class="diag-clean-title">Standard / Managed</span>
+          <span class="diag-clean-note">${total > 0 ? `${total} fully styled` : 'No standard components on this page'}</span>
         </div>`;
     }
 
@@ -1064,23 +1088,24 @@
       if (this.aiSuggestion || this.aiBusy) html += this._aiSuggestionHTML();
 
       // ── 2. "On this page" subhead + page-scoped sections ──
+      // Always render the subhead + a Tokens row + a Components row so the
+      // drill-down mirrors the KPI row on the Page Health card (tokens /
+      // components / issues). If a category is clean, it reads as "all good"
+      // instead of silently disappearing.
       const cs = this.componentResults?.summary;
-      const hasPageSections =
-        (this.fixReport?.tokenFixes?.fixes?.length > 0) ||
-        (cs && (cs.totalUnstyled > 0 || cs.totalPartial > 0 || cs.totalHardcoded > 0)) ||
-        (this.fixReport?.componentPatches?.length > 0);
-
-      if (hasPageSections) {
-        html += '<div class="diag-scope-label">On this page</div>';
-        if (this.fixReport?.tokenFixes?.fixes?.length > 0) {
-          html += this._tokenFixesSection();
-        }
-        if (cs && (cs.totalUnstyled > 0 || cs.totalPartial > 0 || cs.totalHardcoded > 0)) {
-          html += this._componentIssuesSection();
-        }
-        if (this.fixReport?.componentPatches?.length > 0) {
-          html += this._lwcPatchesSection();
-        }
+      html += '<div class="diag-scope-label">On this page</div>';
+      if (this.fixReport?.tokenFixes?.fixes?.length > 0) {
+        html += this._tokenFixesSection();
+      } else if (this.scanResults) {
+        html += this._tokensCleanRowHTML();
+      }
+      if (cs && (cs.totalUnstyled > 0 || cs.totalPartial > 0 || cs.totalHardcoded > 0)) {
+        html += this._componentIssuesSection();
+      } else if (this.componentResults) {
+        html += this._componentsCleanRowHTML();
+      }
+      if (this.fixReport?.componentPatches?.length > 0) {
+        html += this._lwcPatchesSection();
       }
 
       // ── 3. Active patches (org-level, not page-scoped) ──
