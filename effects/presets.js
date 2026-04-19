@@ -172,6 +172,8 @@ const THEME_EFFECTS_MAP = {
     base: 'subtle',
     extras: { borderEffect: 'shimmer' },
   },
+  'boardroom': { base: 'subtle' },
+  'carbon':    { base: 'subtle' },
 
   // ─── Dark themes
   'connectry-dark': {
@@ -194,6 +196,7 @@ const THEME_EFFECTS_MAP = {
     base: 'subtle',
     extras: { ambientGlow: true, borderEffect: 'shimmer' },
   },
+  'graphite': { base: 'subtle' },
 };
 
 

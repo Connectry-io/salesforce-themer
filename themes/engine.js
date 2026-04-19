@@ -13,6 +13,7 @@ const _FONT_STACKS = {
   'humanist':       "Seravek, 'Gill Sans Nova', Ubuntu, Calibri, 'DejaVu Sans', source-sans-pro, sans-serif",
   'geometric':      "Avenir, Montserrat, Corbel, 'URW Gothic', source-sans-pro, sans-serif",
   'classic-serif':  "Charter, 'Bitstream Charter', 'Sitka Text', Cambria, serif",
+  'ibm-plex':       "'IBM Plex Sans', Inter, 'Segoe UI', system-ui, sans-serif",
 };
 
 function _generateTypographyCSS(typo) {

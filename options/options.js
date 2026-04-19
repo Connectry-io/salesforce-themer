@@ -84,6 +84,7 @@
     'humanist':       "Seravek, 'Gill Sans Nova', Ubuntu, Calibri, 'DejaVu Sans', source-sans-pro, sans-serif",
     'geometric':      "Avenir, Montserrat, Corbel, 'URW Gothic', source-sans-pro, sans-serif",
     'classic-serif':  "Charter, 'Bitstream Charter', 'Sitka Text', Cambria, serif",
+    'ibm-plex':       "'IBM Plex Sans', Inter, 'Segoe UI', system-ui, sans-serif",
   };
 
   const TYPE_SIZE_PRESETS = {
@@ -1854,8 +1855,11 @@
       'slate': SUBTLE,
       'tron': { ...IMMERSIVE, neonFlicker: true, neonFlickerIntensity: 'strong', ambientGlow: true, ambientGlowIntensity: 'strong' },
       'obsidian': { ...SUBTLE, ambientGlow: true, ambientGlowIntensity: 'subtle' },
+      'graphite': SUBTLE,
       'arctic': { ...ALIVE, aurora: true, auroraIntensity: 'medium', particles: 'snow', particlesIntensity: 'medium' },
       'sakura': { ...SUBTLE, borderEffect: 'shimmer', borderEffectIntensity: 'subtle' },
+      'boardroom': SUBTLE,
+      'carbon': SUBTLE,
       'nord': { ...SUBTLE, aurora: true, auroraIntensity: 'subtle' },
       'high-contrast': NONE,
       'dracula': { ...SUBTLE, ambientGlow: true, ambientGlowIntensity: 'medium', borderEffect: 'shimmer', borderEffectIntensity: 'medium' },
@@ -3337,7 +3341,7 @@
     const typeHint = document.getElementById('editorMiniTypeHint');
     if (typeHint) {
       const t = editorState.typography || {};
-      const fontLabel = { 'system-ui': 'System Default', 'neo-grotesque': 'Neo-Grotesque', 'humanist': 'Humanist', 'geometric': 'Geometric', 'classic-serif': 'Classic Serif' }[t.fontFamily] || 'System Default';
+      const fontLabel = { 'system-ui': 'System Default', 'neo-grotesque': 'Neo-Grotesque', 'humanist': 'Humanist', 'geometric': 'Geometric', 'classic-serif': 'Classic Serif', 'ibm-plex': 'IBM Plex Sans' }[t.fontFamily] || 'System Default';
       const sizeLabels = { compact: 'Sm', normal: 'Md', comfortable: 'Lg', large: 'XL' };
       const sizeLabel = sizeLabels[t.sizePreset || 'normal'] || 'Md';
       const lh = t.lineHeight || 1.375;
@@ -5389,7 +5393,7 @@
       const exAa = document.getElementById('guideTypeExampleAa');
       const stencilRow = document.getElementById('guideTypeExampleLabel');
       if (exAa && stencilRow) {
-        const fontLabels = { 'system-ui': 'System Default', 'neo-grotesque': 'Neo-Grotesque', 'humanist': 'Humanist', 'geometric': 'Geometric', 'classic-serif': 'Classic Serif' };
+        const fontLabels = { 'system-ui': 'System Default', 'neo-grotesque': 'Neo-Grotesque', 'humanist': 'Humanist', 'geometric': 'Geometric', 'classic-serif': 'Classic Serif', 'ibm-plex': 'IBM Plex Sans' };
         const sizePresets = { '0.9': 'Sm', '1': 'Md', '1.1': 'Lg', '1.2': 'XL' };
         const label = fontLabels[bodyKey] || 'System Default';
         const sizeLabel = sizePresets[String(scale)] || 'Md';

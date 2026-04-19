@@ -39,17 +39,21 @@
   // canonical map in effects/presets.js (popup runs in a different script
   // context so it can't import from there).
   const POPUP_THEME_EFFECTS = {
-    'salesforce':      [],
-    'connectry':       ['hoverLift'],
-    'connectry-dark':  ['hoverLift', 'ambientGlow'],
-    'slate':           ['hoverLift'],
-    'tron':            ['hoverLift', 'ambientGlow', 'borderEffect', 'cursorTrail', 'neonFlicker'],
-    'obsidian':        ['hoverLift', 'ambientGlow'],
-    'arctic':          ['hoverLift', 'ambientGlow', 'borderEffect', 'aurora', 'particles'],
-    'sakura':          ['hoverLift', 'borderEffect'],
-    'nord':            ['hoverLift', 'aurora'],
-    'high-contrast':   [],
-    'dracula':         ['hoverLift', 'ambientGlow', 'borderEffect'],
+    'salesforce':        [],
+    'salesforce-cosmos': [],
+    'connectry':         ['hoverLift'],
+    'connectry-dark':    ['hoverLift', 'ambientGlow'],
+    'slate':             ['hoverLift'],
+    'tron':              ['hoverLift', 'ambientGlow', 'borderEffect', 'cursorTrail', 'neonFlicker'],
+    'obsidian':          ['hoverLift', 'ambientGlow'],
+    'graphite':          ['hoverLift'],
+    'arctic':            ['hoverLift', 'ambientGlow', 'borderEffect', 'aurora', 'particles'],
+    'sakura':            ['hoverLift', 'borderEffect'],
+    'boardroom':         ['hoverLift'],
+    'carbon':            ['hoverLift'],
+    'nord':              ['hoverLift', 'aurora'],
+    'high-contrast':     [],
+    'dracula':           ['hoverLift', 'ambientGlow', 'borderEffect'],
   };
 
   const POPUP_EFFECT_LABELS = {
