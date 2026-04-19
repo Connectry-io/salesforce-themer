@@ -684,6 +684,22 @@
       const darkName = THEME_NAMES[darkTheme] || 'Connectry Dark';
       document.getElementById('autoLightName').textContent = lightName;
       document.getElementById('autoDarkName').textContent = darkName;
+
+      // Render the per-theme favicon next to each name. Carries the theme's
+      // accent colour so the indicators are visually distinct (and tie back
+      // to what the user sees on the theme card itself).
+      const renderFav = (themeId) => {
+        const t = THEMES.find(x => x.id === themeId);
+        if (!t) return '';
+        const cfg = t.favicon
+          || (self.ConnectryFavicon?.defaultForTheme(t.id, t.colors?.accent))
+          || { shape: 'circle', color: (t.colors && t.colors.accent) || '#4A6FA5', icon: 'connectry' };
+        return self.ConnectryFavicon ? self.ConnectryFavicon.buildSVG(cfg, 12) : '';
+      };
+      const lightIconEl = document.getElementById('autoLightIcon');
+      const darkIconEl = document.getElementById('autoDarkIcon');
+      if (lightIconEl) lightIconEl.innerHTML = renderFav(lightTheme);
+      if (darkIconEl) darkIconEl.innerHTML = renderFav(darkTheme);
     }
   }
 
