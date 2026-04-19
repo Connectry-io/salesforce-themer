@@ -116,7 +116,6 @@
         this.host.classList.add('diag-light');
       }
       this._renderPanel();
-      this._setupDrag();
       await this._restorePosition();
 
       // Run initial scan automatically
@@ -146,7 +145,6 @@
     restore() {
       this.isMinimized = false;
       this._renderPanel();
-      this._setupDrag();
       this._restorePosition();
     }
 
@@ -385,6 +383,10 @@
 
       this.panel = this.shadow.querySelector('.diag-panel');
       this._bindEvents();
+      // Drag listeners live on the header element (recreated above), so
+      // every render must re-attach them. Pre-B29 this only mattered on
+      // first open; tab-switch re-renders (B29a) silently killed drag.
+      this._setupDrag();
     }
 
     _headerHTML() {
