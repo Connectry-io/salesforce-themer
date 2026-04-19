@@ -46,6 +46,7 @@
       fixReport,
       testingProgress,
       patchSummary,
+      screenshotDataUrl,
     } = opts;
 
     const now = new Date();
@@ -78,6 +79,7 @@
     const activePatchesSection = buildActivePatchesSection(patchSummary);
     const testingSection = buildTestingSection(testingProgress);
     const cssFixBlock = fixReport?.fullCSS ? buildCSSFixBlock(fixReport.fullCSS) : '';
+    const screenshotSection = buildScreenshotSection(screenshotDataUrl);
 
     return `<!DOCTYPE html>
 <html lang="en">
@@ -151,6 +153,28 @@
   .kpi-value.ok { color: var(--cx-warn); }
   .kpi-value.bad { color: var(--cx-bad); }
   .kpi-label { font-size: 11px; color: var(--cx-text-2); text-transform: uppercase; letter-spacing: 0.05em; margin-top: 4px; }
+
+  /* Screenshot section */
+  .report-section {
+    margin-bottom: 20px;
+    background: var(--cx-surface);
+    border: 1px solid var(--cx-border);
+    border-radius: var(--cx-radius);
+    padding: 14px 16px;
+  }
+  .report-section .section-title { margin-bottom: 10px; display: block; }
+  .section-meta { color: var(--cx-text-3); font-size: 11px; font-weight: 400; letter-spacing: 0; margin-left: 6px; }
+  .screenshot-frame {
+    background: #000;
+    border-radius: 6px;
+    overflow: hidden;
+    border: 1px solid var(--cx-border);
+  }
+  .screenshot-frame img {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
 
   /* Sections */
   .section { margin-bottom: 20px; }
@@ -298,6 +322,7 @@
   </div>
 
   <!-- Sections -->
+  ${screenshotSection}
   ${tokenGapsSection}
   ${componentSection}
   ${lwcPatchesSection}
@@ -332,6 +357,18 @@
   }
 
   // ─── Section builders ──────────────────────────────────────────────────
+
+  function buildScreenshotSection(screenshotDataUrl) {
+    if (!screenshotDataUrl) return '';
+    const kb = Math.round((screenshotDataUrl.length * 0.75) / 1024);
+    return `
+    <section class="report-section">
+      <h2 class="section-title">Viewport Screenshot <span class="section-meta">~${kb} KB · captured at scan time</span></h2>
+      <div class="screenshot-frame">
+        <img src="${screenshotDataUrl}" alt="Viewport screenshot captured during scan" />
+      </div>
+    </section>`;
+  }
 
   function buildTokenGapsSection(scanResults, fixReport) {
     if (!scanResults) return '';

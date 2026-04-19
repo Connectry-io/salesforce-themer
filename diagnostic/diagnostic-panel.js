@@ -610,24 +610,14 @@
               ${modeChip('mine', 'My Themes')}
               ${modeChip('all', 'All')}
             </div>
-            ${this._isPro
-              ? `<label class="diag-screenshot-switch${camActive ? ' is-active' : ''}" tabindex="0" data-diag-tooltip="Captures a PNG of the visible page and attaches it to AI Suggest, Copy, and View Report.&#10;&#10;⚠ Avoid if sensitive data is on screen — no customer PII, financial records, or confidential info." data-diag-tooltip-align="right">
-                  <span class="diag-switch-icon">${ICONS.camera}</span>
-                  <span class="diag-switch-label">Include screenshot</span>
-                  <input type="checkbox" class="diag-sr-only" data-action="toggleIncludeScreenshot" ${camActive ? 'checked' : ''}>
-                  <span class="diag-switch-track" aria-hidden="true">
-                    <span class="diag-switch-thumb"></span>
-                  </span>
-                </label>`
-              : `<div class="diag-screenshot-switch is-pro-locked" tabindex="0" data-diag-tooltip="Screenshot capture is a Connectry Pro feature. Backend is still in development — coming soon." data-diag-tooltip-align="right">
-                  <span class="diag-switch-icon">${ICONS.camera}</span>
-                  <span class="diag-switch-label">Include screenshot</span>
-                  <span class="diag-pro-badge">Pro</span>
-                  <span class="diag-switch-track diag-switch-track--locked" aria-hidden="true">
-                    <span class="diag-switch-thumb"></span>
-                  </span>
-                </div>`
-            }
+            <label class="diag-screenshot-switch${camActive ? ' is-active' : ''}" tabindex="0" data-diag-tooltip="Captures a PNG of the visible page and attaches it to Copy, View Report, and AI Suggest.&#10;&#10;⚠ Avoid if sensitive data is on screen — no customer PII, financial records, or confidential info." data-diag-tooltip-align="right">
+              <span class="diag-switch-icon">${ICONS.camera}</span>
+              <span class="diag-switch-label">Include screenshot</span>
+              <input type="checkbox" class="diag-sr-only" data-action="toggleIncludeScreenshot" ${camActive ? 'checked' : ''}>
+              <span class="diag-switch-track" aria-hidden="true">
+                <span class="diag-switch-thumb"></span>
+              </span>
+            </label>
           </details>
         </div>`;
     }
@@ -1613,7 +1603,6 @@
         else if (action === 'scrollToPatches') this._scrollToPatches();
         else if (action === 'activateConfiguredTheme') this._activateConfiguredTheme(btn);
         else if (action === 'toggleIncludeScreenshot') {
-          if (!this._isPro) return; // Pro-gated — locked markup has no handler
           this.includeScreenshot = btn.tagName === 'INPUT'
             ? btn.checked === true
             : !this.includeScreenshot;
@@ -2629,6 +2618,7 @@
         fixReport: this.fixReport,
         testingProgress: this.testingProgress,
         patchSummary: this.patchSummary,
+        screenshotDataUrl: this.screenshotDataUrl,
       });
     }
 
