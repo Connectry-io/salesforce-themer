@@ -4832,9 +4832,23 @@
     // Effect pills use buildEffectIndicators for the active theme so
     // the anatomy card matches the user's current theme and shows dots.
     const anatomyPills = buildEffectIndicators(theme.id);
+    // Match the real theme card's typography row so the diagram example
+    // mirrors what the user sees in the gallery (instead of a static
+    // "System Default · Md · 1.375/0" placeholder).
+    const typo = theme.typography || {};
+    const typoFontKey = typo.fontFamily || 'system-ui';
+    const typoFontStack = FONT_STACKS[typoFontKey] || FONT_STACKS['system-ui'];
+    const FONT_LABELS_LOCAL = { 'system-ui': 'System Default', 'neo-grotesque': 'Neo-Grotesque', 'humanist': 'Humanist', 'geometric': 'Geometric', 'classic-serif': 'Classic Serif', 'ibm-plex': 'IBM Plex Sans' };
+    const typoFontLabel = FONT_LABELS_LOCAL[typoFontKey] || 'System Default';
+    const sizeLabels = { compact: 'Sm', normal: 'Md', comfortable: 'Lg', large: 'XL' };
+    const typoSizeLabel = sizeLabels[typo.sizePreset || 'normal'] || 'Md';
+    const typoLh = typo.lineHeight || 1.375;
+    const typoLs = typo.letterSpacing == null ? 0 : typo.letterSpacing;
+    const typoLsStr = typoLs === 0 ? '0' : String(typoLs);
+    const typoLabelStr = `${typoFontLabel} · ${typoSizeLabel} · ${typoLh}/${typoLsStr}`;
     target.innerHTML = `
       <div class="guide-anatomy-card-wrap">
-        <div class="theme-card is-active" style="width: 300px; cursor: default; pointer-events: none;">
+        <div class="theme-card is-active" style="width: 260px; cursor: default; pointer-events: none;">
           <div class="anatomy-swatch-wrap" data-part="1">
             <button type="button" class="anatomy-marker" data-marker="1" aria-label="Color swatch explainer">1</button>
             <div class="theme-swatch">${buildSwatch(theme)}</div>
@@ -4856,11 +4870,12 @@
               <button type="button" class="anatomy-marker" data-marker="4" aria-label="Effect pills explainer">4</button>
               ${anatomyPills}
             </div>
-            <!-- Typography row -->
+            <!-- Typography row — uses the active theme's actual typography
+                 so the anatomy mirrors what the user sees on real cards. -->
             <div class="guide-anatomy-placeholder-row" data-part="5">
               <button type="button" class="anatomy-marker" data-marker="5" aria-label="Typography explainer">5</button>
-              <span class="guide-anatomy-placeholder-label">Aa</span>
-              <span class="guide-anatomy-placeholder-text">System Default · Md · 1.375/0</span>
+              <span class="guide-anatomy-placeholder-label" style="font-family:${typoFontStack}">Aa</span>
+              <span class="guide-anatomy-placeholder-text">${typoLabelStr}</span>
             </div>
           </div>
           <!-- (Removed: data-part="6" theme-card-actions row + marker 6 —
@@ -4967,27 +4982,33 @@
     target.style.setProperty('--gcm-accent', c.accent);
     target.style.setProperty('--gcm-text', c.textPrimary);
 
+    // Tag every visible element with a data-color so highlight choreography
+    // covers the full surface — previously only logo/tab/button had accent
+    // and only the title had text, which made those highlights look like
+    // "everything else greyed out". Now every line gets a colour identity:
+    // sidebar items + card lines = text; non-active tabs = accent (echoing
+    // the active one); etc.
     target.innerHTML = `
       <div class="gcm-header" data-color="surface">
         <span class="gcm-logo" data-color="accent"></span>
         <span class="gcm-tabs">
           <span class="gcm-tab is-active" data-color="accent"></span>
-          <span class="gcm-tab"></span>
-          <span class="gcm-tab"></span>
+          <span class="gcm-tab" data-color="text"></span>
+          <span class="gcm-tab" data-color="text"></span>
         </span>
       </div>
       <div class="gcm-body">
         <div class="gcm-sidebar" data-color="surface">
-          <span class="gcm-sidebar-item"></span>
-          <span class="gcm-sidebar-item"></span>
-          <span class="gcm-sidebar-item"></span>
-          <span class="gcm-sidebar-item"></span>
+          <span class="gcm-sidebar-item" data-color="text"></span>
+          <span class="gcm-sidebar-item" data-color="text"></span>
+          <span class="gcm-sidebar-item" data-color="text"></span>
+          <span class="gcm-sidebar-item" data-color="text"></span>
         </div>
         <div class="gcm-main" data-color="background">
           <div class="gcm-card" data-color="surface">
             <div class="gcm-card-title" data-color="text">Account name</div>
-            <div class="gcm-card-line"></div>
-            <div class="gcm-card-line short"></div>
+            <div class="gcm-card-line" data-color="text"></div>
+            <div class="gcm-card-line short" data-color="text"></div>
             <button class="gcm-button" data-color="accent" type="button">Save</button>
           </div>
         </div>

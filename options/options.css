@@ -5099,10 +5099,20 @@ td.upgrade-compare-col-premium,
 /* Make sure the card itself doesn't clip the markers that escape its
    left edge. .theme-swatch keeps its own overflow:hidden (it needs to clip
    the rounded color bars), so the swatch's marker lives in a sibling
-   wrapper — see .anatomy-swatch-wrap below. */
+   wrapper — see .anatomy-swatch-wrap below.
+   .theme-description has its own overflow:hidden for the 2-line clamp,
+   which was clipping marker 3 (positioned at left:-56px). Also overridden. */
 .guide-anatomy-card-wrap .theme-card,
-.guide-anatomy-card-wrap .theme-card-body {
+.guide-anatomy-card-wrap .theme-card-body,
+.guide-anatomy-card-wrap .theme-description {
   overflow: visible;
+}
+/* Drop the line-clamp inside the anatomy diagram so descriptions render
+   in their full natural height — keeps the marker geometry stable. */
+.guide-anatomy-card-wrap .theme-description {
+  display: block;
+  -webkit-line-clamp: unset;
+  -webkit-box-orient: unset;
 }
 
 /* Wrapper around the color swatch that acts as the data-part="1" anchor.
@@ -5562,7 +5572,11 @@ td.upgrade-compare-col-premium,
   cursor: pointer;
 }
 .guide-colors-mock.is-focusing [data-color]:not(.is-highlight) {
-  opacity: 0.20;
+  /* Was 0.20 — too aggressive, made the whole mock read as "greyed out"
+     when small accent/text elements were highlighted. 0.45 keeps the
+     non-matching context legible while still letting the matching
+     elements pop via their accent ring. */
+  opacity: 0.45;
 }
 .guide-colors-mock.is-focusing [data-color].is-highlight {
   box-shadow:
