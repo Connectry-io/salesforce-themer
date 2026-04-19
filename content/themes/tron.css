@@ -20,10 +20,10 @@
   color-scheme: dark;
 
   /* Legacy LWC tokens */
-  --lwc-colorBackground: #0a0a0f !important;
+  --lwc-colorBackground: #05070a !important;
   --lwc-colorBackgroundAlt: #0d1117 !important;
   --lwc-colorBackgroundRow: #0d1117 !important;
-  --lwc-colorBackgroundRowHover: #0f1520 !important;
+  --lwc-colorBackgroundRowHover: rgba(0,229,255,0.06) !important;
   --lwc-colorBackgroundHighlight: rgba(0, 229, 255, 0.08) !important;
   --lwc-colorBackgroundSelection: rgba(0, 229, 255, 0.12) !important;
   --lwc-colorBackgroundButtonBrand: transparent !important;
@@ -32,7 +32,7 @@
   --lwc-colorBackgroundButtonDefault: transparent !important;
   --lwc-colorBackgroundButtonDefaultHover: rgba(0, 229, 255, 0.06) !important;
   --lwc-headerColorBackground: #0d1117 !important;
-  --lwc-pageColorBackground: #0a0a0f !important;
+  --lwc-pageColorBackground: #05070a !important;
   --lwc-colorTextDefault: #e0f7fa !important;
   --lwc-colorTextWeak: #4dd0e1 !important;
   --lwc-colorTextLabel: #4dd0e1 !important;
@@ -54,8 +54,8 @@
 
   /* SLDS 2 global tokens */
   --slds-g-color-surface-1: #0d1117 !important;
-  --slds-g-color-surface-2: #0a0a0f !important;
-  --slds-g-color-surface-3: #0f1520 !important;
+  --slds-g-color-surface-2: #05070a !important;
+  --slds-g-color-surface-3: rgba(0,229,255,0.06) !important;
   --slds-g-color-surface-4: rgba(0, 229, 255, 0.15) !important;
   --slds-g-color-on-surface-1: #e0f7fa !important;
   --slds-g-color-on-surface-2: #4dd0e1 !important;
@@ -65,13 +65,13 @@
   --slds-g-color-brand-1: #00e5ff !important;
   --slds-g-color-brand-2: #00b8cc !important;
   --slds-g-color-brand-3: #008fa0 !important;
-  --slds-g-color-neutral-1: #0a0a0f !important;
-  --slds-g-color-neutral-2: #111820 !important;
+  --slds-g-color-neutral-1: #05070a !important;
+  --slds-g-color-neutral-2: #0f1520 !important;
   --slds-g-color-neutral-3: rgba(0, 229, 255, 0.15) !important;
 
   /* SLDS 2 surface containers */
   --slds-g-color-surface-container-1: #0d1117 !important;
-  --slds-g-color-surface-container-2: #0f1520 !important;
+  --slds-g-color-surface-container-2: rgba(0,229,255,0.06) !important;
   --slds-g-color-surface-container-3: rgba(0, 229, 255, 0.15) !important;
 
   /* SLDS 2 accent */
@@ -88,13 +88,13 @@
 
   /* Legacy LWC — backgrounds (surfaces, inputs, modals) */
   --lwc-colorBackgroundLight: #0d1117 !important;
-  --lwc-colorBackgroundShade: #111820 !important;
-  --lwc-colorBackgroundShadeDark: #111820 !important;
-  --lwc-colorBackgroundInput: #0a0a0f !important;
-  --lwc-colorBackgroundInputActive: #0a0a0f !important;
-  --lwc-colorBackgroundInputDisabled: #111820 !important;
+  --lwc-colorBackgroundShade: #0f1520 !important;
+  --lwc-colorBackgroundShadeDark: #0f1520 !important;
+  --lwc-colorBackgroundInput: #05070a !important;
+  --lwc-colorBackgroundInputActive: #05070a !important;
+  --lwc-colorBackgroundInputDisabled: #0f1520 !important;
   --lwc-colorBackgroundInputError: #0d1117 !important;
-  --lwc-colorBackgroundInputSearch: #0a0a0f !important;
+  --lwc-colorBackgroundInputSearch: #05070a !important;
   --lwc-colorBackgroundInputCheckbox: #0d1117 !important;
   --lwc-colorBackgroundInputCheckboxSelected: #00e5ff !important;
   --lwc-colorBackgroundModal: #0d1117 !important;
@@ -103,7 +103,7 @@
 
   /* Legacy LWC — button states */
   --lwc-colorBackgroundButtonBrandDisabled: #1c8fa0 !important;
-  --lwc-colorBackgroundButtonDefaultActive: #0f1520 !important;
+  --lwc-colorBackgroundButtonDefaultActive: rgba(0,229,255,0.06) !important;
   --lwc-colorBackgroundButtonDefaultDisabled: #0d1117 !important;
   --lwc-buttonColorBackgroundPrimary: transparent !important;
   --lwc-buttonColorBorderPrimary: #00e5ff !important;
@@ -133,7 +133,7 @@
   /* Component hooks — cards & inputs */
   --slds-c-card-color-background: #0d1117 !important;
   --slds-c-card-color-border: rgba(0, 229, 255, 0.15) !important;
-  --slds-c-input-color-background: #0a0a0f !important;
+  --slds-c-input-color-background: #05070a !important;
   --slds-c-input-color-border: rgba(0, 229, 255, 0.25) !important;
   --slds-c-input-color-border-focus: #00e5ff !important;
   --slds-c-input-text-color: #e0f7fa !important;
@@ -146,22 +146,22 @@
   --slds-c-button-neutral-color-border: rgba(0, 229, 255, 0.2) !important;
   --slds-c-button-neutral-color-background-hover: rgba(0, 229, 255, 0.06) !important;
   --slds-c-button-neutral-color-border-hover: rgba(0, 229, 255, 0.2) !important;
-  --slds-c-button-neutral-color-background-active: #0f1520 !important;
+  --slds-c-button-neutral-color-background-active: rgba(0,229,255,0.06) !important;
   --slds-c-button-neutral-color-border-active: rgba(0, 229, 255, 0.25) !important;
   --slds-c-button-text-color-hover: #e0f7fa !important;
   --slds-c-button-text-color-active: #e0f7fa !important;
 
   /* Legacy LWC — gap tokens discovered 2026-04-12 */
-  --lwc-colorBackgroundAlt2: #111820 !important;
+  --lwc-colorBackgroundAlt2: #0f1520 !important;
   --lwc-colorBackgroundRowActive: rgba(0, 229, 255, 0.12) !important;
   --lwc-colorBackgroundRowSelected: rgba(0, 229, 255, 0.12) !important;
   --lwc-colorBackgroundNotification: rgba(0, 229, 255, 0.08) !important;
-  --lwc-colorBackgroundToggleHover: #0f1520 !important;
+  --lwc-colorBackgroundToggleHover: rgba(0,229,255,0.06) !important;
   --lwc-colorTextPrimary: #e0f7fa !important;
   --lwc-colorTextLinkDisabled: #1c8fa0 !important;
   --lwc-colorTextLinkActive: #008fa0 !important;
   /* Kebab-case aliases SF uses alongside camelCase */
-  --lwc-color-background: #0a0a0f !important;
+  --lwc-color-background: #05070a !important;
   --lwc-color-background-alt: #0d1117 !important;
   --lwc-colorBackgroundDark: #0d1117 !important;
 
@@ -177,7 +177,7 @@
 html,
 body,
 .desktop {
-  background-color: #0a0a0f !important;
+  background-color: #05070a !important;
   color: #e0f7fa !important;
   background-image:
     repeating-linear-gradient(
@@ -502,7 +502,7 @@ one-app-nav-bar-item-root.slds-is-active .slds-context-bar__label-action,
 .slds-select,
 .slds-combobox__form-element,
 .slds-has-input-focus .slds-input {
-  background-color: #0a0a0f !important;
+  background-color: #05070a !important;
   border-color: rgba(0, 229, 255, 0.25) !important;
   color: #e0f7fa !important;
 }
@@ -616,7 +616,7 @@ one-app-nav-bar-item-root.slds-is-active .slds-context-bar__label-action,
 /* LWC root inside the launcher modal — paint with theme background so
  * the app grid sits on a themed surface instead of SF default white. */
 one-app-launcher-modal {
-  background-color: #0a0a0f !important;
+  background-color: #05070a !important;
 }
 
 one-app-launcher-modal .modal-container,
@@ -788,7 +788,7 @@ a:hover {
 .bPageBlock,
 .pbBody,
 .pbSubsection {
-  background-color: #0a0a0f !important;
+  background-color: #05070a !important;
   color: #e0f7fa !important;
 }
 
@@ -802,7 +802,7 @@ body.setupTab,
 body[class*="setup"],
 .setupHelpContent,
 .setupBodyDiv {
-  background-color: #0a0a0f !important;
+  background-color: #05070a !important;
   color: #e0f7fa !important;
 }
 
@@ -830,7 +830,7 @@ body[class*="setup"],
 .slds-report,
 .forceReportOutput,
 .reportHeader {
-  background-color: #0a0a0f !important;
+  background-color: #05070a !important;
   color: #e0f7fa !important;
 }
 
@@ -841,7 +841,7 @@ body[class*="setup"],
 .split-view,
 .slds-split-view,
 [class*="console"] {
-  background-color: #0a0a0f !important;
+  background-color: #05070a !important;
   color: #e0f7fa !important;
 }
 
@@ -857,7 +857,7 @@ body[class*="setup"],
 .record-page-decorator,
 .recordHomeTemplate,
 .forceHighlightsLayout {
-  background-color: #0a0a0f !important;
+  background-color: #05070a !important;
   color: #e0f7fa !important;
   border-color: rgba(0, 229, 255, 0.15) !important;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15) !important;
@@ -868,7 +868,7 @@ body[class*="setup"],
 .flexipage-template,
 .uiTabBar + .tabContent,
 .forceRecordFlexiPage {
-  background-color: #0a0a0f !important;
+  background-color: #05070a !important;
 }
 
 /* ─── Path / Stage Path ─────────────────────────────────────────────────── */
@@ -925,7 +925,7 @@ body .forcePathAssistant .slds-card__body_inner {
 body .slds-path__item,
 body .slds-path__item .slds-path__link,
 body .slds-path__item a.slds-path__link {
-  background-color: #111820 !important;
+  background-color: #0f1520 !important;
 }
 
 body .slds-path__item.slds-is-complete,
@@ -943,7 +943,7 @@ body .slds-path__item.slds-is-current a.slds-path__link {
 body .slds-path__item.slds-is-incomplete,
 body .slds-path__item.slds-is-incomplete .slds-path__link,
 body .slds-path__item.slds-is-incomplete a.slds-path__link {
-  background-color: #111820 !important;
+  background-color: #0f1520 !important;
 }
 
 /* Path chevrons — SLDS uses skewed ::before/::after with background, NOT border triangles */
@@ -952,12 +952,12 @@ body .slds-path__item.slds-is-incomplete a.slds-path__link {
 /* Incomplete (default) — item + pseudo-elements */
 body .slds-path__item::before,
 body .slds-path__item::after {
-  background: #111820 !important;
+  background: #0f1520 !important;
 }
 
 body .slds-path__item.slds-is-incomplete::before,
 body .slds-path__item.slds-is-incomplete::after {
-  background: #111820 !important;
+  background: #0f1520 !important;
 }
 
 /* Complete */
@@ -996,12 +996,12 @@ body .slds-path__item.slds-is-incomplete.slds-is-active::after {
 /* Hover — incomplete items */
 .slds-path__item:hover,
 .slds-path__item:hover .slds-path__link {
-  background-color: #0f1520 !important;
+  background-color: rgba(0,229,255,0.06) !important;
 }
 
 .slds-path__item:hover::before,
 .slds-path__item:hover::after {
-  background: #0f1520 !important;
+  background: rgba(0,229,255,0.06) !important;
 }
 
 /* Hover — complete/current items */
@@ -1072,7 +1072,7 @@ body .slds-path__item.slds-is-lost .slds-path__title {
 /* Related list containers — background only, cards handle their own borders */
 .forceRelatedListContainer,
 .forceRelatedListSingleContainer {
-  background-color: #0a0a0f !important;
+  background-color: #05070a !important;
 }
 
 /* Related list inner headers — no extra borders */
@@ -1109,4 +1109,15 @@ body .slds-path__item.slds-is-lost .slds-path__title {
 .forceSocialPhoto,
 .photoContainer {
   border-color: transparent !important;
+}
+
+/* ─── Typography overrides ──────────────────────────────────────────── */
+
+:root {
+  --lwc-fontFamily: Avenir, Montserrat, Corbel, 'URW Gothic', source-sans-pro, sans-serif !important;
+  --slds-g-font-family: Avenir, Montserrat, Corbel, 'URW Gothic', source-sans-pro, sans-serif !important;
+}
+
+body, .desktop, .oneContent, .slds-scope {
+  font-family: Avenir, Montserrat, Corbel, 'URW Gothic', source-sans-pro, sans-serif !important;
 }

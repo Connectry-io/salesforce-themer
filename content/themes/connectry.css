@@ -36,7 +36,7 @@
   --lwc-colorTextDefault: #2d2d2d !important;
   --lwc-colorTextWeak: #4a5568 !important;
   --lwc-colorTextLabel: #4a5568 !important;
-  --lwc-colorTextPlaceholder: #9aa5b4 !important;
+  --lwc-colorTextPlaceholder: #b0b7c3 !important;
   --lwc-colorTextButtonBrand: #ffffff !important;
   --lwc-colorTextLink: #4a6fa5 !important;
   --lwc-colorTextLinkHover: #2d4a72 !important;
@@ -416,7 +416,7 @@ one-app-nav-bar-item-root.slds-is-active .slds-context-bar__label-action,
 
 .slds-input::placeholder,
 .slds-textarea::placeholder {
-  color: #9aa5b4 !important;
+  color: #b0b7c3 !important;
 }
 
 .slds-form-element__label {
@@ -995,4 +995,15 @@ body .slds-path__item.slds-is-lost .slds-path__title {
 .forceSocialPhoto,
 .photoContainer {
   border-color: transparent !important;
+}
+
+/* ─── Typography overrides ──────────────────────────────────────────── */
+
+:root {
+  --lwc-fontFamily: Inter, Roboto, 'Helvetica Neue', 'Arial Nova', 'Nimbus Sans', Arial, sans-serif !important;
+  --slds-g-font-family: Inter, Roboto, 'Helvetica Neue', 'Arial Nova', 'Nimbus Sans', Arial, sans-serif !important;
+}
+
+body, .desktop, .oneContent, .slds-scope {
+  font-family: Inter, Roboto, 'Helvetica Neue', 'Arial Nova', 'Nimbus Sans', Arial, sans-serif !important;
 }

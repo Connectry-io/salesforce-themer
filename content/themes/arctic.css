@@ -20,90 +20,90 @@
   color-scheme: light;
 
   /* Legacy LWC tokens */
-  --lwc-colorBackground: #f0f4f8 !important;
+  --lwc-colorBackground: #f7fafc !important;
   --lwc-colorBackgroundAlt: #ffffff !important;
   --lwc-colorBackgroundRow: #ffffff !important;
-  --lwc-colorBackgroundRowHover: #e8f0f8 !important;
+  --lwc-colorBackgroundRowHover: #ebf4ff !important;
   --lwc-colorBackgroundHighlight: #dbeafe !important;
   --lwc-colorBackgroundSelection: #bfdbfe !important;
   --lwc-colorBackgroundButtonBrand: #2b6cb0 !important;
   --lwc-colorBackgroundButtonBrandHover: #1e4f8c !important;
-  --lwc-colorBackgroundButtonBrandActive: #153e73 !important;
+  --lwc-colorBackgroundButtonBrandActive: #2a4365 !important;
   --lwc-colorBackgroundButtonDefault: #ffffff !important;
   --lwc-colorBackgroundButtonDefaultHover: #edf2f7 !important;
-  --lwc-headerColorBackground: #1e3a5f !important;
-  --lwc-pageColorBackground: #f0f4f8 !important;
+  --lwc-headerColorBackground: #ffffff !important;
+  --lwc-pageColorBackground: #f7fafc !important;
   --lwc-colorTextDefault: #1a202c !important;
   --lwc-colorTextWeak: #4a5568 !important;
   --lwc-colorTextLabel: #4a5568 !important;
   --lwc-colorTextPlaceholder: #a0aec0 !important;
   --lwc-colorTextButtonBrand: #ffffff !important;
-  --lwc-colorTextLink: #2b6cb0 !important;
-  --lwc-colorTextLinkHover: #153e73 !important;
-  --lwc-colorBorder: #d2dce8 !important;
+  --lwc-colorTextLink: #3182ce !important;
+  --lwc-colorTextLinkHover: #2c5282 !important;
+  --lwc-colorBorder: #e2e8f0 !important;
   --lwc-colorBorderSeparator: #dde5ef !important;
-  --lwc-colorBorderInput: #b2c3d8 !important;
-  --lwc-colorBorderInputActive: #2b6cb0 !important;
-  --lwc-brandPrimary: #2b6cb0 !important;
-  --lwc-brandPrimaryActive: #1e4f8c !important;
-  --lwc-brandPrimaryTransparent: rgba(43, 108, 176, 0.12) !important;
-  --lwc-brandAccessible: #2b6cb0 !important;
-  --lwc-brandAccessibleActive: #1e4f8c !important;
-  --lwc-colorBackgroundSpin: #2b6cb0 !important;
+  --lwc-colorBorderInput: #cbd5e0 !important;
+  --lwc-colorBorderInputActive: #3182ce !important;
+  --lwc-brandPrimary: #3182ce !important;
+  --lwc-brandPrimaryActive: #2c5282 !important;
+  --lwc-brandPrimaryTransparent: rgba(49, 130, 206, 0.12) !important;
+  --lwc-brandAccessible: #3182ce !important;
+  --lwc-brandAccessibleActive: #2c5282 !important;
+  --lwc-colorBackgroundSpin: #3182ce !important;
   --lwc-shadowOutlineFocus: 0 0 0 3px rgba(43, 108, 176, 0.3) !important;
 
   /* SLDS 2 global tokens */
   --slds-g-color-surface-1: #ffffff !important;
-  --slds-g-color-surface-2: #f0f4f8 !important;
-  --slds-g-color-surface-3: #e8f0f8 !important;
-  --slds-g-color-surface-4: #d2dce8 !important;
+  --slds-g-color-surface-2: #f7fafc !important;
+  --slds-g-color-surface-3: #ebf4ff !important;
+  --slds-g-color-surface-4: #e2e8f0 !important;
   --slds-g-color-on-surface-1: #1a202c !important;
   --slds-g-color-on-surface-2: #4a5568 !important;
   --slds-g-color-on-surface-3: #718096 !important;
-  --slds-g-color-border-1: #b2c3d8 !important;
-  --slds-g-color-border-2: #b2c3d8 !important;
-  --slds-g-color-brand-1: #2b6cb0 !important;
-  --slds-g-color-brand-2: #1e4f8c !important;
-  --slds-g-color-brand-3: #153e73 !important;
-  --slds-g-color-neutral-1: #f0f4f8 !important;
-  --slds-g-color-neutral-2: #e8f0f8 !important;
-  --slds-g-color-neutral-3: #d2dce8 !important;
+  --slds-g-color-border-1: #cbd5e0 !important;
+  --slds-g-color-border-2: #cbd5e0 !important;
+  --slds-g-color-brand-1: #3182ce !important;
+  --slds-g-color-brand-2: #2c5282 !important;
+  --slds-g-color-brand-3: #2a4365 !important;
+  --slds-g-color-neutral-1: #f7fafc !important;
+  --slds-g-color-neutral-2: #edf2f7 !important;
+  --slds-g-color-neutral-3: #e2e8f0 !important;
 
   /* SLDS 2 surface containers */
   --slds-g-color-surface-container-1: #ffffff !important;
-  --slds-g-color-surface-container-2: #e8f0f8 !important;
-  --slds-g-color-surface-container-3: #d2dce8 !important;
+  --slds-g-color-surface-container-2: #ebf4ff !important;
+  --slds-g-color-surface-container-3: #e2e8f0 !important;
 
   /* SLDS 2 accent */
-  --slds-g-color-accent-1: #2b6cb0 !important;
-  --slds-g-color-accent-2: #1e4f8c !important;
-  --slds-g-color-accent-3: rgba(43, 108, 176, 0.12) !important;
+  --slds-g-color-accent-1: #3182ce !important;
+  --slds-g-color-accent-2: #2c5282 !important;
+  --slds-g-color-accent-3: rgba(49, 130, 206, 0.12) !important;
 
   /* Legacy LWC — brand */
-  --lwc-colorBrand: #2b6cb0 !important;
-  --lwc-colorBrandDark: #2b6cb0 !important;
-  --lwc-colorBrandDarker: #153e73 !important;
-  --lwc-colorTextBrand: #2b6cb0 !important;
-  --lwc-colorTextBrandPrimary: #2b6cb0 !important;
+  --lwc-colorBrand: #3182ce !important;
+  --lwc-colorBrandDark: #3182ce !important;
+  --lwc-colorBrandDarker: #2a4365 !important;
+  --lwc-colorTextBrand: #3182ce !important;
+  --lwc-colorTextBrandPrimary: #3182ce !important;
 
   /* Legacy LWC — backgrounds (surfaces, inputs, modals) */
   --lwc-colorBackgroundLight: #ffffff !important;
-  --lwc-colorBackgroundShade: #e8f0f8 !important;
-  --lwc-colorBackgroundShadeDark: #e8f0f8 !important;
+  --lwc-colorBackgroundShade: #edf2f7 !important;
+  --lwc-colorBackgroundShadeDark: #edf2f7 !important;
   --lwc-colorBackgroundInput: #ffffff !important;
   --lwc-colorBackgroundInputActive: #ffffff !important;
-  --lwc-colorBackgroundInputDisabled: #e8f0f8 !important;
+  --lwc-colorBackgroundInputDisabled: #edf2f7 !important;
   --lwc-colorBackgroundInputError: #ffffff !important;
   --lwc-colorBackgroundInputSearch: #ffffff !important;
   --lwc-colorBackgroundInputCheckbox: #ffffff !important;
-  --lwc-colorBackgroundInputCheckboxSelected: #2b6cb0 !important;
+  --lwc-colorBackgroundInputCheckboxSelected: #3182ce !important;
   --lwc-colorBackgroundModal: #ffffff !important;
   --lwc-colorBackgroundBackdropTint: rgba(30, 58, 95, 0.45) !important;
   --lwc-colorBackgroundPill: #e8f0f8 !important;
 
   /* Legacy LWC — button states */
   --lwc-colorBackgroundButtonBrandDisabled: #718096 !important;
-  --lwc-colorBackgroundButtonDefaultActive: #e8f0f8 !important;
+  --lwc-colorBackgroundButtonDefaultActive: #ebf4ff !important;
   --lwc-colorBackgroundButtonDefaultDisabled: #ffffff !important;
   --lwc-buttonColorBackgroundPrimary: #2b6cb0 !important;
   --lwc-buttonColorBorderPrimary: #2b6cb0 !important;
@@ -117,25 +117,25 @@
   --lwc-colorTextButtonDefaultDisabled: #718096 !important;
   --lwc-colorTextIconDefault: #4a5568 !important;
   --lwc-colorTextIconDefaultHover: #1a202c !important;
-  --lwc-colorTextIconDefaultActive: #2b6cb0 !important;
+  --lwc-colorTextIconDefaultActive: #3182ce !important;
   --lwc-colorTextIconDefaultDisabled: #718096 !important;
   --lwc-colorTextActionLabel: #4a5568 !important;
   --lwc-colorTextActionLabelActive: #1a202c !important;
   --lwc-colorTextInputIcon: #4a5568 !important;
 
   /* Legacy LWC — borders */
-  --lwc-colorBorderPrimary: #d2dce8 !important;
-  --lwc-colorBorderBrand: #2b6cb0 !important;
+  --lwc-colorBorderPrimary: #e2e8f0 !important;
+  --lwc-colorBorderBrand: #3182ce !important;
   --lwc-colorBorderButtonBrand: #2b6cb0 !important;
   --lwc-colorBorderButtonBrandDisabled: transparent !important;
   --lwc-colorBorderButtonDefault: #b2c3d8 !important;
 
   /* Component hooks — cards & inputs */
   --slds-c-card-color-background: #ffffff !important;
-  --slds-c-card-color-border: #d2dce8 !important;
+  --slds-c-card-color-border: #e2e8f0 !important;
   --slds-c-input-color-background: #ffffff !important;
-  --slds-c-input-color-border: #b2c3d8 !important;
-  --slds-c-input-color-border-focus: #2b6cb0 !important;
+  --slds-c-input-color-border: #cbd5e0 !important;
+  --slds-c-input-color-border-focus: #3182ce !important;
   --slds-c-input-text-color: #1a202c !important;
 
   /* Component hooks — buttons */
@@ -146,24 +146,24 @@
   --slds-c-button-neutral-color-border: #b2c3d8 !important;
   --slds-c-button-neutral-color-background-hover: #edf2f7 !important;
   --slds-c-button-neutral-color-border-hover: #b2c3d8 !important;
-  --slds-c-button-neutral-color-background-active: #e8f0f8 !important;
-  --slds-c-button-neutral-color-border-active: #b2c3d8 !important;
+  --slds-c-button-neutral-color-background-active: #ebf4ff !important;
+  --slds-c-button-neutral-color-border-active: #cbd5e0 !important;
   --slds-c-button-text-color-hover: #1a202c !important;
   --slds-c-button-text-color-active: #1a202c !important;
 
   /* Legacy LWC — gap tokens discovered 2026-04-12 */
-  --lwc-colorBackgroundAlt2: #e8f0f8 !important;
+  --lwc-colorBackgroundAlt2: #edf2f7 !important;
   --lwc-colorBackgroundRowActive: #bfdbfe !important;
   --lwc-colorBackgroundRowSelected: #bfdbfe !important;
   --lwc-colorBackgroundNotification: #dbeafe !important;
-  --lwc-colorBackgroundToggleHover: #e8f0f8 !important;
+  --lwc-colorBackgroundToggleHover: #ebf4ff !important;
   --lwc-colorTextPrimary: #1a202c !important;
   --lwc-colorTextLinkDisabled: #718096 !important;
-  --lwc-colorTextLinkActive: #153e73 !important;
+  --lwc-colorTextLinkActive: #2a4365 !important;
   /* Kebab-case aliases SF uses alongside camelCase */
-  --lwc-color-background: #f0f4f8 !important;
+  --lwc-color-background: #f7fafc !important;
   --lwc-color-background-alt: #ffffff !important;
-  --lwc-colorBackgroundDark: #1e3a5f !important;
+  --lwc-colorBackgroundDark: #ffffff !important;
 
   /* Component hooks — tabs */
   --slds-c-tabs-item-text-color: #4a5568 !important;
@@ -177,7 +177,7 @@
 html,
 body,
 .desktop {
-  background-color: #f0f4f8 !important;
+  background-color: #f7fafc !important;
   color: #1a202c !important;
 }
 
@@ -202,7 +202,7 @@ body,
 .slds-global-header .slds-form-element__control input {
   background-color: #ffffff !important;
   color: #1a202c !important;
-  border-color: #d2dce8 !important;
+  border-color: #e2e8f0 !important;
   border-radius: 6px !important;
 }
 
@@ -213,7 +213,7 @@ body,
 
 .slds-global-header .slds-input:focus,
 .slds-global-header input:focus {
-  border-color: #2b6cb0 !important;
+  border-color: #3182ce !important;
   box-shadow: 0 0 0 3px rgba(43, 108, 176, 0.3) !important;
 }
 
@@ -224,20 +224,20 @@ one-app-nav-bar,
 .navexConsoleTabBar,
 [class*="globalNavigation"],
 .slds-context-bar {
-  background-color: #1e3a5f !important;
-  border-bottom: 1px solid #153e73 !important;
+  background-color: #ffffff !important;
+  border-bottom: 1px solid #e2e8f0 !important;
 }
 
 .slds-context-bar__item,
 .navexConsoleTabItem,
 .oneConsoleTabItem {
-  color: #bee3f8 !important;
+  color: #1a202c !important;
 }
 
 .slds-context-bar__item:hover,
 .navexConsoleTabItem:hover {
-  background-color: rgba(255, 255, 255, 0.1) !important;
-  color: #ffffff !important;
+  background-color: rgba(49, 130, 206, 0.08) !important;
+  color: #3182ce !important;
 }
 
 /* Active nav tab — paint ONLY the outer list item.
@@ -249,9 +249,9 @@ one-app-nav-bar,
 .slds-context-bar__item.slds-is-active,
 .slds-context-bar__item.slds-is-active.slds-is-unsaved,
 .navexConsoleTabItem.active {
-  background-color: rgba(255, 255, 255, 0.16) !important;
-  border-bottom-color: #63b3ed !important;
-  color: #ffffff !important;
+  background-color: rgba(49, 130, 206, 0.12) !important;
+  border-bottom-color: #3182ce !important;
+  color: #3182ce !important;
 }
 
 /* Kill the underline pseudo-elements on active tab */
@@ -263,9 +263,9 @@ one-app-nav-bar-item-root.slds-is-active::after,
 .slds-context-bar__item.slds-is-active a::after,
 one-app-nav-bar-item-root.slds-is-active a::before,
 one-app-nav-bar-item-root.slds-is-active a::after {
-  background-color: #63b3ed !important;
-  background: #63b3ed !important;
-  border-color: #63b3ed !important;
+  background-color: #3182ce !important;
+  background: #3182ce !important;
+  border-color: #3182ce !important;
 }
 
 /* Null ALL inner active-tab backgrounds — prevents double-chip visual.
@@ -280,7 +280,7 @@ one-app-nav-bar-item-root.slds-is-active a,
 one-app-nav-bar-item-root.slds-is-active a.dndItem,
 one-app-nav-bar-item-root.slds-is-active .slds-context-bar__label-action,
 .slds-context-bar a[aria-current="page"] {
-  color: #ffffff !important;
+  color: #3182ce !important;
   background-color: transparent !important;
   --slds-c-context-bar-item-color-background-active: transparent !important;
   --lwc-brandNavigationColorBackgroundActive: transparent !important;
@@ -290,15 +290,15 @@ one-app-nav-bar-item-root.slds-is-active .slds-context-bar__label-action,
 .slds-context-bar__label-action,
 .slds-context-bar__icon-action,
 .slds-context-bar .slds-icon {
-  color: #bee3f8 !important;
-  fill: #bee3f8 !important;
+  color: #3182ce !important;
+  fill: #3182ce !important;
 }
 
 /* App launcher button */
 .slds-context-bar__app-name,
 .appLauncherButton {
-  color: #ffffff !important;
-  border-right: 1px solid rgba(255, 255, 255, 0.15) !important;
+  color: #1a202c !important;
+  border-right: 1px solid #e2e8f0 !important;
 }
 
 /* App launcher waffle dots — target individual dots, not the container */
@@ -311,7 +311,7 @@ one-app-nav-bar-item-root.slds-is-active .slds-context-bar__label-action,
 .slds-icon-waffle .slds-r7,
 .slds-icon-waffle .slds-r8,
 .slds-icon-waffle .slds-r9 {
-  background-color: #ffffff !important;
+  background-color: #3182ce !important;
 }
 
 /* ─── Main Content ───────────────────────────────────────────────────────── */
@@ -321,7 +321,7 @@ one-app-nav-bar-item-root.slds-is-active .slds-context-bar__label-action,
 .flexipageBody,
 .onesetupSetupLayout,
 .setupcontent {
-  background-color: #f0f4f8 !important;
+  background-color: #f7fafc !important;
 }
 
 /* ─── Page Headers ───────────────────────────────────────────────────────── */
@@ -330,7 +330,7 @@ one-app-nav-bar-item-root.slds-is-active .slds-context-bar__label-action,
 .forceListViewManager .listViewManager,
 [class*="pageHeader"] {
   background-color: #ffffff !important;
-  border-bottom: 1px solid #d2dce8 !important;
+  border-bottom: 1px solid #e2e8f0 !important;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06) !important;
 }
 
@@ -349,7 +349,7 @@ one-app-nav-bar-item-root.slds-is-active .slds-context-bar__label-action,
 .slds-card,
 .forceRecordCard {
   background-color: #ffffff !important;
-  border-color: #d2dce8 !important;
+  border-color: #e2e8f0 !important;
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06) !important;
 }
 
@@ -361,7 +361,7 @@ one-app-nav-bar-item-root.slds-is-active .slds-context-bar__label-action,
 
 .slds-card__header {
   background-color: #ffffff !important;
-  border-bottom-color: #d2dce8 !important;
+  border-bottom-color: #e2e8f0 !important;
 }
 
 /* Card + page headings — force textPrimary so headings are always the
@@ -418,15 +418,15 @@ one-app-nav-bar-item-root.slds-is-active .slds-context-bar__label-action,
 .slds-combobox__form-element,
 .slds-has-input-focus .slds-input {
   background-color: #ffffff !important;
-  border-color: #b2c3d8 !important;
+  border-color: #cbd5e0 !important;
   color: #1a202c !important;
 }
 
 .slds-input:focus,
 .slds-textarea:focus,
 .slds-select:focus {
-  border-color: #2b6cb0 !important;
-  box-shadow: 0 0 0 3px rgba(43, 108, 176, 0.2) !important;
+  border-color: #3182ce !important;
+  box-shadow: 0 0 0 3px rgba(49, 130, 206, 0.2) !important;
   outline: none !important;
 }
 
@@ -444,14 +444,14 @@ one-app-nav-bar-item-root.slds-is-active .slds-context-bar__label-action,
 
 .slds-table {
   background-color: #ffffff !important;
-  border: 1px solid #d2dce8 !important;
+  border: 1px solid #e2e8f0 !important;
 }
 
 .slds-table thead th,
 .slds-table thead td {
   background-color: #edf2f7 !important;
   color: #2d3748 !important;
-  border-bottom: 2px solid #d2dce8 !important;
+  border-bottom: 2px solid #e2e8f0 !important;
   font-weight: 600 !important;
 }
 
@@ -479,13 +479,13 @@ one-app-nav-bar-item-root.slds-is-active .slds-context-bar__label-action,
 
 .slds-modal__container {
   background-color: #ffffff !important;
-  border: 1px solid #d2dce8 !important;
+  border: 1px solid #e2e8f0 !important;
   box-shadow: 0 20px 60px rgba(30, 58, 95, 0.18) !important;
 }
 
 .slds-modal__header {
   background-color: #f7faff !important;
-  border-bottom: 1px solid #d2dce8 !important;
+  border-bottom: 1px solid #e2e8f0 !important;
   color: #1a202c !important;
 }
 
@@ -496,7 +496,7 @@ one-app-nav-bar-item-root.slds-is-active .slds-context-bar__label-action,
 
 .slds-modal__footer {
   background-color: #f0f4f8 !important;
-  border-top: 1px solid #d2dce8 !important;
+  border-top: 1px solid #e2e8f0 !important;
 }
 
 .slds-backdrop {
@@ -526,7 +526,7 @@ one-app-nav-bar-item-root.slds-is-active .slds-context-bar__label-action,
 /* LWC root inside the launcher modal — paint with theme background so
  * the app grid sits on a themed surface instead of SF default white. */
 one-app-launcher-modal {
-  background-color: #f0f4f8 !important;
+  background-color: #f7fafc !important;
 }
 
 one-app-launcher-modal .modal-container,
@@ -559,7 +559,7 @@ one-app-launcher-modal ~ .slds-backdrop {
 .slds-dropdown,
 .slds-dropdown__list {
   background-color: #ffffff !important;
-  border: 1px solid #d2dce8 !important;
+  border: 1px solid #e2e8f0 !important;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.10) !important;
 }
 
@@ -577,7 +577,7 @@ one-app-launcher-modal ~ .slds-backdrop {
 
 .slds-popover {
   background-color: #ffffff !important;
-  border: 1px solid #d2dce8 !important;
+  border: 1px solid #e2e8f0 !important;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.10) !important;
   color: #1a202c !important;
 }
@@ -665,11 +665,11 @@ one-app-launcher-modal ~ .slds-backdrop {
 a,
 .slds-truncate a,
 .forceOutputLookup a {
-  color: #2b6cb0 !important;
+  color: #3182ce !important;
 }
 
 a:hover {
-  color: #153e73 !important;
+  color: #2c5282 !important;
 }
 
 /* ─── Setup Pages ────────────────────────────────────────────────────────── */
@@ -690,7 +690,7 @@ a:hover {
 .bPageBlock,
 .pbBody,
 .pbSubsection {
-  background-color: #f0f4f8 !important;
+  background-color: #f7fafc !important;
   color: #1a202c !important;
 }
 
@@ -704,7 +704,7 @@ body.setupTab,
 body[class*="setup"],
 .setupHelpContent,
 .setupBodyDiv {
-  background-color: #f0f4f8 !important;
+  background-color: #f7fafc !important;
   color: #1a202c !important;
 }
 
@@ -720,7 +720,7 @@ body[class*="setup"],
 .setupBody .pbSubsection,
 .setupBody .pbHeader {
   background-color: #ffffff !important;
-  border-color: #d2dce8 !important;
+  border-color: #e2e8f0 !important;
   color: #1a202c !important;
 }
 
@@ -732,7 +732,7 @@ body[class*="setup"],
 .slds-report,
 .forceReportOutput,
 .reportHeader {
-  background-color: #f0f4f8 !important;
+  background-color: #f7fafc !important;
   color: #1a202c !important;
 }
 
@@ -743,7 +743,7 @@ body[class*="setup"],
 .split-view,
 .slds-split-view,
 [class*="console"] {
-  background-color: #f0f4f8 !important;
+  background-color: #f7fafc !important;
   color: #1a202c !important;
 }
 
@@ -759,9 +759,9 @@ body[class*="setup"],
 .record-page-decorator,
 .recordHomeTemplate,
 .forceHighlightsLayout {
-  background-color: #f0f4f8 !important;
+  background-color: #f7fafc !important;
   color: #1a202c !important;
-  border-color: #d2dce8 !important;
+  border-color: #e2e8f0 !important;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06) !important;
 }
 
@@ -770,7 +770,7 @@ body[class*="setup"],
 .flexipage-template,
 .uiTabBar + .tabContent,
 .forceRecordFlexiPage {
-  background-color: #f0f4f8 !important;
+  background-color: #f7fafc !important;
 }
 
 /* ─── Path / Stage Path ─────────────────────────────────────────────────── */
@@ -819,7 +819,7 @@ body .forcePathAssistant .slds-card,
 body .forcePathAssistant .slds-card__body,
 body .forcePathAssistant .slds-card__body_inner {
   background-color: #ffffff !important;
-  border-color: #d2dce8 !important;
+  border-color: #e2e8f0 !important;
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06) !important;
 }
 
@@ -827,25 +827,25 @@ body .forcePathAssistant .slds-card__body_inner {
 body .slds-path__item,
 body .slds-path__item .slds-path__link,
 body .slds-path__item a.slds-path__link {
-  background-color: #e8f0f8 !important;
+  background-color: #edf2f7 !important;
 }
 
 body .slds-path__item.slds-is-complete,
 body .slds-path__item.slds-is-complete .slds-path__link,
 body .slds-path__item.slds-is-complete a.slds-path__link {
-  background-color: #2b6cb0 !important;
+  background-color: #3182ce !important;
 }
 
 body .slds-path__item.slds-is-current,
 body .slds-path__item.slds-is-current .slds-path__link,
 body .slds-path__item.slds-is-current a.slds-path__link {
-  background-color: #2b6cb0 !important;
+  background-color: #3182ce !important;
 }
 
 body .slds-path__item.slds-is-incomplete,
 body .slds-path__item.slds-is-incomplete .slds-path__link,
 body .slds-path__item.slds-is-incomplete a.slds-path__link {
-  background-color: #e8f0f8 !important;
+  background-color: #edf2f7 !important;
 }
 
 /* Path chevrons — SLDS uses skewed ::before/::after with background, NOT border triangles */
@@ -854,24 +854,24 @@ body .slds-path__item.slds-is-incomplete a.slds-path__link {
 /* Incomplete (default) — item + pseudo-elements */
 body .slds-path__item::before,
 body .slds-path__item::after {
-  background: #e8f0f8 !important;
+  background: #edf2f7 !important;
 }
 
 body .slds-path__item.slds-is-incomplete::before,
 body .slds-path__item.slds-is-incomplete::after {
-  background: #e8f0f8 !important;
+  background: #edf2f7 !important;
 }
 
 /* Complete */
 body .slds-path__item.slds-is-complete::before,
 body .slds-path__item.slds-is-complete::after {
-  background: #2b6cb0 !important;
+  background: #3182ce !important;
 }
 
 /* Current */
 body .slds-path__item.slds-is-current::before,
 body .slds-path__item.slds-is-current::after {
-  background-color: #2b6cb0 !important;
+  background-color: #3182ce !important;
   background-image: none !important;
 }
 
@@ -884,7 +884,7 @@ body .slds-path__item.slds-is-incomplete.slds-is-active,
 body .slds-path__item.slds-is-incomplete.slds-is-active .slds-path__link,
 body .slds-path__item.slds-is-incomplete.slds-is-active a.slds-path__link,
 body .slds-path__item [aria-selected="true"] {
-  background-color: #1e4f8c !important;
+  background-color: #2c5282 !important;
   color: #ffffff !important;
 }
 
@@ -892,18 +892,18 @@ body .slds-path__item.slds-is-active::before,
 body .slds-path__item.slds-is-active::after,
 body .slds-path__item.slds-is-incomplete.slds-is-active::before,
 body .slds-path__item.slds-is-incomplete.slds-is-active::after {
-  background: #1e4f8c !important;
+  background: #2c5282 !important;
 }
 
 /* Hover — incomplete items */
 .slds-path__item:hover,
 .slds-path__item:hover .slds-path__link {
-  background-color: #e8f0f8 !important;
+  background-color: #ebf4ff !important;
 }
 
 .slds-path__item:hover::before,
 .slds-path__item:hover::after {
-  background: #e8f0f8 !important;
+  background: #ebf4ff !important;
 }
 
 /* Hover — complete/current items */
@@ -911,14 +911,14 @@ body .slds-path__item.slds-is-incomplete.slds-is-active::after {
 .slds-path__item.slds-is-complete:hover .slds-path__link,
 .slds-path__item.slds-is-current:hover,
 .slds-path__item.slds-is-current:hover .slds-path__link {
-  background-color: #1e4f8c !important;
+  background-color: #2c5282 !important;
 }
 
 .slds-path__item.slds-is-complete:hover::before,
 .slds-path__item.slds-is-complete:hover::after,
 .slds-path__item.slds-is-current:hover::before,
 .slds-path__item.slds-is-current:hover::after {
-  background: #1e4f8c !important;
+  background: #2c5282 !important;
 }
 
 /* Won (Closed Won) */
@@ -974,7 +974,7 @@ body .slds-path__item.slds-is-lost .slds-path__title {
 /* Related list containers — background only, cards handle their own borders */
 .forceRelatedListContainer,
 .forceRelatedListSingleContainer {
-  background-color: #f0f4f8 !important;
+  background-color: #f7fafc !important;
 }
 
 /* Related list inner headers — no extra borders */
@@ -1003,4 +1003,15 @@ body .slds-path__item.slds-is-lost .slds-path__title {
 .forceSocialPhoto,
 .photoContainer {
   border-color: transparent !important;
+}
+
+/* ─── Typography overrides ──────────────────────────────────────────── */
+
+:root {
+  --lwc-fontFamily: Inter, Roboto, 'Helvetica Neue', 'Arial Nova', 'Nimbus Sans', Arial, sans-serif !important;
+  --slds-g-font-family: Inter, Roboto, 'Helvetica Neue', 'Arial Nova', 'Nimbus Sans', Arial, sans-serif !important;
+}
+
+body, .desktop, .oneContent, .slds-scope {
+  font-family: Inter, Roboto, 'Helvetica Neue', 'Arial Nova', 'Nimbus Sans', Arial, sans-serif !important;
 }

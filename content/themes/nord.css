@@ -1068,3 +1068,14 @@ body .slds-path__item.slds-is-lost .slds-path__title {
 .photoContainer {
   border-color: transparent !important;
 }
+
+/* ─── Typography overrides ──────────────────────────────────────────── */
+
+:root {
+  --lwc-fontFamily: Inter, Roboto, 'Helvetica Neue', 'Arial Nova', 'Nimbus Sans', Arial, sans-serif !important;
+  --slds-g-font-family: Inter, Roboto, 'Helvetica Neue', 'Arial Nova', 'Nimbus Sans', Arial, sans-serif !important;
+}
+
+body, .desktop, .oneContent, .slds-scope {
+  font-family: Inter, Roboto, 'Helvetica Neue', 'Arial Nova', 'Nimbus Sans', Arial, sans-serif !important;
+}

@@ -241,7 +241,7 @@
         "textPrimary": "#2d2d2d",
         "textSecondary": "#4a5568",
         "textMuted": "#6b7280",
-        "textPlaceholder": "#9aa5b4",
+        "textPlaceholder": "#b0b7c3",
         "accent": "#4a6fa5",
         "accentHover": "#3d5e8c",
         "accentActive": "#2d4a72",
@@ -296,7 +296,10 @@
         "colorScheme": "light",
         "globalHeaderWhite": true
       },
-      "suggestedEffects": "subtle"
+      "suggestedEffects": "subtle",
+      "typography": {
+        "fontFamily": "neo-grotesque"
+      }
     },
     {
       "id": "connectry-dark",
@@ -333,7 +336,7 @@
         "textPrimary": "#e8eaed",
         "textSecondary": "#9aa0a9",
         "textMuted": "#6b7280",
-        "textPlaceholder": "#5f6368",
+        "textPlaceholder": "#4a5058",
         "accent": "#6d9fd4",
         "accentHover": "#4a6fa5",
         "accentActive": "#3d5e8e",
@@ -394,7 +397,10 @@
         "searchFocusBorder": "#6d9fd4",
         "searchFocusShadow": "0 0 0 2px rgba(109, 159, 212, 0.25)"
       },
-      "suggestedEffects": "subtle"
+      "suggestedEffects": "subtle",
+      "typography": {
+        "fontFamily": "neo-grotesque"
+      }
     },
     {
       "id": "slate",
@@ -503,10 +509,10 @@
         "dramatic"
       ],
       "colors": {
-        "background": "#0a0a0f",
+        "background": "#05070a",
         "surface": "#0d1117",
-        "surfaceAlt": "#111820",
-        "surfaceHover": "#0f1520",
+        "surfaceAlt": "#0f1520",
+        "surfaceHover": "rgba(0,229,255,0.06)",
         "surfaceHighlight": "rgba(0, 229, 255, 0.08)",
         "surfaceSelection": "rgba(0, 229, 255, 0.12)",
         "nav": "#0d1117",
@@ -595,7 +601,10 @@
           "linkHoverTextShadow": "0 0 10px rgba(0, 229, 255, 0.5)"
         }
       },
-      "suggestedEffects": "immersive"
+      "suggestedEffects": "immersive",
+      "typography": {
+        "fontFamily": "geometric"
+      }
     },
     {
       "id": "obsidian",
@@ -612,10 +621,10 @@
         "premium"
       ],
       "colors": {
-        "background": "#111111",
+        "background": "#0d0d0d",
         "surface": "#1a1a1a",
         "surfaceAlt": "#202020",
-        "surfaceHover": "#1e1e1e",
+        "surfaceHover": "#262626",
         "surfaceHighlight": "rgba(212, 168, 83, 0.08)",
         "surfaceSelection": "rgba(212, 168, 83, 0.12)",
         "nav": "#1a1a1a",
@@ -629,9 +638,9 @@
         "navAppName": "#e8e6e3",
         "navAppBorder": "#2a2a2a",
         "navWaffleDot": "#a39e93",
-        "textPrimary": "#e8e6e3",
+        "textPrimary": "#ede7d3",
         "textSecondary": "#a39e93",
-        "textMuted": "#5c5852",
+        "textMuted": "#7a7568",
         "textPlaceholder": "#4a4540",
         "accent": "#d4a853",
         "accentHover": "#c49340",
@@ -693,7 +702,10 @@
         "searchFocusBorder": "#d4a853",
         "searchFocusShadow": "0 0 0 2px rgba(212, 168, 83, 0.25)"
       },
-      "suggestedEffects": "subtle"
+      "suggestedEffects": "subtle",
+      "typography": {
+        "fontFamily": "classic-serif"
+      }
     },
     {
       "id": "arctic",
@@ -710,39 +722,39 @@
         "accessible"
       ],
       "colors": {
-        "background": "#f0f4f8",
+        "background": "#f7fafc",
         "surface": "#ffffff",
-        "surfaceAlt": "#e8f0f8",
-        "surfaceHover": "#e8f0f8",
+        "surfaceAlt": "#edf2f7",
+        "surfaceHover": "#ebf4ff",
         "surfaceHighlight": "#dbeafe",
         "surfaceSelection": "#bfdbfe",
-        "nav": "#1e3a5f",
-        "navHover": "rgba(255, 255, 255, 0.1)",
-        "navActive": "rgba(255, 255, 255, 0.16)",
-        "navActiveBorder": "#63b3ed",
-        "navText": "#bee3f8",
-        "navBorder": "#153e73",
-        "navIcon": "#bee3f8",
-        "navActiveText": "#ffffff",
-        "navAppName": "#ffffff",
-        "navAppBorder": "rgba(255, 255, 255, 0.15)",
-        "navWaffleDot": "#ffffff",
+        "nav": "#ffffff",
+        "navHover": "rgba(49, 130, 206, 0.08)",
+        "navActive": "rgba(49, 130, 206, 0.12)",
+        "navActiveBorder": "#3182ce",
+        "navText": "#1a202c",
+        "navBorder": "#e2e8f0",
+        "navIcon": "#3182ce",
+        "navActiveText": "#3182ce",
+        "navAppName": "#1a202c",
+        "navAppBorder": "#e2e8f0",
+        "navWaffleDot": "#3182ce",
         "textPrimary": "#1a202c",
         "textSecondary": "#4a5568",
         "textMuted": "#718096",
         "textPlaceholder": "#a0aec0",
-        "accent": "#2b6cb0",
-        "accentHover": "#1e4f8c",
-        "accentActive": "#153e73",
-        "accentLight": "rgba(43, 108, 176, 0.12)",
-        "border": "#d2dce8",
+        "accent": "#3182ce",
+        "accentHover": "#2c5282",
+        "accentActive": "#2a4365",
+        "accentLight": "rgba(49, 130, 206, 0.12)",
+        "border": "#e2e8f0",
         "borderSeparator": "#dde5ef",
-        "borderInput": "#b2c3d8",
+        "borderInput": "#cbd5e0",
         "success": "#059669",
         "warning": "#d97706",
         "error": "#dc2626",
-        "link": "#2b6cb0",
-        "linkHover": "#153e73",
+        "link": "#3182ce",
+        "linkHover": "#2c5282",
         "scrollTrack": "#f0f4f8",
         "scrollThumb": "#b2c3d8",
         "scrollThumbHover": "#8aa3be",
@@ -785,7 +797,10 @@
         "colorScheme": "light",
         "globalHeaderWhite": false
       },
-      "suggestedEffects": "alive"
+      "suggestedEffects": "alive",
+      "typography": {
+        "fontFamily": "neo-grotesque"
+      }
     },
     {
       "id": "sakura",
@@ -820,8 +835,8 @@
         "navAppBorder": "rgba(255, 255, 255, 0.2)",
         "navWaffleDot": "#ffffff",
         "textPrimary": "#1f1215",
-        "textSecondary": "#6b4c5a",
-        "textMuted": "#718096",
+        "textSecondary": "#7a5765",
+        "textMuted": "#8b6b75",
         "textPlaceholder": "#c4a0af",
         "accent": "#e11d48",
         "accentHover": "#be185d",
@@ -877,7 +892,10 @@
         "colorScheme": "light",
         "globalHeaderWhite": false
       },
-      "suggestedEffects": "subtle"
+      "suggestedEffects": "subtle",
+      "typography": {
+        "fontFamily": "humanist"
+      }
     },
     {
       "id": "nord",
@@ -975,7 +993,10 @@
         "searchFocusBorder": "#88c0d0",
         "searchFocusShadow": "0 0 0 2px rgba(136, 192, 208, 0.25)"
       },
-      "suggestedEffects": "subtle"
+      "suggestedEffects": "subtle",
+      "typography": {
+        "fontFamily": "neo-grotesque"
+      }
     },
     {
       "id": "high-contrast",

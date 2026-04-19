@@ -36,18 +36,18 @@ function _generateTypographyCSS(typo) {
   if (headingStack) css += `  --lwc-fontFamilyHeading: ${headingStack} !important;\n`;
   css += `  --slds-g-font-family: ${bodyStack} !important;\n`;
 
-  // Weight tokens
-  if (typo.weightBody !== 400) {
+  // Weight tokens — only emit when explicitly set (don't emit 'undefined')
+  if (typo.weightBody != null && typo.weightBody !== 400) {
     css += `  --lwc-fontWeightRegular: ${typo.weightBody} !important;\n`;
     css += `  --slds-g-font-weight-4: ${typo.weightBody} !important;\n`;
   }
-  if (typo.weightHeading !== 700) {
+  if (typo.weightHeading != null && typo.weightHeading !== 700) {
     css += `  --lwc-fontWeightBold: ${typo.weightHeading} !important;\n`;
     css += `  --slds-g-font-weight-7: ${typo.weightHeading} !important;\n`;
   }
 
-  // Line height
-  if (typo.lineHeight !== 1.375) {
+  // Line height — only emit when explicitly set
+  if (typo.lineHeight != null && typo.lineHeight !== 1.375) {
     css += `  --lwc-lineHeightText: ${typo.lineHeight} !important;\n`;
     css += `  --lwc-lineHeightHeading: ${Math.max(1.1, typo.lineHeight - 0.125)} !important;\n`;
   }

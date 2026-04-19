@@ -34,8 +34,8 @@
   --lwc-headerColorBackground: #be185d !important;
   --lwc-pageColorBackground: #fff5f5 !important;
   --lwc-colorTextDefault: #1f1215 !important;
-  --lwc-colorTextWeak: #6b4c5a !important;
-  --lwc-colorTextLabel: #6b4c5a !important;
+  --lwc-colorTextWeak: #7a5765 !important;
+  --lwc-colorTextLabel: #7a5765 !important;
   --lwc-colorTextPlaceholder: #c4a0af !important;
   --lwc-colorTextButtonBrand: #ffffff !important;
   --lwc-colorTextLink: #be185d !important;
@@ -58,8 +58,8 @@
   --slds-g-color-surface-3: #ffe8e8 !important;
   --slds-g-color-surface-4: #f5d0d8 !important;
   --slds-g-color-on-surface-1: #1f1215 !important;
-  --slds-g-color-on-surface-2: #6b4c5a !important;
-  --slds-g-color-on-surface-3: #718096 !important;
+  --slds-g-color-on-surface-2: #7a5765 !important;
+  --slds-g-color-on-surface-3: #8b6b75 !important;
   --slds-g-color-border-1: #e8b4c0 !important;
   --slds-g-color-border-2: #e8b4c0 !important;
   --slds-g-color-brand-1: #e11d48 !important;
@@ -102,7 +102,7 @@
   --lwc-colorBackgroundPill: #fce4ec !important;
 
   /* Legacy LWC — button states */
-  --lwc-colorBackgroundButtonBrandDisabled: #718096 !important;
+  --lwc-colorBackgroundButtonBrandDisabled: #8b6b75 !important;
   --lwc-colorBackgroundButtonDefaultActive: #ffe8e8 !important;
   --lwc-colorBackgroundButtonDefaultDisabled: #ffffff !important;
   --lwc-buttonColorBackgroundPrimary: #e11d48 !important;
@@ -110,18 +110,18 @@
 
   /* Legacy LWC — text (buttons, icons, actions) */
   --lwc-colorTextButtonBrandHover: #ffffff !important;
-  --lwc-colorTextButtonBrandDisabled: #718096 !important;
+  --lwc-colorTextButtonBrandDisabled: #8b6b75 !important;
   --lwc-colorTextButtonDefault: #1a202c !important;
   --lwc-colorTextButtonDefaultHover: #1a202c !important;
-  --lwc-colorTextButtonDefaultHint: #6b4c5a !important;
-  --lwc-colorTextButtonDefaultDisabled: #718096 !important;
-  --lwc-colorTextIconDefault: #6b4c5a !important;
+  --lwc-colorTextButtonDefaultHint: #7a5765 !important;
+  --lwc-colorTextButtonDefaultDisabled: #8b6b75 !important;
+  --lwc-colorTextIconDefault: #7a5765 !important;
   --lwc-colorTextIconDefaultHover: #1f1215 !important;
   --lwc-colorTextIconDefaultActive: #e11d48 !important;
-  --lwc-colorTextIconDefaultDisabled: #718096 !important;
-  --lwc-colorTextActionLabel: #6b4c5a !important;
+  --lwc-colorTextIconDefaultDisabled: #8b6b75 !important;
+  --lwc-colorTextActionLabel: #7a5765 !important;
   --lwc-colorTextActionLabelActive: #1f1215 !important;
-  --lwc-colorTextInputIcon: #6b4c5a !important;
+  --lwc-colorTextInputIcon: #7a5765 !important;
 
   /* Legacy LWC — borders */
   --lwc-colorBorderPrimary: #f5d0d8 !important;
@@ -158,7 +158,7 @@
   --lwc-colorBackgroundNotification: #fce4ec !important;
   --lwc-colorBackgroundToggleHover: #ffe8e8 !important;
   --lwc-colorTextPrimary: #1f1215 !important;
-  --lwc-colorTextLinkDisabled: #718096 !important;
+  --lwc-colorTextLinkDisabled: #8b6b75 !important;
   --lwc-colorTextLinkActive: #9d174d !important;
   /* Kebab-case aliases SF uses alongside camelCase */
   --lwc-color-background: #fff5f5 !important;
@@ -339,7 +339,7 @@ one-app-nav-bar-item-root.slds-is-active .slds-context-bar__label-action,
 }
 
 .slds-page-header__meta-text {
-  color: #6b4c5a !important;
+  color: #7a5765 !important;
 }
 
 /* ─── Cards ──────────────────────────────────────────────────────────────── */
@@ -435,7 +435,7 @@ one-app-nav-bar-item-root.slds-is-active .slds-context-bar__label-action,
 }
 
 .slds-form-element__label {
-  color: #6b4c5a !important;
+  color: #7a5765 !important;
   font-weight: 500 !important;
 }
 
@@ -1002,4 +1002,15 @@ body .slds-path__item.slds-is-lost .slds-path__title {
 .forceSocialPhoto,
 .photoContainer {
   border-color: transparent !important;
+}
+
+/* ─── Typography overrides ──────────────────────────────────────────── */
+
+:root {
+  --lwc-fontFamily: Seravek, 'Gill Sans Nova', Ubuntu, Calibri, 'DejaVu Sans', source-sans-pro, sans-serif !important;
+  --slds-g-font-family: Seravek, 'Gill Sans Nova', Ubuntu, Calibri, 'DejaVu Sans', source-sans-pro, sans-serif !important;
+}
+
+body, .desktop, .oneContent, .slds-scope {
+  font-family: Seravek, 'Gill Sans Nova', Ubuntu, Calibri, 'DejaVu Sans', source-sans-pro, sans-serif !important;
 }
