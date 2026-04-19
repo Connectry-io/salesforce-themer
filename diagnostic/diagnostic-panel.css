@@ -2005,6 +2005,32 @@
 .diag-cov-pass { color: #16a34a; font-weight: 600; }
 .diag-cov-warn { color: #eab308; font-weight: 600; }
 .diag-cov-fail { color: #ef4444; font-weight: 600; }
+
+/* Clickable rows — apply theme + drill into single-theme view */
+.diag-multiscan-row {
+  cursor: pointer;
+  transition: background 150ms ease;
+}
+
+.diag-multiscan-row:hover {
+  background: var(--dp-accent-bg);
+}
+
+.diag-multiscan-row.is-active {
+  background: var(--dp-accent-bg);
+}
+
+.diag-multiscan-row.is-active td:first-child {
+  color: var(--dp-accent-text);
+}
+
+.diag-multiscan-hint {
+  margin-top: 8px;
+  padding: 6px 2px 0;
+  font-size: 10px;
+  color: var(--dp-text-3);
+  font-style: italic;
+}
 .diag-scan-btn--secondary {
   background: transparent;
   border: 1px solid rgba(128, 128, 128, 0.25);

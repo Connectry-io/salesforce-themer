@@ -1725,6 +1725,8 @@
         else if (action === 'copyComponentPatches') this._copyComponentPatches(btn);
         else if (action === 'copyMultiScan') this._copyMultiScanReport(btn);
         else if (action === 'viewMultiScan') this._openMultiScanReport();
+        else if (action === 'applyAndScan') this._applyAndScanSingleTheme(btn.dataset.themeId);
+        else if (action === 'suggestMultiThemeAIFix') this._suggestMultiThemeAIFix(btn);
         else if (action === 'copyFullCSS') this._copyFullCSS(btn);
         else if (action === 'savePatch') this._savePatch(btn);
         else if (action === 'togglePatch') this._togglePatch(btn);
@@ -2002,6 +2004,7 @@
         sorted.reduce((s, r) => s + (r.coverage || 0), 0) / sorted.length
       );
 
+      const activeId = this.currentTheme;
       const rows = sorted.map(r => {
         const tokenClass = r.coverage >= 100 ? 'pass' : r.coverage >= 95 ? 'warn' : 'fail';
         const compClass = r.componentHealth >= 80 ? 'pass' : r.componentHealth >= 50 ? 'warn' : 'fail';
@@ -2010,9 +2013,13 @@
           ? Math.round((r.coverage + r.componentHealth) / 2)
           : (r.coverage ?? r.componentHealth ?? null);
         const pageClass = pageHealth == null ? 'fail' : pageHealth >= 85 ? 'pass' : pageHealth >= 60 ? 'warn' : 'fail';
+        const isActive = r.id === activeId;
+        const rowTitle = isActive
+          ? 'Currently active theme'
+          : `Apply "${r.name}" and drill into single-theme view`;
         return `
-          <tr>
-            <td style="padding:6px 8px;font-weight:500">${this._escapeHtml(r.name)}</td>
+          <tr class="diag-multiscan-row${isActive ? ' is-active' : ''}" data-action="applyAndScan" data-theme-id="${this._escapeHtml(r.id)}" title="${this._escapeHtml(rowTitle)}">
+            <td style="padding:6px 8px;font-weight:500">${isActive ? '● ' : ''}${this._escapeHtml(r.name)}</td>
             <td style="padding:6px 8px;text-align:right" class="diag-cov-${pageClass}">${pageHealth != null ? pageHealth + '%' : '—'}</td>
             <td style="padding:6px 8px;text-align:right" class="diag-cov-${tokenClass}">${r.coverage != null ? r.coverage + '%' : '—'}</td>
             <td style="padding:6px 8px;text-align:right" class="diag-cov-${compClass}">${r.componentHealth != null ? r.componentHealth + '%' : '—'}</td>
@@ -2041,7 +2048,14 @@
             </thead>
             <tbody>${rows}</tbody>
           </table>
-          <div class="diag-primary-actions" style="padding:10px 0 0;margin-top:12px;border-top:1px solid var(--dp-border-row);border-bottom:none">
+          <div class="diag-multiscan-hint">Click a theme to apply &amp; drill into its single-theme scan.</div>
+          <div class="diag-primary-actions" style="padding:10px 0 0;margin-top:10px;border-top:1px solid var(--dp-border-row);border-bottom:none">
+            <button class="diag-primary-btn diag-primary-btn--ai"
+                    ${this.aiBusy ? 'disabled' : 'data-action="suggestMultiThemeAIFix"'}
+                    title="Send the full multi-theme comparison to Connectry AI for pattern-level fixes (engine improvements that lift all themes at once)">
+              <span class="diag-primary-icon">✨</span>
+              <span class="diag-primary-label">${this.aiBusy ? 'Thinking…' : `AI Fix (all ${sorted.length})`}</span>
+            </button>
             <button class="diag-primary-btn" data-action="copyMultiScan" title="Copy this comparison table as Markdown">
               ${ICONS.copy}
               <span class="diag-primary-label">Copy</span>
@@ -2113,6 +2127,110 @@
         screenshotDataUrl: this.screenshotDataUrl,
         multiScan: payload,
       });
+    }
+
+    async _applyAndScanSingleTheme(themeId) {
+      if (!themeId) return;
+      // Apply the picked theme via the background setTheme pipeline.
+      try {
+        await new Promise((resolve) => {
+          chrome.runtime.sendMessage({ action: 'setTheme', theme: themeId }, () => resolve());
+        });
+      } catch (_) {}
+      // Clear multi-scan state so the single-theme view takes over.
+      this._multiScanResults = null;
+      this.currentTheme = themeId;
+      this.themeColors = null;
+      this.themeDisplayName = null;
+      this.scanResults = null;
+      this.componentResults = null;
+      this.fixReport = null;
+      this.hasScanned = false;
+      // Full re-render; _autoScan will populate the single-theme view.
+      try {
+        if (ns.resolveThemeColors) this.themeColors = await ns.resolveThemeColors(themeId);
+        if (ns.resolveThemeName) this.themeDisplayName = await ns.resolveThemeName(themeId);
+      } catch (_) {}
+      if (!this.isOpen || this.isMinimized) return;
+      this._renderPanel();
+      this._autoScan();
+    }
+
+    async _suggestMultiThemeAIFix(_btn) {
+      const intel = window.ConnectryIntel;
+      const payload = this._multiScanResults;
+      if (!intel || !payload?.results?.length) {
+        this.aiSuggestion = { error: 'No multi-theme results to send.' };
+        this._rerender();
+        return;
+      }
+      const consent = await intel.getConsent?.();
+      if (!consent) {
+        const ok = window.confirm(
+          'AI Fix (all themes) sends the multi-theme comparison to Connectry so we can suggest engine-level patches that lift every theme at once.\n\n' +
+          'Sent:\n' +
+          '  • Page URL + theme names\n' +
+          '  • Per-theme token coverage %, component health %, gap count\n' +
+          '  • Your active theme\'s gaps (if any)\n\n' +
+          'Continue?'
+        );
+        if (!ok) return;
+        await intel.setConsent?.(true);
+      }
+
+      // Build an engine-level findings payload. AI decides what to do with it
+      // on the backend — typical output is a pattern-level patch
+      // (engine-token addition) rather than a per-theme CSS patch.
+      const tokenGaps = this.scanResults?.gaps || [];
+      const themeStats = payload.results.map(r => ({
+        id: r.id,
+        name: r.name,
+        tokens: r.coverage,
+        components: r.componentHealth,
+        gaps: r.gaps,
+      }));
+
+      this.aiBusy = true;
+      this.aiSuggestion = null;
+      this._setAIProgress('Analysing 16 themes…');
+      try {
+        const r = await intel.suggestFix({
+          intent: 'multitheme_pattern',
+          findings: {
+            mode: 'multitheme',
+            scope: payload.mode,
+            themeCount: themeStats.length,
+            themeStats,
+            activeThemeGaps: tokenGaps.map((g, i) => ({ id: `gap-${i + 1}`, token: g })),
+          },
+          context: {
+            themeId: this.currentTheme || null,
+            page: location.pathname,
+            scan_source: 'multitheme',
+            activeTokens: this.themeColors || {},
+          },
+          mode: 'silent',
+        });
+        this.aiBusy = false;
+        this.aiProgress = null;
+        if (r?.error) {
+          this.aiSuggestion = { error: r.error, source: 'multitheme' };
+        } else {
+          this.aiSuggestion = {
+            id: r.suggestion_id,
+            output: r.output,
+            status: r.status || 'previewing',
+            reject_reason: r.reject_reason || null,
+            source: 'multitheme',
+            mode: 'silent',
+          };
+        }
+      } catch (err) {
+        this.aiBusy = false;
+        this.aiProgress = null;
+        this.aiSuggestion = { error: String(err.message || err), source: 'multitheme' };
+      }
+      this._rerender();
     }
 
     _showMultiScanEmpty(mode) {
