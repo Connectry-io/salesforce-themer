@@ -4829,50 +4829,38 @@
     root.style.setProperty('--ged-accent', c.accent);
     root.style.setProperty('--ged-text', c.textPrimary);
 
-    // INPUTS — the 4 cardinal colours, big chips
+    // INPUTS — 4 stacked chips on the left side of the L→R flow.
     const inputs = [
-      { key: 'background', label: 'Background', cssVar: '--ged-bg', text: c.textPrimary },
-      { key: 'surface',    label: 'Surface',    cssVar: '--ged-surface', text: c.textPrimary },
-      { key: 'accent',     label: 'Accent',     cssVar: '--ged-accent', text: '#ffffff' },
-      { key: 'text',       label: 'Text',       cssVar: '--ged-text', text: c.background },
+      { label: 'Background', cssVar: '--ged-bg' },
+      { label: 'Surface',    cssVar: '--ged-surface' },
+      { label: 'Accent',     cssVar: '--ged-accent' },
+      { label: 'Text',       cssVar: '--ged-text' },
     ];
     inputGrid.innerHTML = inputs.map(i => `
-      <div class="ged-chip ged-chip-input" style="background: var(${i.cssVar}); color: ${i.text}">
+      <div class="ged-chip ged-chip-input" title="${i.label}">
+        <span class="ged-chip-swatch" style="background: var(${i.cssVar})"></span>
         <span class="ged-chip-label">${i.label}</span>
       </div>
     `).join('');
 
-    // OUTPUTS — 16 derived swatches grouped roughly by source colour.
-    // Each style uses color-mix() so derivation stays in CSS land.
+    // OUTPUTS — 12 derived swatches in a 4×3 grid. Compact tooltips
+    // surface the label on hover so chips can stay tight.
     const outputs = [
-      // From accent (6) — buttons, focus, selection
-      { label: 'accent-hover',   bg: 'color-mix(in srgb, var(--ged-accent) 85%, black)', text: '#fff' },
-      { label: 'accent-pressed', bg: 'color-mix(in srgb, var(--ged-accent) 70%, black)', text: '#fff' },
-      { label: 'accent-soft',    bg: 'color-mix(in srgb, var(--ged-accent) 12%, var(--ged-surface))' },
-      { label: 'accent-border',  bg: 'color-mix(in srgb, var(--ged-accent) 35%, var(--ged-surface))' },
-      { label: 'focus-ring',     bg: 'color-mix(in srgb, var(--ged-accent) 50%, transparent)' },
-      { label: 'link-visited',   bg: 'color-mix(in srgb, var(--ged-accent) 70%, var(--ged-text))', text: '#fff' },
-
-      // From surface + text (5) — chrome, dividers, shadows
+      { label: 'accent-hover',     bg: 'color-mix(in srgb, var(--ged-accent) 85%, black)' },
+      { label: 'accent-pressed',   bg: 'color-mix(in srgb, var(--ged-accent) 70%, black)' },
+      { label: 'accent-soft',      bg: 'color-mix(in srgb, var(--ged-accent) 12%, var(--ged-surface))' },
+      { label: 'focus-ring',       bg: 'color-mix(in srgb, var(--ged-accent) 50%, transparent)' },
       { label: 'surface-elevated', bg: 'color-mix(in srgb, var(--ged-surface) 92%, white)' },
       { label: 'surface-border',   bg: 'color-mix(in srgb, var(--ged-text) 14%, var(--ged-surface))' },
       { label: 'surface-divider',  bg: 'color-mix(in srgb, var(--ged-text) 7%, var(--ged-surface))' },
-      { label: 'surface-shadow',   bg: 'color-mix(in srgb, var(--ged-text) 22%, transparent)' },
       { label: 'overlay-scrim',    bg: 'color-mix(in srgb, var(--ged-text) 55%, transparent)' },
-
-      // From text (3) — typography hierarchy
-      { label: 'text-muted',     bg: 'color-mix(in srgb, var(--ged-text) 65%, var(--ged-surface))' },
-      { label: 'text-subtle',    bg: 'color-mix(in srgb, var(--ged-text) 40%, var(--ged-surface))' },
-      { label: 'text-disabled',  bg: 'color-mix(in srgb, var(--ged-text) 22%, var(--ged-surface))' },
-
-      // From background (2) — canvas variants
-      { label: 'bg-tint',  bg: 'color-mix(in srgb, var(--ged-surface) 50%, var(--ged-bg))' },
-      { label: 'bg-shade', bg: 'color-mix(in srgb, var(--ged-text) 6%, var(--ged-bg))' },
+      { label: 'text-muted',       bg: 'color-mix(in srgb, var(--ged-text) 65%, var(--ged-surface))' },
+      { label: 'text-subtle',      bg: 'color-mix(in srgb, var(--ged-text) 40%, var(--ged-surface))' },
+      { label: 'bg-tint',          bg: 'color-mix(in srgb, var(--ged-surface) 50%, var(--ged-bg))' },
+      { label: 'bg-shade',         bg: 'color-mix(in srgb, var(--ged-text) 6%, var(--ged-bg))' },
     ];
     outputGrid.innerHTML = outputs.map(o => `
-      <div class="ged-chip ged-chip-output" style="background: ${o.bg};${o.text ? ` color: ${o.text};` : ''}">
-        <span class="ged-chip-label">${o.label}</span>
-      </div>
+      <span class="ged-chip ged-chip-output" style="background: ${o.bg}" title="${o.label}"></span>
     `).join('');
   }
 

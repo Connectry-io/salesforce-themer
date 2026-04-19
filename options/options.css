@@ -5564,25 +5564,21 @@ td.upgrade-compare-col-premium,
   pointer-events: none;
 }
 
-/* Highlight choreography — "spotlight" pattern: matching elements stay
-   sharp + full-clarity, everything else blurs and dims. Inverts the old
-   "ring the highlight" approach which read poorly when the highlighted
-   element was tiny (Accent + Text). Now your eye snaps straight to the
-   sharp region instead of hunting for an outline. */
+/* Highlight choreography — matching elements stay EXACTLY as they are
+   (no ring, no glow, no transform). Non-matching dim to a calm grey
+   so your eye lands naturally on the still-clear region. No blur —
+   the previous blur made adjacent areas read muddy and contaminated
+   the highlighted element's clarity. */
 .guide-colors-mock [data-color] {
   position: relative;
-  transition: opacity 220ms ease, filter 220ms ease;
+  transition: opacity 220ms ease;
   cursor: pointer;
 }
 .guide-colors-mock.is-focusing [data-color]:not(.is-highlight) {
-  opacity: 0.55;
-  filter: blur(2px);
+  opacity: 0.25;
 }
 .guide-colors-mock.is-focusing [data-color].is-highlight {
-  /* Sharp + clear — no ring, no glow. Clarity does the work. */
-  filter: none;
   opacity: 1;
-  z-index: 2;
 }
 
 /* Right-side callout list — same look as the Anatomy callouts but each
@@ -5663,36 +5659,38 @@ td.upgrade-compare-col-premium,
   padding: var(--cx-space-6);
 }
 
-/* Engine derivation grid (Option A) — replaces the old "23 → ⚙ → 150+"
-   abstract flow. Top: 4 source colour chips. Below: 16 derived swatches
-   computed via CSS color-mix() from the inputs. Makes "150+ derived
-   values" tangible — user can SEE the engine working. */
+/* Engine derivation grid (Option A, condensed L→R) — inputs strip on
+   the left, arrow + "engine" caption in the middle, derived 4×3 grid
+   on the right. Compact, single-row, no scrolling. Live from active
+   theme via CSS color-mix(). */
 .ged {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: auto auto 1fr;
+  align-items: center;
   gap: var(--cx-space-4);
-  margin-bottom: var(--cx-space-4);
+  margin-bottom: var(--cx-space-3);
 }
 
-.ged-row {
+.ged-side {
   display: flex;
   flex-direction: column;
-  gap: var(--cx-space-3);
+  gap: 6px;
+  min-width: 0;
 }
 
-.ged-row-label {
+.ged-side-label {
   display: flex;
   align-items: baseline;
-  gap: var(--cx-space-2);
-  font-size: 11px;
+  gap: 4px;
+  font-size: 10px;
   font-weight: 600;
   letter-spacing: 0.04em;
   text-transform: uppercase;
   color: var(--cx-text-subtle);
 }
 
-.ged-row-num {
-  font-size: 18px;
+.ged-side-num {
+  font-size: 14px;
   font-weight: 800;
   letter-spacing: -0.02em;
   color: var(--cx-accent);
@@ -5700,91 +5698,78 @@ td.upgrade-compare-col-premium,
   text-transform: none;
 }
 
-/* INPUTS row — 4 large chips, equal columns */
-.ged-input-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: var(--cx-space-2);
-}
-
-.ged-chip {
-  position: relative;
+/* INPUTS — vertical strip of 4 small chips with a colour swatch + label */
+.ged-input-strip {
   display: flex;
-  align-items: flex-end;
-  justify-content: flex-start;
-  border: 1px solid var(--cx-border);
-  border-radius: var(--cx-radius-sm);
-  padding: 8px 10px;
-  min-height: 56px;
-  overflow: hidden;
+  flex-direction: column;
+  gap: 3px;
 }
 
 .ged-chip-input {
-  min-height: 64px;
-  border: 1px solid color-mix(in srgb, var(--cx-text) 12%, transparent);
-}
-
-.ged-chip-label {
-  font-size: 10px;
-  font-weight: 600;
-  letter-spacing: 0.02em;
-  font-family: var(--cx-font-mono, ui-monospace, SFMono-Regular, Consolas, monospace);
-  /* Inherit color from .ged-chip inline style; for output chips that
-     don't set color, fall back to a tone that reads on most surfaces. */
-  color: inherit;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.18);
-}
-
-/* DIVIDER — visual cue between inputs and outputs */
-.ged-divider {
-  display: flex;
-  align-items: center;
-  gap: var(--cx-space-3);
-  margin: var(--cx-space-1) 0;
-}
-
-.ged-divider-line {
-  flex: 1;
-  height: 1px;
-  background: var(--cx-border);
-}
-
-.ged-divider-pill {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 4px 10px;
+  padding: 4px 8px 4px 4px;
   background: var(--cx-surface);
   border: 1px solid var(--cx-border);
   border-radius: 999px;
-  font-size: 11px;
-  font-weight: 600;
+  font-size: 10px;
+  font-weight: 500;
   color: var(--cx-text-muted);
   white-space: nowrap;
 }
 
-.ged-divider-pill svg {
-  color: var(--cx-accent);
+.ged-chip-swatch {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 1px solid color-mix(in srgb, var(--cx-text) 14%, transparent);
+  flex-shrink: 0;
 }
 
-/* OUTPUTS grid — 16 chips, 4 cols at full width, collapses to 2 on narrow */
+/* ARROW between inputs and outputs */
+.ged-arrow {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  color: var(--cx-text-subtle);
+  flex-shrink: 0;
+}
+
+.ged-arrow-label {
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+/* OUTPUTS — tight 4×3 grid of small swatch tiles, label-on-hover via
+   the title attribute. No visible label so the grid stays dense. */
 .ged-output-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: var(--cx-space-2);
+  gap: 4px;
 }
 
 .ged-chip-output {
-  min-height: 48px;
-  /* Default text colour for output chips when JS doesn't override. The
-     monospace label is small and the text-shadow gives it punch on
-     mid-tone backgrounds. */
-  color: #ffffff;
+  display: block;
+  height: 22px;
+  border-radius: var(--cx-radius-sm);
+  border: 1px solid color-mix(in srgb, var(--cx-text) 8%, transparent);
 }
 
 @media (max-width: 720px) {
-  .ged-output-grid {
-    grid-template-columns: repeat(2, 1fr);
+  .ged {
+    grid-template-columns: 1fr;
+  }
+  .ged-arrow {
+    flex-direction: row;
+    justify-self: center;
+  }
+  .ged-arrow svg {
+    transform: rotate(90deg);
   }
 }
 
