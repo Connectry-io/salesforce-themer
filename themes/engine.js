@@ -509,6 +509,24 @@ function generateThemeCSS(theme) {
   --lwc-globalnavigationItemHeightAccentActive: ${c.accent} !important;
   --lwc-globalnavigationItemHeightAccentFocus: ${c.accentHover} !important;
 
+  /* Context bar + Context tab bar active/hover — these tokens paint
+   * the active-subtab fill (the "Home" pill) which defaults to white.
+   * This is the root cause of the Home-tab-always-cyan saga on Tron:
+   * SF paints with ContextBarItemActive, we had no override, and my
+   * selector-level transparent-bg was losing specificity. Neutralize
+   * at the token source. */
+  --lwc-colorBackgroundContextBarItem: transparent !important;
+  --lwc-colorBackgroundContextBarItemActive: transparent !important;
+  --lwc-colorBackgroundContextBarItemHover: ${c.navHover || 'rgba(255,255,255,0.08)'} !important;
+  --lwc-colorBackgroundContextBarInverseItemActive: ${c.accentLight || 'rgba(255,255,255,0.15)'} !important;
+  --lwc-colorBackgroundContextBarInverseItemHover: ${c.navHover || 'rgba(255,255,255,0.1)'} !important;
+  --lwc-colorBackgroundContextTabBarItem: transparent !important;
+  --lwc-colorBackgroundContextTabBarItemActive: transparent !important;
+  --lwc-colorBorderContextBarThemeDefault: ${c.accent} !important;
+  --lwc-colorBorderContextBarThemeDefaultActive: ${c.accent} !important;
+  --lwc-colorBorderContextBarThemeDefaultAlt: ${c.border} !important;
+  --lwc-colorBorderContextBarThemeDefaultHover: ${c.accentHover} !important;
+
   /* Path chevron — hover + stage-specific states (B7 added the basics) */
   --lwc-colorBorderPathCurrentHover: ${c.accentHover} !important;
   --lwc-colorTextPathCurrentHover: ${c.buttonBrandText || '#ffffff'} !important;
@@ -983,30 +1001,102 @@ input[type="radio"] {
 
 /* Legacy Setup buttons (the Aura "btn" class variant, not SLDS).
  * Brand the primary action with accent border + accent text; hover
- * fills with accentLight for visible affordance. */
+ * fills with accentLight for visible affordance.
+ *
+ * CRITICAL: appearance: none strips the browser's native button chrome
+ * (ButtonFace bg color) — without it, <input type="button"> renders
+ * with a user-agent-stylesheet white/grey bg that beats our
+ * background-color: transparent even with !important. Fixed 2026-04-19
+ * after Users-page legacy buttons stayed white through B14-B16. */
 .btn,
 input.btn,
 button.btn,
+input[type="button"].btn,
+input[type="submit"].btn,
 .setupBody .btn,
-.bBody .btn {
-  background-color: ${c.buttonNeutralBg} !important;
+.bBody .btn,
+.bPageBlock .btn,
+.pbBottomButtons .btn {
+  -webkit-appearance: none !important;
+  appearance: none !important;
+  background-color: transparent !important;
+  background-image: none !important;
   color: ${c.accent} !important;
   border: 1px solid ${c.accent} !important;
+  border-radius: 4px !important;
+  padding: 5px 12px !important;
+  cursor: pointer !important;
   text-shadow: none !important;
+  box-shadow: none !important;
+  font-weight: 500 !important;
 }
 
 .btn:hover,
 input.btn:hover,
-button.btn:hover {
+button.btn:hover,
+input[type="button"].btn:hover {
   background-color: ${c.accentLight || c.surfaceHover} !important;
   color: ${c.accent} !important;
   border-color: ${c.accent} !important;
+}
+
+.btn:active,
+input.btn:active,
+button.btn:active {
+  background-color: ${c.accentLight || c.surfaceHover} !important;
+  transform: translateY(1px);
 }
 
 .btnDisabled,
 .btn:disabled,
 input.btn:disabled {
   opacity: 0.5 !important;
+  cursor: not-allowed !important;
+}
+
+/* Legacy list-view filter "View:" dropdown (.bFilterView pattern).
+ * DOM confirmed 2026-04-19: .bFilterView > .bFilter > label + .fBody
+ * > select + .fFooter > Edit/Create-New-View links. */
+.bFilterView,
+.bFilter,
+.fBody,
+.fFooter {
+  background-color: transparent !important;
+  color: ${c.textPrimary} !important;
+}
+
+.bFilterView label,
+.bFilter label,
+.bFilterView .assistiveText {
+  color: ${c.textPrimary} !important;
+  font-weight: 600 !important;
+}
+
+.bFilterView select,
+.bFilter select,
+.fBody select {
+  -webkit-appearance: menulist !important;
+  appearance: menulist !important;
+  background-color: ${isDark ? c.background : c.surface} !important;
+  color: ${c.textPrimary} !important;
+  border: 1px solid ${c.borderInput} !important;
+  border-radius: 4px !important;
+  padding: 4px 6px !important;
+  color-scheme: ${isDark ? 'dark' : 'light'} !important;
+}
+
+.bFilterView select:focus,
+.bFilter select:focus,
+.fBody select:focus {
+  border-color: ${c.accent} !important;
+  outline: none !important;
+  box-shadow: 0 0 0 2px ${c.accentLight || 'rgba(0,0,0,0.1)'} !important;
+}
+
+.fFooter a,
+.bFilter a,
+.bFilterView a {
+  color: ${c.link || c.accent} !important;
 }
 
 /* Aggressive active-tab hammer — role/aria-based selectors catch any
