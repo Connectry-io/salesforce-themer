@@ -778,6 +778,178 @@ setup-tree-node:hover *,
   background-color: transparent !important;
 }
 
+/* Search-term text highlight — SF hardcodes bright yellow (#fff03f).
+ * Replace with theme-appropriate tint so left-nav search results
+ * match the theme instead of popping yellow on every palette. */
+:root {
+  --lwc-colorBackgroundHighlightSearch: ${c.surfaceSelection || c.accentLight || 'rgba(0, 0, 0, 0.15)'} !important;
+}
+
+mark,
+.highlight,
+.highlightSearchTerm,
+.slds-text-highlight,
+.slds-nav__list-item .highlight,
+.search-highlight,
+.forceHighlightText {
+  background-color: ${c.surfaceSelection || c.accentLight} !important;
+  color: ${c.textPrimary} !important;
+  box-shadow: none !important;
+}
+
+/* Legacy Aura Setup pages (Users, Profiles, Permission Sets, Roles,
+ * Queues, Public Groups, etc.) — SF's older admin UI hardcodes white
+ * container bgs + near-black text on .uiDataGrid + related classes.
+ * Recolor to theme surface. These pages look ~10 years older than
+ * Setup Home and need this baseline or they render as white islands. */
+.enhancedSetupHome,
+.setupcontent,
+.onesetupSetupComponent,
+.onesetupModule,
+.module,
+.module-content,
+.setupBody,
+.setupManager,
+.bBody,
+.bRelatedList,
+.listViewContent,
+.listViewHeader,
+.listViewBody {
+  background-color: transparent !important;
+  color: ${c.textPrimary} !important;
+}
+
+.uiDataGrid,
+.uiDataGrid--default,
+.uiVirtualDataGrid,
+.dataTable,
+table.list,
+table.bList,
+.bList {
+  background-color: ${c.surface} !important;
+  color: ${c.textPrimary} !important;
+  border-color: ${c.border} !important;
+}
+
+.uiDataGrid thead,
+.uiDataGrid thead tr,
+.uiDataGrid thead th,
+.uiDataGrid th,
+table.list thead,
+table.list thead th,
+table.bList thead,
+table.bList thead th {
+  background-color: ${c.tableHeaderBg || c.surfaceAlt} !important;
+  color: ${c.tableHeaderText || c.textSecondary} !important;
+  border-color: ${c.border} !important;
+}
+
+.uiDataGrid tbody tr,
+.uiDataGrid tbody td,
+table.list tbody tr,
+table.list tbody td,
+table.bList tbody tr,
+table.bList tbody td {
+  background-color: ${c.surface} !important;
+  color: ${c.textPrimary} !important;
+  border-color: ${c.borderSeparator || c.border} !important;
+}
+
+.uiDataGrid tbody tr:hover,
+.uiDataGrid tbody tr:hover td,
+table.list tbody tr:hover,
+table.list tbody tr:hover td,
+table.bList tbody tr:hover,
+table.bList tbody tr:hover td {
+  background-color: ${c.surfaceHover} !important;
+}
+
+.uiDataGrid tbody tr:nth-child(even) td,
+table.list tbody tr:nth-child(even) td,
+table.bList tbody tr:nth-child(even) td {
+  background-color: ${c.tableAltRow || c.surface} !important;
+}
+
+.uiDataGrid a,
+table.list a,
+table.bList a {
+  color: ${c.link || c.accent} !important;
+}
+
+/* Legacy Setup page headings + description + help text */
+.pageDescription,
+.bPageDescription,
+.pbSubsection,
+.pbHeader,
+.mainTitle,
+.detailList,
+.setupBody .pageHeader h1,
+.setupBody .pageHeader h2,
+.setupcontent .pageHeader,
+h1.pageType,
+h2.pageDescription,
+.bodyCell,
+.labelCol,
+.dataCol {
+  color: ${c.textPrimary} !important;
+  background-color: transparent !important;
+}
+
+/* Alphabet filter / letter picker (W X Y Z Other All on list views) */
+.letterBar,
+.letterBar a,
+.letterBar span,
+.pipe,
+.alphaPicker,
+.alphaPicker a,
+.alphaPicker .current {
+  color: ${c.textSecondary} !important;
+  background-color: transparent !important;
+}
+
+.letterBar a:hover,
+.alphaPicker a:hover,
+.alphaPicker a.current,
+.letterBar a.current {
+  background-color: ${c.accentLight || c.surfaceHover} !important;
+  color: ${c.accent} !important;
+}
+
+/* "Help for this Page" link + similar Setup chrome links */
+.pageDescription a,
+.helpLink,
+.bHelp a {
+  color: ${c.link || c.accent} !important;
+}
+
+/* Legacy Setup form inputs + dropdowns */
+.setupBody input[type="text"],
+.setupBody select,
+.setupBody textarea,
+.setupcontent input[type="text"],
+.setupcontent select,
+.setupcontent textarea {
+  background-color: ${isDark ? c.background : c.surface} !important;
+  color: ${c.textPrimary} !important;
+  border-color: ${c.borderInput} !important;
+}
+
+/* Legacy Setup buttons (the Aura "btn" class variant, not SLDS) */
+.btn,
+input.btn,
+button.btn {
+  background-color: ${c.buttonNeutralBg} !important;
+  color: ${c.buttonNeutralText} !important;
+  border-color: ${c.buttonNeutralBorder} !important;
+}
+
+.btn:hover,
+input.btn:hover,
+button.btn:hover {
+  background-color: ${c.buttonNeutralHover} !important;
+  color: ${c.buttonNeutralText} !important;
+}
+
 /* ─── Base ───────────────────────────────────────────────────────────────── */
 
 html,

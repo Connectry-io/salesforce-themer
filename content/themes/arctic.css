@@ -683,6 +683,178 @@ setup-tree-node:hover *,
   background-color: transparent !important;
 }
 
+/* Search-term text highlight — SF hardcodes bright yellow (#fff03f).
+ * Replace with theme-appropriate tint so left-nav search results
+ * match the theme instead of popping yellow on every palette. */
+:root {
+  --lwc-colorBackgroundHighlightSearch: #bfdbfe !important;
+}
+
+mark,
+.highlight,
+.highlightSearchTerm,
+.slds-text-highlight,
+.slds-nav__list-item .highlight,
+.search-highlight,
+.forceHighlightText {
+  background-color: #bfdbfe !important;
+  color: #1a202c !important;
+  box-shadow: none !important;
+}
+
+/* Legacy Aura Setup pages (Users, Profiles, Permission Sets, Roles,
+ * Queues, Public Groups, etc.) — SF's older admin UI hardcodes white
+ * container bgs + near-black text on .uiDataGrid + related classes.
+ * Recolor to theme surface. These pages look ~10 years older than
+ * Setup Home and need this baseline or they render as white islands. */
+.enhancedSetupHome,
+.setupcontent,
+.onesetupSetupComponent,
+.onesetupModule,
+.module,
+.module-content,
+.setupBody,
+.setupManager,
+.bBody,
+.bRelatedList,
+.listViewContent,
+.listViewHeader,
+.listViewBody {
+  background-color: transparent !important;
+  color: #1a202c !important;
+}
+
+.uiDataGrid,
+.uiDataGrid--default,
+.uiVirtualDataGrid,
+.dataTable,
+table.list,
+table.bList,
+.bList {
+  background-color: #ffffff !important;
+  color: #1a202c !important;
+  border-color: #e2e8f0 !important;
+}
+
+.uiDataGrid thead,
+.uiDataGrid thead tr,
+.uiDataGrid thead th,
+.uiDataGrid th,
+table.list thead,
+table.list thead th,
+table.bList thead,
+table.bList thead th {
+  background-color: #edf2f7 !important;
+  color: #2d3748 !important;
+  border-color: #e2e8f0 !important;
+}
+
+.uiDataGrid tbody tr,
+.uiDataGrid tbody td,
+table.list tbody tr,
+table.list tbody td,
+table.bList tbody tr,
+table.bList tbody td {
+  background-color: #ffffff !important;
+  color: #1a202c !important;
+  border-color: #dde5ef !important;
+}
+
+.uiDataGrid tbody tr:hover,
+.uiDataGrid tbody tr:hover td,
+table.list tbody tr:hover,
+table.list tbody tr:hover td,
+table.bList tbody tr:hover,
+table.bList tbody tr:hover td {
+  background-color: #ebf4ff !important;
+}
+
+.uiDataGrid tbody tr:nth-child(even) td,
+table.list tbody tr:nth-child(even) td,
+table.bList tbody tr:nth-child(even) td {
+  background-color: #f7faff !important;
+}
+
+.uiDataGrid a,
+table.list a,
+table.bList a {
+  color: #3182ce !important;
+}
+
+/* Legacy Setup page headings + description + help text */
+.pageDescription,
+.bPageDescription,
+.pbSubsection,
+.pbHeader,
+.mainTitle,
+.detailList,
+.setupBody .pageHeader h1,
+.setupBody .pageHeader h2,
+.setupcontent .pageHeader,
+h1.pageType,
+h2.pageDescription,
+.bodyCell,
+.labelCol,
+.dataCol {
+  color: #1a202c !important;
+  background-color: transparent !important;
+}
+
+/* Alphabet filter / letter picker (W X Y Z Other All on list views) */
+.letterBar,
+.letterBar a,
+.letterBar span,
+.pipe,
+.alphaPicker,
+.alphaPicker a,
+.alphaPicker .current {
+  color: #4a5568 !important;
+  background-color: transparent !important;
+}
+
+.letterBar a:hover,
+.alphaPicker a:hover,
+.alphaPicker a.current,
+.letterBar a.current {
+  background-color: rgba(49, 130, 206, 0.12) !important;
+  color: #3182ce !important;
+}
+
+/* "Help for this Page" link + similar Setup chrome links */
+.pageDescription a,
+.helpLink,
+.bHelp a {
+  color: #3182ce !important;
+}
+
+/* Legacy Setup form inputs + dropdowns */
+.setupBody input[type="text"],
+.setupBody select,
+.setupBody textarea,
+.setupcontent input[type="text"],
+.setupcontent select,
+.setupcontent textarea {
+  background-color: #ffffff !important;
+  color: #1a202c !important;
+  border-color: #cbd5e0 !important;
+}
+
+/* Legacy Setup buttons (the Aura "btn" class variant, not SLDS) */
+.btn,
+input.btn,
+button.btn {
+  background-color: #ffffff !important;
+  color: #1a202c !important;
+  border-color: #b2c3d8 !important;
+}
+
+.btn:hover,
+input.btn:hover,
+button.btn:hover {
+  background-color: #edf2f7 !important;
+  color: #1a202c !important;
+}
+
 /* ─── Base ───────────────────────────────────────────────────────────────── */
 
 html,
