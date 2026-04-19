@@ -1137,8 +1137,14 @@
     await loadThemes();
     renderThemesSection();
     // Presets tab badge count = total OOTB theme count
+    // Match the visible-themes filter in renderThemesSection — Builder
+    // templates (SF baselines) are not user-facing presets, so they shouldn't
+    // count toward the Presets tab badge.
     const builtinCount = document.getElementById('builtinTabCount');
-    if (builtinCount) builtinCount.textContent = String(THEMES.length);
+    if (builtinCount) {
+      const visiblePresets = THEMES.filter(t => t.role !== 'template').length;
+      builtinCount.textContent = String(visiblePresets);
+    }
 
     bindThemeTabs();
     renderCustomThemesPanel();
