@@ -889,7 +889,7 @@
     menu.innerHTML = '';
 
     if (!isPremium()) {
-      menu.innerHTML = `<div class="builder-theme-switcher-empty">Saving custom themes is a <strong>Premium</strong> feature, coming soon.</div>`;
+      menu.innerHTML = `<div class="builder-theme-switcher-empty">Saving custom themes is a <strong>Pro</strong> feature, coming soon.</div>`;
       return;
     }
 
@@ -2464,6 +2464,32 @@
     document.getElementById('guideBuilderCta')?.addEventListener('click', () => {
       if (_tabsInstance) _tabsInstance.activate('builder');
       window.scrollTo({ top: 0, behavior: 'auto' });
+    });
+
+    // Upgrade tab — Pro card billing toggle (Monthly / Yearly). Pure UI:
+    // swaps the displayed amount + period + supporting copy. Live wiring
+    // to Stripe happens when checkout backend lands.
+    const PRO_BILLING = {
+      monthly: { amount: '5',  period: '/month', desc: '$5/month, billed monthly. Cancel anytime.' },
+      yearly:  { amount: '45', period: '/year',  desc: 'Just $3.75/month, billed annually.' },
+    };
+    document.querySelectorAll('.upgrade-billing-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const mode = btn.dataset.billing;
+        const cfg = PRO_BILLING[mode];
+        if (!cfg) return;
+        document.querySelectorAll('.upgrade-billing-btn').forEach(b => {
+          const active = b === btn;
+          b.classList.toggle('is-active', active);
+          b.setAttribute('aria-selected', String(active));
+        });
+        const amt = document.getElementById('upgradeProAmount');
+        const per = document.getElementById('upgradeProPeriod');
+        const desc = document.getElementById('upgradeProDesc');
+        if (amt)  amt.textContent  = cfg.amount;
+        if (per)  per.textContent  = cfg.period;
+        if (desc) desc.textContent = cfg.desc;
+      });
     });
 
     // Mark <body> with the current premium state so CSS can hide gating
@@ -4524,7 +4550,7 @@
   function _showSaveUpgradePrompt() {
     const body = document.createElement('div');
     body.innerHTML = `
-      <p style="margin-bottom:12px;">Saving custom themes is a <strong>Premium</strong> feature.</p>
+      <p style="margin-bottom:12px;">Saving custom themes is a <strong>Pro</strong> feature.</p>
       <p style="margin-bottom:16px; font-size:13px; color: var(--cx-text-muted); line-height:1.6;">
         Your changes are still here in the editor — feel free to keep tweaking.
         Upgrade to Premium to save custom themes, use AI generation, brand-guide
@@ -4565,14 +4591,13 @@
   }
 
   /**
-   * Bind the plan CTAs on the Upgrade tab. V1 ships with the buttons
-   * disabled and labeled "Premium" — there's nothing to bind. When
-   * Premium ships, restore the [data-plan] attributes in HTML and have
-   * this function POST to the backend to create a Stripe Checkout
-   * session.
+   * Bind the plan CTAs on the Upgrade tab. V1 ships with the Pro card
+   * disabled — there's nothing to bind. When Pro ships, restore the
+   * [data-plan] attributes in HTML and have this function POST to the
+   * backend to create a Stripe Checkout session.
    */
   function bindUpgradePlanCtas() {
-    // No-op for V1. Plan buttons are disabled in HTML.
+    // No-op for V1. Pro CTA is disabled in HTML.
   }
 
   /**
@@ -4709,11 +4734,10 @@
 
   function _showCheckoutPlaceholder(plan) {
     const planLabels = {
-      monthly: { name: 'Monthly', price: '$5/month' },
-      yearly:  { name: 'Yearly',  price: '$45/year' },
-      lifetime:{ name: 'Lifetime',price: '$200 one-time' },
+      monthly: { name: 'Pro · Monthly', price: '$5/month' },
+      yearly:  { name: 'Pro · Yearly',  price: '$45/year' },
     };
-    const info = planLabels[plan] || { name: 'Premium', price: '' };
+    const info = planLabels[plan] || { name: 'Pro', price: '' };
 
     const body = document.createElement('div');
     body.innerHTML = `
