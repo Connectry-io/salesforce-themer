@@ -840,7 +840,7 @@
       return `
         <div class="diag-clean-row" data-section="componentsClean">
           <span class="diag-clean-dot is-pass"></span>
-          <span class="diag-clean-title">Standard / Managed</span>
+          <span class="diag-clean-title">Components</span>
           <span class="diag-clean-note">${total > 0 ? `${total} fully styled` : 'No standard components on this page'}</span>
         </div>`;
     }
@@ -881,7 +881,7 @@
       let html = `
         <div class="diag-section" data-section="componentIssues">
           <div class="diag-section-header">
-            <span class="diag-section-title">Standard / Managed</span>
+            <span class="diag-section-title">Components</span>
             <span class="diag-section-badge">
               ${s.totalUnstyled ? `<span class="diag-section-badge-item is-fail">${s.totalUnstyled} unstyled</span>` : ''}
               ${s.totalPartial ? `<span class="diag-section-badge-item is-gap">${s.totalPartial} partial</span>` : ''}
@@ -1912,20 +1912,12 @@
       // Update info bar
       this._updateInfoBar();
 
-      // Show success state on scan button, then reset
+      // Swap scan bar directly to the collapsed summary — no 1.2s "Scanned"
+      // intermediate state. The snapshot banner in the results ("SCANNED ·
+      // just now") already confirms completion, so the extra button state
+      // was redundant and caused Advanced to flicker away and back.
       const scanBar = this.shadow?.querySelector('.diag-scan-bar');
-      if (scanBar) {
-        scanBar.innerHTML = `
-          <button class="diag-scan-btn diag-scan-btn--success" style="width:100%" disabled>
-            <svg viewBox="0 0 14 14" fill="none" width="14" height="14"><path d="M3 7l3 3 5-5.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
-            <span>Scanned</span>
-          </button>`;
-        // After 1.2s, swap back to the real Re-Scan button
-        setTimeout(() => {
-          const bar = this.shadow?.querySelector('.diag-scan-bar');
-          if (bar) bar.outerHTML = this._scanBarHTML();
-        }, 1200);
-      }
+      if (scanBar) scanBar.outerHTML = this._scanBarHTML();
 
       this._scanning = false;
     }

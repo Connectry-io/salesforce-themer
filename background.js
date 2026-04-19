@@ -383,10 +383,15 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
   // and some blob: CSP carry-over), so we delegate to the background worker
   // which has full tab APIs.
   if (msg?.action === 'openReportTab' && msg.reportId) {
-    const url = chrome.runtime.getURL(`diagnostic/report.html?id=${msg.reportId}`);
+    // getURL doesn't parse query strings — build it separately.
+    const base = chrome.runtime.getURL('diagnostic/report.html');
+    const url = `${base}?id=${encodeURIComponent(msg.reportId)}`;
     chrome.tabs.create({ url })
       .then(() => sendResponse({ ok: true }))
-      .catch((err) => sendResponse({ ok: false, error: String(err) }));
+      .catch((err) => {
+        console.error('[SFT bg] openReportTab failed:', err);
+        sendResponse({ ok: false, error: String(err) });
+      });
     return true;
   }
   return false;

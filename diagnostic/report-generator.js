@@ -28,23 +28,41 @@
    * @param {string} opts.screenshotDataUrl
    */
   ns.openReport = async function openReport(opts) {
+    const id = (crypto.randomUUID ? crypto.randomUUID() : String(Date.now() + Math.random().toString(36).slice(2)));
+    const key = 'sft-report-' + id;
+    const payload = {
+      ...opts,
+      host: location.hostname,
+      pageUrl: location.href,
+      generatedAt: new Date().toISOString().replace('T', ' ').slice(0, 19),
+    };
+
+    // Try session storage first (ephemeral, preferred). Fall back to
+    // local storage if session isn't available (older Chrome or MV2
+    // compatibility mode).
     try {
-      const id = (crypto.randomUUID ? crypto.randomUUID() : String(Date.now() + Math.random().toString(36).slice(2)));
-      const key = 'sft-report-' + id;
-      const payload = {
-        ...opts,
-        host: location.hostname,
-        pageUrl: location.href,
-        generatedAt: new Date().toISOString().replace('T', ' ').slice(0, 19),
-      };
-      await chrome.storage.session.set({ [key]: payload });
-      // Delegate tab creation to the background worker — content scripts
-      // can't reliably window.open a chrome-extension:// URL (user gesture
-      // lost across the storage.set await), and popup blockers sometimes
-      // intervene. Background has unrestricted chrome.tabs access.
-      await chrome.runtime.sendMessage({ action: 'openReportTab', reportId: id });
+      if (chrome.storage.session) {
+        await chrome.storage.session.set({ [key]: payload });
+      } else {
+        await chrome.storage.local.set({ [key]: payload });
+      }
     } catch (err) {
-      console.error('[SFT Diag] openReport failed:', err);
+      console.error('[SFT Diag] openReport: storage write failed', err);
+      alert('Could not prepare report — storage write failed. Check the console.');
+      return;
+    }
+
+    // Delegate tab open to the background worker. Request a response so
+    // errors surface instead of silently failing.
+    try {
+      const resp = await chrome.runtime.sendMessage({ action: 'openReportTab', reportId: id });
+      if (!resp?.ok) {
+        console.error('[SFT Diag] openReport: background replied with error', resp);
+        alert('Could not open report tab. Check the extension service-worker console.');
+      }
+    } catch (err) {
+      console.error('[SFT Diag] openReport: sendMessage failed', err);
+      alert('Could not reach the extension background — try reloading the extension.');
     }
   };
 })();
