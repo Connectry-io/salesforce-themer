@@ -208,7 +208,6 @@ body {
 .settings-gear-btn[aria-expanded="true"] {
   background: var(--color-bg);
   color: var(--color-accent);
-  transform: rotate(60deg);
 }
 
 .settings-gear-btn:focus-visible {
