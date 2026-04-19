@@ -9,14 +9,17 @@
 <body>
   <div class="popup">
 
-    <!-- Beta banner — always-on during the beta window (no dismiss). When
-         Pro ships, the banner gets removed entirely. Click triggers a
-         chrome.tabs.create with mailto so the popup-close-on-click race
-         can't swallow the link. -->
+    <!-- Beta banner — always-on during the beta window (no dismiss).
+         Two CTAs:
+           • "Scan & report" (primary) opens the diagnostic panel on the
+             current SF tab, capturing structured scan data — also doubles
+             as a preview of the AI auto-paint approach.
+           • "Feedback" (secondary) opens mailto for quick notes. -->
     <div class="beta-banner" id="betaBanner">
       <span class="beta-banner-badge">Beta</span>
       <span class="beta-banner-text">Help shape what Pro becomes.</span>
-      <button class="beta-banner-cta" id="betaBannerCta" type="button">Send feedback →</button>
+      <button class="beta-banner-cta beta-banner-cta--primary" id="betaBannerScanCta" type="button" title="Open diagnostic scanner on the current Salesforce tab">Scan &amp; report →</button>
+      <button class="beta-banner-cta beta-banner-cta--secondary" id="betaBannerCta" type="button" title="Send a quick note via email">Feedback</button>
     </div>
 
     <!-- Header -->

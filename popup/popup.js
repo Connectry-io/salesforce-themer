@@ -1242,16 +1242,18 @@
   }
 
   // ─── Beta banner ─────────────────────────────────────────────────────────
-  // Always-on during the beta window — no dismiss button. When Pro ships,
-  // the banner gets removed entirely from popup.html.
+  // Always-on during the beta window — no dismiss. When Pro ships, the
+  // banner gets removed entirely from popup.html.
   //
-  // The CTA uses chrome.tabs.create to launch the mailto so the popup
-  // closing on link-click can't swallow it (a plain <a href="mailto:">
-  // sometimes silently fails in extension popups depending on OS mail
-  // handler config).
+  // Two CTAs:
+  //   • Scan & report → opens the diagnostic panel on the active SF tab
+  //     (showcases AI auto-paint approach + captures structured data).
+  //     Falls back to mailto with a "switch to a SF tab" hint if the
+  //     active tab isn't Salesforce.
+  //   • Feedback → opens mailto via chrome.tabs.create (popup-close-on-
+  //     click safe; plain <a href="mailto:"> can be silently swallowed
+  //     in extension popups when no OS mail handler is registered).
   function _bindBetaBanner(version) {
-    const cta = document.getElementById('betaBannerCta');
-    if (!cta) return;
     const subject = encodeURIComponent(`Themer Beta · Popup · v${version || '?'}`);
     const body = encodeURIComponent(
       `Hi Connectry team,\n\n` +
@@ -1262,14 +1264,48 @@
       `Browser: ${navigator.userAgent}\n`
     );
     const mailto = `mailto:feedback@connectry.io?subject=${subject}&body=${body}`;
-    cta.addEventListener('click', () => {
+    const openMailto = () => {
+      try { chrome.tabs.create({ url: mailto }); }
+      catch (_) { window.location.href = mailto; }
+    };
+
+    // Quick-feedback CTA (secondary)
+    document.getElementById('betaBannerCta')?.addEventListener('click', openMailto);
+
+    // Scan & report CTA (primary) — opens the diagnostic panel on the
+    // current SF tab. If user isn't on a SF tab, we can't run the
+    // scanner, so fall back to a mailto with a friendly nudge in the
+    // subject line.
+    document.getElementById('betaBannerScanCta')?.addEventListener('click', async () => {
       try {
-        chrome.tabs.create({ url: mailto });
-      } catch (_) {
-        // Fallback: window.location for non-extension contexts
-        window.location.href = mailto;
-      }
+        const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+        if (tab?.id && _isSalesforceUrl(tab.url)) {
+          await chrome.tabs.sendMessage(tab.id, { action: 'toggleDiagnostic' });
+          window.close();
+          return;
+        }
+      } catch (_) {}
+      // Not on a SF tab — open mailto with a nudge
+      const altSubject = encodeURIComponent(`Themer Beta · Scan request (not on SF tab)`);
+      const altMailto = `mailto:feedback@connectry.io?subject=${altSubject}&body=${body}`;
+      try { chrome.tabs.create({ url: altMailto }); }
+      catch (_) { window.location.href = altMailto; }
     });
+  }
+
+  function _isSalesforceUrl(url) {
+    if (!url) return false;
+    try {
+      const host = new URL(url).hostname;
+      return (
+        host.endsWith('.lightning.force.com') ||
+        host.endsWith('.my.salesforce.com') ||
+        host.endsWith('.visualforce.com') ||
+        host.endsWith('.salesforce-setup.com') ||
+        host.endsWith('.cloudforce.com') ||
+        host.endsWith('.force.com')
+      );
+    } catch (_) { return false; }
   }
 
   init();

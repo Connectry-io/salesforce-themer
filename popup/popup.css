@@ -52,8 +52,9 @@ body {
   gap: 14px;
 }
 
-/* Beta banner — always-on during the beta window. Subtle Connectry-blue
-   tint (not warning-gold). Reads as "we're listening", not "alert". */
+/* Beta banner — always-on during the beta window. Connectry muted teal
+   (#3D7A7A) instead of brand blue so it stands out from the rest of
+   the UI (which is blue-accented). Reads as "friendly invitation". */
 .beta-banner {
   display: flex;
   align-items: center;
@@ -61,16 +62,16 @@ body {
   padding: 7px 12px;
   margin: -16px -16px 0;
   background: linear-gradient(135deg,
-    color-mix(in srgb, #4A6FA5 8%, #ffffff) 0%,
-    color-mix(in srgb, #4A6FA5 14%, #ffffff) 100%);
-  border-bottom: 1px solid color-mix(in srgb, #4A6FA5 25%, transparent);
+    color-mix(in srgb, #3D7A7A 10%, #ffffff) 0%,
+    color-mix(in srgb, #3D7A7A 16%, #ffffff) 100%);
+  border-bottom: 1px solid color-mix(in srgb, #3D7A7A 30%, transparent);
   font-size: 11px;
-  color: #1f2d44;
+  color: #1a3a3a;
 }
 
 .beta-banner-badge {
   padding: 2px 7px;
-  background: #4A6FA5;
+  background: #3D7A7A;
   color: #ffffff;
   font-size: 9px;
   font-weight: 700;
@@ -84,25 +85,41 @@ body {
   flex: 1;
   min-width: 0;
   font-weight: 500;
-  color: #1f2d44;
+  color: #1a3a3a;
 }
 
 .beta-banner-cta {
-  padding: 0;
+  padding: 4px 9px;
   background: transparent;
-  border: none;
-  color: #4A6FA5;
+  border: 1px solid transparent;
+  border-radius: 999px;
   font-family: var(--font);
   font-size: 11px;
   font-weight: 700;
   white-space: nowrap;
   cursor: pointer;
-  transition: color var(--transition);
+  transition: background-color var(--transition), color var(--transition), border-color var(--transition);
+  color: #2d5a5a;
 }
 
-.beta-banner-cta:hover {
-  color: #2d4a72;
-  text-decoration: underline;
+/* Primary CTA — solid teal pill */
+.beta-banner-cta--primary {
+  background: #3D7A7A;
+  color: #ffffff;
+}
+
+.beta-banner-cta--primary:hover {
+  background: #2d5a5a;
+}
+
+/* Secondary CTA — outlined teal */
+.beta-banner-cta--secondary {
+  border-color: color-mix(in srgb, #3D7A7A 35%, transparent);
+}
+
+.beta-banner-cta--secondary:hover {
+  background: color-mix(in srgb, #3D7A7A 12%, transparent);
+  color: #1a3a3a;
 }
 
 /* ─── Header ─────────────────────────────────────────────────────────────── */
