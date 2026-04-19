@@ -412,6 +412,33 @@
   flex: 1;
 }
 
+/* ─── Screenshot toggle (icon-only chip right of Scan) ─────────────────── */
+
+.diag-scan-cam {
+  flex-shrink: 0;
+  width: 36px;
+  padding: 0 !important;
+  background: var(--dp-surface) !important;
+  border-color: var(--dp-border) !important;
+  color: var(--dp-text-3) !important;
+}
+
+.diag-scan-cam:hover {
+  background: var(--dp-surface-hover) !important;
+  color: var(--dp-text-2) !important;
+}
+
+.diag-scan-cam.is-active {
+  background: var(--dp-accent-bg) !important;
+  border-color: var(--dp-accent-border) !important;
+  color: var(--dp-accent-text) !important;
+}
+
+.diag-scan-cam svg {
+  width: 14px;
+  height: 14px;
+}
+
 /* ─── Advanced disclosure (power-user scan modes) ──────────────────────── */
 
 .diag-advanced {

@@ -28,6 +28,7 @@
     chevron: `<svg viewBox="0 0 10 10" fill="none" width="10" height="10"><path d="M2.5 3.5L5 6.5L7.5 3.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
     copy: `<svg viewBox="0 0 14 14" fill="none"><rect x="4" y="4" width="7" height="8" rx="1.2" stroke="currentColor" stroke-width="1.3"/><path d="M10 3.5V3a1.2 1.2 0 0 0-1.2-1.2H4.2A1.2 1.2 0 0 0 3 3v5.8A1.2 1.2 0 0 0 4.2 10H4.5" stroke="currentColor" stroke-width="1.3"/></svg>`,
     magnifier: `<svg viewBox="0 0 14 14" fill="none"><circle cx="6" cy="6" r="3.5" stroke="currentColor" stroke-width="1.4"/><path d="M8.6 8.6l3 3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>`,
+    camera: `<svg viewBox="0 0 14 14" fill="none"><rect x="1.5" y="4" width="11" height="7.5" rx="1.4" stroke="currentColor" stroke-width="1.3"/><circle cx="7" cy="7.75" r="2.2" stroke="currentColor" stroke-width="1.3"/><path d="M5 4l0.8-1.2h2.4L9 4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
     badge: `<svg viewBox="0 0 24 24" fill="none"><circle cx="6" cy="12" r="3" fill="currentColor" opacity="0.6"/><line x1="9" y1="12" x2="15" y2="12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" opacity="0.4"/><circle cx="18" cy="12" r="3" fill="currentColor"/></svg>`,
   };
 
@@ -561,24 +562,24 @@
       const pageLabel = pageType ? ` · ${pageType.label}` : '';
 
       // Scan tab — idle state. Walk-through status is Validate-tab-only.
+      const camActive = this.includeScreenshot ? ' is-active' : '';
       return `
         <div class="diag-scan-bar">
-          <div class="diag-scan-row">
+          <div class="diag-scan-row" style="gap:6px">
             <button class="diag-scan-btn diag-scan-btn--primary" data-action="scanAll" style="flex:1">
               ${ICONS.scan}
               <span>Scan${pageLabel}</span>
             </button>
-          </div>
-          <div class="diag-scan-row" style="margin-top:8px;gap:8px;align-items:center">
-            <label class="diag-screenshot-toggle" style="display:flex;align-items:center;gap:6px;font-size:11px;color:currentColor;cursor:pointer;user-select:none">
-              <input type="checkbox" data-action="toggleIncludeScreenshot" ${this.includeScreenshot ? 'checked' : ''} style="cursor:pointer">
-              <span>Include screenshot</span>
-            </label>
-            <span class="diag-screenshot-info" tabindex="0" data-diag-tooltip="Captures a PNG of the current viewport (~50 KB) to help diagnose visual issues.&#10;&#10;⚠ Avoid including sensitive data. Before enabling, make sure no customer PII, financial records, or confidential info is visible.&#10;&#10;Screenshots sent to Connectry AI are used only for one-time diagnosis and are permanently deleted after the patch is generated. We never retain screenshots." style="display:inline-flex;align-items:center;justify-content:center;width:14px;height:14px;border-radius:50%;background:rgba(128,128,128,0.25);color:currentColor;font-size:10px;font-weight:700;cursor:help">?</span>
+            <button class="diag-scan-btn diag-scan-cam${camActive}" data-action="toggleIncludeScreenshot" tabindex="0" data-diag-tooltip="Include viewport screenshot in AI suggestions (~50 KB PNG).&#10;&#10;⚠ Avoid if sensitive data is visible — no customer PII, financial records, or confidential info.&#10;&#10;Screenshots are used for one-time diagnosis and deleted after the patch is generated. We never retain them.">
+              ${ICONS.camera}
+            </button>
           </div>
           <details class="diag-advanced">
-            <summary>Advanced — scan against other themes</summary>
+            <summary>Advanced — pick a theme to scan</summary>
             <div class="diag-scan-row" style="margin-top:6px">
+              <button class="diag-scan-btn diag-scan-btn--secondary" data-action="scanAll" title="Scan this page against your current theme (same as the main Scan button)">
+                <span>Current</span>
+              </button>
               <button class="diag-scan-btn diag-scan-btn--secondary" data-action="scanThemesPresets" title="Scan this page against every preset theme">
                 <span>Presets</span>
               </button>
@@ -1554,7 +1555,10 @@
         else if (action === 'scrollToPatches') this._scrollToPatches();
         else if (action === 'activateConfiguredTheme') this._activateConfiguredTheme(btn);
         else if (action === 'toggleIncludeScreenshot') {
-          this.includeScreenshot = btn.checked === true;
+          this.includeScreenshot = !this.includeScreenshot;
+          // Redraw scan bar so the camera button reflects is-active state.
+          const scanBar = this.shadow?.querySelector('.diag-scan-bar');
+          if (scanBar) scanBar.outerHTML = this._scanBarHTML();
         }
         else if (action === 'scanAll') this._runScanAll(btn);
         else if (action === 'scanThemesPresets') this._runMultiThemeScan('presets');
