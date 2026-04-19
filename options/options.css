@@ -5024,7 +5024,7 @@ td.upgrade-compare-col-premium,
   font-size: 15px;
   line-height: 1.6;
   color: var(--cx-text-muted);
-  max-width: 720px;
+  /* No max-width: let it fill the row so it doesn't orphan a fragment on line 2 */
 }
 
 /* (Removed: .guide-coming-soon badges — all replaced with Premium badges) */
