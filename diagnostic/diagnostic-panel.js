@@ -199,9 +199,9 @@
       this.autoScanEnabled = !this.autoScanEnabled;
       // Persist preference
       try { chrome.storage.local.set({ diagnosticAutoScan: this.autoScanEnabled }); } catch (_) {}
-      // Re-render scan bar to reflect state
-      const scanBar = this.shadow?.querySelector('.diag-scan-bar');
-      if (scanBar) scanBar.outerHTML = this._scanBarHTML();
+      // Walk-through banner lives on Validate tab now — full re-render keeps
+      // banner + checklist + scan-bar all consistent regardless of active tab.
+      this._renderPanel();
       // If just enabled, run an immediate scan
       if (this.autoScanEnabled) this._autoScan();
     }
@@ -505,11 +505,50 @@
     }
 
     _scanBarHTML() {
+      // Validate tab owns the walk-through banner; no scan-bar there.
+      if (this.activeTab === 'validate') return '';
+
       const pageType = ns.detectPageType?.();
       const pageLabel = pageType ? ` · ${pageType.label}` : '';
 
+      // Scan tab — idle state. Walk-through status is Validate-tab-only.
+      return `
+        <div class="diag-scan-bar">
+          <div class="diag-scan-row">
+            <button class="diag-scan-btn diag-scan-btn--primary" data-action="scanAll" style="flex:1">
+              ${ICONS.scan}
+              <span>${this.hasScanned ? 'Re-Scan' : 'Scan'}${pageLabel}</span>
+            </button>
+          </div>
+          <div class="diag-scan-row" style="margin-top:8px;gap:8px;align-items:center">
+            <label class="diag-screenshot-toggle" style="display:flex;align-items:center;gap:6px;font-size:11px;color:currentColor;cursor:pointer;user-select:none">
+              <input type="checkbox" data-action="toggleIncludeScreenshot" ${this.includeScreenshot ? 'checked' : ''} style="cursor:pointer">
+              <span>Include screenshot</span>
+            </label>
+            <span class="diag-screenshot-info" data-diag-tooltip="Captures a PNG of the current viewport (~50 KB) to help diagnose visual issues.&#10;&#10;⚠ Avoid including sensitive data. Before enabling, make sure no customer PII, financial records, or confidential info is visible.&#10;&#10;Screenshots sent to Connectry AI are used only for one-time diagnosis and are permanently deleted after the patch is generated. We never retain screenshots." style="display:inline-flex;align-items:center;justify-content:center;width:14px;height:14px;border-radius:50%;background:rgba(128,128,128,0.25);color:currentColor;font-size:10px;font-weight:700;cursor:help">?</span>
+          </div>
+          <details class="diag-advanced">
+            <summary>Advanced</summary>
+            <div class="diag-scan-row" style="margin-top:6px">
+              <button class="diag-scan-btn diag-scan-btn--secondary" data-action="scanThemesPresets" title="Scan this page against every preset theme">
+                <span>Scan Presets</span>
+              </button>
+              <button class="diag-scan-btn diag-scan-btn--secondary" data-action="scanThemesMine" title="Scan this page against your custom themes">
+                <span>My Themes</span>
+              </button>
+              <button class="diag-scan-btn diag-scan-btn--secondary" data-action="scanThemesAll" title="Scan this page against every preset + custom theme">
+                <span>All</span>
+              </button>
+              <button class="diag-scan-btn diag-scan-btn--secondary" data-action="explainPicker" title="Click any element on the page to see which layer (engine, preset, patch) painted it">
+                <span>🔍 Explain</span>
+              </button>
+            </div>
+          </details>
+        </div>`;
+    }
+
+    _walkThroughBannerHTML() {
       if (this.autoScanEnabled) {
-        // Walk-through mode — show stop button, no manual scan
         const summary = this.testingProgress && ns.getCompletionSummary
           ? ns.getCompletionSummary(this.testingProgress) : null;
         const progress = summary ? `${summary.completed}/${summary.total}` : '';
@@ -527,44 +566,14 @@
             <div class="diag-autoscan-hint">Navigate to each page — results update automatically</div>
           </div>`;
       }
-
-      // Manual mode — show scan button + walk-through + scan all themes
       return `
         <div class="diag-scan-bar">
           <div class="diag-scan-row">
-            <button class="diag-scan-btn diag-scan-btn--primary" data-action="scanAll">
-              ${ICONS.scan}
-              <span>${this.hasScanned ? 'Re-Scan' : 'Scan'}${pageLabel}</span>
-            </button>
-            <button class="diag-scan-btn diag-autoscan-btn" data-action="toggleAutoScan" title="Start walk-through: auto-scan each page as you navigate">
-              <span>Walk-Through</span>
+            <button class="diag-scan-btn diag-scan-btn--primary" data-action="toggleAutoScan" style="flex:1">
+              <span>Start Walk-Through</span>
             </button>
           </div>
-          <div class="diag-scan-row" style="margin-top:6px">
-            <button class="diag-scan-btn diag-scan-btn--secondary" data-action="scanThemesPresets" title="Scan this page against every preset theme">
-              <span>Scan Presets</span>
-            </button>
-            <button class="diag-scan-btn diag-scan-btn--secondary" data-action="scanThemesMine" title="Scan this page against your custom themes">
-              <span>My Themes</span>
-            </button>
-            <button class="diag-scan-btn diag-scan-btn--secondary" data-action="scanThemesAll" title="Scan this page against every preset + custom theme">
-              <span>All</span>
-            </button>
-            <button class="diag-scan-btn diag-scan-btn--secondary" data-action="explainPicker" title="Click any element on the page to see which layer (engine, preset, patch) painted it">
-              <span>🔍 Explain</span>
-            </button>
-          </div>
-          <div class="diag-scan-row" style="margin-top:8px;gap:6px;align-items:center">
-            <label class="diag-screenshot-toggle" style="display:flex;align-items:center;gap:6px;font-size:11px;color:currentColor;cursor:pointer;user-select:none">
-              <input type="checkbox" data-action="toggleIncludeScreenshot" ${this.includeScreenshot ? 'checked' : ''} style="cursor:pointer">
-              <span>Include screenshot</span>
-            </label>
-            <span class="diag-screenshot-info" data-diag-tooltip="Captures a PNG of the current viewport (~50 KB) to help diagnose visual issues.&#10;&#10;⚠ Avoid including sensitive data. Before enabling, make sure no customer PII, financial records, or confidential info is visible.&#10;&#10;Screenshots sent to Connectry AI are used only for one-time diagnosis and are permanently deleted after the patch is generated. We never retain screenshots." title="Captures a PNG of the current viewport (~50 KB) to help diagnose visual issues.
-
-⚠ Avoid including sensitive data. Before enabling, make sure no customer PII, financial records, or confidential info is visible.
-
-Screenshots sent to Connectry AI are used only for one-time diagnosis and are permanently deleted after the patch is generated. We never retain screenshots." style="display:inline-flex;align-items:center;justify-content:center;width:14px;height:14px;border-radius:50%;background:rgba(128,128,128,0.25);color:currentColor;font-size:10px;font-weight:700;cursor:help">?</span>
-          </div>
+          <div class="diag-autoscan-hint" style="margin-top:6px">Auto-scans each page as you navigate — track theme coverage across your org.</div>
         </div>`;
     }
 
@@ -958,10 +967,7 @@ Screenshots sent to Connectry AI are used only for one-time diagnosis and are pe
         html += this._activePatchesSection();
       }
 
-      // ── 6. Testing checklist (B29a: still here until B29b migrates to Validate) ──
-      html += this._testingChecklistSection();
-
-      // ── 7. Copy all fixes button ──
+      // ── 6. Copy all fixes button ──
       if (this.fixReport?.fullCSS) {
         const total = (this.fixReport.summary?.tokenGapsFixed || 0) + (this.fixReport.summary?.componentsPatched || 0);
         if (total > 0) {
@@ -978,12 +984,9 @@ Screenshots sent to Connectry AI are used only for one-time diagnosis and are pe
       return html;
     }
 
-    /** Validate tab — cross-page walk-through + checklist coverage.
-     *  B29a: mirrors current unified content so nothing is hidden during the
-     *  skeleton step. B29b lifts walk-through banner + checklists in and
-     *  strips the scan-specific sections out. */
+    /** Validate tab — cross-page walk-through + checklist coverage. */
     _validateTabHTML() {
-      return this._scanTabHTML();
+      return this._walkThroughBannerHTML() + this._testingChecklistSection();
     }
 
     _emptyComponentHTML() {

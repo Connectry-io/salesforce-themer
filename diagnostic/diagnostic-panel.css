@@ -412,6 +412,42 @@
   flex: 1;
 }
 
+/* ─── Advanced disclosure (power-user scan modes) ──────────────────────── */
+
+.diag-advanced {
+  margin-top: 8px;
+  font-size: 11px;
+}
+
+.diag-advanced > summary {
+  cursor: pointer;
+  color: var(--dp-text-3);
+  padding: 4px 0;
+  user-select: none;
+  list-style: none;
+  transition: color 150ms ease;
+}
+
+.diag-advanced > summary::-webkit-details-marker {
+  display: none;
+}
+
+.diag-advanced > summary::before {
+  content: '▸';
+  display: inline-block;
+  margin-right: 4px;
+  font-size: 9px;
+  transition: transform 150ms ease;
+}
+
+.diag-advanced[open] > summary::before {
+  transform: rotate(90deg);
+}
+
+.diag-advanced > summary:hover {
+  color: var(--dp-text-2);
+}
+
 /* ─── Auto-scan toggle ─────────────────────────────────────────────────── */
 
 .diag-autoscan-btn {
