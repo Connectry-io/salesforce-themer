@@ -4863,20 +4863,9 @@
               <span class="guide-anatomy-placeholder-text">System Default · Md · 1.375/0</span>
             </div>
           </div>
-          <div class="theme-card-actions" data-part="6">
-            <button type="button" class="anatomy-marker" data-marker="6" aria-label="Apply / Clone explainer">6</button>
-            <div class="theme-card-status">
-              <span class="theme-card-status-dot"></span>
-              <span>Active</span>
-            </div>
-            <button class="theme-card-clone-btn" type="button" title="Clone preview" disabled>
-              <svg width="10" height="10" viewBox="0 0 12 12" fill="none" aria-hidden="true">
-                <rect x="2.5" y="5.5" width="7" height="5" rx="1" stroke="currentColor" stroke-width="1.3"/>
-                <path d="M4 5.5V4a2 2 0 0 1 4 0v1.5" stroke="currentColor" stroke-width="1.3"/>
-              </svg>
-              Clone
-            </button>
-          </div>
+          <!-- (Removed: data-part="6" theme-card-actions row + marker 6 —
+               the Apply/Clone callout was retired during the V1 simplification
+               since cards now Apply on click and Clone is a hover action.) -->
         </div>
       </div>
       <p class="guide-anatomy-hint">
