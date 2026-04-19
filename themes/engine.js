@@ -509,6 +509,9 @@ function generateThemeCSS(theme) {
   --lwc-globalnavigationItemHeightAccentActive: ${c.accent} !important;
   --lwc-globalnavigationItemHeightAccentFocus: ${c.accentHover} !important;
 
+  /* Kebab-case alias for brandAccessible (used in some SF SLDS 2 tokens) */
+  --lwc-brand-accessible: ${c.accent} !important;
+
   /* Context bar + Context tab bar active/hover — these tokens paint
    * the active-subtab fill (the "Home" pill) which defaults to white.
    * This is the root cause of the Home-tab-always-cyan saga on Tron:
@@ -2199,6 +2202,95 @@ one-app-launcher-modal .slds-modal__header {
 one-app-launcher-modal + .slds-backdrop,
 one-app-launcher-modal ~ .slds-backdrop {
   background-color: ${c.modalBackdrop} !important;
+}
+
+/* App Launcher tiles — the individual app cards (Sales, Service, etc.).
+ * Scan 2026-04-19 showed 21 tile-body instances partial + 21 tile-figure
+ * + 21 lightning-avatar unstyled = tile body/figure defaulted to white.
+ * Theme each tile as a card with surface bg, border, hover state. */
+one-app-launcher-app-tile,
+one-app-launcher-app-tile .slds-app-launcher__tile,
+body .slds-app-launcher__tile {
+  background-color: ${c.surface} !important;
+  color: ${c.textPrimary} !important;
+  border: 1px solid ${c.border} !important;
+  border-radius: 4px !important;
+}
+
+one-app-launcher-app-tile .slds-app-launcher__tile-body,
+body .slds-app-launcher__tile-body {
+  background-color: transparent !important;
+  color: ${c.textPrimary} !important;
+}
+
+one-app-launcher-app-tile .slds-app-launcher__tile-figure,
+body .slds-app-launcher__tile-figure {
+  background-color: ${c.surfaceAlt} !important;
+}
+
+one-app-launcher-app-tile .appTileTitle,
+one-app-launcher-app-tile a,
+one-app-launcher-app-tile b,
+body .slds-app-launcher__tile-body a,
+body .slds-app-launcher__tile-body b {
+  color: ${c.accent} !important;
+  font-weight: 600 !important;
+}
+
+one-app-launcher-app-tile .slds-text-body_small,
+one-app-launcher-app-tile p,
+body .slds-app-launcher__tile-body p,
+body .slds-app-launcher__tile-body .slds-text-body_small {
+  color: ${c.textSecondary} !important;
+}
+
+one-app-launcher-app-tile lightning-avatar,
+one-app-launcher-app-tile .slds-avatar,
+body .slds-app-launcher__tile .slds-avatar {
+  background-color: transparent !important;
+  border-color: transparent !important;
+}
+
+one-app-launcher-app-tile:hover,
+body .slds-app-launcher__tile:hover {
+  background-color: ${c.surfaceHover} !important;
+  border-color: ${c.accent} !important;
+  box-shadow: 0 2px 8px ${c.accentLight || 'rgba(0,0,0,0.2)'} !important;
+}
+
+/* App Launcher accordion section headers ("All Apps", "All Items") */
+one-app-launcher-modal .slds-accordion__summary,
+one-app-launcher-modal .slds-accordion__summary-heading,
+one-app-launcher-modal lightning-accordion-section {
+  background-color: transparent !important;
+  color: ${c.textPrimary} !important;
+  font-weight: 600 !important;
+}
+
+/* App Launcher search bar */
+one-app-launcher-search-bar,
+one-app-launcher-search-bar input,
+one-app-launcher-search-bar .slds-input {
+  background-color: ${isDark ? c.background : c.surface} !important;
+  color: ${c.textPrimary} !important;
+  border-color: ${c.borderInput} !important;
+}
+
+one-app-launcher-search-bar input::placeholder {
+  color: ${c.textPlaceholder} !important;
+}
+
+/* App Launcher header + Visit AppExchange button */
+one-app-launcher-header,
+one-app-launcher-header h2,
+one-app-launcher-modal h2 {
+  color: ${c.textPrimary} !important;
+}
+
+one-app-launcher-modal a[href*="appexchange"],
+one-app-launcher-modal .slds-button_neutral {
+  color: ${c.accent} !important;
+  border-color: ${c.accent} !important;
 }
 
 /* ─── Dropdowns & Popovers ───────────────────────────────────────────────── */
