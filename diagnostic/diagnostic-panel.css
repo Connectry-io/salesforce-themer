@@ -642,6 +642,18 @@
   font-weight: 600;
 }
 
+/* ─── "On this page" scope label (B29d) ────────────────────────────────── */
+
+.diag-scope-label {
+  padding: 12px 14px 4px;
+  font-size: 9px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--dp-text-3);
+  border-top: 1px solid var(--dp-border);
+}
+
 /* ─── Token sections ──────────────────────────────────────────────────── */
 
 .diag-section {
@@ -1133,6 +1145,13 @@
 .diag-copy-btn.is-copied {
   color: #4ade80;
   border-color: rgba(34, 197, 94, 0.3);
+}
+
+.diag-copy-btn.is-disabled,
+.diag-copy-btn[disabled] {
+  opacity: 0.4;
+  cursor: not-allowed;
+  pointer-events: none;
 }
 
 .diag-copy-btn svg {

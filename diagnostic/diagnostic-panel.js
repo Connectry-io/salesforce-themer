@@ -27,6 +27,7 @@
     spinner: `<svg viewBox="0 0 14 14" fill="none"><path d="M7 2a5 5 0 1 1-4.33 2.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>`,
     chevron: `<svg viewBox="0 0 10 10" fill="none" width="10" height="10"><path d="M2.5 3.5L5 6.5L7.5 3.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
     copy: `<svg viewBox="0 0 14 14" fill="none"><rect x="4" y="4" width="7" height="8" rx="1.2" stroke="currentColor" stroke-width="1.3"/><path d="M10 3.5V3a1.2 1.2 0 0 0-1.2-1.2H4.2A1.2 1.2 0 0 0 3 3v5.8A1.2 1.2 0 0 0 4.2 10H4.5" stroke="currentColor" stroke-width="1.3"/></svg>`,
+    magnifier: `<svg viewBox="0 0 14 14" fill="none"><circle cx="6" cy="6" r="3.5" stroke="currentColor" stroke-width="1.4"/><path d="M8.6 8.6l3 3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>`,
     badge: `<svg viewBox="0 0 24 24" fill="none"><circle cx="6" cy="12" r="3" fill="currentColor" opacity="0.6"/><line x1="9" y1="12" x2="15" y2="12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" opacity="0.4"/><circle cx="18" cy="12" r="3" fill="currentColor"/></svg>`,
   };
 
@@ -395,6 +396,9 @@
             <div class="diag-header-subtitle">Powered by Connectry AI</div>
           </div>
           <div class="diag-header-actions">
+            <button class="diag-icon-btn" data-action="explainPicker" title="Explain: click any element on the page to see which layer (engine, preset, patch) painted it">
+              ${ICONS.magnifier}
+            </button>
             <button class="diag-icon-btn" data-action="toggleQAMode" title="QA mode: also load draft-tier engine patches in this tab (Connectry HQ only)" style="font-size:9px;font-weight:600;letter-spacing:0.04em;width:auto;padding:0 8px;">
               <span data-qa-label>QA</span>
             </button>
@@ -545,19 +549,16 @@
             <span class="diag-screenshot-info" tabindex="0" data-diag-tooltip="Captures a PNG of the current viewport (~50 KB) to help diagnose visual issues.&#10;&#10;⚠ Avoid including sensitive data. Before enabling, make sure no customer PII, financial records, or confidential info is visible.&#10;&#10;Screenshots sent to Connectry AI are used only for one-time diagnosis and are permanently deleted after the patch is generated. We never retain screenshots." style="display:inline-flex;align-items:center;justify-content:center;width:14px;height:14px;border-radius:50%;background:rgba(128,128,128,0.25);color:currentColor;font-size:10px;font-weight:700;cursor:help">?</span>
           </div>
           <details class="diag-advanced">
-            <summary>Advanced</summary>
+            <summary>Advanced — scan against other themes</summary>
             <div class="diag-scan-row" style="margin-top:6px">
               <button class="diag-scan-btn diag-scan-btn--secondary" data-action="scanThemesPresets" title="Scan this page against every preset theme">
-                <span>Scan Presets</span>
+                <span>Presets</span>
               </button>
               <button class="diag-scan-btn diag-scan-btn--secondary" data-action="scanThemesMine" title="Scan this page against your custom themes">
                 <span>My Themes</span>
               </button>
               <button class="diag-scan-btn diag-scan-btn--secondary" data-action="scanThemesAll" title="Scan this page against every preset + custom theme">
                 <span>All</span>
-              </button>
-              <button class="diag-scan-btn diag-scan-btn--secondary" data-action="explainPicker" title="Click any element on the page to see which layer (engine, preset, patch) painted it">
-                <span>🔍 Explain</span>
               </button>
             </div>
           </details>
@@ -643,7 +644,7 @@
       return `
         <div class="diag-coverage">
           <div class="diag-coverage-header">
-            <span class="diag-coverage-label">Theme Health</span>
+            <span class="diag-coverage-label" title="Average of token coverage + component health on this page">Page Health</span>
             ${timeStr ? `<span class="diag-scan-time">${timeStr}</span>` : ''}
             <span class="diag-coverage-pct is-${overallLevel}">${overallPct}%</span>
           </div>
@@ -964,41 +965,29 @@
       // ── 1b. AI suggestion card (if present or in progress) ──
       if (this.aiSuggestion || this.aiBusy) html += this._aiSuggestionHTML();
 
-      // ── 2. Issues: token gaps with inline fixes ──
-      if (this.fixReport?.tokenFixes?.fixes?.length > 0) {
-        html += this._tokenFixesSection();
-      }
+      // ── 2. "On this page" subhead + page-scoped sections ──
+      const cs = this.componentResults?.summary;
+      const hasPageSections =
+        (this.fixReport?.tokenFixes?.fixes?.length > 0) ||
+        (cs && (cs.totalUnstyled > 0 || cs.totalPartial > 0 || cs.totalHardcoded > 0)) ||
+        (this.fixReport?.componentPatches?.length > 0);
 
-      // ── 3. Issues: component problems ──
-      if (this.componentResults) {
-        const s = this.componentResults.summary;
-        if (s.totalUnstyled > 0 || s.totalPartial > 0 || s.totalHardcoded > 0) {
+      if (hasPageSections) {
+        html += '<div class="diag-scope-label">On this page</div>';
+        if (this.fixReport?.tokenFixes?.fixes?.length > 0) {
+          html += this._tokenFixesSection();
+        }
+        if (cs && (cs.totalUnstyled > 0 || cs.totalPartial > 0 || cs.totalHardcoded > 0)) {
           html += this._componentIssuesSection();
         }
+        if (this.fixReport?.componentPatches?.length > 0) {
+          html += this._lwcPatchesSection();
+        }
       }
 
-      // ── 4. Custom LWC patches (with Enable buttons) ──
-      if (this.fixReport?.componentPatches?.length > 0) {
-        html += this._lwcPatchesSection();
-      }
-
-      // ── 5. Active patches ──
+      // ── 3. Active patches (org-level, not page-scoped) ──
       if (this.patchSummary?.total > 0) {
         html += this._activePatchesSection();
-      }
-
-      // ── 6. Copy all fixes button ──
-      if (this.fixReport?.fullCSS) {
-        const total = (this.fixReport.summary?.tokenGapsFixed || 0) + (this.fixReport.summary?.componentsPatched || 0);
-        if (total > 0) {
-          html += `
-            <div class="diag-fix-actions">
-              <button class="diag-scan-btn diag-scan-btn--primary" data-action="copyFullCSS" style="width:100%">
-                ${ICONS.copy}
-                <span>Copy All Fixes (${total} rules)</span>
-              </button>
-            </div>`;
-        }
       }
 
       return html;
@@ -1426,6 +1415,10 @@
     }
 
     _footerHTML() {
+      const scanned = this.hasScanned;
+      const disabledAttr = scanned ? '' : 'disabled';
+      const disabledClass = scanned ? '' : ' is-disabled';
+      const scanHint = scanned ? '' : ' — run a scan first';
       return `
         <div class="diag-footer">
           <span class="diag-footer-brand">Powered by <strong>Connectry AI</strong></span>
@@ -1433,11 +1426,11 @@
             <button class="diag-copy-btn" data-action="copyDOM" title="Copy DOM structure snapshot to clipboard">
               <span>DOM</span>
             </button>
-            <button class="diag-copy-btn" data-action="copy" title="Copy scan report to clipboard">
+            <button class="diag-copy-btn${disabledClass}" ${disabledAttr} data-action="copy" title="Copy scan report to clipboard${scanHint}">
               ${ICONS.copy}
               <span>Copy</span>
             </button>
-            <button class="diag-copy-btn diag-report-btn" data-action="viewReport" title="Open full interactive report in new tab">
+            <button class="diag-copy-btn diag-report-btn${disabledClass}" ${disabledAttr} data-action="viewReport" title="Open full interactive report in new tab${scanHint}">
               <span>View Report</span>
             </button>
           </div>
