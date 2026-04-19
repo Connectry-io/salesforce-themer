@@ -602,36 +602,98 @@ setup-tree-node:hover *,
 /* Global search dropdown (Setup search bar + force:search) — SF's
  * picker uses .forceSearchDropdown / .lookup__menu / .forceActionsContainer.
  * Ensure bg + text + row-hover match the theme so results are legible. */
-.forceSearchDropdown,
-.forceSearchSection,
-.forceActionsContainer,
-.lookup__menu,
-.search-setup-dropdown {
+body .forceSearchDropdown,
+body .forceSearchSection,
+body .forceSearchSectionHeader,
+body .forceSearchAutoCompleteDataContainer,
+body .forceSearchAutoCompleteDesktop,
+body .forceSearchAutoCompleteRow,
+body .forceActionsContainer,
+body .lookup__menu,
+body .search-setup-dropdown,
+body .forceSearchResults,
+body .searchDropdownRoot {
   background-color: #ffffff !important;
   color: #1a202c !important;
   border-color: #e2e8f0 !important;
 }
 
-.forceSearchDropdown a,
-.forceSearchDropdown .primaryField,
-.forceSearchDropdown .secondaryField,
-.lookup__menu a,
-.lookup__item-label {
+/* Text inside the dropdown — aggressively force textPrimary on every
+ * text-bearing element. SF buries the item title in various nested
+ * spans/divs with specific classes. Using body prefix + broad list to
+ * beat Aura CSS specificity. */
+body .forceSearchDropdown,
+body .forceSearchDropdown span,
+body .forceSearchDropdown div,
+body .forceSearchDropdown li,
+body .forceSearchDropdown a,
+body .forceSearchDropdown b,
+body .forceSearchDropdown h1,
+body .forceSearchDropdown h2,
+body .forceSearchDropdown h3,
+body .forceSearchDropdown .primaryField,
+body .forceSearchDropdown .slds-truncate,
+body .forceSearchDropdown .entityName,
+body .forceSearchDropdown .result-name,
+body .forceSearchDropdown .search-item-name,
+body .forceSearchDropdown .search-entity-item-name,
+body .forceSearchAutoCompleteRow,
+body .forceSearchAutoCompleteRow span,
+body .forceSearchAutoCompleteRow div,
+body .forceSearchAutoCompleteRow a,
+body .forceSearchAutoCompleteRow .primaryField,
+body .forceSearchAutoCompleteRow .slds-truncate,
+body .lookup__menu,
+body .lookup__menu span,
+body .lookup__menu div,
+body .lookup__menu a,
+body .lookup__menu li,
+body .lookup__item-label {
   color: #1a202c !important;
 }
 
-.forceSearchDropdown .secondaryField,
-.forceSearchDropdown .slds-text-body_small,
-.lookup__menu .slds-text-body_small,
-.lookup__item-meta {
+/* Secondary / meta text (record type, modified date, etc.) */
+body .forceSearchDropdown .secondaryField,
+body .forceSearchDropdown .slds-text-body_small,
+body .forceSearchDropdown .meta,
+body .forceSearchDropdown .entity,
+body .forceSearchAutoCompleteRow .secondaryField,
+body .forceSearchAutoCompleteRow .slds-text-body_small,
+body .lookup__menu .slds-text-body_small,
+body .lookup__menu .secondaryField,
+body .lookup__item-meta {
   color: #4a5568 !important;
 }
 
-.forceSearchDropdown li:hover,
-.forceSearchDropdown a:hover,
-.lookup__menu li:hover,
-.lookup__menu a:hover {
+/* Section header ("Recent Items", "Top Results", etc.) */
+body .forceSearchDropdown .forceSearchSectionHeader,
+body .forceSearchDropdown .section-header,
+body .forceSearchDropdown .slds-listbox__option-header,
+body .forceSearchDropdown h3.slds-text-title,
+body .forceSearchAutoCompleteDesktop .searchTitle {
+  color: #4a5568 !important;
+  background-color: #edf2f7 !important;
+  font-weight: 600 !important;
+}
+
+/* Hover / focus / selected */
+body .forceSearchDropdown li:hover,
+body .forceSearchDropdown a:hover,
+body .forceSearchDropdown .forceSearchAutoCompleteRow:hover,
+body .forceSearchDropdown .forceSearchAutoCompleteRow.selected,
+body .forceSearchAutoCompleteRow:hover,
+body .forceSearchAutoCompleteRow.selected,
+body .lookup__menu li:hover,
+body .lookup__menu a:hover {
   background-color: #ebf4ff !important;
+}
+
+body .forceSearchDropdown li:hover *,
+body .forceSearchDropdown a:hover *,
+body .forceSearchAutoCompleteRow:hover *,
+body .forceSearchAutoCompleteRow.selected *,
+body .lookup__menu li:hover *,
+body .lookup__menu a:hover * {
   color: #1a202c !important;
 }
 
