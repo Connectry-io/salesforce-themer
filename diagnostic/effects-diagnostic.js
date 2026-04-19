@@ -92,14 +92,16 @@
     } catch (err) { return { error: String(err) }; }
   }
 
-  async function dumpEffectsState() {
+  // Pure data collection — no side effects. Used by Scan to fold effects
+  // state into the unified report.
+  async function getEffectsState() {
     const cx = innerWidth / 2;
     const cy = innerHeight / 2;
     const manifestVersion = chrome?.runtime?.getManifest?.()?.version || '?';
     const archetype = _classifyArchetype();
     const config = await _readConfig();
 
-    const report = {
+    return {
       meta: {
         generatedAt: new Date().toISOString(),
         extensionVersion: manifestVersion,
@@ -128,6 +130,10 @@
         oneContent: document.querySelectorAll('.oneContent, .desktop, .forceRecordLayout').length,
       },
     };
+  }
+
+  async function dumpEffectsState() {
+    const report = await getEffectsState();
 
     const formatted = '=== SF THEMER EFFECTS DIAGNOSTIC ===\n'
       + JSON.stringify(report, null, 2)
@@ -171,4 +177,5 @@
   }
 
   ns.dumpEffectsState = dumpEffectsState;
+  ns.getEffectsState = getEffectsState;
 })();

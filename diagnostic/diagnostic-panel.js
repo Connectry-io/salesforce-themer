@@ -49,6 +49,9 @@
       this.hasScanned = false;        // true after first scan
       this.autoScanEnabled = false;  // continuous scan mode
       this.testingProgress = null;   // guided testing progress
+      this.effectsState = null;      // effects runtime snapshot (B28 unified)
+      this.screenshotDataUrl = null; // base64 PNG when checkbox enabled
+      this.includeScreenshot = false; // user-toggled on each scan
       this._panelTheme = 'dark';     // 'dark' | 'light'
       this._configuredThemeName = null;
       this._dragState = null;
@@ -372,12 +375,6 @@
             <button class="diag-icon-btn" data-action="toggleQAMode" title="QA mode: also load draft-tier engine patches in this tab (Connectry HQ only)" style="font-size:9px;font-weight:600;letter-spacing:0.04em;width:auto;padding:0 8px;">
               <span data-qa-label>QA</span>
             </button>
-            <button class="diag-icon-btn" data-action="toggleAdvancedMode" title="Advanced mode: rich enrichment + screenshot for AI suggestions" style="font-size:9px;font-weight:600;letter-spacing:0.04em;width:auto;padding:0 8px;">
-              <span data-advanced-label>ADV</span>
-            </button>
-            <button class="diag-icon-btn" data-action="dumpEffects" title="Dump effects state to clipboard (for Claude debugging)" style="font-size:9px;font-weight:600;letter-spacing:0.04em;width:auto;padding:0 8px;">
-              FX
-            </button>
             <button class="diag-icon-btn" data-action="togglePanelTheme" title="Toggle light/dark panel">
               <svg viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="5" stroke="currentColor" stroke-width="1.4"/><path d="M7 2a5 5 0 0 1 0 10z" fill="currentColor"/></svg>
             </button>
@@ -531,6 +528,17 @@
             <button class="diag-scan-btn diag-scan-btn--secondary" data-action="explainPicker" title="Click any element on the page to see which layer (engine, preset, patch) painted it">
               <span>🔍 Explain</span>
             </button>
+          </div>
+          <div class="diag-scan-row" style="margin-top:8px;gap:6px;align-items:center">
+            <label class="diag-screenshot-toggle" style="display:flex;align-items:center;gap:6px;font-size:11px;color:currentColor;cursor:pointer;user-select:none">
+              <input type="checkbox" data-action="toggleIncludeScreenshot" ${this.includeScreenshot ? 'checked' : ''} style="cursor:pointer">
+              <span>Include screenshot</span>
+            </label>
+            <span class="diag-screenshot-info" data-diag-tooltip="Captures a PNG of the current viewport (~50 KB) to help diagnose visual issues.&#10;&#10;⚠ Avoid including sensitive data. Before enabling, make sure no customer PII, financial records, or confidential info is visible.&#10;&#10;Screenshots sent to Connectry AI are used only for one-time diagnosis and are permanently deleted after the patch is generated. We never retain screenshots." title="Captures a PNG of the current viewport (~50 KB) to help diagnose visual issues.
+
+⚠ Avoid including sensitive data. Before enabling, make sure no customer PII, financial records, or confidential info is visible.
+
+Screenshots sent to Connectry AI are used only for one-time diagnosis and are permanently deleted after the patch is generated. We never retain screenshots." style="display:inline-flex;align-items:center;justify-content:center;width:14px;height:14px;border-radius:50%;background:rgba(128,128,128,0.25);color:currentColor;font-size:10px;font-weight:700;cursor:help">?</span>
           </div>
         </div>`;
     }
@@ -1404,7 +1412,8 @@
       if (!this.shadow) return;
 
       // Initial advanced-mode + QA-mode chip state.
-      this._refreshAdvancedChip().catch(() => {});
+      // B28 — ADV button removed; advancedMode state is no longer toggled
+      // from UI. Screenshot inclusion is now per-scan via the checkbox.
       this._refreshQAChip().catch(() => {});
 
       // Action buttons
@@ -1416,12 +1425,10 @@
         if (action === 'close') this.close();
         else if (action === 'minimize') this.minimize();
         else if (action === 'togglePanelTheme') this._togglePanelTheme();
-        else if (action === 'dumpEffects') {
-          try { window.__sfThemerDiag?.dumpEffectsState?.(); }
-          catch (err) { console.warn('[SFT] dumpEffects failed', err); }
-        }
-        else if (action === 'toggleAdvancedMode') this._toggleAdvancedMode(btn);
         else if (action === 'toggleQAMode') this._toggleQAMode(btn);
+        else if (action === 'toggleIncludeScreenshot') {
+          this.includeScreenshot = btn.checked === true;
+        }
         else if (action === 'scanAll') this._runScanAll(btn);
         else if (action === 'scanThemesPresets') this._runMultiThemeScan('presets');
         else if (action === 'scanThemesMine') this._runMultiThemeScan('custom');
@@ -1513,6 +1520,32 @@
           this.patchSummary = await ns.getPatchSummary();
         }
       } catch (_) {}
+
+      // 4b. B28 — effects runtime state (folded into unified scan).
+      try {
+        if (ns.getEffectsState) {
+          this.effectsState = await ns.getEffectsState();
+        }
+      } catch (err) {
+        console.warn('[SFT Diag] Effects state capture failed:', err);
+      }
+
+      // 4c. B28 — optional screenshot (user-toggled per scan). Goes via
+      // background service worker because content scripts can't call
+      // chrome.tabs.captureVisibleTab directly.
+      this.screenshotDataUrl = null;
+      if (this.includeScreenshot) {
+        try {
+          const res = await chrome.runtime.sendMessage({ action: 'intel.captureScreenshot' });
+          if (res?.ok && res.dataUrl) {
+            this.screenshotDataUrl = res.dataUrl;
+          } else if (res?.error) {
+            console.warn('[SFT Diag] Screenshot capture failed:', res.error);
+          }
+        } catch (err) {
+          console.warn('[SFT Diag] Screenshot message failed:', err);
+        }
+      }
 
       // 5. Save testing progress
       const pageType = ns.detectPageType?.();
@@ -2491,6 +2524,44 @@
             report += '```html\n' + data.domSample.outerHTML + '\n```\n\n';
           }
         }
+      }
+
+      // B28 — effects runtime state (folded into unified scan).
+      if (this.effectsState) {
+        const e = this.effectsState;
+        report += `## Effects State\n\n`;
+        report += `- **Archetype**: ${e.meta?.archetype || '—'}\n`;
+        report += `- **Viewport**: ${e.meta?.viewport?.w || 0}×${e.meta?.viewport?.h || 0}\n`;
+        if (e.syncConfig) {
+          report += `- **Active theme**: ${e.syncConfig.theme || '—'}\n`;
+          report += `- **Effects volume**: ${e.syncConfig.effectsVolume || '—'}\n`;
+          report += `- **Auto-mode**: ${e.syncConfig.autoMode ? 'on' : 'off'}\n`;
+          if (e.syncConfig.customThemesCount != null) {
+            report += `- **Custom themes**: ${e.syncConfig.customThemesCount}\n`;
+          }
+        }
+        if (e.themerStyleTags?.length) {
+          report += `- **Themer style tags**: ${e.themerStyleTags.length} (${e.themerStyleTags.map(t => `${t.id}=${t.bytes}B`).join(', ')})\n`;
+        }
+        if (e.knownSelectors) {
+          const sel = Object.entries(e.knownSelectors).filter(([, n]) => n > 0);
+          if (sel.length) {
+            report += `- **Known selectors on page**: ${sel.map(([k, n]) => `${k}=${n}`).join(', ')}\n`;
+          }
+        }
+        report += '\n<details><summary>Full effects JSON (stacks, pseudo, config)</summary>\n\n```json\n';
+        report += JSON.stringify(e, null, 2);
+        report += '\n```\n</details>\n\n';
+      }
+
+      // B28 — screenshot appendix if user opted in.
+      if (this.screenshotDataUrl) {
+        const kb = Math.round(this.screenshotDataUrl.length * 0.75 / 1024);
+        report += `## Screenshot\n\n`;
+        report += `_Captured at scan time (~${kb} KB). User opted in._\n\n`;
+        report += '<details><summary>Base64 PNG (viewport)</summary>\n\n';
+        report += `![viewport](${this.screenshotDataUrl})\n\n`;
+        report += '</details>\n\n';
       }
 
       report += `\n---\n*Generated by Salesforce Themer Diagnostic — Powered by Connectry AI*\n`;
