@@ -1959,22 +1959,15 @@ one-app-nav-bar-item-root.slds-is-active .slds-context-bar__label-action,
 }
 
 /* App Launcher — the Aura-hosted modal wraps a pure-LWC content tree
- * in a standard .slds-modal__container painted white. B25 fix: make the
- * .slds-modal shell AND container fill the viewport with the theme
- * background, so there's no bleed-through at edges where the LWC
- * doesn't reach (previous transparent fix left gaps showing the Setup
- * page behind). :has() scopes this to the app-launcher modal only. */
-.slds-modal:has(one-app-launcher-modal) {
-  background-color: #ffffff !important;
-}
-
+ * in a standard .slds-modal__container. Native SF renders this as a
+ * centered card with the Setup page dimmed behind via backdrop; we
+ * match that pattern. Prior fixes (B8 transparent, B25 fullscreen)
+ * were both wrong — the card should be a proper themed dark surface
+ * sized to content, letting the backdrop handle the page dim. */
 .slds-modal__container:has(one-app-launcher-modal),
 .slds-modal:has(one-app-launcher-modal) .slds-modal__container {
   background-color: #ffffff !important;
-  border-color: transparent !important;
-  max-width: 100vw !important;
-  width: 100vw !important;
-  min-height: 100vh !important;
+  border: 1px solid #000000 !important;
 }
 
 /* App Launcher close button (the X in the upper right). SF renders it
