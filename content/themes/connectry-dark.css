@@ -590,6 +590,72 @@ setup-tree-node:hover *,
   color: #e8eaed !important;
 }
 
+/* Global header chrome — context bar sections + global actions.
+ * Scan showed .slds-context-bar__primary/secondary/tertiary unstyled;
+ * these are the left/middle/right sections of the top bar. Global
+ * actions (gear, bell, waffle, profile, help) live in __tertiary. */
+.slds-context-bar,
+.slds-context-bar__primary,
+.slds-context-bar__secondary,
+.slds-context-bar__tertiary {
+  background-color: #4a6fa5 !important;
+  color: #ffffff !important;
+  border-color: #3d5e8e !important;
+}
+
+.slds-global-actions,
+.slds-global-actions__item,
+.slds-global-actions__item-action {
+  background-color: transparent !important;
+  color: #ffffff !important;
+}
+
+.slds-global-actions__item:hover,
+.slds-global-actions__item-action:hover,
+.slds-global-actions__item-action:focus {
+  background-color: rgba(255, 255, 255, 0.12) !important;
+  color: #ffffff !important;
+}
+
+.slds-global-actions__item svg,
+.slds-global-actions__item-action svg,
+.slds-global-actions__item .slds-icon,
+.slds-global-actions__item-action .slds-icon {
+  fill: #ffffff !important;
+  color: #ffffff !important;
+}
+
+.slds-global-actions__item:hover svg,
+.slds-global-actions__item-action:hover svg {
+  fill: #ffffff !important;
+  color: #ffffff !important;
+}
+
+/* Icon background defaults — prevent stray accent bubbles on icons
+ * that inherit --slds-c-icon-color-background. Search magnifying
+ * glass + various icon slots use this token; must stay transparent
+ * unless a specific component explicitly styles it. */
+:root {
+  --slds-c-icon-color-background: transparent !important;
+  --sds-c-icon-color-background: transparent !important;
+}
+
+.slds-icon_container,
+.slds-icon-text-default,
+.slds-input__icon,
+.slds-input-has-icon .slds-icon {
+  background-color: transparent !important;
+}
+
+/* Global search input icon — Setup top bar magnifying glass */
+.forceSearchInputContainer .slds-icon,
+.globalSearchContainer .slds-icon,
+.slds-form-element__icon .slds-icon,
+.slds-input__icon svg {
+  fill: #9aa0a9 !important;
+  background-color: transparent !important;
+}
+
 /* ─── Base ───────────────────────────────────────────────────────────────── */
 
 html,
