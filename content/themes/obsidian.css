@@ -937,6 +937,122 @@ li[role="presentation"].active,
   text-shadow: none !important;
 }
 
+/* Pseudo-element kill — SF paints active tabs via ::before/::after in
+ * some variants (cyan fill across the pill). Neutralize them so our
+ * transparent bg wins. */
+.oneConsoleTabItem.slds-active::before,
+.oneConsoleTabItem.slds-active::after,
+.oneConsoleTabItem.active::before,
+.oneConsoleTabItem.active::after,
+.slds-sub-tabs__item.slds-active::before,
+.slds-sub-tabs__item.slds-active::after,
+[role="tab"][aria-selected="true"]::before,
+[role="tab"][aria-selected="true"]::after {
+  background: transparent !important;
+  background-color: transparent !important;
+  background-image: none !important;
+}
+
+/* ─── Legacy .bPageBlock pattern (Users, Profiles, Perm Sets, Roles,
+ * Queues, Public Groups list screens) — the OLD old Setup UI. DOM
+ * confirmed 2026-04-19: uses .bPageBlock.brandSecondaryBrd.secondaryPalette
+ * wrapper, table.list with <tr class="headerRow"> directly in <tbody>
+ * (NO <thead>), rows as tr.dataRow.even/.odd, cells as .dataCell, and
+ * image-based checkmarks in .booleanColumn. */
+.listRelatedObject,
+.setupBlock,
+.bPageBlock,
+.bPageBlock.brandSecondaryBrd,
+.bPageBlock.secondaryPalette,
+.bPageBlock .pbHeader,
+.bPageBlock .pbBody,
+.bPageBlock .pbInnerFooter,
+.bPageBlock .pbFooter,
+.bPageBlock .pbFooter.secondaryPalette,
+.bPageBlock .bg,
+.pbHeader,
+.pbInnerFooter,
+.pbFooter,
+.pbBottomButtons,
+.pbSubsection,
+.secondaryPalette {
+  background-color: #1a1a1a !important;
+  color: #ede7d3 !important;
+  border-color: #2a2a2a !important;
+}
+
+/* Header row (inside <tbody>, not <thead> — SF's legacy list pattern) */
+table.list tr.headerRow,
+table.list tr.headerRow th,
+table.list tr.headerRow td,
+.pbBody tr.headerRow,
+.pbBody tr.headerRow th,
+.listRelatedObject tr.headerRow,
+.listRelatedObject tr.headerRow th,
+tr.headerRow,
+tr.headerRow th,
+tr.headerRow td {
+  background-color: #111111 !important;
+  color: #a39e93 !important;
+  border-color: #2a2a2a !important;
+}
+
+tr.headerRow th a,
+tr.headerRow a,
+.zen-deemphasize,
+.zen-deemphasize a,
+th.zen-deemphasize,
+th.zen-deemphasize a {
+  color: #a39e93 !important;
+}
+
+/* Data rows — alternating .even/.odd/.first/.last + .dataCell */
+tr.dataRow,
+tr.dataRow th.dataCell,
+tr.dataRow td.dataCell,
+tr.dataRow .dataCell,
+tr.dataRow td,
+tr.dataRow th {
+  background-color: #1a1a1a !important;
+  color: #ede7d3 !important;
+  border-color: #222222 !important;
+}
+
+tr.dataRow.odd,
+tr.dataRow.odd td,
+tr.dataRow.odd th,
+tr.dataRow.odd .dataCell {
+  background-color: #191919 !important;
+}
+
+tr.dataRow:hover,
+tr.dataRow:hover td,
+tr.dataRow:hover th,
+tr.dataRow:hover .dataCell {
+  background-color: #262626 !important;
+}
+
+tr.dataRow a,
+.dataCell a,
+.actionColumn a,
+.actionLink {
+  color: #d4a853 !important;
+}
+
+td.actionColumn,
+th.actionColumn {
+  background-color: inherit !important;
+}
+
+/* Image-based "Active" checkmark column — the gif is a dark blue
+ * checkmark on transparent; invert to pure white on dark themes so
+ * it's visible against our dark rows. Light themes keep the original. */
+td.booleanColumn img.checkImg,
+td.booleanColumn img[src*="checkbox_"],
+img.checkImg {
+  filter: brightness(0) invert(1) opacity(0.85) !important;
+}
+
 /* ─── Base ───────────────────────────────────────────────────────────────── */
 
 html,
