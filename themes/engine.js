@@ -2293,6 +2293,403 @@ one-app-launcher-modal .slds-button_neutral {
   border-color: ${c.accent} !important;
 }
 
+/* ═══════════════════════════════════════════════════════════════════════
+ * Chatter publisher + feed (record page + record home Chatter tab)
+ *
+ * The rich-text-editor textarea is the big white "Share an update..."
+ * input. Scan reports components styled (our engine injects SOMETHING)
+ * but the contenteditable area + toolbar default to white. Aggressive
+ * targeting of every Chatter container + editor primitive below.
+ * ════════════════════════════════════════════════════════════════════ */
+body .forceChatterBasePublisher,
+body .forceChatterPublisherPresentationDesktop,
+body .forceChatterMessageBodyInput,
+body .forceChatterPublisherAttachments,
+body .forceChatterPublisherAttachmentPreview,
+body .forceChatterPublisherVisibility,
+body .forceChatterPublisherVisibilityWrapper,
+body .cuf-publisherWrapper,
+body .cuf-publisher,
+body .publisherSelectableTab,
+body .publisherTabsWrap {
+  background-color: ${c.surface} !important;
+  color: ${c.textPrimary} !important;
+  border-color: ${c.border} !important;
+}
+
+/* Rich text editor primitives — contenteditable area, toolbar, textarea */
+body .slds-rich-text-editor,
+body .slds-rich-text-editor__textarea,
+body .slds-rich-text-area__content,
+body .forceChatterMessageBodyInput [contenteditable],
+body .forceChatterMessageBodyInput .cuf-publisherInput {
+  background-color: ${isDark ? c.background : c.surface} !important;
+  color: ${c.textPrimary} !important;
+  border-color: ${c.borderInput} !important;
+}
+
+body .slds-rich-text-editor__textarea:focus,
+body .slds-rich-text-area__content:focus,
+body .forceChatterMessageBodyInput [contenteditable]:focus {
+  border-color: ${c.accent} !important;
+  box-shadow: ${c.focusRing || '0 0 0 2px ' + c.accent} !important;
+}
+
+/* Placeholder text ("Share an update...") */
+body .slds-rich-text-area__content[data-placeholder]::before,
+body .forceChatterMessageBodyInput [data-placeholder]::before,
+body .forceChatterMessageBodyInput .cuf-publisherPlaceholder {
+  color: ${c.textPlaceholder} !important;
+}
+
+/* Editor toolbar (B I U S strikethrough list link image emoji mention) */
+body .slds-rich-text-editor__toolbar,
+body .slds-rich-text-editor__toolbar-column,
+body .forceQuillButtonLink,
+body .forceQuillInsertImageButton {
+  background-color: ${c.surfaceAlt} !important;
+  color: ${c.textSecondary} !important;
+  border-color: ${c.border} !important;
+}
+
+body .slds-rich-text-editor__toolbar button,
+body .slds-rich-text-editor__toolbar .slds-button {
+  color: ${c.textSecondary} !important;
+  background-color: transparent !important;
+}
+
+body .slds-rich-text-editor__toolbar button:hover,
+body .slds-rich-text-editor__toolbar button.slds-is-active,
+body .slds-rich-text-editor__toolbar .slds-button:hover {
+  background-color: ${c.surfaceHover} !important;
+  color: ${c.accent} !important;
+}
+
+body .slds-rich-text-editor__toolbar svg,
+body .slds-rich-text-editor__toolbar .slds-icon {
+  fill: ${c.textSecondary} !important;
+}
+
+body .slds-rich-text-editor__toolbar button:hover svg,
+body .slds-rich-text-editor__toolbar button.slds-is-active svg {
+  fill: ${c.accent} !important;
+}
+
+/* Publisher tabs (Post / Poll / Question) */
+body .publisherSelectableTab,
+body .publisherSelectableTab a,
+body .publisherSelectableTab span {
+  color: ${c.textSecondary} !important;
+  background-color: transparent !important;
+}
+
+body .publisherSelectableTab.active,
+body .publisherSelectableTab[aria-selected="true"] {
+  color: ${c.accent} !important;
+  border-bottom-color: ${c.accent} !important;
+}
+
+/* Chatter feed + feed items */
+body .forceChatterFeed,
+body .forceChatterScroller,
+body .forceChatterSearchInFeed,
+body .cuf-feed,
+body .cuf-feedItem {
+  background-color: transparent !important;
+  color: ${c.textPrimary} !important;
+}
+
+body .cuf-feedItem,
+body .feeditem,
+body .feedItem {
+  border-color: ${c.border} !important;
+}
+
+/* Feed sorter ("Sort by: Most Recent Activity") */
+body .feeds_sorter-sorter,
+body .feeds_sorter-filter,
+body .feeds_sorter-sorter *,
+body .feeds_sorter-filter * {
+  color: ${c.textPrimary} !important;
+}
+
+body .feeds_sorter-sorter select,
+body .feeds_sorter-filter select,
+body .feeds_sorter-sorter .slds-combobox__input {
+  background-color: ${isDark ? c.background : c.surface} !important;
+  color: ${c.textPrimary} !important;
+  border-color: ${c.borderInput} !important;
+  color-scheme: ${isDark ? 'dark' : 'light'} !important;
+}
+
+/* Share button (primary action in publisher) */
+body .cuf-publisherShareButton,
+body .forceChatterBasePublisher .shareButton,
+body .publisherButtonContainer .slds-button_brand,
+body .publisherButtonContainer .shareButton {
+  background-color: ${c.accent} !important;
+  color: ${c.buttonBrandText || '#ffffff'} !important;
+  border-color: ${c.accent} !important;
+}
+
+/* Empty-feed illustration / placeholder */
+body .feeds_placeholding-empty-feed,
+body .slds-illustration,
+body .slds-illustration__svg,
+body .slds-illustration__text-title,
+body .slds-illustration__text-body {
+  background-color: transparent !important;
+  color: ${c.textSecondary} !important;
+}
+
+/* File drop zone (chatter attachments) */
+body .slds-file-selector,
+body .slds-file-selector__body,
+body .slds-file-selector__dropzone,
+body .slds-file-selector__text,
+body .forceContentFileDroppableZone {
+  background-color: ${c.surfaceAlt} !important;
+  color: ${c.textSecondary} !important;
+  border-color: ${c.borderInput} !important;
+}
+
+body .slds-file-selector__dropzone:hover {
+  background-color: ${c.surfaceHover} !important;
+  border-color: ${c.accent} !important;
+}
+
+/* "To:" mention pill + assignee text */
+body .forceChatterMessageBodyInput .cuf-publisherInput .slds-pill,
+body .assignTo,
+body .assignTo a {
+  background-color: ${c.pillBg || c.surfaceAlt} !important;
+  color: ${c.pillText || c.textPrimary} !important;
+  border-color: ${c.pillBorder || c.border} !important;
+}
+
+/* "To link to a record, enter / then..." hint text */
+body .forceChatterBasePublisher .atMentionLink,
+body .forceChatterBasePublisher .cuf-publisherHint,
+body .cuf-publisher .slds-text-body_small,
+body .slashHelperText,
+body .slashHelperText * {
+  color: ${c.textSecondary} !important;
+}
+
+/* Quill editor primitives — the actual rich-text library SF uses under
+ * the .slds-rich-text-* wrappers. .ql-editor is the contenteditable
+ * element; .ql-container wraps it; .ql-blank is the empty state. */
+body .ql-container,
+body .ql-editor,
+body .ql-editor.ql-blank,
+body .slds-rich-text-area__content.ql-editor,
+body div[contenteditable="true"].ql-editor {
+  background-color: ${isDark ? c.background : c.surface} !important;
+  color: ${c.textPrimary} !important;
+}
+
+body .ql-editor p,
+body .ql-editor span,
+body .ql-editor div {
+  color: ${c.textPrimary} !important;
+}
+
+/* Quill placeholder (shown when .ql-blank) — the data-placeholder attr
+ * content is rendered via ::before pseudo with a specific class color. */
+body .ql-editor.ql-blank::before,
+body .ql-editor[data-placeholder]::before,
+body .slds-rich-text-area__content.ql-blank::before {
+  color: ${c.textPlaceholder} !important;
+  font-style: normal !important;
+}
+
+/* Quill toolbar button icons — .ql-bold, .ql-italic, etc. */
+body button.ql-bold,
+body button.ql-italic,
+body button.ql-underline,
+body button.ql-strike,
+body button.ql-clean,
+body button.ql-list,
+body button.ql-link,
+body button.ql-emoji,
+body button.ql-adduser,
+body li.ql-bold button,
+body li.ql-italic button,
+body li.ql-underline button,
+body li.ql-strike button,
+body li.ql-clean button,
+body li.ql-list button,
+body li.ql-emoji button,
+body li.ql-adduser button {
+  background-color: transparent !important;
+  color: ${c.textSecondary} !important;
+  border-color: transparent !important;
+}
+
+body button.ql-bold:hover,
+body button.ql-italic:hover,
+body button.ql-underline:hover,
+body button.ql-strike:hover,
+body button.ql-list:hover,
+body button.ql-emoji:hover,
+body button.ql-adduser:hover,
+body button.ql-bold.slds-is-active,
+body button.ql-italic.slds-is-active,
+body button[aria-pressed="true"] {
+  background-color: ${c.surfaceHover} !important;
+  color: ${c.accent} !important;
+}
+
+/* Quill button icons SVG fill */
+body button.ql-bold svg,
+body button.ql-italic svg,
+body button.ql-underline svg,
+body button.ql-strike svg,
+body button.ql-clean svg,
+body button.ql-list svg,
+body button.ql-emoji svg,
+body button.ql-adduser svg,
+body .slds-rich-text-editor__toolbar button svg {
+  fill: ${c.textSecondary} !important;
+}
+
+body button.ql-bold:hover svg,
+body button.ql-italic:hover svg,
+body button.ql-underline:hover svg,
+body button[aria-pressed="true"] svg {
+  fill: ${c.accent} !important;
+}
+
+/* Publisher tabs (Post/Poll/Question) — uiTabset variant */
+body .uiTabset--base,
+body .uiTabset--task,
+body .oneActionsComposer,
+body .uiTabset .uiTabBar,
+body .uiTabset .tabs__nav {
+  background-color: transparent !important;
+  border-color: ${c.border} !important;
+}
+
+body .uiTabset .tabs__item,
+body .uiTabItem,
+body .uiTabItem a,
+body .uiTabItem .tabHeader,
+body .uiTabItem .title {
+  background-color: transparent !important;
+  color: ${c.textSecondary} !important;
+}
+
+body .uiTabset .tabs__item.active,
+body .uiTabItem.active,
+body .uiTabItem.active a,
+body .uiTabItem.active .tabHeader,
+body .uiTabItem.active .title,
+body .uiTabItem a[aria-selected="true"],
+body .uiTabItem a[aria-selected="true"] .title {
+  color: ${c.accent} !important;
+  border-bottom-color: ${c.accent} !important;
+}
+
+body .uiTabset .tabs__content,
+body .uiTab,
+body .uiTab.active {
+  background-color: transparent !important;
+  color: ${c.textPrimary} !important;
+}
+
+/* Publisher inner containers surfaced in DOM dump */
+body .cuf-content,
+body .cuf-content.scrollable,
+body .container.activeState,
+body .main.MEDIUM,
+body .baseDefault,
+body .messageBodyWrapper,
+body #outerContainer {
+  background-color: transparent !important;
+  color: ${c.textPrimary} !important;
+}
+
+/* Visibility switcher ("To Noland smith") */
+body .visibilitySwitcher,
+body .forceChatterPublisherVisibility,
+body .forceChatterPublisherVisibilityWrapper,
+body .publisherVisibilityLabel,
+body .publisherVisibilityValue,
+body .cuf-defaultVisibilityMessage,
+body .toLabel {
+  background-color: transparent !important;
+  color: ${c.textSecondary} !important;
+}
+
+body .publisherVisibilityValue,
+body .cuf-defaultVisibilityMessage {
+  color: ${c.textPrimary} !important;
+}
+
+/* Bottom bar (attach button + Share button) */
+body .slds-grid.bottomBar,
+body .bottomBar,
+body .bottomBarLeft,
+body .bottomBarRight,
+body .cuf-publisherAttachmentBar,
+body .cuf-attachmentsList,
+body .cuf-attachmentsItem {
+  background-color: transparent !important;
+  color: ${c.textPrimary} !important;
+}
+
+body button.cuf-publisherShareButton,
+body button.cuf-publisherShareButton.slds-button_brand,
+body .cuf-publisherShareButton {
+  background-color: ${c.accent} !important;
+  color: ${c.buttonBrandText || '#ffffff'} !important;
+  border-color: ${c.accent} !important;
+}
+
+body button.cuf-publisherShareButton:disabled,
+body button.cuf-publisherShareButton[disabled] {
+  opacity: 0.5 !important;
+}
+
+/* Attach button (paperclip icon) */
+body .cuf-publisherAttachmentButton,
+body .cuf-Icon {
+  background-color: transparent !important;
+  color: ${c.textSecondary} !important;
+}
+
+body .cuf-publisherAttachmentButton:hover {
+  background-color: ${c.surfaceHover} !important;
+  color: ${c.accent} !important;
+}
+
+/* Error banners inside publisher (.slds-theme_error / .slds-theme--error) */
+body .slds-theme_error,
+body .slds-theme--error,
+body .genericNotification.slds-theme_error {
+  background-color: ${isDark ? 'rgba(234, 0, 30, 0.15)' : 'rgba(234, 0, 30, 0.08)'} !important;
+  color: ${c.error} !important;
+  border-color: ${c.error} !important;
+}
+
+body .slds-text-color_error,
+body .slds-text-color--error,
+body .errorsList {
+  color: ${c.error} !important;
+}
+
+/* Placeholder skeleton loaders inside Chatter publisher */
+body .forcePlaceholder .placeholder,
+body .forcePlaceholder .placeholder .field,
+body .forcePlaceholder .placeholder .text {
+  background-color: ${c.surfaceAlt} !important;
+}
+
+body .forcePlaceholder .placeholder .text-primary,
+body .forcePlaceholder .placeholder .text-secondary {
+  background-color: ${c.surfaceHover} !important;
+}
+
 /* ─── Dropdowns & Popovers ───────────────────────────────────────────────── */
 
 .slds-dropdown,
