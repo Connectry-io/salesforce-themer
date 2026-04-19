@@ -624,14 +624,14 @@ body {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 5px;
-  padding: 7px 10px;
+  gap: 6px;
+  padding: 9px 12px;
   background: transparent;
   border: none;
   border-radius: var(--radius-sm);
   font-family: var(--font);
-  font-size: 11px;
-  font-weight: 600;
+  font-size: 13px;
+  font-weight: 700;
   color: var(--color-text-muted);
   cursor: pointer;
   transition: background-color var(--transition), color var(--transition), box-shadow var(--transition);
@@ -842,22 +842,22 @@ body {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 8px 10px;
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-  margin-bottom: 8px;
+  padding: 6px 8px;
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-sm);
+  margin-bottom: 6px;
 }
 
 .themes-effects-strip-label {
   display: flex;
   align-items: center;
   gap: 5px;
-  font-size: 10px;
-  font-weight: 700;
+  font-size: 9px;
+  font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.06em;
-  color: var(--color-text-muted);
+  letter-spacing: 0.05em;
+  color: var(--color-text-subtle);
   flex-shrink: 0;
 }
 
@@ -981,19 +981,21 @@ body {
 }
 
 .theme-group-label-count {
-  margin-left: auto;
+  /* Sits next to the title (left side) — was margin-left:auto pushed-to-right
+     before, which made the count read as orphaned/decorative. Now it's part
+     of the title and clearly visible. */
   display: inline-flex;
   align-items: center;
   justify-content: center;
   min-width: 18px;
   height: 16px;
   padding: 0 6px;
-  background: var(--color-bg);
-  border: 1px solid var(--color-border);
+  background: var(--color-accent);
+  border: 1px solid var(--color-accent);
   border-radius: 100px;
   font-size: 10px;
   font-weight: 700;
-  color: var(--color-text-muted);
+  color: #ffffff;
   letter-spacing: 0;
 }
 

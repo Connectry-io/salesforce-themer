@@ -93,13 +93,13 @@
         <span class="opt-status-bar-sep"></span>
         <label class="opt-status-bar-auto">
           <input type="checkbox" id="optSetupScopeToggle" />
-          <span>Also theme Setup</span>
-          <button class="opt-tip-btn" data-tip="By default the theme applies to Lightning pages. Turn this on to also theme the Setup admin area." type="button" aria-label="What does this do?">?</button>
+          <span>Apply to Setup</span>
+          <button class="opt-tip-btn" data-tip="Apply the theme to Salesforce Setup admin pages too (on by default). Turn off to keep Setup looking native." type="button" aria-label="What does this do?">?</button>
         </label>
         <span class="opt-status-bar-sep"></span>
         <label class="opt-status-bar-auto">
           <input type="checkbox" id="autoModeToggle" />
-          <span>Auto dark mode</span>
+          <span>Sync with system theme</span>
           <button class="opt-tip-btn" data-tip="Automatically switch between a light and dark theme when your computer toggles dark mode" type="button" aria-label="What is auto dark mode?">?</button>
         </label>
         <span class="opt-status-bar-spacer"></span>
@@ -127,8 +127,8 @@
       </div>
 
       <!-- Floating tooltips (positioned by JS, shared across the tab) -->
-      <div class="opt-settings-tooltip" id="optAutoTooltip" hidden>Pick a light and a dark theme — Themer switches automatically when your computer toggles dark mode.</div>
-      <div class="opt-settings-tooltip" id="optScopeTooltip" hidden>By default the theme applies to Lightning pages (everyday Salesforce). Turn on <strong>Also theme Setup</strong> to extend it to the admin Setup area. Off by default — most admins prefer Setup looking native.</div>
+      <div class="opt-settings-tooltip" id="optAutoTooltip" hidden>Switch between your chosen light and dark themes when your computer's appearance changes.</div>
+      <div class="opt-settings-tooltip" id="optScopeTooltip" hidden>Apply the theme to <strong>Setup</strong> admin pages too (on by default). Turn off to keep Setup looking native — useful if you want admin work to feel visually distinct.</div>
       <div class="opt-settings-tooltip" id="optEffectsTooltip" hidden>Each preset theme ships with curated effects. The volume knob scales intensity.</div>
       <div class="opt-settings-tooltip" id="optOrgTooltip" hidden>Each Salesforce org can have its own theme override. Useful for keeping production and sandbox visually distinct.</div>
 
@@ -1081,8 +1081,7 @@
             <ul class="upgrade-plan-features">
               <li>All 16 preset themes</li>
               <li>4 effect presets</li>
-              <li>Auto dark mode</li>
-              <li>Per-org themes</li>
+              <li>Sync with system theme</li>
               <li>Keyboard shortcuts</li>
               <li>Setup, Reports & Console coverage</li>
             </ul>
@@ -1102,6 +1101,7 @@
             <ul class="upgrade-plan-features upgrade-plan-features-premium">
               <li><strong>Everything in Free</strong></li>
               <li>Custom theme builder</li>
+              <li>Per-org themes</li>
               <li>Individual effect control</li>
               <li>Per-effect intensity sliders</li>
               <li>Per-theme effect configs</li>
@@ -1186,8 +1186,13 @@
                 <td class="upgrade-compare-check"><span class="upgrade-check">&check;</span></td>
               </tr>
               <tr>
-                <td>Auto dark mode · per-org themes · shortcuts</td>
+                <td>Sync with system theme · keyboard shortcuts</td>
                 <td class="upgrade-compare-check"><span class="upgrade-check">&check;</span></td>
+                <td class="upgrade-compare-check"><span class="upgrade-check">&check;</span></td>
+              </tr>
+              <tr>
+                <td>Per-org themes (pin a theme to a specific org)</td>
+                <td class="upgrade-compare-check"><span class="upgrade-dash">—</span></td>
                 <td class="upgrade-compare-check"><span class="upgrade-check">&check;</span></td>
               </tr>
               <tr class="upgrade-compare-divider">

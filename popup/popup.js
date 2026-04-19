@@ -1068,41 +1068,9 @@
     });
   }
 
-  // ─── Reset all settings ───────────────────────────────────────────────────
-
-  function bindResetSettings() {
-    const btn = document.getElementById('resetSettingsBtn');
-    if (!btn) return;
-    btn.addEventListener('click', async () => {
-      const confirmed = confirm(
-        'Reset Salesforce Themer to defaults?\n\n' +
-        'This will:\n' +
-        '• Switch back to the Connectry theme\n' +
-        '• Turn off Follow System mode\n' +
-        '• Apply theme to Lightning pages only\n' +
-        '• Set effects to the Subtle preset\n' +
-        '• Clear all per-org overrides\n\n' +
-        'Custom themes you\'ve created will be kept.'
-      );
-      if (!confirmed) return;
-
-      // Reset to the same defaults the onInstalled handler uses
-      const defaults = {
-        theme: 'connectry',
-        autoMode: false,
-        lastLightTheme: 'connectry',
-        lastDarkTheme: 'connectry-dark',
-        orgThemes: {},
-        themeScope: 'lightning',
-        effectsVolume: 'medium',
-      };
-      await chrome.storage.sync.set(defaults);
-      // Re-apply to active tab
-      await applyThemeToTab('connectry');
-      // Reload the popup to reflect fresh state
-      window.location.reload();
-    });
-  }
+  // (Reset-all-settings removed: only 3 toggles + per-org gate left in the
+   // popup, all individually adjustable. Background.js onInstalled still owns
+   // first-install defaults; nuclear reset can come back in Studio if asked.)
 
   // ─── Scope toggle (Also theme Setup pages) ───────────────────────────────
   // Storage stays as themeScope: 'lightning' | 'both'. The deprecated
@@ -1168,7 +1136,6 @@
     bindSettingsCollapse();
     bindThemeOnToggle();
     bindPerOrgToggle();
-    bindResetSettings();
     applyPremiumStateToPopup();
 
     const [result, orgHostname] = await Promise.all([
@@ -1178,7 +1145,7 @@
         lastLightTheme: 'connectry',
         lastDarkTheme: 'connectry-dark',
         orgThemes: {},
-        themeScope: 'lightning',
+        themeScope: 'both',
         effectsVolume: 'medium',
         customThemes: [],
       }),

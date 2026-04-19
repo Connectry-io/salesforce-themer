@@ -2103,7 +2103,7 @@
         lastLightTheme: 'connectry',
         lastDarkTheme: 'connectry-dark',
         orgThemes: {},
-        themeScope: 'lightning',
+        themeScope: 'both',
         effectsVolume: 'medium',
       };
       await chrome.storage.sync.set(defaults);
@@ -2255,7 +2255,7 @@
       lastLightTheme: 'connectry',
       lastDarkTheme: 'connectry-dark',
       orgThemes: {},
-      themeScope: 'lightning',
+      themeScope: 'both',
       effectsVolume: 'medium',
       customThemes: [],
     });

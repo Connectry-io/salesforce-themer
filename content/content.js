@@ -839,7 +839,7 @@
         lastLightTheme: 'connectry',
         lastDarkTheme: 'connectry-dark',
         orgThemes: {},
-        themeScope: 'lightning',
+        themeScope: 'both',
         faviconEnabled: true,
         faviconConfig: null,
       });
@@ -916,7 +916,7 @@
 
   function preInit() {
     chrome.storage.sync.get(
-      { theme: 'connectry', autoMode: false, lastLightTheme: 'connectry', lastDarkTheme: 'connectry-dark', orgThemes: {}, themeScope: 'lightning' },
+      { theme: 'connectry', autoMode: false, lastLightTheme: 'connectry', lastDarkTheme: 'connectry-dark', orgThemes: {}, themeScope: 'both' },
       (syncData) => {
         if (chrome.runtime.lastError) return;
         if (!shouldApplyToPage(syncData.themeScope)) {

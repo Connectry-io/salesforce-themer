@@ -112,7 +112,7 @@ chrome.runtime.onInstalled.addListener(async (details) => {
       lastLightTheme: 'connectry',
       lastDarkTheme: 'connectry-dark',
       orgThemes: {},
-      themeScope: 'lightning',
+      themeScope: 'both',
       effectsVolume: 'medium',
     });
   } else if (details.reason === 'update') {
@@ -159,10 +159,10 @@ async function migrateDefaultsForExistingInstall() {
       updates.effectsVolume = VOLUME_LEGACY[current.effectsVolume];
     }
 
-    // Scope: only set if completely missing (legacy installs predating the
-    // scope option). 'both' was the previous default — leave it alone.
+    // Scope: backfill missing values to 'both' (the new V1 default — Setup
+    // gets themed too out of the box). Never override an explicit user choice.
     if (current.themeScope === undefined) {
-      updates.themeScope = 'lightning';
+      updates.themeScope = 'both';
     }
 
     // Auto mode: only set if missing — never override a user toggle.
