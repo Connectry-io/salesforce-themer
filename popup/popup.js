@@ -1242,40 +1242,34 @@
   }
 
   // ─── Beta banner ─────────────────────────────────────────────────────────
-  // Dismissible per major-version (localStorage flag). Reappears on major
-  // bump so users re-see the pitch on meaningful releases. Mailto-only —
-  // no backend, pre-fills version + UA so we have triage context.
+  // Always-on during the beta window — no dismiss button. When Pro ships,
+  // the banner gets removed entirely from popup.html.
+  //
+  // The CTA uses chrome.tabs.create to launch the mailto so the popup
+  // closing on link-click can't swallow it (a plain <a href="mailto:">
+  // sometimes silently fails in extension popups depending on OS mail
+  // handler config).
   function _bindBetaBanner(version) {
-    const banner = document.getElementById('betaBanner');
-    if (!banner) return;
-    const BETA_DISMISS_KEY = 'sft-beta-banner-dismissed-major';
-    const major = (version || '').split('.').slice(0, 2).join('.');
-    let dismissed = '';
-    try { dismissed = localStorage.getItem(BETA_DISMISS_KEY) || ''; } catch (_) {}
-    if (dismissed && dismissed === major) return;
-    banner.hidden = false;
-
     const cta = document.getElementById('betaBannerCta');
-    if (cta) {
-      const subject = encodeURIComponent(`Themer Beta · Popup · v${version || '?'}`);
-      const body = encodeURIComponent(
-        `Hi Connectry team,\n\n` +
-        `What I saw:\n\n\n` +
-        `What I expected:\n\n\n` +
-        `— — —\n` +
-        `Themer version: ${version || '?'}\n` +
-        `Browser: ${navigator.userAgent}\n`
-      );
-      cta.href = `mailto:feedback@connectry.io?subject=${subject}&body=${body}`;
-    }
-
-    const close = document.getElementById('betaBannerClose');
-    if (close) {
-      close.addEventListener('click', () => {
-        banner.hidden = true;
-        try { localStorage.setItem(BETA_DISMISS_KEY, major); } catch (_) {}
-      });
-    }
+    if (!cta) return;
+    const subject = encodeURIComponent(`Themer Beta · Popup · v${version || '?'}`);
+    const body = encodeURIComponent(
+      `Hi Connectry team,\n\n` +
+      `What I saw:\n\n\n` +
+      `What I expected:\n\n\n` +
+      `— — —\n` +
+      `Themer version: ${version || '?'}\n` +
+      `Browser: ${navigator.userAgent}\n`
+    );
+    const mailto = `mailto:feedback@connectry.io?subject=${subject}&body=${body}`;
+    cta.addEventListener('click', () => {
+      try {
+        chrome.tabs.create({ url: mailto });
+      } catch (_) {
+        // Fallback: window.location for non-extension contexts
+        window.location.href = mailto;
+      }
+    });
   }
 
   init();

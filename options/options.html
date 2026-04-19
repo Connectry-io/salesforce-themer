@@ -9,14 +9,13 @@
 </head>
 <body class="cx-settings">
 
-  <!-- Beta banner — dismissible (localStorage flag scoped to major ver).
-       Reappears on major-version bump. Mailto pre-fills subject + env. -->
-  <div class="cx-beta-banner" id="cxBetaBanner" hidden>
+  <!-- Beta banner — always-on during the beta window (no dismiss). When
+       Pro ships, the banner gets removed entirely. -->
+  <div class="cx-beta-banner" id="cxBetaBanner">
     <div class="cx-beta-banner-inner">
       <span class="cx-beta-banner-badge">Beta</span>
       <span class="cx-beta-banner-text">Themer is in free beta — help us iron out gaps and shape what Pro becomes.</span>
       <a class="cx-beta-banner-cta" id="cxBetaBannerCta" href="#" rel="noopener">Send feedback →</a>
-      <button class="cx-beta-banner-close" id="cxBetaBannerClose" type="button" aria-label="Dismiss beta banner" title="Dismiss">×</button>
     </div>
   </div>
 

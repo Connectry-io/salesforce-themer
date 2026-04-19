@@ -9,13 +9,14 @@
 <body>
   <div class="popup">
 
-    <!-- Beta banner — dismissible via × (localStorage flag). Reappears on
-         major version bump. Mailto pre-fills subject + context. -->
-    <div class="beta-banner" id="betaBanner" hidden>
+    <!-- Beta banner — always-on during the beta window (no dismiss). When
+         Pro ships, the banner gets removed entirely. Click triggers a
+         chrome.tabs.create with mailto so the popup-close-on-click race
+         can't swallow the link. -->
+    <div class="beta-banner" id="betaBanner">
       <span class="beta-banner-badge">Beta</span>
       <span class="beta-banner-text">Help shape what Pro becomes.</span>
-      <a class="beta-banner-cta" id="betaBannerCta" href="#" rel="noopener">Send feedback →</a>
-      <button class="beta-banner-close" id="betaBannerClose" type="button" aria-label="Dismiss beta banner" title="Dismiss">×</button>
+      <button class="beta-banner-cta" id="betaBannerCta" type="button">Send feedback →</button>
     </div>
 
     <!-- Header -->
