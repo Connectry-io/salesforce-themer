@@ -600,33 +600,44 @@
           </ul>
         </div>
 
-        <!-- Engine explainer — the multiplier story -->
+        <!-- Engine derivation grid — shows the actual transformation:
+             4 source colors at the top → 16 derived swatches below.
+             Populated by JS from the active theme so it's always live. -->
         <div class="guide-engine-card">
-          <div class="guide-engine-flow">
-            <div class="guide-engine-stat">
-              <div class="guide-engine-num">23</div>
-              <div class="guide-engine-label">core colors<br>you set</div>
+          <div class="ged" id="guideEngineDerivation">
+            <!-- INPUTS row — populated by JS from active theme -->
+            <div class="ged-row ged-row-inputs">
+              <div class="ged-row-label">
+                <span class="ged-row-num">4</span>
+                <span>inputs you pick</span>
+              </div>
+              <div class="ged-input-grid" id="gedInputGrid"></div>
             </div>
-            <svg class="guide-engine-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-              <path d="M5 12h14M13 5l7 7-7 7"/>
-            </svg>
-            <div class="guide-engine-engine">
-              <svg class="guide-engine-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                <circle cx="12" cy="12" r="3"/>
-                <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
-              </svg>
-              <div class="guide-engine-label">Theme engine<br>derives the rest</div>
+
+            <!-- DIVIDER — visual cue that engine transforms the row above -->
+            <div class="ged-divider">
+              <span class="ged-divider-line"></span>
+              <span class="ged-divider-pill">
+                <svg width="11" height="11" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                  <path d="M8 2v9M5 8l3 3 3-3M3 14h10" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                Theme engine derives
+              </span>
+              <span class="ged-divider-line"></span>
             </div>
-            <svg class="guide-engine-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-              <path d="M5 12h14M13 5l7 7-7 7"/>
-            </svg>
-            <div class="guide-engine-stat">
-              <div class="guide-engine-num">150+</div>
-              <div class="guide-engine-label">CSS values<br>painted across Salesforce</div>
+
+            <!-- OUTPUTS grid — populated by JS, derived live from the inputs -->
+            <div class="ged-row ged-row-outputs">
+              <div class="ged-row-label">
+                <span class="ged-row-num">150+</span>
+                <span>painted across Salesforce — a taste</span>
+              </div>
+              <div class="ged-output-grid" id="gedOutputGrid"></div>
             </div>
           </div>
+
           <p class="guide-engine-caption">
-            Hover states, focus rings, modal backdrops, scrollbar tints, link colors, borders — all derived from those 23 inputs. Without the engine you'd be tuning every value by hand. With it, you pick what matters and we fill in the rest.
+            Without the engine you'd be tuning hover states, focus rings, modal backdrops, scrollbar tints, link colors, and borders by hand. With it, you pick what matters — we paint the rest.
           </p>
         </div>
       </section>

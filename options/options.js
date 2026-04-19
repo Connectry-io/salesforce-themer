@@ -2458,9 +2458,12 @@
     // Dev panel: Easter-egg unlock + premium override toggle
     bindDevPanel();
 
-    // Guide tab — Builder CTA button
+    // Guide tab — Builder CTA button. Reset scroll to top when switching;
+    // the CTA lives at the bottom of the Guide so the browser would
+    // otherwise drop the user mid-Builder at the same y-offset.
     document.getElementById('guideBuilderCta')?.addEventListener('click', () => {
       if (_tabsInstance) _tabsInstance.activate('builder');
+      window.scrollTo({ top: 0, behavior: 'auto' });
     });
 
     // Mark <body> with the current premium state so CSS can hide gating
@@ -4793,9 +4796,84 @@
   function renderGuideTab() {
     renderGuideAnatomyDiagram();
     renderGuideColorsMock();
+    renderGuideEngineDerivation();
     renderGuideEffectsGrid();
     _bindGuideTypeDemo();
     _bindGuideFaviconDemo();
+  }
+
+  /**
+   * Render the engine derivation grid (replaces the old "23 → ⚙ → 150+"
+   * abstract flow). Top row = the 4 source colors; bottom grid = a curated
+   * set of 16 derived swatches showing where the engine actually paints
+   * across Salesforce. Every chip is computed live from the active theme
+   * via CSS color-mix() — no JS color math needed, and the grid updates
+   * the moment the user switches themes.
+   */
+  function renderGuideEngineDerivation() {
+    const inputGrid = document.getElementById('gedInputGrid');
+    const outputGrid = document.getElementById('gedOutputGrid');
+    const root = document.getElementById('guideEngineDerivation');
+    if (!inputGrid || !outputGrid || !root) return;
+
+    const activeId = syncState.theme && syncState.theme !== 'none' ? syncState.theme : 'connectry';
+    const theme = _resolveThemeForMeta(activeId) || getThemeById('connectry');
+    if (!theme) return;
+    const c = theme.colors;
+
+    // Anchor the four source colours as CSS vars on the container so every
+    // chip below can reference them via color-mix() — keeps derivation
+    // declarative and stays correct if the active theme changes.
+    root.style.setProperty('--ged-bg', c.background);
+    root.style.setProperty('--ged-surface', c.surface);
+    root.style.setProperty('--ged-accent', c.accent);
+    root.style.setProperty('--ged-text', c.textPrimary);
+
+    // INPUTS — the 4 cardinal colours, big chips
+    const inputs = [
+      { key: 'background', label: 'Background', cssVar: '--ged-bg', text: c.textPrimary },
+      { key: 'surface',    label: 'Surface',    cssVar: '--ged-surface', text: c.textPrimary },
+      { key: 'accent',     label: 'Accent',     cssVar: '--ged-accent', text: '#ffffff' },
+      { key: 'text',       label: 'Text',       cssVar: '--ged-text', text: c.background },
+    ];
+    inputGrid.innerHTML = inputs.map(i => `
+      <div class="ged-chip ged-chip-input" style="background: var(${i.cssVar}); color: ${i.text}">
+        <span class="ged-chip-label">${i.label}</span>
+      </div>
+    `).join('');
+
+    // OUTPUTS — 16 derived swatches grouped roughly by source colour.
+    // Each style uses color-mix() so derivation stays in CSS land.
+    const outputs = [
+      // From accent (6) — buttons, focus, selection
+      { label: 'accent-hover',   bg: 'color-mix(in srgb, var(--ged-accent) 85%, black)', text: '#fff' },
+      { label: 'accent-pressed', bg: 'color-mix(in srgb, var(--ged-accent) 70%, black)', text: '#fff' },
+      { label: 'accent-soft',    bg: 'color-mix(in srgb, var(--ged-accent) 12%, var(--ged-surface))' },
+      { label: 'accent-border',  bg: 'color-mix(in srgb, var(--ged-accent) 35%, var(--ged-surface))' },
+      { label: 'focus-ring',     bg: 'color-mix(in srgb, var(--ged-accent) 50%, transparent)' },
+      { label: 'link-visited',   bg: 'color-mix(in srgb, var(--ged-accent) 70%, var(--ged-text))', text: '#fff' },
+
+      // From surface + text (5) — chrome, dividers, shadows
+      { label: 'surface-elevated', bg: 'color-mix(in srgb, var(--ged-surface) 92%, white)' },
+      { label: 'surface-border',   bg: 'color-mix(in srgb, var(--ged-text) 14%, var(--ged-surface))' },
+      { label: 'surface-divider',  bg: 'color-mix(in srgb, var(--ged-text) 7%, var(--ged-surface))' },
+      { label: 'surface-shadow',   bg: 'color-mix(in srgb, var(--ged-text) 22%, transparent)' },
+      { label: 'overlay-scrim',    bg: 'color-mix(in srgb, var(--ged-text) 55%, transparent)' },
+
+      // From text (3) — typography hierarchy
+      { label: 'text-muted',     bg: 'color-mix(in srgb, var(--ged-text) 65%, var(--ged-surface))' },
+      { label: 'text-subtle',    bg: 'color-mix(in srgb, var(--ged-text) 40%, var(--ged-surface))' },
+      { label: 'text-disabled',  bg: 'color-mix(in srgb, var(--ged-text) 22%, var(--ged-surface))' },
+
+      // From background (2) — canvas variants
+      { label: 'bg-tint',  bg: 'color-mix(in srgb, var(--ged-surface) 50%, var(--ged-bg))' },
+      { label: 'bg-shade', bg: 'color-mix(in srgb, var(--ged-text) 6%, var(--ged-bg))' },
+    ];
+    outputGrid.innerHTML = outputs.map(o => `
+      <div class="ged-chip ged-chip-output" style="background: ${o.bg};${o.text ? ` color: ${o.text};` : ''}">
+        <span class="ged-chip-label">${o.label}</span>
+      </div>
+    `).join('');
   }
 
   /**
