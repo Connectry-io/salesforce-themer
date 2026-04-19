@@ -880,11 +880,15 @@ body {
 /* Effects volume strip — sits at the top of the pre-built themes section.
    Conceptually belongs to those themes since custom themes manage their
    own per-effect intensities. */
+/* Stacked layout: label on top, pills full-width below. The previous
+   side-by-side layout pushed the 4 pills (Off/Subtle/Medium/Strong) to
+   the right edge with margin-left:auto, which felt squished. Stacking
+   gives them the full strip width to breathe. */
 .themes-effects-strip {
   position: relative;
   display: flex;
-  align-items: center;
-  gap: 8px;
+  flex-direction: column;
+  gap: 6px;
   padding: 6px 8px;
   background: transparent;
   border: none;
@@ -901,11 +905,10 @@ body {
   text-transform: uppercase;
   letter-spacing: 0.05em;
   color: var(--color-text-subtle);
-  flex-shrink: 0;
 }
 
 .themes-effects-strip .effects-pills {
-  margin-left: auto;
+  width: 100%;
 }
 
 /* Strip-anchored tooltip — positioned below the whole strip via CSS so it
