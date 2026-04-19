@@ -1173,12 +1173,18 @@
 
     // Footer version — pulled from manifest so it never drifts
     const verEl = document.getElementById('footerVersion');
+    let manifestVersion = '';
     if (verEl) {
       try {
-        const v = chrome.runtime.getManifest().version;
-        verEl.textContent = `v${v}`;
+        manifestVersion = chrome.runtime.getManifest().version;
+        verEl.textContent = `v${manifestVersion}`;
       } catch (_) {}
     }
+
+    // Beta banner — show unless user dismissed for this major version.
+    // Reappears on major-version bump (e.g. 2.7.x → 3.0.x) so users
+    // re-see the pitch whenever there's a significant release.
+    _bindBetaBanner(manifestVersion);
 
     const [result, orgHostname] = await Promise.all([
       chrome.storage.sync.get({
@@ -1233,6 +1239,43 @@
     updateOrgRow(result.orgThemes, effectiveTheme);
 
     document.getElementById('autoModeToggle')?.addEventListener('change', handleAutoModeToggle);
+  }
+
+  // ─── Beta banner ─────────────────────────────────────────────────────────
+  // Dismissible per major-version (localStorage flag). Reappears on major
+  // bump so users re-see the pitch on meaningful releases. Mailto-only —
+  // no backend, pre-fills version + UA so we have triage context.
+  function _bindBetaBanner(version) {
+    const banner = document.getElementById('betaBanner');
+    if (!banner) return;
+    const BETA_DISMISS_KEY = 'sft-beta-banner-dismissed-major';
+    const major = (version || '').split('.').slice(0, 2).join('.');
+    let dismissed = '';
+    try { dismissed = localStorage.getItem(BETA_DISMISS_KEY) || ''; } catch (_) {}
+    if (dismissed && dismissed === major) return;
+    banner.hidden = false;
+
+    const cta = document.getElementById('betaBannerCta');
+    if (cta) {
+      const subject = encodeURIComponent(`Themer Beta · Popup · v${version || '?'}`);
+      const body = encodeURIComponent(
+        `Hi Connectry team,\n\n` +
+        `What I saw:\n\n\n` +
+        `What I expected:\n\n\n` +
+        `— — —\n` +
+        `Themer version: ${version || '?'}\n` +
+        `Browser: ${navigator.userAgent}\n`
+      );
+      cta.href = `mailto:feedback@connectry.io?subject=${subject}&body=${body}`;
+    }
+
+    const close = document.getElementById('betaBannerClose');
+    if (close) {
+      close.addEventListener('click', () => {
+        banner.hidden = true;
+        try { localStorage.setItem(BETA_DISMISS_KEY, major); } catch (_) {}
+      });
+    }
   }
 
   init();

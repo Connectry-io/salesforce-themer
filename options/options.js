@@ -2458,6 +2458,9 @@
     // Dev panel: Easter-egg unlock + premium override toggle
     bindDevPanel();
 
+    // Beta banner — dismissible per major-version (localStorage flag)
+    bindBetaBanner();
+
     // Guide tab — Builder CTA button. Reset scroll to top when switching;
     // the CTA lives at the bottom of the Guide so the browser would
     // otherwise drop the user mid-Builder at the same y-offset.
@@ -4606,6 +4609,42 @@
    * chrome.storage.local.premiumOverride and unlocks all Premium UI gates
    * without a real subscription. Reload the page after toggling.
    */
+  function bindBetaBanner() {
+    const banner = document.getElementById('cxBetaBanner');
+    if (!banner) return;
+    const BETA_DISMISS_KEY = 'sft-studio-beta-banner-dismissed-major';
+    let version = '';
+    try { version = chrome.runtime.getManifest().version || ''; } catch (_) {}
+    const major = version.split('.').slice(0, 2).join('.'); // e.g. "2.7"
+    let dismissed = '';
+    try { dismissed = localStorage.getItem(BETA_DISMISS_KEY) || ''; } catch (_) {}
+    if (dismissed && dismissed === major) return;
+    banner.hidden = false;
+
+    const cta = document.getElementById('cxBetaBannerCta');
+    if (cta) {
+      // Pre-fill subject + environment. Mailto-only for beta — no backend.
+      const subject = encodeURIComponent(`Themer Beta · Studio · v${version || '?'}`);
+      const body = encodeURIComponent(
+        `Hi Connectry team,\n\n` +
+        `What I saw:\n\n\n` +
+        `What I expected:\n\n\n` +
+        `— — —\n` +
+        `Themer version: ${version || '?'}\n` +
+        `Browser: ${navigator.userAgent}\n`
+      );
+      cta.href = `mailto:feedback@connectry.io?subject=${subject}&body=${body}`;
+    }
+
+    const close = document.getElementById('cxBetaBannerClose');
+    if (close) {
+      close.addEventListener('click', () => {
+        banner.hidden = true;
+        try { localStorage.setItem(BETA_DISMISS_KEY, major); } catch (_) {}
+      });
+    }
+  }
+
   function bindDevPanel() {
     const versionEl = document.getElementById('aboutVersion') || document.getElementById('versionLabel');
     const panel = document.getElementById('devPanel');

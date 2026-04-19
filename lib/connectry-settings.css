@@ -113,6 +113,79 @@ body.cx-settings {
 
 /* ─── Header ─────────────────────────────────────────────────────────────── */
 
+/* Beta banner — full-width strip above the header. Gold gradient to
+   signal "this is special / help us shape it". Dismissible; reappears
+   on major-version bump. */
+.cx-beta-banner {
+  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+  border-bottom: 1px solid #d4a22a;
+  color: #78350f;
+  font-size: 13px;
+}
+
+.cx-beta-banner[hidden] { display: none; }
+
+.cx-beta-banner-inner {
+  max-width: var(--cx-max-width);
+  margin: 0 auto;
+  padding: 8px var(--cx-space-6);
+  display: flex;
+  align-items: center;
+  gap: var(--cx-space-3);
+}
+
+.cx-beta-banner-badge {
+  padding: 3px 8px;
+  background: linear-gradient(135deg, #d4a22a 0%, #b07d1a 100%);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  border-radius: 999px;
+  flex-shrink: 0;
+}
+
+.cx-beta-banner-text {
+  flex: 1;
+  min-width: 0;
+  font-weight: 500;
+}
+
+.cx-beta-banner-cta {
+  color: #78350f;
+  font-weight: 700;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: color var(--cx-transition);
+}
+
+.cx-beta-banner-cta:hover {
+  color: #422006;
+  text-decoration: underline;
+}
+
+.cx-beta-banner-close {
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  background: transparent;
+  border: none;
+  border-radius: 50%;
+  color: #78350f;
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+  opacity: 0.6;
+  flex-shrink: 0;
+  transition: opacity var(--cx-transition), background-color var(--cx-transition);
+}
+
+.cx-beta-banner-close:hover {
+  opacity: 1;
+  background: rgba(0, 0, 0, 0.08);
+}
+
 .cx-header {
   background: var(--cx-surface);
   border-bottom: 1px solid var(--cx-border);

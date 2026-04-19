@@ -9,6 +9,15 @@
 <body>
   <div class="popup">
 
+    <!-- Beta banner — dismissible via × (localStorage flag). Reappears on
+         major version bump. Mailto pre-fills subject + context. -->
+    <div class="beta-banner" id="betaBanner" hidden>
+      <span class="beta-banner-badge">Beta</span>
+      <span class="beta-banner-text">Help shape what Pro becomes.</span>
+      <a class="beta-banner-cta" id="betaBannerCta" href="#" rel="noopener">Send feedback →</a>
+      <button class="beta-banner-close" id="betaBannerClose" type="button" aria-label="Dismiss beta banner" title="Dismiss">×</button>
+    </div>
+
     <!-- Header -->
     <header class="header">
       <div class="header-logo">

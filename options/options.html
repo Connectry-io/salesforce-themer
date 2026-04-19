@@ -9,6 +9,17 @@
 </head>
 <body class="cx-settings">
 
+  <!-- Beta banner — dismissible (localStorage flag scoped to major ver).
+       Reappears on major-version bump. Mailto pre-fills subject + env. -->
+  <div class="cx-beta-banner" id="cxBetaBanner" hidden>
+    <div class="cx-beta-banner-inner">
+      <span class="cx-beta-banner-badge">Beta</span>
+      <span class="cx-beta-banner-text">Themer is in free beta — help us iron out gaps and shape what Pro becomes.</span>
+      <a class="cx-beta-banner-cta" id="cxBetaBannerCta" href="#" rel="noopener">Send feedback →</a>
+      <button class="cx-beta-banner-close" id="cxBetaBannerClose" type="button" aria-label="Dismiss beta banner" title="Dismiss">×</button>
+    </div>
+  </div>
+
   <!-- ═══ Header with tabs ═══ -->
   <header class="cx-header">
     <div class="cx-header-inner">
@@ -1054,6 +1065,9 @@
             </div>
             <ul class="upgrade-plan-features upgrade-plan-features-premium">
               <li><strong>Everything in Free</strong></li>
+              <li><strong>AI theme generation</strong> — describe a mood, paste a URL, or upload a brand guide</li>
+              <li><strong>AI auto-paint</strong> — styles custom, managed, and edge-case components the engine hasn't pre-covered</li>
+              <li><strong>AI diagnostics</strong> — see what's themed, what's missing, and get suggested fixes</li>
               <li>Custom theme builder (clone, tweak, save)</li>
               <li>Per-org themes (pin a theme to a specific org)</li>
               <li>Individual effect toggles + intensity sliders</li>
@@ -1110,6 +1124,21 @@
                 <td colspan="3">Pro unlocks</td>
               </tr>
               <tr>
+                <td>AI theme generation (describe, paste a URL, or upload a brand guide)</td>
+                <td class="upgrade-compare-check"><span class="upgrade-dash">—</span></td>
+                <td class="upgrade-compare-check"><span class="upgrade-check">&check;</span></td>
+              </tr>
+              <tr>
+                <td>AI auto-paint for custom, managed, and edge-case components</td>
+                <td class="upgrade-compare-check"><span class="upgrade-dash">—</span></td>
+                <td class="upgrade-compare-check"><span class="upgrade-check">&check;</span></td>
+              </tr>
+              <tr>
+                <td>AI diagnostics (coverage report + suggested fixes)</td>
+                <td class="upgrade-compare-check"><span class="upgrade-dash">—</span></td>
+                <td class="upgrade-compare-check"><span class="upgrade-check">&check;</span></td>
+              </tr>
+              <tr>
                 <td>Custom theme builder (clone, tweak, save)</td>
                 <td class="upgrade-compare-check"><span class="upgrade-dash">—</span></td>
                 <td class="upgrade-compare-check"><span class="upgrade-check">&check;</span></td>
@@ -1159,6 +1188,10 @@
         </div>
 
         <div class="upgrade-faq">
+          <details class="upgrade-faq-item" open>
+            <summary>Is Themer production-ready?</summary>
+            <p>Themer is in free beta. We've handcrafted and tested the 13 preset themes against stock Salesforce, but your org probably has custom and managed components we haven't seen yet. Use it freely — if you spot gaps, the Send Feedback button in the popup helps us iron them out. Your input shapes what Pro becomes.</p>
+          </details>
           <details class="upgrade-faq-item">
             <summary>Does the free tier stay free forever?</summary>
             <p>Yes. All 13 preset themes, system-theme sync, Setup theming, and shortcuts will always be free. Pro only adds new capabilities on top — nothing is taken away.</p>

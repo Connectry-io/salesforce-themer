@@ -52,6 +52,75 @@ body {
   gap: 14px;
 }
 
+/* Beta banner — slim strip at the top of the popup. Gold gradient to
+   signal "this is special / help us", tight padding so it doesn't eat
+   visual real estate. */
+.beta-banner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  margin: -16px -16px 0;
+  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+  border-bottom: 1px solid #d4a22a;
+  font-size: 11px;
+  color: #78350f;
+}
+
+.beta-banner[hidden] { display: none; }
+
+.beta-banner-badge {
+  padding: 2px 6px;
+  background: linear-gradient(135deg, #d4a22a 0%, #b07d1a 100%);
+  color: #fff;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  border-radius: 999px;
+  flex-shrink: 0;
+}
+
+.beta-banner-text {
+  flex: 1;
+  min-width: 0;
+  font-weight: 500;
+}
+
+.beta-banner-cta {
+  color: #78350f;
+  font-weight: 700;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: color var(--transition);
+}
+
+.beta-banner-cta:hover {
+  color: #422006;
+  text-decoration: underline;
+}
+
+.beta-banner-close {
+  width: 18px;
+  height: 18px;
+  padding: 0;
+  background: transparent;
+  border: none;
+  border-radius: 50%;
+  color: #78350f;
+  font-size: 14px;
+  line-height: 1;
+  cursor: pointer;
+  opacity: 0.6;
+  flex-shrink: 0;
+  transition: opacity var(--transition), background-color var(--transition);
+}
+
+.beta-banner-close:hover {
+  opacity: 1;
+  background: rgba(0, 0, 0, 0.08);
+}
+
 /* ─── Header ─────────────────────────────────────────────────────────────── */
 
 .header {
