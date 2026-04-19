@@ -537,6 +537,40 @@
   transform: translateX(12px);
 }
 
+/* Pro-gated state: disabled visual, badge, non-interactive. Label + icon
+   remain readable so the feature is still discoverable. */
+.diag-screenshot-switch.is-pro-locked {
+  cursor: not-allowed;
+  opacity: 0.75;
+}
+
+.diag-screenshot-switch.is-pro-locked:hover {
+  background: var(--dp-surface);
+  color: var(--dp-text-2);
+}
+
+.diag-switch-track--locked {
+  background: var(--dp-border);
+  opacity: 0.5;
+}
+
+.diag-pro-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2px 7px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+  color: #fff;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  line-height: 1;
+  box-shadow: 0 1px 3px rgba(245, 158, 11, 0.3);
+  flex-shrink: 0;
+}
+
 /* ─── Scan-mode toggle chips (Advanced row) ────────────────────────────── */
 
 .diag-mode-chip {

@@ -57,6 +57,7 @@
       this.activeTab = 'scan';       // 'scan' | 'validate' — B29 tab split
       this.scanMode = 'current';     // 'current' | 'presets' | 'mine' | 'all'
       this._advancedOpen = false;    // user-toggled Advanced disclosure state
+      this._isPro = false;           // Pro-tier flag — gates screenshot feature until backend is finalized
       this._panelTheme = 'dark';     // 'dark' | 'light'
       this._configuredThemeName = null;
       this._dragState = null;
@@ -609,14 +610,24 @@
               ${modeChip('mine', 'My Themes')}
               ${modeChip('all', 'All')}
             </div>
-            <label class="diag-screenshot-switch${camActive ? ' is-active' : ''}" tabindex="0" data-diag-tooltip="Captures a ~50 KB PNG of the visible page and attaches it to AI Suggest, Copy, and View Report.&#10;&#10;⚠ Avoid if sensitive data is on screen — no customer PII, financial records, or confidential info.&#10;&#10;Privacy: Connectry uses the screenshot once to generate a fix, then deletes it. We do not retain images." data-diag-tooltip-align="right">
-              <span class="diag-switch-icon">${ICONS.camera}</span>
-              <span class="diag-switch-label">Include screenshot</span>
-              <input type="checkbox" class="diag-sr-only" data-action="toggleIncludeScreenshot" ${camActive ? 'checked' : ''}>
-              <span class="diag-switch-track" aria-hidden="true">
-                <span class="diag-switch-thumb"></span>
-              </span>
-            </label>
+            ${this._isPro
+              ? `<label class="diag-screenshot-switch${camActive ? ' is-active' : ''}" tabindex="0" data-diag-tooltip="Captures a PNG of the visible page and attaches it to AI Suggest, Copy, and View Report.&#10;&#10;⚠ Avoid if sensitive data is on screen — no customer PII, financial records, or confidential info." data-diag-tooltip-align="right">
+                  <span class="diag-switch-icon">${ICONS.camera}</span>
+                  <span class="diag-switch-label">Include screenshot</span>
+                  <input type="checkbox" class="diag-sr-only" data-action="toggleIncludeScreenshot" ${camActive ? 'checked' : ''}>
+                  <span class="diag-switch-track" aria-hidden="true">
+                    <span class="diag-switch-thumb"></span>
+                  </span>
+                </label>`
+              : `<div class="diag-screenshot-switch is-pro-locked" tabindex="0" data-diag-tooltip="Screenshot capture is a Connectry Pro feature. Backend is still in development — coming soon." data-diag-tooltip-align="right">
+                  <span class="diag-switch-icon">${ICONS.camera}</span>
+                  <span class="diag-switch-label">Include screenshot</span>
+                  <span class="diag-pro-badge">Pro</span>
+                  <span class="diag-switch-track diag-switch-track--locked" aria-hidden="true">
+                    <span class="diag-switch-thumb"></span>
+                  </span>
+                </div>`
+            }
           </details>
         </div>`;
     }
@@ -1602,9 +1613,7 @@
         else if (action === 'scrollToPatches') this._scrollToPatches();
         else if (action === 'activateConfiguredTheme') this._activateConfiguredTheme(btn);
         else if (action === 'toggleIncludeScreenshot') {
-          // Surgical: toggle state + update switch's is-active class.
-          // Avoids re-rendering the scan bar (which would collapse the
-          // <details> Advanced disclosure).
+          if (!this._isPro) return; // Pro-gated — locked markup has no handler
           this.includeScreenshot = btn.tagName === 'INPUT'
             ? btn.checked === true
             : !this.includeScreenshot;
