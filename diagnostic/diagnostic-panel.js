@@ -52,6 +52,7 @@
       this.effectsState = null;      // effects runtime snapshot (B28 unified)
       this.screenshotDataUrl = null; // base64 PNG when checkbox enabled
       this.includeScreenshot = false; // user-toggled on each scan
+      this.activeTab = 'scan';       // 'scan' | 'validate' — B29 tab split
       this._panelTheme = 'dark';     // 'dark' | 'light'
       this._configuredThemeName = null;
       this._dragState = null;
@@ -102,9 +103,10 @@
 
       // Restore panel preferences
       try {
-        const pref = await chrome.storage.local.get(['diagnosticPanelTheme', 'diagnosticAutoScan']);
+        const pref = await chrome.storage.local.get(['diagnosticPanelTheme', 'diagnosticAutoScan', 'diagnosticPanelTab']);
         if (pref.diagnosticPanelTheme === 'light') this._panelTheme = 'light';
         if (pref.diagnosticAutoScan) this.autoScanEnabled = true;
+        if (pref.diagnosticPanelTab === 'validate') this.activeTab = 'validate';
       } catch (_) {}
 
       this._createHost();
@@ -183,6 +185,14 @@
       }
       // Persist preference
       try { chrome.storage.local.set({ diagnosticPanelTheme: this._panelTheme }); } catch (_) {}
+    }
+
+    _switchTab(tab) {
+      if (tab !== 'scan' && tab !== 'validate') return;
+      if (this.activeTab === tab) return;
+      this.activeTab = tab;
+      try { chrome.storage.local.set({ diagnosticPanelTab: tab }); } catch (_) {}
+      this._renderPanel();
     }
 
     _toggleAutoScan() {
@@ -351,6 +361,7 @@
         <div class="diag-panel">
           ${this._headerHTML()}
           ${this._infoBarHTML(themeName, injected)}
+          ${this._tabBarHTML()}
           ${this._scanBarHTML()}
           <div class="diag-results">
             ${this._unifiedResultsHTML()}
@@ -476,6 +487,20 @@
             ${orgBadge}
           </div>
           <div class="diag-heartbeat" id="diagHeartbeat"></div>
+        </div>`;
+    }
+
+    _tabBarHTML() {
+      const tabs = [
+        { id: 'scan', label: 'Scan' },
+        { id: 'validate', label: 'Validate' },
+      ];
+      return `
+        <div class="diag-tab-bar">
+          ${tabs.map(t => `
+            <button class="diag-tab${this.activeTab === t.id ? ' is-active' : ''}"
+                    data-action="switchTab" data-tab="${t.id}">${t.label}</button>
+          `).join('')}
         </div>`;
     }
 
@@ -891,8 +916,15 @@ Screenshots sent to Connectry AI are used only for one-time diagnosis and are pe
       return html;
     }
 
-    /** Single unified view — no tabs. Everything in one scroll. */
+    /** Tab dispatcher — routes to Scan or Validate based on this.activeTab. */
     _unifiedResultsHTML() {
+      return this.activeTab === 'validate'
+        ? this._validateTabHTML()
+        : this._scanTabHTML();
+    }
+
+    /** Scan tab — single-page diagnostic (health, gaps, components, patches). */
+    _scanTabHTML() {
       if (!this.hasScanned) return this._emptyHTML();
 
       let html = '';
@@ -926,7 +958,7 @@ Screenshots sent to Connectry AI are used only for one-time diagnosis and are pe
         html += this._activePatchesSection();
       }
 
-      // ── 6. Testing checklist (always visible) ──
+      // ── 6. Testing checklist (B29a: still here until B29b migrates to Validate) ──
       html += this._testingChecklistSection();
 
       // ── 7. Copy all fixes button ──
@@ -944,6 +976,14 @@ Screenshots sent to Connectry AI are used only for one-time diagnosis and are pe
       }
 
       return html;
+    }
+
+    /** Validate tab — cross-page walk-through + checklist coverage.
+     *  B29a: mirrors current unified content so nothing is hidden during the
+     *  skeleton step. B29b lifts walk-through banner + checklists in and
+     *  strips the scan-specific sections out. */
+    _validateTabHTML() {
+      return this._scanTabHTML();
     }
 
     _emptyComponentHTML() {
@@ -1426,6 +1466,7 @@ Screenshots sent to Connectry AI are used only for one-time diagnosis and are pe
         else if (action === 'minimize') this.minimize();
         else if (action === 'togglePanelTheme') this._togglePanelTheme();
         else if (action === 'toggleQAMode') this._toggleQAMode(btn);
+        else if (action === 'switchTab') this._switchTab(btn.dataset.tab);
         else if (action === 'toggleIncludeScreenshot') {
           this.includeScreenshot = btn.checked === true;
         }
