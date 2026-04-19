@@ -57,24 +57,83 @@
   ];
 
   // Known managed packages — tag/class prefix → human label.
+  // NOTE: first-party SF managed apps (DevOps Center, Pardot, etc.) are
+  // classified here so they don't fall through to the "custom LWC" bucket.
+  // Custom = only the user's own c-* tags.
   const MANAGED_PACKAGES = [
-    { prefix: 'ncino',         label: 'nCino' },
-    { prefix: 'nforcecredit',  label: 'nCino' },
-    { prefix: 'vlocity',       label: 'Vlocity/Omnistudio' },
-    { prefix: 'omnistudio',    label: 'Omnistudio' },
-    { prefix: 'copado',        label: 'Copado' },
-    { prefix: 'conga',         label: 'Conga' },
-    { prefix: 'drawloop',      label: 'Conga (Drawloop)' },
-    { prefix: 'docusign',      label: 'DocuSign' },
-    { prefix: 'dsfs',          label: 'DocuSign' },
-    { prefix: 'sb_',           label: 'Salesforce CPQ' },
-    { prefix: 'sbqq',          label: 'Salesforce CPQ' },
-    { prefix: 'sfa_',          label: 'Salesforce Advanced' },
-    { prefix: 'maps',          label: 'Salesforce Maps' },
-    { prefix: 'taskray',       label: 'TaskRay' },
-    { prefix: 'formassembly',  label: 'FormAssembly' },
-    { prefix: 'mholt',         label: 'Matt Holt (AppExchange)' },
+    { prefix: 'ncino',          label: 'nCino' },
+    { prefix: 'nforcecredit',   label: 'nCino' },
+    { prefix: 'vlocity',        label: 'Vlocity/Omnistudio' },
+    { prefix: 'omnistudio',     label: 'Omnistudio' },
+    { prefix: 'copado',         label: 'Copado' },
+    { prefix: 'conga',          label: 'Conga' },
+    { prefix: 'drawloop',       label: 'Conga (Drawloop)' },
+    { prefix: 'docusign',       label: 'DocuSign' },
+    { prefix: 'dsfs',           label: 'DocuSign' },
+    { prefix: 'sb_',            label: 'Salesforce CPQ' },
+    { prefix: 'sbqq',           label: 'Salesforce CPQ' },
+    { prefix: 'sfa_',           label: 'Salesforce Advanced' },
+    { prefix: 'maps',           label: 'Salesforce Maps' },
+    { prefix: 'taskray',        label: 'TaskRay' },
+    { prefix: 'formassembly',   label: 'FormAssembly' },
+    { prefix: 'mholt',          label: 'Matt Holt (AppExchange)' },
+    // First-party SF managed apps (LWC tags that look custom)
+    { prefix: 'devops_center',  label: 'DevOps Center' },
+    { prefix: 'devops-center',  label: 'DevOps Center' },
+    { prefix: 'pi__',           label: 'Pardot' },
+    { prefix: 'einstein',       label: 'Einstein' },
+    { prefix: 'data_cloud',     label: 'Data Cloud' },
+    { prefix: 'installedPackage', label: 'Installed Package' },
   ];
+
+  // ─── Utility / sub-part / invisible exclusions ─────────────────────────
+  // Classes that have no paint of their own (spacing, sizing, alignment,
+  // truncation, etc.) — flagging them as "unstyled" is always a false
+  // positive because they were never meant to be themed.
+  const UTILITY_PREFIXES = [
+    'slds-m-', 'slds-p-',                // margin / padding
+    'slds-var-m-', 'slds-var-p-',
+    'slds-size_', 'slds-size-',          // grid sizing
+    'slds-col_', 'slds-col-',            // column layout modifiers
+    'slds-align_', 'slds-align-',
+    'slds-grid_', 'slds-grid-',          // grid modifiers (NOT slds-grid itself)
+    'slds-text-align_', 'slds-text-align-',
+    'slds-text-body_', 'slds-text-body-',
+    'slds-text-heading_', 'slds-text-heading-',
+    'slds-line-height_', 'slds-line-height-',
+    'slds-border_', 'slds-border-',
+    'slds-float_', 'slds-float-',
+    'slds-clear_', 'slds-clear-',
+  ];
+
+  const UTILITY_EXACT = new Set([
+    'slds-truncate', 'slds-truncate_container_75',
+    'slds-assistive-text',              // screen-reader only, never visible
+    'slds-hide', 'slds-hidden', 'slds-show', 'slds-show_inline', 'slds-show_inline-block',
+    'slds-is-relative', 'slds-is-absolute', 'slds-is-fixed', 'slds-is-active',
+    'slds-no-flex', 'slds-shrink-none', 'slds-grow',
+    'slds-has-flexi-truncate', 'slds-has-divider', 'slds-has-divider_bottom',
+    'slds-theme_default', 'slds-theme_alt-inverse',
+    'slds-r1', 'slds-r2', 'slds-r3', 'slds-r4', 'slds-r5',
+    'slds-r6', 'slds-r7', 'slds-r8', 'slds-r9',
+    // Grid cells with no paint
+    'slds-col',
+  ]);
+
+  function isUtilityClass(cls) {
+    if (UTILITY_EXACT.has(cls)) return true;
+    for (const p of UTILITY_PREFIXES) {
+      if (cls.startsWith(p)) return true;
+    }
+    return false;
+  }
+
+  // BEM sub-parts (`block__element`) are pieces of a composite component,
+  // not standalone components. Their parent block owns the visual theming.
+  // Flagging them individually double-counts. Recognising by `__` convention.
+  function isSubPart(cls) {
+    return cls.includes('__');
+  }
 
   // Classes that identify semantically distinct standard components. Used
   // to pick a stable "identity class" per element even when many slds-
@@ -161,16 +220,44 @@
       : [];
     if (!classes.length) return null;
 
-    // Prefer KNOWN_COMPONENT_CLASSES; otherwise first namespaced class.
-    let identityClass = classes.find(c => KNOWN_COMPONENT_CLASSES.has(c));
+    // Prefer KNOWN_COMPONENT_CLASSES; otherwise first namespaced, non-utility,
+    // non-subpart class. Utility/subpart classes produce false positives
+    // because they have no paint of their own — the parent owns the theme.
+    let identityClass = classes.find(c =>
+      KNOWN_COMPONENT_CLASSES.has(c) && !isUtilityClass(c)
+    );
     if (!identityClass) {
-      identityClass = classes.find(c => classifyToken(c));
+      identityClass = classes.find(c =>
+        classifyToken(c) && !isUtilityClass(c) && !isSubPart(c)
+      );
     }
     if (!identityClass) return null;
 
     const cls = classifyToken(identityClass);
     if (!cls) return null;
     return { identityKey: identityClass, tag, identityClass, ...cls };
+  }
+
+  // Inheritance-aware theming detection. Elements with transparent bg that
+  // sit inside a themed parent are visually themed via inheritance — flagging
+  // them as unstyled was a major false-positive source (nav items, header
+  // buttons, context-bar children all have transparent bg + themed parent).
+  function hasThemedAncestorBg(el) {
+    let p = el.parentElement;
+    let hops = 0;
+    while (p && p !== document.body && hops < 8) {
+      try {
+        const bg = getComputedStyle(p).backgroundColor;
+        if (bg && bg !== 'rgba(0, 0, 0, 0)' && bg !== 'transparent') {
+          // First solid-bg ancestor wins. If it's themed (not a SF default),
+          // this element inherits a themed visual context.
+          return !SF_DEFAULTS.has(bg);
+        }
+      } catch (_) {}
+      p = p.parentElement;
+      hops++;
+    }
+    return false;
   }
 
   // ─── Style + structure capture ──────────────────────────────────────────
@@ -330,6 +417,10 @@
 
       // Styled classification: any computed color value not in SF_DEFAULTS
       // counts as "themed". All defaults = "unstyled". Mixed = "partial".
+      // Inheritance rule: if the element's own bg is transparent but its
+      // nearest solid-bg ancestor is themed, the element visually inherits
+      // the theme — upgrade "unstyled" to "styled" and "partial" stays
+      // "partial" (text/border defaults still want addressing).
       let styled = 'unknown';
       if (styles) {
         const vals = [styles.backgroundColor, styles.color, styles.borderColor].filter(v => v && v !== 'rgba(0, 0, 0, 0)');
@@ -337,7 +428,14 @@
           const themed = vals.filter(v => !SF_DEFAULTS.has(v)).length;
           const defaults = vals.length - themed;
           if (defaults === 0) styled = 'styled';
-          else if (themed === 0) styled = 'unstyled';
+          else if (themed === 0) {
+            // All default colors — but check if the element is actually
+            // painted via a themed ancestor background.
+            const inherits = sample && styles.backgroundColor === 'rgba(0, 0, 0, 0)'
+              ? hasThemedAncestorBg(sample)
+              : false;
+            styled = inherits ? 'styled' : 'unstyled';
+          }
           else styled = 'partial';
         }
       }
