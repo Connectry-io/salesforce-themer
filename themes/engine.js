@@ -2154,17 +2154,46 @@ ${fx ? `
 }
 
 /* App Launcher — the Aura-hosted modal wraps a pure-LWC content tree
- * in a standard .slds-modal__container painted white. That wide white
- * card around the app grid is what users read as a "weird backdrop
- * layer." For the app launcher specifically, null the outer modal
- * chrome (container + header) so the LWC content reads as a themed
- * fullscreen page rather than a card-inside-a-card. :has() scopes
- * this to the app-launcher modal only — standard modals (New Contact,
- * etc.) keep their card appearance. */
+ * in a standard .slds-modal__container painted white. B25 fix: make the
+ * .slds-modal shell AND container fill the viewport with the theme
+ * background, so there's no bleed-through at edges where the LWC
+ * doesn't reach (previous transparent fix left gaps showing the Setup
+ * page behind). :has() scopes this to the app-launcher modal only. */
+.slds-modal:has(one-app-launcher-modal) {
+  background-color: ${c.background} !important;
+}
+
 .slds-modal__container:has(one-app-launcher-modal),
 .slds-modal:has(one-app-launcher-modal) .slds-modal__container {
-  background-color: transparent !important;
+  background-color: ${c.background} !important;
   border-color: transparent !important;
+  max-width: 100vw !important;
+  width: 100vw !important;
+  min-height: 100vh !important;
+}
+
+/* App Launcher close button (the X in the upper right). SF renders it
+ * as .slds-modal__close.slds-button_icon-inverse with a lightness
+ * filter that produces a white chip on dark themes. Force transparent
+ * bg + theme text color + kill the inverse filter. */
+.slds-modal:has(one-app-launcher-modal) .slds-modal__close,
+.slds-modal:has(one-app-launcher-modal) button.slds-modal__close,
+.slds-modal__container:has(one-app-launcher-modal) .slds-modal__close {
+  background-color: transparent !important;
+  color: ${c.textPrimary} !important;
+  border: 1px solid ${c.border} !important;
+  filter: none !important;
+}
+.slds-modal:has(one-app-launcher-modal) .slds-modal__close svg,
+.slds-modal:has(one-app-launcher-modal) .slds-modal__close .slds-button__icon,
+.slds-modal:has(one-app-launcher-modal) button.slds-modal__close svg {
+  fill: ${c.textPrimary} !important;
+  color: ${c.textPrimary} !important;
+}
+.slds-modal:has(one-app-launcher-modal) .slds-modal__close:hover,
+.slds-modal:has(one-app-launcher-modal) button.slds-modal__close:hover {
+  background-color: ${c.surfaceHover} !important;
+  border-color: ${c.accent} !important;
 }
 
 .slds-modal__container:has(one-app-launcher-modal) .slds-modal__header,
