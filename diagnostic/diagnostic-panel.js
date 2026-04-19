@@ -29,6 +29,8 @@
     copy: `<svg viewBox="0 0 14 14" fill="none"><rect x="4" y="4" width="7" height="8" rx="1.2" stroke="currentColor" stroke-width="1.3"/><path d="M10 3.5V3a1.2 1.2 0 0 0-1.2-1.2H4.2A1.2 1.2 0 0 0 3 3v5.8A1.2 1.2 0 0 0 4.2 10H4.5" stroke="currentColor" stroke-width="1.3"/></svg>`,
     magnifier: `<svg viewBox="0 0 14 14" fill="none"><circle cx="6" cy="6" r="3.5" stroke="currentColor" stroke-width="1.4"/><path d="M8.6 8.6l3 3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>`,
     camera: `<svg viewBox="0 0 14 14" fill="none"><rect x="1.5" y="4" width="11" height="7.5" rx="1.4" stroke="currentColor" stroke-width="1.3"/><circle cx="7" cy="7.75" r="2.2" stroke="currentColor" stroke-width="1.3"/><path d="M5 4l0.8-1.2h2.4L9 4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
+    sun: `<svg viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="2.8" stroke="currentColor" stroke-width="1.4"/><path d="M7 1.2v1.4M7 11.4v1.4M1.2 7h1.4M11.4 7h1.4M2.9 2.9l1 1M10.1 10.1l1 1M2.9 11.1l1-1M10.1 3.9l1-1" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>`,
+    moon: `<svg viewBox="0 0 14 14" fill="none"><path d="M11.5 8.5a4.5 4.5 0 0 1-5.9-5.9 4.8 4.8 0 1 0 5.9 5.9z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>`,
     badge: `<svg viewBox="0 0 24 24" fill="none"><circle cx="6" cy="12" r="3" fill="currentColor" opacity="0.6"/><line x1="9" y1="12" x2="15" y2="12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" opacity="0.4"/><circle cx="18" cy="12" r="3" fill="currentColor"/></svg>`,
   };
 
@@ -191,6 +193,12 @@
       this._panelTheme = this._panelTheme === 'dark' ? 'light' : 'dark';
       if (this.host) {
         this.host.classList.toggle('diag-light', this._panelTheme === 'light');
+      }
+      // Surgical icon swap — no full re-render needed for a visual-only flip.
+      const btn = this.shadow?.querySelector('.diag-theme-toggle');
+      if (btn) {
+        btn.innerHTML = this._panelTheme === 'light' ? ICONS.moon : ICONS.sun;
+        btn.title = this._panelTheme === 'light' ? 'Switch to dark panel' : 'Switch to light panel';
       }
       // Persist preference
       try { chrome.storage.local.set({ diagnosticPanelTheme: this._panelTheme }); } catch (_) {}
@@ -437,8 +445,8 @@
             <div class="diag-header-subtitle">Powered by Connectry <strong>AI</strong></div>
           </div>
           <div class="diag-header-actions">
-            <button class="diag-icon-btn" data-action="togglePanelTheme" title="Toggle light/dark panel">
-              <svg viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="5" stroke="currentColor" stroke-width="1.4"/><path d="M7 2a5 5 0 0 1 0 10z" fill="currentColor"/></svg>
+            <button class="diag-icon-btn diag-theme-toggle" data-action="togglePanelTheme" title="${this._panelTheme === 'light' ? 'Switch to dark panel' : 'Switch to light panel'}">
+              ${this._panelTheme === 'light' ? ICONS.moon : ICONS.sun}
             </button>
             <button class="diag-icon-btn" data-action="minimize" title="Minimize">${ICONS.minimize}</button>
             <button class="diag-icon-btn" data-action="close" title="Close">${ICONS.close}</button>

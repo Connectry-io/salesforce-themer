@@ -197,6 +197,12 @@
   color: var(--dp-text);
 }
 
+/* Panel theme toggle — Connectry brand accent on hover */
+.diag-theme-toggle:hover {
+  background: var(--dp-accent-bg);
+  color: var(--dp-accent-text);
+}
+
 .diag-icon-btn svg {
   width: 14px;
   height: 14px;

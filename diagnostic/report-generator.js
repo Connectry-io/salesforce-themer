@@ -90,18 +90,37 @@
 <style>
   :root {
     --cx-bg: #0f1115;
+    --cx-bg-grad: linear-gradient(135deg, #1a1d23 0%, #0f1115 100%);
     --cx-surface: #1a1d23;
     --cx-surface-2: #22262e;
     --cx-border: rgba(255,255,255,0.06);
+    --cx-border-strong: rgba(255,255,255,0.1);
     --cx-text: #e4e4e7;
     --cx-text-2: rgba(255,255,255,0.55);
     --cx-text-3: rgba(255,255,255,0.3);
     --cx-accent: #4a6fa5;
+    --cx-accent-2: #93b5e0;
     --cx-accent-light: rgba(74,111,165,0.15);
     --cx-good: #22c55e;
     --cx-warn: #eab308;
     --cx-bad: #ef4444;
     --cx-radius: 8px;
+    --cx-shadow: 0 4px 16px rgba(0,0,0,0.3);
+  }
+  [data-theme="light"] {
+    --cx-bg: #f8f9fb;
+    --cx-bg-grad: linear-gradient(135deg, #ffffff 0%, #f1f3f8 100%);
+    --cx-surface: #ffffff;
+    --cx-surface-2: #f1f3f8;
+    --cx-border: rgba(0,0,0,0.06);
+    --cx-border-strong: rgba(0,0,0,0.1);
+    --cx-text: #1a1a1a;
+    --cx-text-2: #4a5568;
+    --cx-text-3: #8a94a6;
+    --cx-accent: #3d5e8e;
+    --cx-accent-2: #4a6fa5;
+    --cx-accent-light: rgba(74,111,165,0.1);
+    --cx-shadow: 0 2px 8px rgba(0,0,0,0.06);
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body {
@@ -112,9 +131,38 @@
     padding: 0;
   }
 
+  /* Toolbar — sticky top bar with brand + actions */
+  .report-toolbar {
+    position: sticky; top: 0; z-index: 50;
+    display: flex; align-items: center; gap: 12px;
+    padding: 10px 40px;
+    background: var(--cx-surface);
+    border-bottom: 1px solid var(--cx-border);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+  }
+  .report-toolbar-brand {
+    display: flex; align-items: center; gap: 10px;
+    font-size: 12px; font-weight: 600; color: var(--cx-text-2);
+    letter-spacing: 0.02em;
+  }
+  .report-toolbar-brand svg { width: 22px; height: 22px; }
+  .report-toolbar-brand strong { color: var(--cx-accent-2); font-weight: 700; }
+  .report-toolbar-actions { margin-left: auto; display: flex; gap: 8px; }
+  .report-btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 7px 12px; font-family: inherit; font-size: 12px; font-weight: 600;
+    background: var(--cx-surface-2); color: var(--cx-text-2);
+    border: 1px solid var(--cx-border); border-radius: 6px;
+    cursor: pointer; transition: all 150ms ease;
+  }
+  .report-btn:hover { background: var(--cx-accent-light); color: var(--cx-accent-2); border-color: var(--cx-accent); }
+  .report-btn svg { width: 14px; height: 14px; }
+  .report-btn--primary { background: var(--cx-accent-light); color: var(--cx-accent-2); border-color: rgba(74,111,165,0.3); }
+
   /* Header */
   .report-header {
-    background: linear-gradient(135deg, #1a1d23 0%, #0f1115 100%);
+    background: var(--cx-bg-grad);
     border-bottom: 1px solid var(--cx-border);
     padding: 32px 40px;
     display: flex;
@@ -122,8 +170,9 @@
     gap: 20px;
   }
   .report-logo svg { width: 36px; height: 36px; }
-  .report-header-text h1 { font-size: 20px; font-weight: 700; color: #fff; }
+  .report-header-text h1 { font-size: 22px; font-weight: 700; color: var(--cx-text); letter-spacing: -0.01em; }
   .report-header-text p { font-size: 12px; color: var(--cx-text-2); margin-top: 2px; }
+  .report-header-text p strong { color: var(--cx-accent-2); font-weight: 700; }
   .report-header-meta { margin-left: auto; text-align: right; font-size: 11px; color: var(--cx-text-3); line-height: 1.6; }
 
   /* Container */
@@ -136,10 +185,10 @@
     border: 1px solid var(--cx-border); border-radius: var(--cx-radius);
     margin-bottom: 24px;
   }
-  .report-swatch { display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; width: 40px; height: 40px; border-radius: 8px; overflow: hidden; box-shadow: inset 0 0 0 1px rgba(255,255,255,0.08); flex-shrink: 0; }
+  .report-swatch { display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; width: 40px; height: 40px; border-radius: 8px; overflow: hidden; box-shadow: inset 0 0 0 1px var(--cx-border-strong); flex-shrink: 0; }
   .report-swatch span { display: block; }
   .report-theme-info { flex: 1; min-width: 0; }
-  .report-theme-name { font-size: 16px; font-weight: 700; color: #fff; }
+  .report-theme-name { font-size: 16px; font-weight: 700; color: var(--cx-text); }
   .report-theme-org { font-size: 12px; color: var(--cx-text-2); }
 
   /* KPI row */
@@ -185,7 +234,7 @@
     user-select: none;
   }
   .section-header:hover { background: var(--cx-surface-2); }
-  .section-title { font-size: 13px; font-weight: 600; color: #fff; flex: 1; }
+  .section-title { font-size: 13px; font-weight: 600; color: var(--cx-text); flex: 1; }
   .section-badge {
     font-size: 10px; font-weight: 600; padding: 2px 8px;
     border-radius: 10px; white-space: nowrap;
@@ -211,6 +260,7 @@
     padding: 6px 0; border-bottom: 1px solid rgba(255,255,255,0.03);
     font-size: 12px;
   }
+  .row { border-bottom-color: var(--cx-border) !important; }
   .row:last-child { border-bottom: none; }
   .row-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
   .row-dot.pass { background: var(--cx-good); }
@@ -231,7 +281,7 @@
 
   /* CSS code block */
   .css-block {
-    margin: 16px 0; padding: 16px; background: #0d0f12;
+    margin: 16px 0; padding: 16px; background: var(--cx-surface-2);
     border: 1px solid var(--cx-border); border-radius: var(--cx-radius);
     font-family: 'SFMono-Regular', Consolas, monospace;
     font-size: 11px; line-height: 1.7; color: var(--cx-text-2);
@@ -260,19 +310,58 @@
   .report-footer a { color: var(--cx-accent); text-decoration: none; }
   .report-footer a:hover { text-decoration: underline; }
 
-  /* Print */
+  /* Print — force light theme, expand all sections, hide interactive UI */
   @media print {
+    :root, [data-theme="dark"], [data-theme="light"] {
+      --cx-bg: #fff;
+      --cx-bg-grad: #fff;
+      --cx-surface: #fff;
+      --cx-surface-2: #f5f5f5;
+      --cx-border: rgba(0,0,0,0.1);
+      --cx-border-strong: rgba(0,0,0,0.15);
+      --cx-text: #1a1a1a;
+      --cx-text-2: #333;
+      --cx-text-3: #666;
+    }
     body { background: #fff; color: #1a1a1a; }
+    .report-toolbar { display: none; }
     .report-header { background: #f5f5f5; }
     .section-body { display: block !important; }
+    .section-chevron { display: none; }
     .css-block-copy { display: none; }
+    .css-block { max-height: none; overflow: visible; }
+    .report-section, .section { break-inside: avoid; }
+    .report-body { padding: 20px 24px; max-width: none; }
   }
 
   /* Toggle sections */
   .section-header { cursor: pointer; }
+  /* Light-mode-specific logo gradient fix */
+  [data-theme="light"] .report-logo svg circle:first-child { fill: #2D2D2D; }
 </style>
 </head>
-<body>
+<body data-theme="dark">
+
+<div class="report-toolbar">
+  <div class="report-toolbar-brand">
+    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="6" cy="12" r="3.5" fill="currentColor" opacity="0.7"/>
+      <line x1="9.5" y1="12" x2="14.5" y2="12" stroke="#4A6FA5" stroke-width="1.5" stroke-linecap="round"/>
+      <circle cx="18" cy="12" r="3.5" fill="#4A6FA5"/>
+    </svg>
+    <span>Connectry <strong>Diagnostic</strong></span>
+  </div>
+  <div class="report-toolbar-actions">
+    <button class="report-btn" id="themeToggleBtn" title="Toggle light/dark">
+      <svg viewBox="0 0 14 14" fill="none" id="themeToggleIcon"></svg>
+      <span id="themeToggleLabel">Light</span>
+    </button>
+    <button class="report-btn report-btn--primary" id="savePdfBtn" title="Open print dialog — choose 'Save as PDF'">
+      <svg viewBox="0 0 14 14" fill="none"><path d="M4 2v6M4 8l-2-2M4 8l2-2" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M2 10v1.5A1.5 1.5 0 0 0 3.5 13h7A1.5 1.5 0 0 0 12 11.5V10" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+      <span>Save as PDF</span>
+    </button>
+  </div>
+</div>
 
 <div class="report-header">
   <div class="report-logo">
@@ -284,7 +373,7 @@
   </div>
   <div class="report-header-text">
     <h1>Theme Diagnostic Report</h1>
-    <p>Powered by Connectry AI</p>
+    <p>Powered by Connectry <strong>AI</strong></p>
   </div>
   <div class="report-header-meta">
     ${esc(timestamp)}<br>
@@ -303,21 +392,17 @@
     </div>
   </div>
 
-  <!-- KPIs -->
+  <!-- KPIs — mirror the panel's Page Health card stats -->
   <div class="kpi-row">
     <div class="kpi-card">
       <div class="kpi-value ${overallPct >= 85 ? 'good' : overallPct >= 60 ? 'ok' : 'bad'}">${overallPct}%</div>
-      <div class="kpi-label">Theme Health</div>
+      <div class="kpi-label">Page Health</div>
     </div>
-    ${tokenPct !== null ? `<div class="kpi-card"><div class="kpi-value ${tokenPct >= 90 ? 'good' : tokenPct >= 60 ? 'ok' : 'bad'}">${tokenPct}%</div><div class="kpi-label">Token Coverage</div></div>` : ''}
+    ${tokenPct !== null ? `<div class="kpi-card"><div class="kpi-value ${tokenPct >= 90 ? 'good' : tokenPct >= 60 ? 'ok' : 'bad'}">${tokenPct}%</div><div class="kpi-label">Tokens</div></div>` : ''}
     ${compPct !== null ? `<div class="kpi-card"><div class="kpi-value ${compPct >= 85 ? 'good' : compPct >= 60 ? 'ok' : 'bad'}">${compPct}%</div><div class="kpi-label">Components</div></div>` : ''}
     <div class="kpi-card">
       <div class="kpi-value ${gapCount === 0 ? 'good' : gapCount <= 5 ? 'ok' : 'bad'}">${gapCount}</div>
-      <div class="kpi-label">Gaps Found</div>
-    </div>
-    <div class="kpi-card">
-      <div class="kpi-value ${(fixCount + patchCount) > 0 ? 'ok' : 'good'}">${fixCount + patchCount}</div>
-      <div class="kpi-label">Fixes Available</div>
+      <div class="kpi-label">Issues</div>
     </div>
   </div>
 
@@ -331,16 +416,17 @@
   ${cssFixBlock}
 
   <div class="report-footer">
-    Generated by <a href="https://connectry.io" target="_blank">Connectry</a> Salesforce Themer Diagnostic<br>
+    Built with care by <a href="https://connectry.io" target="_blank">Connectry</a><br>
     Report is a point-in-time snapshot. Re-scan for current state.
   </div>
 </div>
 
 <script>
-  // Toggle sections
+  // Section collapse
   document.querySelectorAll('.section-header').forEach(h => {
     h.addEventListener('click', () => h.closest('.section').classList.toggle('is-open'));
   });
+
   // Copy buttons
   document.querySelectorAll('.css-block-copy').forEach(btn => {
     btn.addEventListener('click', () => {
@@ -350,6 +436,32 @@
         setTimeout(() => { btn.textContent = 'Copy'; }, 2000);
       });
     });
+  });
+
+  // Save as PDF — opens the native print dialog, user picks "Save as PDF"
+  document.getElementById('savePdfBtn').addEventListener('click', () => window.print());
+
+  // Light/dark toggle — persists in localStorage, respects OS preference on first visit
+  const SUN = '<path d="M7 1.2v1.4M7 11.4v1.4M1.2 7h1.4M11.4 7h1.4M2.9 2.9l1 1M10.1 10.1l1 1M2.9 11.1l1-1M10.1 3.9l1-1" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><circle cx="7" cy="7" r="2.8" stroke="currentColor" stroke-width="1.4"/>';
+  const MOON = '<path d="M11.5 8.5a4.5 4.5 0 0 1-5.9-5.9 4.8 4.8 0 1 0 5.9 5.9z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/>';
+  const body = document.body;
+  const icon = document.getElementById('themeToggleIcon');
+  const label = document.getElementById('themeToggleLabel');
+  const btn = document.getElementById('themeToggleBtn');
+  function applyTheme(t) {
+    body.setAttribute('data-theme', t);
+    icon.innerHTML = t === 'dark' ? SUN : MOON;
+    label.textContent = t === 'dark' ? 'Light' : 'Dark';
+    btn.title = 'Switch to ' + (t === 'dark' ? 'light' : 'dark');
+  }
+  const saved = localStorage.getItem('cx-report-theme');
+  const prefers = window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+  applyTheme(saved || prefers);
+  btn.addEventListener('click', () => {
+    const cur = body.getAttribute('data-theme');
+    const next = cur === 'dark' ? 'light' : 'dark';
+    applyTheme(next);
+    localStorage.setItem('cx-report-theme', next);
   });
 </script>
 </body>
