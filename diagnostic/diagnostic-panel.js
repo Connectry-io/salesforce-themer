@@ -155,26 +155,29 @@
     }
 
     updateTheme(themeName) {
+      const nowOff = themeName === 'none';
       this.currentTheme = themeName;
-      this.testingProgress = null; // Reset — different theme
-      this.themeColors = null;     // Clear — need to re-resolve for new theme
-      this.themeDisplayName = null; // Clear — need to re-resolve label
-      this.fixReport = null;       // Clear — fixes depend on theme colors
+      this.testingProgress = null;
+      this.themeColors = null;
+      this.themeDisplayName = null;
+      this.fixReport = null;
+      this.scanResults = null;     // Stale — belonged to previous theme
+      this.componentResults = null;
+      this.hasScanned = false;
       if (ns.clearThemeCache) ns.clearThemeCache();
-      if (this.isOpen && !this.isMinimized) {
-        this._updateInfoBar();
-        // Reload theme colors + display name for the new theme, then re-render
-        const pending = [];
-        if (ns.resolveThemeColors) {
-          pending.push(ns.resolveThemeColors(themeName).then(c => { this.themeColors = c; }));
-        }
+      if (!this.isOpen || this.isMinimized) return;
+
+      // Resolve colors + display name for the new theme, then re-render and
+      // auto-scan (unless theme is off — in which case the scan-bar is
+      // hidden and _autoScan() no-ops anyway).
+      this._loadThemeColors().then(async () => {
         if (ns.resolveThemeName) {
-          pending.push(ns.resolveThemeName(themeName).then(n => { this.themeDisplayName = n; }));
+          try { this.themeDisplayName = await ns.resolveThemeName(themeName); } catch (_) {}
         }
-        Promise.all(pending).then(() => {
-          if (this.isOpen && !this.isMinimized) this._updateInfoBar();
-        });
-      }
+        if (!this.isOpen || this.isMinimized) return;
+        this._renderPanel();
+        if (!nowOff) this._autoScan();
+      });
     }
 
     _togglePanelTheme() {
@@ -192,6 +195,25 @@
       this.activeTab = tab;
       try { chrome.storage.local.set({ diagnosticPanelTab: tab }); } catch (_) {}
       this._renderPanel();
+    }
+
+    async _activateConfiguredTheme(btn) {
+      const theme = btn.dataset.theme;
+      if (!theme) return;
+      btn.disabled = true;
+      const span = btn.querySelector('span');
+      const original = span?.textContent;
+      if (span) span.textContent = 'Activating…';
+      try {
+        await new Promise((resolve) => {
+          chrome.runtime.sendMessage({ action: 'setTheme', theme }, () => resolve());
+        });
+        // updateTheme() fires from the content script's theme-change listener;
+        // the panel will re-render itself. Restore label as a safety net.
+        if (span && original) span.textContent = original;
+      } catch (err) {
+        if (span) span.textContent = 'Failed';
+      }
     }
 
     _scrollToPatches() {
@@ -232,6 +254,8 @@
 
     /** Run all scans silently and refresh the active tab. */
     async _autoScan() {
+      // Skip: scanning against no-theme produces misleading numbers.
+      if (this.currentTheme === 'none') return;
       console.log('[SFT Diag] Auto-scanning on navigation...');
 
       // Small delay — let SF finish rendering the new page
@@ -530,6 +554,8 @@
     _scanBarHTML() {
       // Validate tab owns the walk-through banner; no scan-bar there.
       if (this.activeTab === 'validate') return '';
+      // Theme off → scan is meaningless, surface the "turn it on" CTA instead.
+      if (this.currentTheme === 'none') return '';
 
       const pageType = ns.detectPageType?.();
       const pageLabel = pageType ? ` · ${pageType.label}` : '';
@@ -957,6 +983,11 @@
 
     /** Scan tab — single-page diagnostic (health, gaps, components, patches). */
     _scanTabHTML() {
+      if (this.currentTheme === 'none') {
+        let html = this._themeOffHTML();
+        if (this.patchSummary?.total > 0) html += this._activePatchesSection();
+        return html;
+      }
       if (!this.hasScanned) return this._emptyHTML();
 
       let html = '';
@@ -997,7 +1028,36 @@
 
     /** Validate tab — cross-page walk-through + checklist coverage. */
     _validateTabHTML() {
+      if (this.currentTheme === 'none') return this._themeOffHTML();
       return this._walkThroughBannerHTML() + this._testingChecklistSection();
+    }
+
+    /** Shown on both tabs when no theme is active. */
+    _themeOffHTML() {
+      const configured = this._configuredThemeName;
+      const configSafe = configured ? this._escapeHtml(configured) : '';
+      return `
+        <div class="diag-empty">
+          <div class="diag-empty-icon">
+            <svg width="36" height="36" viewBox="0 0 24 24" fill="none">
+              <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.5"/>
+              <path d="M8 12h8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <div class="diag-empty-title">Theme is off</div>
+          <div class="diag-empty-desc">
+            ${configured
+              ? `<strong>${configSafe}</strong> is configured but not active — turn it on to measure coverage.`
+              : `No theme configured yet. Open the Themer popup to pick one.`}
+          </div>
+          ${configured
+            ? `<div style="margin-top:14px;display:flex;justify-content:center">
+                 <button class="diag-scan-btn diag-scan-btn--primary" data-action="activateConfiguredTheme" data-theme="${configSafe}">
+                   Turn on ${configSafe}
+                 </button>
+               </div>`
+            : ''}
+        </div>`;
     }
 
     _emptyComponentHTML() {
@@ -1492,6 +1552,7 @@
         else if (action === 'toggleQAMode') this._toggleQAMode(btn);
         else if (action === 'switchTab') this._switchTab(btn.dataset.tab);
         else if (action === 'scrollToPatches') this._scrollToPatches();
+        else if (action === 'activateConfiguredTheme') this._activateConfiguredTheme(btn);
         else if (action === 'toggleIncludeScreenshot') {
           this.includeScreenshot = btn.checked === true;
         }
