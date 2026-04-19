@@ -415,28 +415,36 @@
       const structure = sample ? captureDOMStructure(sample) : null;
       const hardcoded = sample ? detectHardcodedColors(sample) : [];
 
-      // Styled classification: any computed color value not in SF_DEFAULTS
-      // counts as "themed". All defaults = "unstyled". Mixed = "partial".
-      // Inheritance rule: if the element's own bg is transparent but its
-      // nearest solid-bg ancestor is themed, the element visually inherits
-      // the theme — upgrade "unstyled" to "styled" and "partial" stays
-      // "partial" (text/border defaults still want addressing).
+      // Styled classification. Rule: if ANY computed paint value on the
+      // element is themed (not in SF_DEFAULTS and not transparent), the
+      // element counts as styled — the theme reached it. Mixing themed and
+      // default colors on the same element is fine: a branded button with
+      // white text and a brand-border is fully themed even though "white"
+      // is in the default set. Previously this scored "partial" which
+      // produced artificially low component health on pages where themes
+      // were actually doing their job.
+      //
+      // An element with no themed values can still be styled via inheritance
+      // — transparent bg sitting inside a themed-bg parent is visually
+      // themed. Only when there's no themed paint AND no themed ancestor
+      // do we flag "unstyled".
+      //
+      // "partial" stays in the data model for backward compat but is no
+      // longer emitted by the classifier — the health formula ignores it.
       let styled = 'unknown';
       if (styles) {
         const vals = [styles.backgroundColor, styles.color, styles.borderColor].filter(v => v && v !== 'rgba(0, 0, 0, 0)');
         if (vals.length) {
           const themed = vals.filter(v => !SF_DEFAULTS.has(v)).length;
-          const defaults = vals.length - themed;
-          if (defaults === 0) styled = 'styled';
-          else if (themed === 0) {
-            // All default colors — but check if the element is actually
-            // painted via a themed ancestor background.
+          if (themed > 0) {
+            styled = 'styled';
+          } else {
+            // All paint values are SF defaults. Check inheritance.
             const inherits = sample && styles.backgroundColor === 'rgba(0, 0, 0, 0)'
               ? hasThemedAncestorBg(sample)
               : false;
             styled = inherits ? 'styled' : 'unstyled';
           }
-          else styled = 'partial';
         }
       }
 
