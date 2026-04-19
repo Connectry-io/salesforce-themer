@@ -144,7 +144,9 @@ body {
   display: flex;
   flex-direction: column;
   box-shadow: var(--shadow-sm);
-  overflow: hidden;
+  /* No overflow:hidden — tooltips are absolute children of this card and
+     need to extend below it without being clipped. The .settings-card-body
+     handles its own collapse animation overflow. */
 }
 
 /* Card header — status + inline toggle + collapse button */
@@ -1515,6 +1517,10 @@ body {
   padding-top: 10px;
   border-top: 1px solid var(--color-border);
   text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
 }
 
 .footer a {
@@ -1527,6 +1533,21 @@ body {
 
 .footer a:hover {
   color: var(--color-accent);
+}
+
+.footer-sep,
+.footer-version {
+  font-size: 11px;
+  color: var(--color-text-subtle);
+  letter-spacing: 0.02em;
+}
+
+.footer-sep {
+  opacity: 0.5;
+}
+
+.footer-version {
+  font-variant-numeric: tabular-nums;
 }
 
 /* ─── Animations ─────────────────────────────────────────────────────────── */

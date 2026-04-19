@@ -1138,6 +1138,15 @@
     bindPerOrgToggle();
     applyPremiumStateToPopup();
 
+    // Footer version — pulled from manifest so it never drifts
+    const verEl = document.getElementById('footerVersion');
+    if (verEl) {
+      try {
+        const v = chrome.runtime.getManifest().version;
+        verEl.textContent = `v${v}`;
+      } catch (_) {}
+    }
+
     const [result, orgHostname] = await Promise.all([
       chrome.storage.sync.get({
         theme: 'connectry',
