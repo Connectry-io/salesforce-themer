@@ -684,10 +684,10 @@ setup-tree-node:hover *,
 }
 
 /* Search-term text highlight — SF hardcodes bright yellow (#fff03f).
- * Replace with theme-appropriate tint so left-nav search results
- * match the theme instead of popping yellow on every palette. */
+ * Replace with punchy theme-accent tint (30% alpha) — visible on any
+ * bg without washing out the text underneath. */
 :root {
-  --lwc-colorBackgroundHighlightSearch: rgba(0, 229, 255, 0.12) !important;
+  --lwc-colorBackgroundHighlightSearch: rgba(0, 229, 255, 0.3) !important;
 }
 
 mark,
@@ -697,9 +697,11 @@ mark,
 .slds-nav__list-item .highlight,
 .search-highlight,
 .forceHighlightText {
-  background-color: rgba(0, 229, 255, 0.12) !important;
+  background-color: rgba(0, 229, 255, 0.3) !important;
   color: #e0f7fa !important;
   box-shadow: none !important;
+  border-radius: 2px !important;
+  padding: 0 2px !important;
 }
 
 /* Legacy Aura Setup pages (Users, Profiles, Permission Sets, Roles,
@@ -827,32 +829,112 @@ h2.pageDescription,
   color: #00e5ff !important;
 }
 
-/* Legacy Setup form inputs + dropdowns */
+/* Legacy Setup form inputs + dropdowns (native select needs color-scheme
+ * hint so the browser paints dark chrome on the list popup). */
 .setupBody input[type="text"],
+.setupBody input[type="search"],
+.setupBody input[type="email"],
+.setupBody input[type="number"],
 .setupBody select,
 .setupBody textarea,
 .setupcontent input[type="text"],
+.setupcontent input[type="search"],
 .setupcontent select,
-.setupcontent textarea {
+.setupcontent textarea,
+.bBody select,
+.bBody input[type="text"],
+.listViewContent select,
+body.desktop input[type="text"]:not(.slds-input),
+body.desktop select:not(.slds-select) {
   background-color: #05070a !important;
   color: #e0f7fa !important;
   border-color: rgba(0, 229, 255, 0.25) !important;
+  color-scheme: dark !important;
 }
 
-/* Legacy Setup buttons (the Aura "btn" class variant, not SLDS) */
+/* Native select arrow + checkbox accent tint — modern browser feature */
+.setupBody,
+.setupcontent,
+.bBody,
+.listViewContent,
+body.desktop {
+  accent-color: #00e5ff;
+}
+
+input[type="checkbox"],
+input[type="radio"] {
+  accent-color: #00e5ff !important;
+  color-scheme: dark !important;
+}
+
+/* Legacy form labels + inline text (View: label, "Edit | Create New View") */
+.setupBody label,
+.setupcontent label,
+.bBody label,
+.labelCol,
+.formFieldLabel,
+.pbTitle,
+.pbSubheader {
+  color: #e0f7fa !important;
+}
+
+.setupBody a,
+.setupcontent a,
+.bBody a,
+.listViewContent a,
+.letterBar + .listViewContent a {
+  color: #00e5ff !important;
+}
+
+/* Legacy Setup buttons (the Aura "btn" class variant, not SLDS).
+ * Brand the primary action with accent border + accent text; hover
+ * fills with accentLight for visible affordance. */
 .btn,
 input.btn,
-button.btn {
+button.btn,
+.setupBody .btn,
+.bBody .btn {
   background-color: transparent !important;
-  color: #4dd0e1 !important;
-  border-color: rgba(0, 229, 255, 0.2) !important;
+  color: #00e5ff !important;
+  border: 1px solid #00e5ff !important;
+  text-shadow: none !important;
 }
 
 .btn:hover,
 input.btn:hover,
 button.btn:hover {
-  background-color: rgba(0, 229, 255, 0.06) !important;
-  color: #4dd0e1 !important;
+  background-color: rgba(0, 229, 255, 0.1) !important;
+  color: #00e5ff !important;
+  border-color: #00e5ff !important;
+}
+
+.btnDisabled,
+.btn:disabled,
+input.btn:disabled {
+  opacity: 0.5 !important;
+}
+
+/* Aggressive active-tab hammer — role/aria-based selectors catch any
+ * variant of active state that SF uses (Setup subtabs, workspace tabs,
+ * app-nav pins). Should finally end the Home-tab readability saga. */
+[role="tab"][aria-selected="true"],
+li[role="presentation"].slds-active,
+li[role="presentation"].active,
+.oneConsoleTabItem[aria-selected="true"],
+.tabHeader[aria-selected="true"] {
+  background: transparent !important;
+  background-color: transparent !important;
+  background-image: none !important;
+  box-shadow: inset 0 -3px 0 #00e5ff !important;
+  border-color: transparent !important;
+}
+
+[role="tab"][aria-selected="true"],
+[role="tab"][aria-selected="true"] *,
+.tabHeader[aria-selected="true"],
+.tabHeader[aria-selected="true"] * {
+  color: #00e5ff !important;
+  text-shadow: none !important;
 }
 
 /* ─── Base ───────────────────────────────────────────────────────────────── */
