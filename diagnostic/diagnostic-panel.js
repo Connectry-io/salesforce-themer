@@ -1723,6 +1723,8 @@
         else if (action === 'revertAISuggestion') this._decideAISuggestion('reverted');
         else if (action === 'dismissAISuggestion') { this.aiSuggestion = null; this._rerender(); }
         else if (action === 'copyComponentPatches') this._copyComponentPatches(btn);
+        else if (action === 'copyMultiScan') this._copyMultiScanReport(btn);
+        else if (action === 'viewMultiScan') this._openMultiScanReport();
         else if (action === 'copyFullCSS') this._copyFullCSS(btn);
         else if (action === 'savePatch') this._savePatch(btn);
         else if (action === 'togglePatch') this._togglePatch(btn);
@@ -2001,40 +2003,116 @@
       );
 
       const rows = sorted.map(r => {
-        const covClass = r.coverage >= 100 ? 'pass' : r.coverage >= 95 ? 'warn' : 'fail';
-        const healthClass = r.componentHealth >= 80 ? 'pass' : r.componentHealth >= 50 ? 'warn' : 'fail';
+        const tokenClass = r.coverage >= 100 ? 'pass' : r.coverage >= 95 ? 'warn' : 'fail';
+        const compClass = r.componentHealth >= 80 ? 'pass' : r.componentHealth >= 50 ? 'warn' : 'fail';
+        // Page Health mirrors the panel formula: avg(tokens, components)
+        const pageHealth = (r.coverage != null && r.componentHealth != null)
+          ? Math.round((r.coverage + r.componentHealth) / 2)
+          : (r.coverage ?? r.componentHealth ?? null);
+        const pageClass = pageHealth == null ? 'fail' : pageHealth >= 85 ? 'pass' : pageHealth >= 60 ? 'warn' : 'fail';
         return `
           <tr>
             <td style="padding:6px 8px;font-weight:500">${this._escapeHtml(r.name)}</td>
-            <td style="padding:6px 8px;text-align:right" class="diag-cov-${covClass}">${r.coverage != null ? r.coverage + '%' : '—'}</td>
+            <td style="padding:6px 8px;text-align:right" class="diag-cov-${pageClass}">${pageHealth != null ? pageHealth + '%' : '—'}</td>
+            <td style="padding:6px 8px;text-align:right" class="diag-cov-${tokenClass}">${r.coverage != null ? r.coverage + '%' : '—'}</td>
+            <td style="padding:6px 8px;text-align:right" class="diag-cov-${compClass}">${r.componentHealth != null ? r.componentHealth + '%' : '—'}</td>
             <td style="padding:6px 8px;text-align:right;opacity:0.8">${r.gaps != null ? r.gaps : '—'}</td>
-            <td style="padding:6px 8px;text-align:right" class="diag-cov-${healthClass}">${r.componentHealth != null ? r.componentHealth + '%' : '—'}</td>
-            <td style="padding:6px 8px;text-align:right;opacity:0.7;font-size:11px">${r.styled}/${r.total}</td>
           </tr>`;
       }).join('');
 
       return `
         <div class="diag-card" style="padding:12px">
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
-            <div>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;gap:8px">
+            <div style="min-width:0;flex:1">
               <div style="font-weight:600">${modeLabel} scan — ${sorted.length} themes</div>
-              <div style="font-size:11px;opacity:0.7;margin-top:2px">Avg coverage: ${avgCoverage}% · ${location.pathname.slice(0,60)}</div>
+              <div style="font-size:11px;opacity:0.7;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Avg coverage: ${avgCoverage}% · ${location.pathname.slice(0,60)}</div>
             </div>
-            <button class="diag-scan-btn" data-action="scanThemesPresets" style="font-size:11px;padding:4px 10px">Re-run</button>
+            <button class="diag-scan-btn" data-action="scanThemesPresets" style="font-size:11px;padding:4px 10px;flex-shrink:0">Re-run</button>
           </div>
           <table style="width:100%;border-collapse:collapse;font-size:12px">
             <thead>
-              <tr style="border-bottom:1px solid rgba(128,128,128,0.2);opacity:0.7;font-size:11px">
+              <tr style="border-bottom:1px solid rgba(128,128,128,0.2);opacity:0.7;font-size:10.5px;text-transform:uppercase;letter-spacing:0.04em">
                 <th style="padding:6px 8px;text-align:left">Theme</th>
+                <th style="padding:6px 8px;text-align:right">Page</th>
                 <th style="padding:6px 8px;text-align:right">Tokens</th>
+                <th style="padding:6px 8px;text-align:right">Comp.</th>
                 <th style="padding:6px 8px;text-align:right">Gaps</th>
-                <th style="padding:6px 8px;text-align:right">Health</th>
-                <th style="padding:6px 8px;text-align:right">Styled</th>
               </tr>
             </thead>
             <tbody>${rows}</tbody>
           </table>
+          <div class="diag-primary-actions" style="padding:10px 0 0;margin-top:12px;border-top:1px solid var(--dp-border-row);border-bottom:none">
+            <button class="diag-primary-btn" data-action="copyMultiScan" title="Copy this comparison table as Markdown">
+              ${ICONS.copy}
+              <span class="diag-primary-label">Copy</span>
+            </button>
+            <button class="diag-primary-btn" data-action="viewMultiScan" title="Open the multi-theme comparison in a new tab">
+              <svg viewBox="0 0 14 14" fill="none"><path d="M5 3H3.5A1.5 1.5 0 0 0 2 4.5v6A1.5 1.5 0 0 0 3.5 12h6A1.5 1.5 0 0 0 11 10.5V9" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/><path d="M8 2h4v4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/><path d="M6 8l6-6" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+              <span class="diag-primary-label">Report</span>
+            </button>
+          </div>
         </div>`;
+    }
+
+    async _copyMultiScanReport(btn) {
+      const payload = this._multiScanResults;
+      if (!payload?.results?.length) return;
+      const { mode, results, ranAt } = payload;
+      const modeLabel = mode === 'presets' ? 'Presets' : mode === 'custom' ? 'My Themes' : 'All Themes';
+      const sorted = [...results].sort((a, b) => {
+        const aP = (a.coverage ?? 0) + (a.componentHealth ?? 0);
+        const bP = (b.coverage ?? 0) + (b.componentHealth ?? 0);
+        return bP - aP;
+      });
+      const avg = Math.round(sorted.reduce((s, r) => s + (r.coverage || 0), 0) / sorted.length);
+
+      let md = `# Theme Comparison — ${modeLabel}\n\n`;
+      md += `- **Page**: ${location.pathname}\n`;
+      md += `- **Host**: ${location.hostname}\n`;
+      md += `- **Scanned**: ${ranAt?.toISOString?.() || new Date().toISOString()}\n`;
+      md += `- **Themes tested**: ${sorted.length}\n`;
+      md += `- **Avg token coverage**: ${avg}%\n\n`;
+      md += `| Theme | Page Health | Tokens | Components | Gaps |\n`;
+      md += `|-------|-------------|--------|------------|------|\n`;
+      for (const r of sorted) {
+        const page = (r.coverage != null && r.componentHealth != null)
+          ? Math.round((r.coverage + r.componentHealth) / 2)
+          : (r.coverage ?? r.componentHealth ?? null);
+        md += `| ${r.name} | ${page != null ? page + '%' : '—'} | ${r.coverage != null ? r.coverage + '%' : '—'} | ${r.componentHealth != null ? r.componentHealth + '%' : '—'} | ${r.gaps ?? '—'} |\n`;
+      }
+      md += `\n---\n*Generated by Salesforce Themer Diagnostic — Powered by Connectry AI*\n`;
+
+      try {
+        await navigator.clipboard.writeText(md);
+        btn.classList.add('is-copied');
+        const span = btn.querySelector('.diag-primary-label');
+        const orig = span?.textContent || 'Copy';
+        if (span) span.textContent = 'Copied!';
+        setTimeout(() => {
+          btn.classList.remove('is-copied');
+          if (span) span.textContent = orig;
+        }, 2000);
+      } catch (err) {
+        console.warn('[SFT Diag] Clipboard write failed:', err);
+      }
+    }
+
+    _openMultiScanReport() {
+      const payload = this._multiScanResults;
+      if (!payload?.results?.length || !ns.openReport) return;
+      // Reuse the report viewer by passing multi-scan comparison as part of
+      // the opts payload. The viewer renders it as an extra top-level section
+      // when present.
+      ns.openReport({
+        themeName: this.currentTheme,
+        themeColors: this.themeColors,
+        scanResults: this.scanResults,
+        componentResults: this.componentResults,
+        fixReport: this.fixReport,
+        patchSummary: this.patchSummary,
+        screenshotDataUrl: this.screenshotDataUrl,
+        multiScan: payload,
+      });
     }
 
     _showMultiScanEmpty(mode) {

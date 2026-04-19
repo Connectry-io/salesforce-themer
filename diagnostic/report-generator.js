@@ -26,6 +26,7 @@
    * @param {Object} opts.testingProgress
    * @param {Object} opts.patchSummary
    * @param {string} opts.screenshotDataUrl
+   * @param {Object} opts.multiScan - Optional multi-theme comparison payload
    */
   ns.openReport = async function openReport(opts) {
     const id = (crypto.randomUUID ? crypto.randomUUID() : String(Date.now() + Math.random().toString(36).slice(2)));

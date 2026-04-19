@@ -153,6 +153,7 @@
           ${patchSummary?.total ? `<div class="kpi-card"><div class="kpi-value ${patchSummary.enabled > 0 ? 'ok' : 'good'}">${patchSummary.enabled}/${patchSummary.total}</div><div class="kpi-label">Patches</div></div>` : ''}
         </div>
 
+        ${buildMultiScanSection(opts.multiScan)}
         ${buildScreenshotSection(screenshotDataUrl)}
         ${buildTokenGapsSection(scanResults, fixReport)}
         ${buildComponentSection(componentResults)}
@@ -253,6 +254,48 @@
   function esc(str) {
     if (!str) return '';
     return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  }
+
+  function buildMultiScanSection(multiScan) {
+    if (!multiScan?.results?.length) return '';
+    const mode = multiScan.mode;
+    const modeLabel = mode === 'presets' ? 'Presets' : mode === 'custom' ? 'My Themes' : 'All Themes';
+    const sorted = [...multiScan.results].sort((a, b) => {
+      const aP = (a.coverage ?? 0) + (a.componentHealth ?? 0);
+      const bP = (b.coverage ?? 0) + (b.componentHealth ?? 0);
+      return bP - aP;
+    });
+    const rows = sorted.map(r => {
+      const page = (r.coverage != null && r.componentHealth != null)
+        ? Math.round((r.coverage + r.componentHealth) / 2)
+        : (r.coverage ?? r.componentHealth ?? null);
+      const pageClass = page == null ? 'fail' : page >= 85 ? 'pass' : page >= 60 ? 'warn' : 'fail';
+      const tokenClass = r.coverage >= 100 ? 'pass' : r.coverage >= 95 ? 'warn' : 'fail';
+      const compClass = r.componentHealth >= 80 ? 'pass' : r.componentHealth >= 50 ? 'warn' : 'fail';
+      return `<tr>
+        <td style="padding:8px 12px;font-weight:500">${esc(r.name)}</td>
+        <td style="padding:8px 12px;text-align:right" class="cov-${pageClass}">${page != null ? page + '%' : '—'}</td>
+        <td style="padding:8px 12px;text-align:right" class="cov-${tokenClass}">${r.coverage != null ? r.coverage + '%' : '—'}</td>
+        <td style="padding:8px 12px;text-align:right" class="cov-${compClass}">${r.componentHealth != null ? r.componentHealth + '%' : '—'}</td>
+        <td style="padding:8px 12px;text-align:right;opacity:0.8">${r.gaps ?? '—'}</td>
+      </tr>`;
+    }).join('');
+    return `
+      <section class="report-section">
+        <h2 class="section-title">Theme Comparison — ${esc(modeLabel)} <span class="section-meta">${sorted.length} themes scanned against this page</span></h2>
+        <table style="width:100%;border-collapse:collapse;font-size:12px;margin-top:8px">
+          <thead>
+            <tr style="border-bottom:1px solid var(--cx-border);font-size:10.5px;text-transform:uppercase;letter-spacing:0.04em;color:var(--cx-text-3)">
+              <th style="padding:8px 12px;text-align:left">Theme</th>
+              <th style="padding:8px 12px;text-align:right">Page Health</th>
+              <th style="padding:8px 12px;text-align:right">Tokens</th>
+              <th style="padding:8px 12px;text-align:right">Components</th>
+              <th style="padding:8px 12px;text-align:right">Gaps</th>
+            </tr>
+          </thead>
+          <tbody>${rows}</tbody>
+        </table>
+      </section>`;
   }
 
   function buildScreenshotSection(screenshotDataUrl) {
