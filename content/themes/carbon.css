@@ -481,6 +481,115 @@
   color: inherit !important;
 }
 
+/* Active subtab contrast — SF paints .slds-is-active with a light bg +
+ * faint text that disappears against dark themes. Force a readable combo.
+ * Discovered via 2026-04-19 Tron Setup visual review. */
+.slds-tabs_default__item.slds-is-active > .slds-tabs_default__link,
+.slds-sub-tabs__item.slds-active > .tabHeader,
+.slds-sub-tabs__item.slds-active > a,
+.oneConsoleTabItem.slds-active > .tabHeader,
+.oneConsoleTabItem.active > .tabHeader {
+  color: #161616 !important;
+  text-shadow: none !important;
+  background-color: transparent !important;
+}
+
+.slds-sub-tabs__item.slds-active,
+.slds-sub-tabs__item.active,
+.oneConsoleTabItem.slds-active,
+.oneConsoleTabItem.active {
+  background-color: rgba(15, 98, 254, 0.12) !important;
+  border-color: #0f62fe !important;
+}
+
+/* Setup tree + left-nav hover — SF hardcodes a light hover bg that
+ * makes text invisible on dark themes. Every node type that the Setup
+ * sidebar uses: slds-tree__item (generic tree), setup-tree-node (LWC
+ * wrapper), .setupLeaf (leaf rows), .setupLink (link rows). */
+.slds-tree__item:hover,
+.slds-tree__item:focus,
+.slds-tree__item-label:hover,
+setup-tree-node:hover,
+.setup-tree-node:hover,
+.setupLeaf:hover,
+.setupLink:hover,
+li.slds-tree__item:hover > a,
+.slds-tree__item[aria-selected="true"] {
+  background-color: #e8e8e8 !important;
+  color: #161616 !important;
+}
+
+.slds-tree__item:hover *,
+.slds-tree__item-label:hover *,
+setup-tree-node:hover *,
+.setupLeaf:hover *,
+.setupLink:hover * {
+  color: #161616 !important;
+}
+
+/* Kill text-shadow on small interactive UI (buttons, dropdown items,
+ * listbox rows, tree items, tab headers). The theme's link-glow effect
+ * blurs small text unreadably — keep the glow for headings/hero text
+ * only, not dense UI copy. */
+.slds-button,
+.slds-button *,
+.slds-button_brand,
+.slds-button_neutral,
+.slds-button_icon,
+.slds-dropdown__item,
+.slds-dropdown__item *,
+.slds-listbox__item,
+.slds-listbox__item *,
+.slds-tree__item,
+.slds-tree__item *,
+.slds-tabs_default__link,
+.slds-sub-tabs__item a,
+.tabHeader,
+.setupLink,
+.uiOutputText,
+.lookup__menu,
+.lookup__menu *,
+.forceSearchDropdown,
+.forceSearchDropdown * {
+  text-shadow: none !important;
+}
+
+/* Global search dropdown (Setup search bar + force:search) — SF's
+ * picker uses .forceSearchDropdown / .lookup__menu / .forceActionsContainer.
+ * Ensure bg + text + row-hover match the theme so results are legible. */
+.forceSearchDropdown,
+.forceSearchSection,
+.forceActionsContainer,
+.lookup__menu,
+.search-setup-dropdown {
+  background-color: #f4f4f4 !important;
+  color: #161616 !important;
+  border-color: #e0e0e0 !important;
+}
+
+.forceSearchDropdown a,
+.forceSearchDropdown .primaryField,
+.forceSearchDropdown .secondaryField,
+.lookup__menu a,
+.lookup__item-label {
+  color: #161616 !important;
+}
+
+.forceSearchDropdown .secondaryField,
+.forceSearchDropdown .slds-text-body_small,
+.lookup__menu .slds-text-body_small,
+.lookup__item-meta {
+  color: #525252 !important;
+}
+
+.forceSearchDropdown li:hover,
+.forceSearchDropdown a:hover,
+.lookup__menu li:hover,
+.lookup__menu a:hover {
+  background-color: #e8e8e8 !important;
+  color: #161616 !important;
+}
+
 /* ─── Base ───────────────────────────────────────────────────────────────── */
 
 html,

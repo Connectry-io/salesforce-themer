@@ -37,7 +37,7 @@
   --lwc-colorTextWeak: #4dd0e1 !important;
   --lwc-colorTextLabel: #4dd0e1 !important;
   --lwc-colorTextPlaceholder: rgba(0, 229, 255, 0.25) !important;
-  --lwc-colorTextButtonBrand: #0a0a0f !important;
+  --lwc-colorTextButtonBrand: #e0f7fa !important;
   --lwc-colorTextLink: #00e5ff !important;
   --lwc-colorTextLinkHover: #80ffff !important;
   --lwc-colorBorder: rgba(0, 229, 255, 0.15) !important;
@@ -109,7 +109,7 @@
   --lwc-buttonColorBorderPrimary: #00e5ff !important;
 
   /* Legacy LWC — text (buttons, icons, actions) */
-  --lwc-colorTextButtonBrandHover: #0a0a0f !important;
+  --lwc-colorTextButtonBrandHover: #e0f7fa !important;
   --lwc-colorTextButtonBrandDisabled: #1c8fa0 !important;
   --lwc-colorTextButtonDefault: #4dd0e1 !important;
   --lwc-colorTextButtonDefaultHover: #4dd0e1 !important;
@@ -260,14 +260,14 @@
   --slds-c-radio-color-border: rgba(0, 229, 255, 0.25) !important;
   --slds-c-radio-color-background-checked: #00e5ff !important;
   --slds-c-radio-color-border-checked: #00e5ff !important;
-  --slds-c-radio-mark-color-foreground: #0a0a0f !important;
+  --slds-c-radio-mark-color-foreground: #e0f7fa !important;
   --slds-c-radio-color-border-focus: #00e5ff !important;
   --slds-c-radio-shadow-focus: 0 0 0 3px rgba(0, 229, 255, 0.35) !important;
   --slds-c-checkbox-color-background: #05070a !important;
   --slds-c-checkbox-color-border: rgba(0, 229, 255, 0.25) !important;
   --slds-c-checkbox-color-background-checked: #00e5ff !important;
   --slds-c-checkbox-color-border-checked: #00e5ff !important;
-  --slds-c-checkbox-mark-color-foreground: #0a0a0f !important;
+  --slds-c-checkbox-mark-color-foreground: #e0f7fa !important;
   --slds-c-checkbox-color-border-focus: #00e5ff !important;
   --slds-c-checkbox-shadow-focus: 0 0 0 3px rgba(0, 229, 255, 0.35) !important;
 
@@ -280,7 +280,7 @@
 
   /* Component hooks — Avatar */
   --slds-c-avatar-text-color: #e0f7fa !important;
-  --slds-c-avatar-initials-text-color: #0a0a0f !important;
+  --slds-c-avatar-initials-text-color: #e0f7fa !important;
 
   /* Legacy LWC — Path chevrons (Opportunity stages etc.) */
   --lwc-colorBackgroundPathIncomplete: #0f1520 !important;
@@ -289,7 +289,7 @@
   --lwc-colorBackgroundPathCompleteHover: rgba(0, 229, 255, 0.1) !important;
   --lwc-colorBackgroundPathCurrent: #00e5ff !important;
   --lwc-colorBorderPathCurrent: #00e5ff !important;
-  --lwc-colorTextPathCurrent: #0a0a0f !important;
+  --lwc-colorTextPathCurrent: #e0f7fa !important;
 
   /* Component hooks — Accordion */
   --slds-c-accordion-heading-color: #e0f7fa !important;
@@ -327,8 +327,8 @@
   --slds-c-checkbox-toggle-color-border-checked: #00e5ff !important;
   --slds-c-checkbox-toggle-color-background-checked: #00e5ff !important;
   --slds-c-checkbox-toggle-color-background-checked-hover: #00b8cc !important;
-  --slds-c-checkbox-toggle-switch-color-background-checked: #0a0a0f !important;
-  --slds-c-checkbox-toggle-mark-color-foreground: #0a0a0f !important;
+  --slds-c-checkbox-toggle-switch-color-background-checked: #e0f7fa !important;
+  --slds-c-checkbox-toggle-mark-color-foreground: #e0f7fa !important;
   --lwc-colorBorderToggleChecked: #00e5ff !important;
   --slds-c-checkbox-toggle-color-background-checked-focus: #00e5ff !important;
   --lwc-colorBackgroundToggleDisabled: #0f1520 !important;
@@ -377,10 +377,10 @@
 
   /* Component hooks — Avatar hover + inverse */
   --slds-c-avatar-text-color-hover: #e0f7fa !important;
-  --slds-c-avatar-initials-text-color-hover: #0a0a0f !important;
-  --slds-c-avatar-inverse-text-color: #0a0a0f !important;
-  --slds-c-avatar-initials-inverse-text-color: #0a0a0f !important;
-  --slds-c-avatar-initials-inverse-text-color-hover: #0a0a0f !important;
+  --slds-c-avatar-initials-text-color-hover: #e0f7fa !important;
+  --slds-c-avatar-inverse-text-color: #e0f7fa !important;
+  --slds-c-avatar-initials-inverse-text-color: #e0f7fa !important;
+  --slds-c-avatar-initials-inverse-text-color-hover: #e0f7fa !important;
 
   /* Component hooks — Pill error states */
   --slds-c-pill-error-color-border: #ff5555 !important;
@@ -416,7 +416,7 @@
 
   /* Path chevron — hover + stage-specific states (B7 added the basics) */
   --lwc-colorBorderPathCurrentHover: #00b8cc !important;
-  --lwc-colorTextPathCurrentHover: #0a0a0f !important;
+  --lwc-colorTextPathCurrentHover: #e0f7fa !important;
   --lwc-colorBackgroundPathActive: #00e5ff !important;
   --lwc-colorBackgroundPathActiveHover: #00b8cc !important;
   --lwc-colorBackgroundPathLost: #ff5555 !important;
@@ -479,6 +479,115 @@
 .welcome-subtitle,
 .topic-text {
   color: inherit !important;
+}
+
+/* Active subtab contrast — SF paints .slds-is-active with a light bg +
+ * faint text that disappears against dark themes. Force a readable combo.
+ * Discovered via 2026-04-19 Tron Setup visual review. */
+.slds-tabs_default__item.slds-is-active > .slds-tabs_default__link,
+.slds-sub-tabs__item.slds-active > .tabHeader,
+.slds-sub-tabs__item.slds-active > a,
+.oneConsoleTabItem.slds-active > .tabHeader,
+.oneConsoleTabItem.active > .tabHeader {
+  color: #e0f7fa !important;
+  text-shadow: none !important;
+  background-color: transparent !important;
+}
+
+.slds-sub-tabs__item.slds-active,
+.slds-sub-tabs__item.active,
+.oneConsoleTabItem.slds-active,
+.oneConsoleTabItem.active {
+  background-color: rgba(0, 229, 255, 0.1) !important;
+  border-color: #00e5ff !important;
+}
+
+/* Setup tree + left-nav hover — SF hardcodes a light hover bg that
+ * makes text invisible on dark themes. Every node type that the Setup
+ * sidebar uses: slds-tree__item (generic tree), setup-tree-node (LWC
+ * wrapper), .setupLeaf (leaf rows), .setupLink (link rows). */
+.slds-tree__item:hover,
+.slds-tree__item:focus,
+.slds-tree__item-label:hover,
+setup-tree-node:hover,
+.setup-tree-node:hover,
+.setupLeaf:hover,
+.setupLink:hover,
+li.slds-tree__item:hover > a,
+.slds-tree__item[aria-selected="true"] {
+  background-color: rgba(0,229,255,0.06) !important;
+  color: #e0f7fa !important;
+}
+
+.slds-tree__item:hover *,
+.slds-tree__item-label:hover *,
+setup-tree-node:hover *,
+.setupLeaf:hover *,
+.setupLink:hover * {
+  color: #e0f7fa !important;
+}
+
+/* Kill text-shadow on small interactive UI (buttons, dropdown items,
+ * listbox rows, tree items, tab headers). The theme's link-glow effect
+ * blurs small text unreadably — keep the glow for headings/hero text
+ * only, not dense UI copy. */
+.slds-button,
+.slds-button *,
+.slds-button_brand,
+.slds-button_neutral,
+.slds-button_icon,
+.slds-dropdown__item,
+.slds-dropdown__item *,
+.slds-listbox__item,
+.slds-listbox__item *,
+.slds-tree__item,
+.slds-tree__item *,
+.slds-tabs_default__link,
+.slds-sub-tabs__item a,
+.tabHeader,
+.setupLink,
+.uiOutputText,
+.lookup__menu,
+.lookup__menu *,
+.forceSearchDropdown,
+.forceSearchDropdown * {
+  text-shadow: none !important;
+}
+
+/* Global search dropdown (Setup search bar + force:search) — SF's
+ * picker uses .forceSearchDropdown / .lookup__menu / .forceActionsContainer.
+ * Ensure bg + text + row-hover match the theme so results are legible. */
+.forceSearchDropdown,
+.forceSearchSection,
+.forceActionsContainer,
+.lookup__menu,
+.search-setup-dropdown {
+  background-color: #0d1117 !important;
+  color: #e0f7fa !important;
+  border-color: rgba(0, 229, 255, 0.15) !important;
+}
+
+.forceSearchDropdown a,
+.forceSearchDropdown .primaryField,
+.forceSearchDropdown .secondaryField,
+.lookup__menu a,
+.lookup__item-label {
+  color: #e0f7fa !important;
+}
+
+.forceSearchDropdown .secondaryField,
+.forceSearchDropdown .slds-text-body_small,
+.lookup__menu .slds-text-body_small,
+.lookup__item-meta {
+  color: #4dd0e1 !important;
+}
+
+.forceSearchDropdown li:hover,
+.forceSearchDropdown a:hover,
+.lookup__menu li:hover,
+.lookup__menu a:hover {
+  background-color: rgba(0,229,255,0.06) !important;
+  color: #e0f7fa !important;
 }
 
 /* ─── Base ───────────────────────────────────────────────────────────────── */
@@ -780,7 +889,7 @@ one-app-nav-bar-item-root.slds-is-active .slds-context-bar__label-action,
 .slds-button--brand {
   background-color: transparent !important;
   border: 1px solid #00e5ff !important;
-  color: #0a0a0f !important;
+  color: #e0f7fa !important;
   text-shadow: 0 0 8px rgba(0, 229, 255, 0.5) !important;
   box-shadow: 0 0 10px rgba(0, 229, 255, 0.15), inset 0 0 10px rgba(0, 229, 255, 0.05) !important;
 }
@@ -1292,7 +1401,7 @@ body .slds-path__item.slds-is-incomplete.slds-is-active .slds-path__link,
 body .slds-path__item.slds-is-incomplete.slds-is-active a.slds-path__link,
 body .slds-path__item [aria-selected="true"] {
   background-color: #00b8cc !important;
-  color: #0a0a0f !important;
+  color: #e0f7fa !important;
 }
 
 body .slds-path__item.slds-is-active::before,
@@ -1368,12 +1477,12 @@ body .slds-path__item.slds-is-lost .slds-path__title {
 .slds-path__item.slds-is-complete .slds-path__title,
 .slds-path__item.slds-is-current .slds-path__title,
 .slds-path__item.slds-is-active .slds-path__title {
-  color: #0a0a0f !important;
+  color: #e0f7fa !important;
 }
 
 /* Path stage icon (checkmark on completed) */
 .slds-path__stage {
-  color: #0a0a0f !important;
+  color: #e0f7fa !important;
 }
 
 /* ─── Related List Cards (right sidebar) ─────────────────────────────────── */

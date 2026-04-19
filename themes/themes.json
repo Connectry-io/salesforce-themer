@@ -647,7 +647,7 @@
         "buttonBrandBg": "transparent",
         "buttonBrandBorder": "#00e5ff",
         "buttonBrandHover": "rgba(0, 229, 255, 0.1)",
-        "buttonBrandText": "#0a0a0f",
+        "buttonBrandText": "#e0f7fa",
         "buttonNeutralBg": "transparent",
         "buttonNeutralBorder": "rgba(0, 229, 255, 0.2)",
         "buttonNeutralHover": "rgba(0, 229, 255, 0.06)",
