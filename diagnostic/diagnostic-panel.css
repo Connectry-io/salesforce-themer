@@ -42,33 +42,33 @@
   --dp-bar-track: rgba(255, 255, 255, 0.06);
 }
 
-/* ─── Light mode — cool-tinted palette with real card contrast ──────── */
+/* ─── Light mode — cool-tinted, stronger contrast so cards actually read ─ */
 :host(.diag-light) {
-  --dp-bg: rgba(250, 251, 254, 0.98);
-  --dp-surface: rgba(15, 23, 42, 0.045);
-  --dp-surface-hover: rgba(15, 23, 42, 0.08);
-  --dp-border: rgba(15, 23, 42, 0.14);
-  --dp-border-row: rgba(15, 23, 42, 0.07);
+  --dp-bg: rgba(244, 247, 252, 0.98);
+  --dp-surface: #ffffff;
+  --dp-surface-hover: rgba(15, 23, 42, 0.05);
+  --dp-border: rgba(15, 23, 42, 0.16);
+  --dp-border-row: rgba(15, 23, 42, 0.08);
   --dp-text: #0f172a;
-  --dp-text-2: #475569;
+  --dp-text-2: #334155;
   --dp-text-3: #64748b;
   --dp-shadow:
-    0 24px 80px rgba(15, 23, 42, 0.08),
-    0 8px 24px rgba(15, 23, 42, 0.06),
-    0 0 0 1px rgba(15, 23, 42, 0.08);
-  --dp-accent: #4a6fa5;
-  --dp-accent-bg: rgba(74, 111, 165, 0.12);
-  --dp-accent-border: rgba(74, 111, 165, 0.3);
-  --dp-accent-text: #2d4a73;
-  --dp-good: #16a34a;
-  --dp-good-bg: rgba(22, 163, 74, 0.12);
-  --dp-warn: #ca8a04;
-  --dp-warn-bg: rgba(202, 138, 4, 0.12);
-  --dp-bad: #dc2626;
-  --dp-bad-bg: rgba(220, 38, 38, 0.12);
-  --dp-swatch-border: rgba(15, 23, 42, 0.16);
-  --dp-scrollbar: rgba(15, 23, 42, 0.2);
-  --dp-bar-track: rgba(15, 23, 42, 0.08);
+    0 30px 90px rgba(15, 23, 42, 0.16),
+    0 12px 32px rgba(15, 23, 42, 0.08),
+    0 0 0 1px rgba(15, 23, 42, 0.1);
+  --dp-accent: #3d5e8e;
+  --dp-accent-bg: rgba(61, 94, 142, 0.12);
+  --dp-accent-border: rgba(61, 94, 142, 0.32);
+  --dp-accent-text: #1e3a6b;
+  --dp-good: #15803d;
+  --dp-good-bg: rgba(21, 128, 61, 0.12);
+  --dp-warn: #b45309;
+  --dp-warn-bg: rgba(180, 83, 9, 0.12);
+  --dp-bad: #b91c1c;
+  --dp-bad-bg: rgba(185, 28, 28, 0.12);
+  --dp-swatch-border: rgba(15, 23, 42, 0.2);
+  --dp-scrollbar: rgba(15, 23, 42, 0.24);
+  --dp-bar-track: rgba(15, 23, 42, 0.1);
 }
 
 *,
@@ -450,6 +450,95 @@
   overflow: hidden;
   text-overflow: ellipsis;
   max-width: 100%;
+}
+
+/* ─── Post-scan collapsed summary (replaces scan controls after scan) ── */
+
+.diag-scan-bar--collapsed {
+  padding: 8px 14px;
+}
+
+.diag-scan-summary {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  background: var(--dp-surface);
+  border: 1px solid var(--dp-border);
+  border-radius: 8px;
+  color: var(--dp-text-2);
+  font-family: inherit;
+  font-size: 11px;
+  cursor: pointer;
+  text-align: left;
+  transition: all 150ms ease;
+}
+
+.diag-scan-summary:hover {
+  background: var(--dp-surface-hover);
+  border-color: var(--dp-accent-border);
+  color: var(--dp-text);
+}
+
+.diag-scan-summary-icon {
+  display: inline-flex;
+  color: var(--dp-good);
+  flex-shrink: 0;
+}
+
+.diag-scan-summary-icon svg {
+  width: 14px;
+  height: 14px;
+}
+
+.diag-scan-summary-main {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  flex: 1;
+  min-width: 0;
+  line-height: 1.2;
+}
+
+.diag-scan-summary-primary {
+  font-weight: 600;
+  color: var(--dp-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.diag-scan-summary-sub {
+  font-size: 10px;
+  color: var(--dp-text-3);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.diag-scan-summary-cam {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 4px;
+  background: var(--dp-accent-bg);
+  color: var(--dp-accent-text);
+  flex-shrink: 0;
+}
+
+.diag-scan-summary-cam svg {
+  width: 12px;
+  height: 12px;
+}
+
+.diag-scan-summary-chevron {
+  font-size: 12px;
+  color: var(--dp-text-3);
+  flex-shrink: 0;
+  opacity: 0.6;
 }
 
 /* ─── Scan bar layout ──────────────────────────────────────────────────── */

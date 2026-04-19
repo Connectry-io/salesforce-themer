@@ -59,6 +59,7 @@
       this.activeTab = 'scan';       // 'scan' | 'validate' — B29 tab split
       this.scanMode = 'current';     // 'current' | 'presets' | 'mine' | 'all'
       this._advancedOpen = false;    // user-toggled Advanced disclosure state
+      this._scanBarCollapsed = false; // auto-collapses after a scan completes
       this._isPro = false;           // Pro-tier flag — gates screenshot feature until backend is finalized
       this._panelTheme = 'dark';     // 'dark' | 'light'
       this._configuredThemeName = null;
@@ -587,6 +588,28 @@
 
       const pageType = ns.detectPageType?.();
       const pageLabel = pageType ? ` · ${pageType.label}` : '';
+
+      // Post-scan: show a one-line summary bar instead of the full controls.
+      // Click expands back to the full scan controls (for re-scan).
+      if (this.hasScanned && this._scanBarCollapsed) {
+        const themeName = this._escapeHtml(this.themeDisplayName || this.currentTheme || 'theme');
+        const camBadge = this.includeScreenshot
+          ? `<span class="diag-scan-summary-cam" title="Screenshot included">${ICONS.camera}</span>`
+          : '';
+        const page = pageType ? this._escapeHtml(pageType.label) : 'this page';
+        return `
+          <div class="diag-scan-bar diag-scan-bar--collapsed">
+            <button class="diag-scan-summary" data-action="expandScanBar" title="Click to re-scan or change options">
+              <span class="diag-scan-summary-icon">${ICONS.scan}</span>
+              <span class="diag-scan-summary-main">
+                <span class="diag-scan-summary-primary">Scan · ${page}</span>
+                <span class="diag-scan-summary-sub">current theme · ${themeName}</span>
+              </span>
+              ${camBadge}
+              <span class="diag-scan-summary-chevron">&#8617;</span>
+            </button>
+          </div>`;
+      }
 
       // Scan tab — idle state. Walk-through status is Validate-tab-only.
       const modeSubLabels = {
@@ -1671,6 +1694,11 @@
           const cb = this.shadow?.querySelector('.diag-screenshot-switch input[type="checkbox"]');
           if (cb) cb.checked = this.includeScreenshot;
         }
+        else if (action === 'expandScanBar') {
+          this._scanBarCollapsed = false;
+          const scanBar = this.shadow?.querySelector('.diag-scan-bar');
+          if (scanBar) scanBar.outerHTML = this._scanBarHTML();
+        }
         else if (action === 'setScanMode') {
           const mode = btn.dataset.mode;
           if (['current', 'presets', 'mine', 'all'].includes(mode)) {
@@ -1835,6 +1863,9 @@
 
       this.hasScanned = true;
       this._lastScanTime = new Date();
+      // Auto-collapse the scan controls into a summary bar so results have
+      // the room. User can click the summary to re-expand for another scan.
+      this._scanBarCollapsed = true;
 
       // Wait for minimum animation time so heartbeat is visible
       const elapsed = Date.now() - scanStart;

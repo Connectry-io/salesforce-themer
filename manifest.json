@@ -99,6 +99,9 @@
         "effects/presets.js",
         "favicons/*.svg",
         "diagnostic/diagnostic-panel.css",
+        "diagnostic/report.html",
+        "diagnostic/report.js",
+        "diagnostic/report.css",
         "intelligence/bundled/global.css",
         "dev/intel-test.html",
         "lib/intelligence-client.js"
