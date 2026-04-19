@@ -566,7 +566,7 @@
           <div class="diag-scan-row">
             <button class="diag-scan-btn diag-scan-btn--primary" data-action="scanAll" style="flex:1">
               ${ICONS.scan}
-              <span>${this.hasScanned ? 'Re-Scan' : 'Scan'}${pageLabel}</span>
+              <span>Scan${pageLabel}</span>
             </button>
           </div>
           <div class="diag-scan-row" style="margin-top:8px;gap:8px;align-items:center">
