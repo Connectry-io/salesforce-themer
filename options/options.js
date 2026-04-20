@@ -4864,6 +4864,53 @@
     renderGuideEffectsGrid();
     _bindGuideTypeDemo();
     _bindGuideFaviconDemo();
+    _bindGuideJumpnav();
+  }
+
+  /**
+   * Section jump-nav pills under the hero. Clicks are handled natively
+   * (anchor href + CSS scroll-behavior:smooth). This function ONLY adds
+   * the active-state highlighting as the user scrolls, via
+   * IntersectionObserver against each [id^="guide-"] section.
+   */
+  function _bindGuideJumpnav() {
+    const pills = Array.from(document.querySelectorAll('.guide-jumpnav-pill'));
+    if (!pills.length) return;
+    const sections = pills
+      .map(p => document.querySelector(p.getAttribute('href')))
+      .filter(Boolean);
+    if (!sections.length) return;
+
+    // Map section id → pill, so the observer can flip is-active without
+    // re-querying on every scroll tick.
+    const pillByHash = {};
+    pills.forEach(p => { pillByHash[p.getAttribute('href').slice(1)] = p; });
+
+    // rootMargin pushes the "is in view" trigger to the top half of the
+    // viewport so the pill flips when the section header crosses ~30%
+    // from the top — feels right rather than waiting for the whole
+    // section to be visible.
+    const obs = new IntersectionObserver((entries) => {
+      // Find the entry that's most-visible in the viewport's top half
+      const visible = entries
+        .filter(e => e.isIntersecting)
+        .sort((a, b) => b.intersectionRatio - a.intersectionRatio);
+      if (!visible.length) return;
+      const id = visible[0].target.id;
+      pills.forEach(p => p.classList.toggle('is-active',
+        p.getAttribute('href') === `#${id}`));
+    }, {
+      rootMargin: '-15% 0px -55% 0px',
+      threshold: [0, 0.25, 0.5, 0.75, 1],
+    });
+
+    sections.forEach(s => obs.observe(s));
+
+    // Click also fires telemetry so we know which sections people jump to
+    pills.forEach(p => p.addEventListener('click', () => {
+      const target = (p.getAttribute('href') || '').slice(1);
+      self.ConnectryIntel?.track?.('guide_jumpnav_click', { target });
+    }));
   }
 
   /**

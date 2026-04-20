@@ -438,11 +438,20 @@
         <div class="guide-hero">
           <h1 class="guide-hero-title">How Salesforce Themer Works</h1>
           <p class="guide-hero-sub">Everything you can customize, illustrated. Explore each section below, or jump to the Builder to make your own.</p>
+          <!-- Section jump nav — pills auto-highlight current section
+               on scroll. Click smooth-scrolls to that section. -->
+          <nav class="guide-jumpnav" aria-label="Guide sections">
+            <a class="guide-jumpnav-pill" href="#guide-anatomy">Anatomy</a>
+            <a class="guide-jumpnav-pill" href="#guide-colors">Colors</a>
+            <a class="guide-jumpnav-pill" href="#guide-effects">Effects</a>
+            <a class="guide-jumpnav-pill" href="#guide-typography">Typography</a>
+            <a class="guide-jumpnav-pill" href="#guide-favicons">Favicons</a>
+          </nav>
         </div>
       </section>
 
       <!-- Section 1: Anatomy of a Theme Card -->
-      <section class="cx-section">
+      <section class="cx-section" id="guide-anatomy">
         <div class="cx-section-header">
           <div>
             <h2 class="cx-section-title">Anatomy of a Theme Card</h2>
@@ -503,7 +512,7 @@
       </section>
 
       <!-- Section 2: Inside the color swatch — expands Anatomy item 1 -->
-      <section class="cx-section">
+      <section class="cx-section" id="guide-colors">
         <div class="cx-section-header">
           <div>
             <h2 class="cx-section-title">Inside the color swatch</h2>
@@ -595,7 +604,7 @@
       </section>
 
       <!-- Section 3: Effects, illustrated (the live previews live here) -->
-      <section class="cx-section">
+      <section class="cx-section" id="guide-effects">
         <div class="cx-section-header">
           <div>
             <h2 class="cx-section-title">Effects, illustrated</h2>
@@ -612,8 +621,8 @@
         </p>
       </section>
 
-      <!-- Section 3: Typography — interactive demo using Builder styling -->
-      <section class="cx-section">
+      <!-- Section 4: Typography — interactive demo using Builder styling -->
+      <section class="cx-section" id="guide-typography">
         <div class="cx-section-header">
           <div>
             <h2 class="cx-section-title">Typography</h2>
@@ -771,8 +780,8 @@
         </div>
       </section>
 
-      <!-- Section 4: Favicons — pick or design, applies live to your tab -->
-      <section class="cx-section">
+      <!-- Section 5: Favicons — pick or design, applies live to your tab -->
+      <section class="cx-section" id="guide-favicons">
         <div class="cx-section-header">
           <div>
             <h2 class="cx-section-title">Favicons</h2>

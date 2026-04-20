@@ -5070,6 +5070,55 @@ td.upgrade-compare-col-premium,
   /* No max-width: let it fill the row so it doesn't orphan a fragment on line 2 */
 }
 
+/* Section jump nav under the hero — inline pills that smooth-scroll to
+   each Guide section + auto-highlight the active one as the user
+   scrolls. Lightweight TOC for a long page. */
+.guide-jumpnav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: var(--cx-space-4);
+}
+
+.guide-jumpnav-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 14px;
+  background: var(--cx-surface);
+  border: 1px solid var(--cx-border);
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--cx-text-muted);
+  text-decoration: none;
+  transition: background-color var(--cx-transition), color var(--cx-transition), border-color var(--cx-transition);
+}
+
+.guide-jumpnav-pill:hover {
+  background: color-mix(in srgb, var(--cx-accent) 8%, var(--cx-surface));
+  color: var(--cx-text);
+  border-color: color-mix(in srgb, var(--cx-accent) 30%, var(--cx-border));
+}
+
+.guide-jumpnav-pill.is-active {
+  background: var(--cx-accent);
+  color: #ffffff;
+  border-color: var(--cx-accent);
+}
+
+/* Smooth-scroll respects the OS reduced-motion setting automatically */
+html { scroll-behavior: smooth; }
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+}
+
+/* Offset for anchor scroll — the sticky header would otherwise hide the
+   top of each landed section. scroll-margin-top lifts the target by the
+   header's height. */
+.cx-tabpanel [id^="guide-"] {
+  scroll-margin-top: calc(var(--cx-header-height) + 16px);
+}
+
 /* (Removed: .guide-coming-soon badges — all replaced with Premium badges) */
 
 /* ─── Anatomy section: side-by-side, interactive ─────────────────────────
