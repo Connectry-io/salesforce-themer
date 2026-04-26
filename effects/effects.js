@@ -190,12 +190,6 @@ body.sf-themer-fx-hover .slds-popover {
     if (ir && ir.cssRules) {
       const imp = { important: true };
       if (ir.cssPrelude) css += `\n/* ─── borderEffect=shimmer prelude ─── */\n${ir.cssPrelude}\n`;
-      // Lift overflow:clip on card wrappers — the home-page record cards wrap
-      // .slds-card in .forceBaseCard which has overflow:clip, hiding the
-      // shimmer ::before that bleeds at the top edge. Without this the
-      // shimmer is invisible on home-page tiles even though it renders fine
-      // on record-detail pages.
-      css += `\nbody.sf-themer-fx-shimmer .forceBaseCard,\nbody.sf-themer-fx-shimmer .slds-card_boundary,\nbody.sf-themer-fx-shimmer .forceRecordCard,\nbody.sf-themer-fx-shimmer .forceRelatedListSingleContainer { overflow: visible !important; }\n`;
       const prefix = 'body.sf-themer-fx-shimmer';
       const expand = (suffix) => CARD_SEL.split(',')
         .map(s => `${prefix} ${s.trim()}${suffix}`)
@@ -206,6 +200,14 @@ body.sf-themer-fx-hover .slds-popover {
         if (rule.selectorRole === 'cardShimmerEdge')      sel = expand('::before');
         if (sel) css += `\n${sel} {\n${engine.cssFromDeclarations(rule.declarations, imp)}\n}\n`;
       }
+      // Lift overflow:clip on the OUTER card wrappers ONLY (not the inner
+      // .slds-card / .forceRecordCard / .forceRelatedListSingleContainer
+      // that engine targets — those need overflow:clip to contain the
+      // shimmer line within the card box). The shimmer ::before sits at the
+      // top edge of the inner card and bleeds 1px outside on home-page
+      // tiles where .forceBaseCard wraps with rounded corners + clip.
+      // EMITTED LAST so cascade order beats any later !important conflicts.
+      css += `\nbody.sf-themer-fx-shimmer .forceBaseCard,\nbody.sf-themer-fx-shimmer .slds-card_boundary { overflow: visible !important; }\n`;
     }
   } else if (_borderStyle === 'gradient') {
     const mergedConfig = {
@@ -258,13 +260,13 @@ body.sf-themer-fx-hover .slds-popover {
     const ir = engine && engine.renderRules('aurora', config, accent, { scale: 1.0, isDark });
     const blobs = ir && ir.runtimeConfig && ir.runtimeConfig.aurora && ir.runtimeConfig.aurora.blobs;
     const auroraOpacity = (ir && ir.runtimeConfig && ir.runtimeConfig.aurora && ir.runtimeConfig.aurora.opacity) || 0.35;
+    const themeBg = (themeColors && themeColors.background) || (isDark ? '#1a1a1a' : '#ffffff');
     if (blobs && blobs.length) {
       // Convert each blob's hex color + position into a radial-gradient
       // layer. color-mix bakes the opacity into the color so the gradient
-      // fades naturally. Radius from runtimeConfig is in normalized canvas
-      // coords (0..1 of max(w,h)); we approximate with vmax for CSS.
-      // The blob alpha is ~0.4-0.6 at the center, fading to transparent.
-      const blobAlphaPct = Math.round(Math.min(1, auroraOpacity * 1.6) * 100);
+      // fades naturally. Bump alpha (×2.4) so the blobs read clearly over
+      // the page bg — the previous ×1.6 was too subtle on light themes.
+      const blobAlphaPct = Math.round(Math.min(1, auroraOpacity * 2.4) * 100);
       const layers = blobs.map(b => {
         const xPct = Math.round((b.x || 0.5) * 100);
         const yPct = Math.round((b.y || 0.5) * 100);
@@ -272,14 +274,22 @@ body.sf-themer-fx-hover .slds-popover {
         return `radial-gradient(circle at ${xPct}% ${yPct}%, color-mix(in srgb, ${b.color} ${blobAlphaPct}%, transparent) 0%, transparent ${rVmax}%)`;
       }).join(',\n    ');
 
+      // Use the `background` shorthand (not just background-image) so we
+      // overwrite any earlier rule that set background-color alone — most
+      // notably the engine's `html, body, .desktop { background-color: ... }`
+      // which doesn't reset background-image, but if a SF stylesheet later
+      // in the cascade uses `background:` shorthand it would nuke our image.
+      // The shorthand here re-asserts both the gradient AND the base color
+      // in one declaration, so nothing downstream can split them.
       css += `
 /* ─── Aurora Background (intensity ${(config.auroraIntensity || 'medium')}, CSS gradient on body) ─── */
 body.sf-themer-fx-aurora,
 body.sf-themer-fx-aurora .desktop {
-  background-image:
-    ${layers} !important;
-  background-attachment: fixed !important;
-  background-size: 100% 100% !important;
+  background:
+    ${layers},
+    ${themeBg} !important;
+  background-attachment: fixed, fixed, fixed, scroll !important;
+  background-size: 100% 100%, 100% 100%, 100% 100%, auto !important;
   background-repeat: no-repeat !important;
 }
 `;

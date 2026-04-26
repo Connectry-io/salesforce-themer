@@ -741,29 +741,31 @@ body .lookup__menu a:hover * {
   color: #4dd0e1 !important;
 }
 
-/* Icon background defaults — clear --slds-c-icon-color-background ONLY on
- * search/input/lookup contexts where SF would otherwise paint a stray
- * accent bubble behind the icon. CRITICAL: do NOT clear this at :root —
- * standard object icons (.slds-icon-standard-task, -event, -call, -email,
- * etc.) use this token (with their own colored fallback like
- *   var(--slds-c-icon-color-background, rgb(59, 167, 85))
- * ) to render the colored square behind the white symbol in places like the
- * activity composer. A :root override turns the green/blue/orange squares
- * transparent, leaving only the white inverse symbol invisible on the
- * neutral button. Scope tightly. */
-.slds-input__icon,
-.slds-input-has-icon,
-.slds-input-has-icon .slds-icon,
-.slds-input-has-icon-group,
-.slds-form-element__icon,
-.forceSearchInputContainer,
-.forceSearchInputContainer .slds-icon,
-.globalSearchContainer,
-.globalSearchContainer .slds-icon,
-.slds-lookup__menu,
-.slds-lookup__menu .slds-icon {
+/* Icon background defaults — clear --slds-c-icon-color-background globally
+ * to prevent stray accent bubbles behind generic icons (search magnifying
+ * glass, global header buttons, setup gear, etc.).
+ *
+ * BUT: standard / custom / action icon containers (.slds-icon-standard-task,
+ * .slds-icon-action-call, .slds-icon-custom-*) WANT a colored square
+ * background — that's the whole point of those icon families (green for task,
+ * blue for call, etc.). Their inner span uses a CSS variable with an inline
+ * color fallback:
+ *   style="--sds-c-icon-color-background: var(--slds-c-icon-color-background, rgb(59, 167, 85))"
+ * The fallback only kicks in when --slds-c-icon-color-background is INVALID
+ * (not when it's set to "transparent"). Setting it to the initial value on
+ * those specific containers makes var() see it as guaranteed-invalid → uses the
+ * inline fallback color. Best of both worlds: generic icons stay clean,
+ * standard/custom/action icons keep their SF brand colors. */
+:root {
   --slds-c-icon-color-background: transparent !important;
   --sds-c-icon-color-background: transparent !important;
+}
+
+[class*="slds-icon-standard-"],
+[class*="slds-icon-custom-"],
+[class*="slds-icon-action-"] {
+  --slds-c-icon-color-background: initial !important;
+  --sds-c-icon-color-background: initial !important;
 }
 
 /* Same scoping note as above: do NOT include bare .slds-icon_container —

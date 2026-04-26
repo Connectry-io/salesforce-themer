@@ -677,7 +677,15 @@ function buildParticlesRules(intensityLevel, style, accentHex, config, scale) {
   const s = typeof scale === 'number' ? scale : 1.0;
   // config is the full effects config — lets callers pass overrides
   // (particleColor, particleDensity, particleSpeed, particleOpacity).
-  const color   = (config && config.particleColor)   || accentHex || '#ffffff';
+  // Snow particles default to white — gives the classic snowflake look AND
+  // makes them invisible on white card surfaces (so they read as "behind
+  // cards" without needing low z-index, which would get occluded by SF's
+  // wrapper layer stack). Other particle styles (rain, embers, matrix, dots)
+  // continue to use the theme accent so they pop. Caller can always override
+  // via config.particleColor.
+  const color   = (config && config.particleColor)
+                  || (style === 'snow' ? '#ffffff' : accentHex)
+                  || '#ffffff';
   const density = (config && config.particleDensity) || level.density;
   const speed   = (config && config.particleSpeed)   || level.speed;
   const opacity = (config && config.particleOpacity) || (level.opacity * s);
