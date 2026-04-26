@@ -107,6 +107,37 @@
     };
   }
 
+  const FONT_LABELS = {
+    'system-ui': 'System Default',
+    'neo-grotesque': 'Neo-Grotesque',
+    'humanist': 'Humanist',
+    'geometric': 'Geometric',
+    'classic-serif': 'Classic Serif',
+    'ibm-plex': 'IBM Plex Sans',
+  };
+  const SIZE_LABELS = { compact: 'Sm', normal: 'Md', comfortable: 'Lg', large: 'XL' };
+
+  // Builds the "Aa Font · Size · LH/LS" row used on every theme card.
+  // The Aa preview always uses the theme's real font stack so the typography
+  // is visible at a glance — this is the row Noland kept seeing rendered as
+  // "System Default" for non-default themes (v2.7.81 bug).
+  function buildTypeRowHtml(typography) {
+    const t = typography || {};
+    const key = t.fontFamily || 'system-ui';
+    const stack = FONT_STACKS[key] || FONT_STACKS['system-ui'];
+    const label = FONT_LABELS[key] || 'System Default';
+    const sizeLabel = SIZE_LABELS[t.sizePreset || 'normal'] || 'Md';
+    const lh = t.lineHeight || 1.375;
+    const lsRaw = t.letterSpacing == null ? 0 : t.letterSpacing;
+    const ls = lsRaw === 0 ? '0' : String(lsRaw);
+    const fontStyle = key !== 'system-ui' ? ` style="font-family:${stack}"` : '';
+    return `
+      <div class="theme-card-type-row">
+        <span class="theme-card-type-icon"${fontStyle}>Aa</span>
+        <span class="theme-card-type-text">${label} · ${sizeLabel} · ${lh}/${ls}</span>
+      </div>`;
+  }
+
   // ─── Shared preview component ────────────────────────────────────────────
   //
   // Reusable Salesforce page mockup used by:
@@ -645,10 +676,7 @@
           </div>
           <div class="theme-description">${theme.description}</div>
           ${buildEffectIndicators(theme.id)}
-          <div class="theme-card-type-row">
-            <span class="theme-card-type-icon">Aa</span>
-            <span class="theme-card-type-text">System Default · Md · 1.375/0</span>
-          </div>
+          ${buildTypeRowHtml(theme.typography)}
         </div>
         <div class="theme-card-actions">
           <div class="theme-card-status">
@@ -1064,10 +1092,7 @@
         </div>
         <div class="theme-description">${theme.description || ''}</div>
         ${theme.isCustom ? buildEffectIndicators(theme.effects || getSuggestedEffectsFor(theme.basedOn || 'connectry')) : buildEffectIndicators(theme.id)}
-        <div class="theme-card-type-row">
-          <span class="theme-card-type-icon">Aa</span>
-          <span class="theme-card-type-text">System Default · Md · 1.375/0</span>
-        </div>
+        ${buildTypeRowHtml(theme.typography)}
       </div>
     `;
 
