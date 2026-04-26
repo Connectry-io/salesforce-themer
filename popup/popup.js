@@ -198,7 +198,7 @@
             </div>
             <div class="theme-desc-popup">${theme.description || ''}</div>
             ${buildPopupEffectPills(theme.id)}
-            ${_popupTypeRow(null)}
+            ${_popupTypeRow(theme.typography)}
           </div>
           <div class="theme-check" aria-hidden="true">
             <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
@@ -514,10 +514,12 @@
     'humanist':       "Seravek, 'Gill Sans Nova', Ubuntu, Calibri, 'DejaVu Sans', source-sans-pro, sans-serif",
     'geometric':      "Avenir, Montserrat, Corbel, 'URW Gothic', source-sans-pro, sans-serif",
     'classic-serif':  "Charter, 'Bitstream Charter', 'Sitka Text', Cambria, serif",
+    'ibm-plex':       "'IBM Plex Sans', Inter, 'Segoe UI', system-ui, sans-serif",
   };
   const POPUP_FONT_LABELS = {
     'system-ui': 'System Default', 'neo-grotesque': 'Neo-Grotesque',
     'humanist': 'Humanist', 'geometric': 'Geometric', 'classic-serif': 'Classic Serif',
+    'ibm-plex': 'IBM Plex Sans',
   };
 
   function _popupTypeRow(typo) {
