@@ -229,52 +229,60 @@ body.sf-themer-fx-hover .slds-popover {
     }
   }
 
-  // ─── Aurora Background (canvas-backed, via core engine) ──────────────────
-  // Aurora now renders on a <canvas> managed by effects/canvas-runtime.js.
-  // The CSS side only needs to:
-  //   1. Make body a stacking context (so the canvas at z-index:-1 stays
-  //      scoped to body and doesn't get pushed behind html).
-  //   2. Transparentize SF's viewport-filling wrappers so the canvas
-  //      behind them is visible in the gaps between cards.
-  // The blob painting + animation live in canvas-runtime.js — see the
-  // runtimeConfig returned by engine.renderRules('aurora', ...).
+  // ─── Aurora Background (CSS-gradient backdrop) ───────────────────────────
+  // 2026-04-26 simplification — canvas approach abandoned.
   //
-  // Why this is different from the 2026-04-16 CSS attempt: canvas avoids
-  // the full-viewport CSS animation + composite cost that stalled Aura
-  // pages. The expensive repaint-every-DOM-mutation cycle is gone; RAF
-  // draws at the browser's natural cadence and pauses on visibilitychange.
+  // The previous approach painted aurora on a fullscreen <canvas> at
+  // z-index:-1 behind body, then transparentized SF's outer wrappers
+  // (.flexipagePage, .forceRecordLayout, etc.) so the canvas would peek
+  // through. This was fragile because:
+  //   - SF has many opaque wrapper layers — listing 4 missed others
+  //     (oneContent, oneRecordHomeFlexipage, etc.), so aurora was
+  //     invisible on most pages.
+  //   - Body's own background-color paints in body's stacking context at
+  //     z-index:0 (auto), covering the canvas at z-index:-1. The whole
+  //     "make body a stacking context" trick fights itself.
+  //   - Canvas adds RAF + resize lifecycle complexity for an effect that
+  //     reads as static-ish anyway.
   //
-  // Transparentized layers (from SF-DOM-MAP 2026-04-16): .flexipagePage,
-  // .sellerHomeContainer, .forceRecordLayout, .slds-template_default.
-  // .oneContent / .responsiveContents deliberately NOT transparentized —
-  // they carry theme-engine bg colors for cards.
+  // New approach: paint aurora as background-image gradient layers ON
+  // body (the same element that already carries c.background via the
+  // `html, body, .desktop` rule in the engine). The gradient sits on top
+  // of c.background within body — no z-index gymnastics, no wrapper
+  // hunting, works on every SF page type unconditionally.
+  //
+  // Static for v1 — animating background-position on body causes
+  // viewport-wide repaints. If we want drift later, we add a separate
+  // pseudo-element with transform animation (GPU-accelerated).
   if (config.aurora) {
     const ir = engine && engine.renderRules('aurora', config, accent, { scale: 1.0, isDark });
-    if (ir && ir.cssRules) {
-      const imp = { important: true };
-      const bodyRule = ir.cssRules.find(r => r.selectorRole === 'bodyWrapper');
-      const occluderRule = ir.cssRules.find(r => r.selectorRole === 'occluderWrapper');
-      css += `\n/* ─── Aurora Background (intensity ${(config.auroraIntensity || 'medium')}, canvas via core engine) ─── */\n`;
-      if (bodyRule) {
-        css += `
-body.sf-themer-fx-aurora {
-${engine.cssFromDeclarations(bodyRule.declarations, imp)}
+    const blobs = ir && ir.runtimeConfig && ir.runtimeConfig.aurora && ir.runtimeConfig.aurora.blobs;
+    const auroraOpacity = (ir && ir.runtimeConfig && ir.runtimeConfig.aurora && ir.runtimeConfig.aurora.opacity) || 0.35;
+    if (blobs && blobs.length) {
+      // Convert each blob's hex color + position into a radial-gradient
+      // layer. color-mix bakes the opacity into the color so the gradient
+      // fades naturally. Radius from runtimeConfig is in normalized canvas
+      // coords (0..1 of max(w,h)); we approximate with vmax for CSS.
+      // The blob alpha is ~0.4-0.6 at the center, fading to transparent.
+      const blobAlphaPct = Math.round(Math.min(1, auroraOpacity * 1.6) * 100);
+      const layers = blobs.map(b => {
+        const xPct = Math.round((b.x || 0.5) * 100);
+        const yPct = Math.round((b.y || 0.5) * 100);
+        const rVmax = Math.round((b.radius || 0.55) * 100);
+        return `radial-gradient(circle at ${xPct}% ${yPct}%, color-mix(in srgb, ${b.color} ${blobAlphaPct}%, transparent) 0%, transparent ${rVmax}%)`;
+      }).join(',\n    ');
+
+      css += `
+/* ─── Aurora Background (intensity ${(config.auroraIntensity || 'medium')}, CSS gradient on body) ─── */
+body.sf-themer-fx-aurora,
+body.sf-themer-fx-aurora .desktop {
+  background-image:
+    ${layers} !important;
+  background-attachment: fixed !important;
+  background-size: 100% 100% !important;
+  background-repeat: no-repeat !important;
 }
 `;
-      }
-      if (occluderRule) {
-        const occluderSelectors = [
-          'body.sf-themer-fx-aurora .flexipagePage',
-          'body.sf-themer-fx-aurora .sellerHomeContainer',
-          'body.sf-themer-fx-aurora .forceRecordLayout',
-          'body.sf-themer-fx-aurora .slds-template_default',
-        ].join(',\n');
-        css += `
-${occluderSelectors} {
-${engine.cssFromDeclarations(occluderRule.declarations, imp)}
-}
-`;
-      }
     }
   }
 
@@ -420,10 +428,10 @@ function generateEffectsRuntimeConfig(effectsConfig, themeColors) {
   const isDark = !!(themeColors && themeColors.colorScheme === 'dark');
   const runtime = {};
 
-  const aurora = engine.renderRules('aurora', effectsConfig, accent, { scale: 1.0, isDark });
-  if (aurora && aurora.runtimeConfig && aurora.runtimeConfig.aurora) {
-    runtime.aurora = aurora.runtimeConfig.aurora;
-  }
+  // Aurora is now CSS-gradient (2026-04-26) — no canvas runtime needed.
+  // The CSS-gradient backdrop is emitted in generateEffectsCSS above; the
+  // canvas-based AuroraRenderer is left in canvas-runtime.js for now but
+  // never receives a config, so it stays inert. Can be deleted later.
 
   const particles = engine.renderRules('particles', effectsConfig, accent);
   if (particles && particles.runtimeConfig && particles.runtimeConfig.particles) {
