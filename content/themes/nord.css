@@ -741,19 +741,42 @@ body .lookup__menu a:hover * {
   color: #d8dee9 !important;
 }
 
-/* Icon background defaults — prevent stray accent bubbles on icons
- * that inherit --slds-c-icon-color-background. Search magnifying
- * glass + various icon slots use this token; must stay transparent
- * unless a specific component explicitly styles it. */
-:root {
+/* Icon background defaults — clear --slds-c-icon-color-background ONLY on
+ * search/input/lookup contexts where SF would otherwise paint a stray
+ * accent bubble behind the icon. CRITICAL: do NOT clear this at :root —
+ * standard object icons (.slds-icon-standard-task, -event, -call, -email,
+ * etc.) use this token (with their own colored fallback like
+ *   var(--slds-c-icon-color-background, rgb(59, 167, 85))
+ * ) to render the colored square behind the white symbol in places like the
+ * activity composer. A :root override turns the green/blue/orange squares
+ * transparent, leaving only the white inverse symbol invisible on the
+ * neutral button. Scope tightly. */
+.slds-input__icon,
+.slds-input-has-icon,
+.slds-input-has-icon .slds-icon,
+.slds-input-has-icon-group,
+.slds-form-element__icon,
+.forceSearchInputContainer,
+.forceSearchInputContainer .slds-icon,
+.globalSearchContainer,
+.globalSearchContainer .slds-icon,
+.slds-lookup__menu,
+.slds-lookup__menu .slds-icon {
   --slds-c-icon-color-background: transparent !important;
   --sds-c-icon-color-background: transparent !important;
 }
 
-.slds-icon_container,
-.slds-icon-text-default,
+/* Same scoping note as above: do NOT include bare .slds-icon_container —
+ * that class lives on standard object icons whose colored square background
+ * IS painted via background-color (sourced from --sds-c-icon-color-background).
+ * Force only the search/input icon contexts to transparent. Standard object
+ * icons get to keep their SF brand colors (green task, blue call, etc.). */
 .slds-input__icon,
-.slds-input-has-icon .slds-icon {
+.slds-input-has-icon .slds-icon,
+.forceSearchInputContainer .slds-icon_container,
+.globalSearchContainer .slds-icon_container,
+.slds-form-element__icon .slds-icon_container,
+.slds-input-has-icon .slds-icon_container {
   background-color: transparent !important;
 }
 
