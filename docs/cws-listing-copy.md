@@ -268,7 +268,7 @@ already produces theme-card hero images. Pull 4 of those into a single
 
 - [ ] All TODOs in this doc resolved
 - [ ] All TODOs in the privacy policy resolved (already done — Delaware, Legalinc, EIN baked in)
-- [ ] Privacy policy URL loads at https://connectry.io/themer/privacy/ (verify it's live, not 404)
+- [x] Privacy policy URL loads at https://connectry.io/themer/privacy/ (verified live 2026-04-26)
 - [ ] feedback@connectry.io routes to a real inbox someone checks
 - [ ] privacy@connectry.io routes to a real inbox someone checks
 - [ ] security@connectry.io routes to a real inbox someone checks

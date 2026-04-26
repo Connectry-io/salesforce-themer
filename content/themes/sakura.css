@@ -425,9 +425,9 @@
    * at the token source. */
   --lwc-colorBackgroundContextBarItem: transparent !important;
   --lwc-colorBackgroundContextBarItemActive: transparent !important;
-  --lwc-colorBackgroundContextBarItemHover: rgba(255, 255, 255, 0.15) !important;
+  --lwc-colorBackgroundContextBarItemHover: rgba(255, 255, 255, 0.18) !important;
   --lwc-colorBackgroundContextBarInverseItemActive: rgba(225, 29, 72, 0.12) !important;
-  --lwc-colorBackgroundContextBarInverseItemHover: rgba(255, 255, 255, 0.15) !important;
+  --lwc-colorBackgroundContextBarInverseItemHover: rgba(255, 255, 255, 0.18) !important;
   --lwc-colorBackgroundContextTabBarItem: transparent !important;
   --lwc-colorBackgroundContextTabBarItemActive: transparent !important;
   --lwc-colorBorderContextBarThemeDefault: #e11d48 !important;
@@ -723,7 +723,7 @@ body .lookup__menu a:hover * {
 .slds-global-actions__item:hover,
 .slds-global-actions__item-action:hover,
 .slds-global-actions__item-action:focus {
-  background-color: rgba(255, 255, 255, 0.15) !important;
+  background-color: rgba(255, 255, 255, 0.18) !important;
   color: #ffffff !important;
 }
 
@@ -1692,7 +1692,7 @@ one-app-nav-bar,
 
 .slds-context-bar__item:hover,
 .navexConsoleTabItem:hover {
-  background-color: rgba(255, 255, 255, 0.15) !important;
+  background-color: rgba(255, 255, 255, 0.18) !important;
 }
 
 /* Active nav tab — paint ONLY the outer list item.
@@ -1704,7 +1704,7 @@ one-app-nav-bar,
 .slds-context-bar__item.slds-is-active,
 .slds-context-bar__item.slds-is-active.slds-is-unsaved,
 .navexConsoleTabItem.active {
-  background-color: rgba(255, 255, 255, 0.25) !important;
+  background-color: rgba(255, 255, 255, 0.32) !important;
   border-bottom-color: #ffffff !important;
   color: #ffffff !important;
 }
@@ -2335,12 +2335,13 @@ body .slds-illustration__text-body {
   color: #7a5765 !important;
 }
 
-/* File drop zone (chatter attachments) */
-body .slds-file-selector,
-body .slds-file-selector__body,
-body .slds-file-selector__dropzone,
-body .slds-file-selector__text,
-body .forceContentFileDroppableZone {
+/* File drop zone (chatter attachments) — narrow paint to ONLY the actual
+ * dropzone box. Earlier rule painted .slds-file-selector + the
+ * .forceContentFileDroppableZone wrapper, but on Notes & Attachments
+ * related lists that wrapper class lives on the OUTER .slds-card__body_inner
+ * (1100×100+ px), not the inner drop area — so the entire card got tinted.
+ * Keep the paint scoped to .slds-file-selector__dropzone only. */
+body .slds-file-selector__dropzone {
   background-color: #fff0f0 !important;
   color: #7a5765 !important;
   border-color: #e8b4c0 !important;
@@ -3053,8 +3054,8 @@ body .slds-path__item.slds-is-lost .slds-path__title {
 .forceHeaderMenuTrigger svg,
 .oneGlobalCreate svg,
 .slds-icon-waffle > div {
-  fill: #7a5765 !important;
-  color: #7a5765 !important;
+  fill: #ffffff !important;
+  color: #ffffff !important;
 }
 
 .slds-global-header button:hover svg,
@@ -3065,8 +3066,8 @@ body .slds-path__item.slds-is-lost .slds-path__title {
   color: #e11d48 !important;
 }
 
-/* Waffle app-launcher button — paint the 9 squares as textSecondary
- * dots instead of the white-on-white default */
+/* Waffle app-launcher button — paint the 9 squares as navWaffleDot
+ * (theme-defined nav icon color, e.g. white on dark-pink Sakura) */
 .slds-icon-waffle .slds-r1,
 .slds-icon-waffle .slds-r2,
 .slds-icon-waffle .slds-r3,
@@ -3076,7 +3077,7 @@ body .slds-path__item.slds-is-lost .slds-path__title {
 .slds-icon-waffle .slds-r7,
 .slds-icon-waffle .slds-r8,
 .slds-icon-waffle .slds-r9 {
-  background-color: #7a5765 !important;
+  background-color: #ffffff !important;
 }
 
 /* Search bar placeholder — textPlaceholder is often too pale on light

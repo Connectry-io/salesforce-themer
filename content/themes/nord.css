@@ -2391,12 +2391,13 @@ body .slds-illustration__text-body {
   color: #d8dee9 !important;
 }
 
-/* File drop zone (chatter attachments) */
-body .slds-file-selector,
-body .slds-file-selector__body,
-body .slds-file-selector__dropzone,
-body .slds-file-selector__text,
-body .forceContentFileDroppableZone {
+/* File drop zone (chatter attachments) — narrow paint to ONLY the actual
+ * dropzone box. Earlier rule painted .slds-file-selector + the
+ * .forceContentFileDroppableZone wrapper, but on Notes & Attachments
+ * related lists that wrapper class lives on the OUTER .slds-card__body_inner
+ * (1100×100+ px), not the inner drop area — so the entire card got tinted.
+ * Keep the paint scoped to .slds-file-selector__dropzone only. */
+body .slds-file-selector__dropzone {
   background-color: #373e4d !important;
   color: #d8dee9 !important;
   border-color: #4c566a !important;

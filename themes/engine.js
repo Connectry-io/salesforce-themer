@@ -2530,12 +2530,13 @@ body .slds-illustration__text-body {
   color: ${c.textSecondary} !important;
 }
 
-/* File drop zone (chatter attachments) */
-body .slds-file-selector,
-body .slds-file-selector__body,
-body .slds-file-selector__dropzone,
-body .slds-file-selector__text,
-body .forceContentFileDroppableZone {
+/* File drop zone (chatter attachments) — narrow paint to ONLY the actual
+ * dropzone box. Earlier rule painted .slds-file-selector + the
+ * .forceContentFileDroppableZone wrapper, but on Notes & Attachments
+ * related lists that wrapper class lives on the OUTER .slds-card__body_inner
+ * (1100×100+ px), not the inner drop area — so the entire card got tinted.
+ * Keep the paint scoped to .slds-file-selector__dropzone only. */
+body .slds-file-selector__dropzone {
   background-color: ${c.surfaceAlt} !important;
   color: ${c.textSecondary} !important;
   border-color: ${c.borderInput} !important;
@@ -3256,8 +3257,8 @@ ${!isDark ? `
 .forceHeaderMenuTrigger svg,
 .oneGlobalCreate svg,
 .slds-icon-waffle > div {
-  fill: ${c.textSecondary} !important;
-  color: ${c.textSecondary} !important;
+  fill: ${c.navIcon || c.textSecondary} !important;
+  color: ${c.navIcon || c.textSecondary} !important;
 }
 
 .slds-global-header button:hover svg,
@@ -3268,8 +3269,8 @@ ${!isDark ? `
   color: ${c.accent} !important;
 }
 
-/* Waffle app-launcher button — paint the 9 squares as textSecondary
- * dots instead of the white-on-white default */
+/* Waffle app-launcher button — paint the 9 squares as navWaffleDot
+ * (theme-defined nav icon color, e.g. white on dark-pink Sakura) */
 .slds-icon-waffle .slds-r1,
 .slds-icon-waffle .slds-r2,
 .slds-icon-waffle .slds-r3,
@@ -3279,7 +3280,7 @@ ${!isDark ? `
 .slds-icon-waffle .slds-r7,
 .slds-icon-waffle .slds-r8,
 .slds-icon-waffle .slds-r9 {
-  background-color: ${c.textSecondary} !important;
+  background-color: ${c.navWaffleDot || c.navIcon || c.textSecondary} !important;
 }
 
 /* Search bar placeholder — textPlaceholder is often too pale on light

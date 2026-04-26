@@ -190,6 +190,12 @@ body.sf-themer-fx-hover .slds-popover {
     if (ir && ir.cssRules) {
       const imp = { important: true };
       if (ir.cssPrelude) css += `\n/* ─── borderEffect=shimmer prelude ─── */\n${ir.cssPrelude}\n`;
+      // Lift overflow:clip on card wrappers — the home-page record cards wrap
+      // .slds-card in .forceBaseCard which has overflow:clip, hiding the
+      // shimmer ::before that bleeds at the top edge. Without this the
+      // shimmer is invisible on home-page tiles even though it renders fine
+      // on record-detail pages.
+      css += `\nbody.sf-themer-fx-shimmer .forceBaseCard,\nbody.sf-themer-fx-shimmer .slds-card_boundary,\nbody.sf-themer-fx-shimmer .forceRecordCard,\nbody.sf-themer-fx-shimmer .forceRelatedListSingleContainer { overflow: visible !important; }\n`;
       const prefix = 'body.sf-themer-fx-shimmer';
       const expand = (suffix) => CARD_SEL.split(',')
         .map(s => `${prefix} ${s.trim()}${suffix}`)
